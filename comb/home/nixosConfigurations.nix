@@ -58,7 +58,6 @@
     # Select internationalisation properties.
     i18n.defaultLocale = "C.UTF-8";
     console = {
-	  font = "Lat2-Terminus16";
 	  keyMap = "de-latin1-nodeadkeys";
     };
 
@@ -81,17 +80,9 @@
     # List packages installed in system profile. To search, run:
     # $ nix search wget
     environment.systemPackages = with pkgs; [
-      xclip
-      tty-share
-      alacritty
-      element-desktop
+	  kitty
       firefox
-      chromium
-      enpass
       # Office
-      libreoffice
-      onlyoffice-bin
-      beancount
       fava
       direnv
       # Git & Tools
@@ -139,17 +130,17 @@
         rerere.enable = true;
       };
     };
-    programs.ssh = {
-      extraConfig = ''
-        Host github.com
-          User git
-          Hostname github.com
-          IdentityFile ~/.ssh/lar
-        Host gitlab.com
-          PreferredAuthentications publickey
-          IdentityFile ~/.ssh/lar
-      '';
-    };
+    #programs.ssh = {
+    #  extraConfig = ''
+    #    Host github.com
+    #      User git
+    #      Hostname github.com
+    #      IdentityFile ~/.ssh/lar
+    #    Host gitlab.com
+    #      PreferredAuthentications publickey
+    #      IdentityFile ~/.ssh/lar
+    #  '';
+    #};
 
     # This value determines the NixOS release from which the default
     # settings for stateful data, like file locations and database versions

@@ -80,8 +80,8 @@
       };
     };
 
-  checkAndTransformConfigFor = user: target: out: config: let
-    _file = "github:divnix/hive: ./comb/${user}; target: ${target}";
+  checkAndTransformConfigFor = site: target: out: config: let
+    _file = "github:divnix/hive: ./comb/${site}; target: ${target}";
     locatedConfig = {
       imports = [config];
       inherit _file;
@@ -99,21 +99,21 @@
   /*
 
   We start with:
-  ${system}.${user}.${cellBlock}.${machine} = config;
+  ${system}.${site}.${cellBlock}.${machine} = config;
 
   We want:
-  ${user}.${machine} = config; (filtered by system)
+  ${machine}@${site} = config; (filtered by system)
 
   */
   pasteurize = self:
     l.pipe
     (
       l.mapAttrs (system:
-        l.mapAttrs (user: blocks: (
+        l.mapAttrs (site: blocks: (
           l.pipe blocks [
             (l.attrByPath [cellBlock] {})
             (l.mapAttrs (machine:
-              checkAndTransformConfigFor user machine (
+              checkAndTransformConfigFor site machine (
                 asserted: {
                   environment.etc."nixos/configuration.nix".text = ''
                     throw '''
@@ -127,7 +127,7 @@
                 }
               )))
             (l.filterAttrs (_: config: config.nixpkgs.system == system))
-            (l.mapAttrs (machine: l.nameValuePair "${user}.${machine}"))
+            (l.mapAttrs (machine: l.nameValuePair "${machine}@${site}"))
           ]
         )))
       (l.intersectAttrs (l.genAttrs l.systems.doubles.all (_: null)) self)
@@ -147,11 +147,11 @@
     l.pipe
     (
       l.mapAttrs (system:
-        l.mapAttrs (user: blocks: (
+        l.mapAttrs (site: blocks: (
           l.pipe blocks [
             (l.attrByPath [cellBlock] {})
             (l.mapAttrs (homecfg:
-              checkAndTransformConfigFor user homecfg (
+              checkAndTransformConfigFor site homecfg (
                 # We switched off the home-manager nimpkgs module since it
                 # does a re-import (and we don't tolerate that interface)
                 # so we re-use bee to communicate with the shake function
@@ -159,7 +159,7 @@
                 asserted: {bee = {inherit (asserted.bee) system pkgs home;};}
               )))
             (l.filterAttrs (_: config: config.bee.system == system))
-            (l.mapAttrs (homecfg: l.nameValuePair "${user}.${homecfg}"))
+            (l.mapAttrs (homecfg: l.nameValuePair "${homecfg}@${site}"))
           ]
         )))
       (l.intersectAttrs (l.genAttrs l.systems.doubles.all (_: null)) self)
@@ -198,11 +198,11 @@
     l.pipe
     (
       l.mapAttrs (system:
-        l.mapAttrs (user: blocks: (
+        l.mapAttrs (site: blocks: (
           l.pipe blocks [
             (l.attrByPath [cellBlock] {})
             (l.filterAttrs (_: _: "x86_64-linux" == system)) # pick one
-            (l.mapAttrs (disko: l.nameValuePair "${user}.${disko}"))
+            (l.mapAttrs (disko: l.nameValuePair "${disko}.${site}"))
           ]
         )))
       (l.intersectAttrs (l.genAttrs l.systems.doubles.all (_: null)) self)

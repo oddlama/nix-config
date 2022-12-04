@@ -10,23 +10,18 @@
       cell.hardwareProfiles.nom
     ];
 
-	# Disable unnecessary stuff from the nixos defaults.
-	services.udisks2.enable = false;
-	networking.dhcpcd.enable = false;
-	networking.firewall.enable = false;
-	security.sudo.enable = false;
+    # Disable unnecessary stuff from the nixos defaults.
+    services.udisks2.enable = false;
+    networking.dhcpcd.enable = false;
+    networking.firewall.enable = false;
+    security.sudo.enable = false;
 
-	documentation.dev.enable = true;
+    documentation.dev.enable = true;
 
-    # swapDevices = [
-    #   {
-    #     device = "/.swapfile";
-    #     size = 8192; # ~8GB - will be autocreated
-    #   }
-    # ];
     # Use the systemd-boot EFI boot loader.
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
+
     nix.settings = {
       auto-optimise-store = true;
       allowed-users = ["@wheel"];
@@ -38,28 +33,34 @@
       accept-flake-config = true;
     };
 
-    # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-
+    networking.hostName = "nom";
     time.timeZone = "Europe/Berlin";
-
-    networking.useDHCP = false;
-    networking.interfaces.wlp2s0.useDHCP = true;
-    networking.networkmanager.enable = true;
-    systemd.services.NetworkManager-wait-online = {
-      enable = false;
-      serviceConfig.TimeoutSec = 15;
-      wantedBy = ["network-online.target"];
-    };
-
-    # Configure network proxy if necessary
-    # networking.proxy.default = "http://user:password@proxy:port/";
-    # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
     # Select internationalisation properties.
     i18n.defaultLocale = "C.UTF-8";
     console = {
-	  keyMap = "de-latin1-nodeadkeys";
+      keyMap = "de-latin1-nodeadkeys";
     };
+
+    # Enable the OpenSSH daemon.
+    services.openssh = {
+      enable = true;
+      passwordAuthentication = false;
+      kbdInteractiveAuthentication = false;
+      permitRootLogin = "yes";
+      hostKeys = [
+        {
+          path = "/etc/ssh/ssh_host_ed25519_key";
+          type = "ed25519";
+        }
+      ];
+    };
+
+    # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+
+    # Configure network proxy if necessary
+    # networking.proxy.default = "http://user:password@proxy:port/";
+    # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
     services.sshd.enable = true;
 
@@ -69,45 +70,42 @@
 
     # Define a user account. Don't forget to set a password with ‘passwd’.
     users = {
-      users.lar = {
-        shell = pkgs.zsh;
+      users.root = {
+        initialHashedPassword = "$6$EBo/CaxB.dQoq2W8$lo2b5vKgJlLPdGGhEqa08q3Irf1Zd1PcFBCwJOrG8lqjwbABkn1DEhrMh1P3ezwnww2HusUBuZGDSMa4nvSQg1";
+        openssh.authorizedKeys.keys = ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA5Uq+CDy5Pmt3If5M6d8K/Q7HArU6sZ7sgoj3T521Wm"];
+      };
+      users.myuser = {
         isNormalUser = true;
-        initialPassword = "password123";
-        extraGroups = ["wheel"]; # Enable ‘sudo’ for the user.
+        shell = pkgs.zsh;
+        extraGroups = ["wheel" "audio" "video"]; # Enable ‘sudo’ for the user.
+        packages = with pkgs; [
+          firefox
+          thunderbird
+        ];
       };
     };
 
     # List packages installed in system profile. To search, run:
     # $ nix search wget
     environment.systemPackages = with pkgs; [
-	  kitty
+      kitty
       firefox
-      # Office
-      fava
       direnv
       # Git & Tools
       git
-      gh
-      gitoxide
-      ghq
       # Nix
       # nil # nix language server
       rnix-lsp # nix language server
       alejandra # nix formatter
       # Python
-      (python3Full.withPackages (p:
-        with p; [
-          numpy
-          pandas
-          ptpython
-          requests
-          scipy
-        ]))
-      poetry # python project files
       black # python formatter
     ];
 
     # Programs configuration
+    programs.neovim.enable = true;
+    programs.neovim.viAlias = true;
+    environment.variables.EDITOR = "nvim";
+
     programs.starship.enable = true;
     programs.nix-ld.enable = true; # quality of life for downloaded programs
     programs.zsh = {
@@ -124,10 +122,7 @@
       enable = true;
       config = {
         init.defaultBranch = "main";
-        core.autocrlf = "input";
         pull.rebase = true;
-        rebase.autosquash = true;
-        rerere.enable = true;
       };
     };
     #programs.ssh = {

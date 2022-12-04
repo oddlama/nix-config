@@ -11,7 +11,7 @@
             {
               type = "partition";
               name = "efi";
-              start = "0";
+              start = "2048";
               end = "8GiB";
               fs-type = "fat32";
               content = {
@@ -38,51 +38,53 @@
         device = "/dev/disk/by-id/nvme-Samsung_SSD_980_PRO_1TB_S5GXNX1T325329W";
         content = {
           type = "zfs";
-          pool = "zpool";
+          pool = "rpool";
         };
       };
     };
-    rpool = {
-      type = "zpool";
-      mode = "mirror";
-      rootFsOptions = {
-        compression = "zstd";
-        acltype = "posix";
-        atime = "off";
-        xattr = "sa";
-        dnodesize = "auto";
-        mountpoint = "none";
-        canmount = "off";
-        devices = "off";
-        encryption = "aes-256-gcm";
-        keyformat = "passphrase";
-        keylocation = "prompt";
-        "autobackup:snap" = "true";
-        "autobackup:home" = "true";
-      };
-      options = {
-        ashift = "12";
-        bootfs = "rpool/root/nixos";
-      };
-      datasets = {
-        "root" = {
-          zfs_type = "filesystem";
+    zpool = {
+      rpool = {
+        type = "zpool";
+        mode = "mirror";
+        rootFsOptions = {
+          compression = "zstd";
+          acltype = "posix";
+          atime = "off";
+          xattr = "sa";
+          dnodesize = "auto";
+          mountpoint = "none";
+          canmount = "off";
+          devices = "off";
+          encryption = "aes-256-gcm";
+          keyformat = "passphrase";
+          keylocation = "prompt";
+          "autobackup:snap" = "true";
+          "autobackup:home" = "true";
         };
-        "root/nixos" = {
-          zfs_type = "filesystem";
-          options = {
-            canmount = "on";
-            mountpoint = "/";
+        options = {
+          ashift = "12";
+          bootfs = "rpool/root/nixos";
+        };
+        datasets = {
+          "root" = {
+            zfs_type = "filesystem";
           };
-        };
-        "home" = {
-          zfs_type = "filesystem";
-        };
-        "home/root" = {
-          zfs_type = "filesystem";
-          options = {
-            canmount = "on";
-            mountpoint = "/root";
+          "root/nixos" = {
+            zfs_type = "filesystem";
+            options = {
+              canmount = "on";
+              mountpoint = "/";
+            };
+          };
+          "home" = {
+            zfs_type = "filesystem";
+          };
+          "home/root" = {
+            zfs_type = "filesystem";
+            options = {
+              canmount = "on";
+              mountpoint = "/root";
+            };
           };
         };
       };

@@ -36,7 +36,7 @@ in
       evalSelected = names: l.filterAttrs (name: _: l.elem name names) this.toplevel;
       evalSelectedDrvPaths = names: l.mapAttrs (_: v: v.drvPath) (this.evalSelected names);
       metaConfig = {
-        name = "divnix/hive";
+        name = "oddlama/infranix";
         inherit (import ./flake.nix) description;
         machinesFile = null;
         allowApplyAll = false;

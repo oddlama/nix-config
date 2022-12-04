@@ -81,7 +81,7 @@
     };
 
   checkAndTransformConfigFor = site: target: out: config: let
-    _file = "github:divnix/hive: ./comb/${site}; target: ${target}";
+    _file = "github:oddlama/infranix: ./nix/${site}; target: ${target}";
     locatedConfig = {
       imports = [config];
       inherit _file;

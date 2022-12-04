@@ -33,7 +33,6 @@
       accept-flake-config = true;
     };
 
-    networking.hostName = "nom";
     time.timeZone = "Europe/Berlin";
 
     # Select internationalisation properties.

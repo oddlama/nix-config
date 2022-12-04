@@ -1,5 +1,5 @@
 {
-  description = "The Hive - The secretly open NixOS-Society";
+  description = "Personal Infrastructure";
   inputs.std.url = "github:divnix/std";
   inputs.std.inputs.nixpkgs.follows = "nixpkgs";
   inputs.std.inputs.mdbook-kroki-preprocessor.follows = "std/blank";
@@ -32,7 +32,7 @@
   } @ inputs:
     std.growOn {
       inherit inputs;
-      cellsFrom = ./comb;
+      cellsFrom = ./nix;
       # debug = ["cells" "x86_64-linux"];
       cellBlocks = with std.blockTypes; [
         # modules implement

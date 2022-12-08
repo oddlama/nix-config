@@ -1,13 +1,3 @@
-# direnv/direnv + divnix/std
-.std
-
-# numtide/devshell
-.data
-
-# nixos/nix
-result*
-
-# nixago: ignore-linked-files
-.conform.yaml
-lefthook.yml
+result
+result-*
 treefmt.toml

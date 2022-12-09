@@ -1,9 +1,3 @@
-{
-  config,
-  impermanence,
-  lib,
-  pkgs,
-  ...
-}:
+{lib, ...}:
 with lib; {
 }

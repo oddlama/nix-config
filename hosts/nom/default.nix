@@ -52,7 +52,7 @@
   hardware = {
     enableRedistributableFirmware = true;
     enableAllFirmware = true;
-    video.hidpi.enable = lib.mkDefault true;
+    video.hidpi.enable = true;
     opengl.enable = true;
   };
 

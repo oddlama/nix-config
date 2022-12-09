@@ -59,7 +59,7 @@
       checks = import ./nix/checks.nix inputs localSystem;
       devShells.default = import ./nix/dev-shell.nix inputs localSystem;
 
-      packages =
+      legacyPackages =
         {
           default = self.packages.${localSystem}.all;
         }

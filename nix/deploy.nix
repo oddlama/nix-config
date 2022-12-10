@@ -16,7 +16,7 @@
   };
 in {
   autoRollback = false;
-  magicRollback = true;
+  magicRollback = false;
   sshUser = "root";
   user = "root";
   sudo = "runuser -u";

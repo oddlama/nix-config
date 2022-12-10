@@ -33,21 +33,20 @@
 
   fileSystems = {
     "/" = {
-      device = "tmpfs";
-      fsType = "tmpfs";
-      options = ["defaults" "noatime" "size=20%" "mode=755"];
+      device = "rpool/root/nixos";
+      fsType = "zfs";
+      options = ["zfsutil" "X-mount.mkdir"];
     };
+
     "/boot" = {
-      device = "/dev/disk/by-uuid/FDA7-5E38";
+      device = "/dev/disk/by-uuid/91ED-0E13";
       fsType = "vfat";
     };
-    "/nix" = {
-      device = "/dev/disk/by-uuid/4610a590-b6b8-4a8f-82a3-9ec7592911eb";
-      fsType = "ext4";
-      options = ["defaults" "noatime"];
-      neededForBoot = true;
-    };
   };
+
+  swapDevices = [
+    {device = "/dev/disk/by-uuid/1122527a-71d3-4ec7-8d41-65d0c8494b04";}
+  ];
 
   hardware = {
     enableRedistributableFirmware = true;
@@ -62,7 +61,7 @@
     wireless.iwd.enable = true;
   };
 
-  powerManagement.cpuFreqGovernor = "performance";
+  powerManagement.cpuFreqGovernor = "powersave";
 
   services = {
     fwupd.enable = true;
@@ -72,13 +71,13 @@
   systemd.network.networks = {
     wired = {
       DHCP = "yes";
-      matchConfig.MACAddress = "1c:83:41:30:ab:9b";
+      matchConfig.MACAddress = "00:00:00:00:00:00";
       dhcpV4Config.RouteMetric = 10;
       dhcpV6Config.RouteMetric = 10;
     };
     wireless = {
       DHCP = "yes";
-      matchConfig.MACAddress = "60:dd:8e:12:67:bd";
+      matchConfig.MACAddress = "00:00:00:00:00:00";
       dhcpV4Config.RouteMetric = 40;
       dhcpV6Config.RouteMetric = 40;
     };

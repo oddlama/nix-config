@@ -1,7 +1,5 @@
 {
   imports = [./documentation.nix];
 
-  environment = {
-    enableDebugInfo = true;
-  };
+  environment.enableDebugInfo = true;
 }

@@ -20,18 +20,14 @@ in {
 
   environment = {
     etc."nixos/configuration.nix".source = dummyConfig;
-    pathsToLink = [
-      "/share/zsh"
-    ];
     systemPackages = with pkgs; [
       neovim
     ];
+	variables.EDITOR = "nvim";
   };
 
   # Disable unnecessary stuff from the nixos defaults.
   services.udisks2.enable = false;
-  networking.dhcpcd.enable = false;
-  networking.firewall.enable = false;
   security.sudo.enable = false;
 
   home-manager = {
@@ -44,12 +40,11 @@ in {
   i18n.defaultLocale = "C.UTF-8";
 
   networking = {
-    # When using systemd-networkd it's still possible to use this option,
-    # but it's recommended to use it in conjunction with explicit per-interface
-    # declarations with `networking.interfaces.<interface>.useDHCP`.
     useDHCP = lib.mkForce false;
     useNetworkd = true;
     wireguard.enable = true;
+    dhcpcd.enable = false;
+    firewall.enable = false;
   };
 
   nix.nixPath = [
@@ -61,10 +56,17 @@ in {
   nixpkgs.config.allowUnfree = true;
 
   programs = {
-    zsh = {
+	git = {
       enable = true;
-      enableGlobalCompInit = false;
+      config = {
+        init.defaultBranch = "main";
+        pull.rebase = true;
+      };
     };
+    neovim = {
+	  enable = true;
+      viAlias = true;
+	};
   };
 
   system = {
@@ -81,5 +83,9 @@ in {
     network.wait-online.anyInterface = true;
   };
 
+  users.users.root = {
+    initialHashedPassword = "$6$EBo/CaxB.dQoq2W8$lo2b5vKgJlLPdGGhEqa08q3Irf1Zd1PcFBCwJOrG8lqjwbABkn1DEhrMh1P3ezwnww2HusUBuZGDSMa4nvSQg1";
+    openssh.authorizedKeys.keys = ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA5Uq+CDy5Pmt3If5M6d8K/Q7HArU6sZ7sgoj3T521Wm"];
+  };
   users.mutableUsers = false;
 }

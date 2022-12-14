@@ -22,6 +22,7 @@ with lib; {
       #impermanence.home-manager.impermanence
       ./core
       ./dev
+      ./modules
       #]
       #++ optionals config.programs.sway.enable [
       #  ./graphical

@@ -20,7 +20,6 @@
     packages = with pkgs; [
       bandwhich
       btop
-      colorcheck
       fd
       kalker
       neofetch

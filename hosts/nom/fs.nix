@@ -1,4 +1,4 @@
-{config, ...}: {
+{
   fileSystems = {
     "/" = {
       device = "rpool/root/nixos";

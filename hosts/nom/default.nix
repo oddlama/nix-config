@@ -16,7 +16,7 @@
     ../../modules/laptop.nix
     ../../modules/yubikey.nix
     ../../modules/zfs.nix
-    ../../users/oddlama
+    ../../users/myuser
 
     ./fs.nix
     ./net.nix

@@ -23,7 +23,7 @@ in {
     systemPackages = with pkgs; [
       neovim
     ];
-	variables.EDITOR = "nvim";
+    variables.EDITOR = "nvim";
   };
 
   # Disable unnecessary stuff from the nixos defaults.
@@ -56,7 +56,7 @@ in {
   nixpkgs.config.allowUnfree = true;
 
   programs = {
-	git = {
+    git = {
       enable = true;
       config = {
         init.defaultBranch = "main";
@@ -64,9 +64,9 @@ in {
       };
     };
     neovim = {
-	  enable = true;
+      enable = true;
       viAlias = true;
-	};
+    };
   };
 
   system = {

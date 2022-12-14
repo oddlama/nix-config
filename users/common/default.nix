@@ -1,5 +1,7 @@
 {pkgs, ...}: {
   imports = [
+    ./modules/uid.nix
+
     #./atuin.nix
     #./bash.nix
     #./btop.nix
@@ -15,7 +17,6 @@
   ];
 
   home = {
-    username = "myuser";
     stateVersion = "22.11";
     packages = with pkgs; [
       bandwhich

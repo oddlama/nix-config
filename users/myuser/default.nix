@@ -20,9 +20,8 @@ with lib; {
   home-manager.users.myuser = {
     imports = [
       #impermanence.home-manager.impermanence
-      ./core
-      ./dev
-      ./modules
+      ../common
+      ./dev.nix
       #]
       #++ optionals config.programs.sway.enable [
       #  ./graphical

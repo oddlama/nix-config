@@ -1,5 +1,4 @@
 {
-  config,
   nixos-hardware,
   pkgs,
   ...

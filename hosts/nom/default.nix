@@ -13,6 +13,7 @@
 
     ../../modules/efi.nix
     ../../modules/laptop.nix
+    ../../modules/sound-pipewire.nix
     ../../modules/yubikey.nix
     ../../modules/zfs.nix
 

@@ -5,11 +5,10 @@
     #./atuin.nix
     #./bash.nix
     #./btop.nix
-    #./fish.nix
-    #./git.nix
+    ./fish.nix
+    ./git.nix
     ./htop.nix
     #./neovim
-    ./nushell.nix
     #./ssh.nix
     ./starship.nix
     #./tmux.nix
@@ -23,7 +22,6 @@
       bandwhich
       btop
       fd
-      kalker
       neofetch
       rclone
       ripgrep
@@ -45,7 +43,6 @@
       chmod = "chmod -c --preserve-root";
       chown = "chown -c --preserve-root";
 
-      vim = "nvim";
       ip = "ip --color";
       tmux = "tmux -2";
       rg = "rg -S";

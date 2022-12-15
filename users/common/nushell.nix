@@ -1,5 +1,0 @@
-{
-  programs.nushell = {
-    enable = true;
-  };
-}

@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: {
-  environment.systemPackages = with pkgs; [pulseaudio];
+  environment.systemPackages = with pkgs; [pulseaudio pulsemixer];
 
   hardware.pulseaudio.enable = lib.mkForce false;
 

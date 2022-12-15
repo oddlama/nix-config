@@ -9,22 +9,17 @@
   '';
 in {
   imports = [
+    ./inputrc.nix
+    ./issue.nix
     ./nix.nix
     ./resolved.nix
+    ./ssh.nix
     ./tmux.nix
     ./xdg.nix
-    ./ssh.nix
   ];
 
   boot.kernelParams = ["log_buf_len=10M"];
-
-  environment = {
-    etc."nixos/configuration.nix".source = dummyConfig;
-    systemPackages = with pkgs; [
-      neovim
-    ];
-    variables.EDITOR = "nvim";
-  };
+  environment.etc."nixos/configuration.nix".source = dummyConfig;
 
   # Disable unnecessary stuff from the nixos defaults.
   services.udisks2.enable = false;
@@ -64,8 +59,11 @@ in {
       };
     };
     neovim = {
+      package = pkgs.neovim;
       enable = true;
       viAlias = true;
+      vimAlias = true;
+      defaultEditor = true;
     };
   };
 

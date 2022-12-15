@@ -15,6 +15,8 @@
     ../../modules/laptop.nix
     ../../modules/yubikey.nix
     ../../modules/zfs.nix
+
+    ../../users/root
     ../../users/myuser
 
     ./fs.nix

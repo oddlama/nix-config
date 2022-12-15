@@ -7,10 +7,11 @@
     #./btop.nix
     #./fish.nix
     #./git.nix
-    #./htop.nix
+    ./htop.nix
     #./neovim
+    ./nushell.nix
     #./ssh.nix
-    #./starship.nix
+    ./starship.nix
     #./tmux.nix
     #./xdg.nix
     #./zsh.nix

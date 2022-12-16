@@ -8,8 +8,9 @@
     nixos-hardware.common-gpu-intel
     nixos-hardware.common-pc-laptop
     nixos-hardware.common-pc-laptop-ssd
-    ../../core
-    ../../dev
+
+    ../../modules/core
+    ../../modules/dev
 
     ../../modules/efi.nix
     ../../modules/laptop.nix

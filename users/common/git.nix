@@ -1,8 +1,4 @@
-{
-  lib,
-  pkgs,
-  ...
-}: {
+{lib, ...}: {
   programs.gitui.enable = true;
   programs.git = {
     enable = true;
@@ -20,7 +16,7 @@
     };
     aliases = {
       unstash = "stash pop";
-      s = status;
+      s = "status";
       tags = "tag -l";
       t = "tag -s -m ''";
       ci = "commit -v -S";
@@ -33,6 +29,6 @@
     gs = "git status";
     ga = "git add";
     gc = "git commit -v -S";
-    gca = "${gci} --amend";
+    gca = "${gc} --amend";
   };
 }

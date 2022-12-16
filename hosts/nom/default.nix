@@ -34,7 +34,7 @@
   console = {
     font = "ter-v28n";
     keyMap = "de-latin1-nodeadkeys";
-    packages = pkgs.terminus_font;
+    packages = with pkgs; [terminus_font];
   };
 
   environment.systemPackages = with pkgs; [wireguard-tools powertop];

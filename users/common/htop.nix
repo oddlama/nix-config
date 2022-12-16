@@ -3,11 +3,13 @@
     enable = true;
     settings =
       {
+        tree_view = 1;
         highlight_base_name = 1;
         show_cpu_frequency = 1;
         show_cpu_temperature = 1;
         hide_kernel_threads = 1;
         hide_userland_threads = 1;
+        sort_key = 46; # Sort by %CPU if not in tree mode
       }
       // (with config.lib.htop;
         leftMeters [

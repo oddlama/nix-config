@@ -1,7 +1,6 @@
 {lib, ...}: {
   programs.starship = {
     enable = true;
-    enableNushellIntegration = true;
     settings = {
       add_newline = false;
       format = lib.concatStrings [
@@ -69,7 +68,7 @@
         staged = "+$count ";
         renamed = "→$count ";
         deleted = "-$count ";
-        format = "[$conflicted](red)[$stashed](magenta)[$staged](green)[$deleted](red)[$renamed](blue)[$modified](yellow)[$untracked](yellow)[$ahead_behind](green)";
+        format = "[$conflicted](red)[$stashed](magenta)[$staged](green)[$deleted](red)[$renamed](blue)[$modified](yellow)[$untracked](blue)[$ahead_behind](green)";
       };
       status = {
         pipestatus = true;

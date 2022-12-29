@@ -13,7 +13,6 @@
     ./starship.nix
     #./tmux.nix
     #./xdg.nix
-    #./zsh.nix
   ];
 
   home = {
@@ -32,7 +31,6 @@
       l = "ls -lahF --group-directories-first --show-control-chars --quoting-style=escape --color=auto";
       t = "tree -F --dirsfirst -L 2";
       tt = "tree -F --dirsfirst -L 3 --filelimit 16";
-      ttt = "tree -F --dirsfirst -L 6 --filelimit 16";
       cpr = "rsync -axHAWXS --numeric-ids --info=progress2";
 
       md = "mkdir";
@@ -46,8 +44,6 @@
       ip = "ip --color";
       tmux = "tmux -2";
       rg = "rg -S";
-
-      p = "cd ~/projects";
     };
   };
 

@@ -14,7 +14,7 @@ with lib; {
       ["wheel" "input" "video"]
       ++ optionals config.sound.enable ["audio"];
     isNormalUser = true;
-    shell = pkgs.zsh;
+    shell = pkgs.fish;
   };
 
   home-manager.users.myuser = {
@@ -31,7 +31,12 @@ with lib; {
       #  ./graphical/i3
     ];
 
-    home.username = config.users.users.myuser.name;
-    home.uid = config.users.users.myuser.uid;
+	home = {
+	  username = config.users.users.myuser.name;
+	  uid = config.users.users.myuser.uid;
+	  shellAliases = {
+	    p = "cd ~/projects";
+	  };
+	};
   };
 }

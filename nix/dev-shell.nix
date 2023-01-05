@@ -8,7 +8,7 @@ with self.pkgs.${system};
       cachix
       deploy-rs.deploy-rs
       nix-build-uncached
-      nix-linter
+      #nix-linter
       alejandra
       ragenix
       rnix-lsp

@@ -31,12 +31,12 @@ with lib; {
       #  ./graphical/i3
     ];
 
-	home = {
-	  username = config.users.users.myuser.name;
-	  uid = config.users.users.myuser.uid;
-	  shellAliases = {
-	    p = "cd ~/projects";
-	  };
-	};
+    home = {
+      username = config.users.users.myuser.name;
+      inherit (config.users.users.myuser) uid;
+      shellAliases = {
+        p = "cd ~/projects";
+      };
+    };
   };
 }

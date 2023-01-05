@@ -39,7 +39,8 @@ in {
     useNetworkd = true;
     wireguard.enable = true;
     dhcpcd.enable = false;
-    firewall.enable = false;
+    nftables.enable = true;
+    firewall.enable = true;
   };
 
   nix.nixPath = [

@@ -6,6 +6,12 @@ let
       hostPlatform = "x86_64-linux";
       remoteBuild = true;
     };
+    ward = {
+      type = "nixos";
+      hostname = "ward";
+      hostPlatform = "x86_64-linux";
+      remoteBuild = true;
+    };
   };
 
   inherit (builtins) attrNames concatMap listToAttrs;

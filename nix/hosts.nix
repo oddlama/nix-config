@@ -14,7 +14,7 @@ let
     };
   };
 
-  inherit (builtins) attrNames concatMap listToAttrs;
+  inherit (builtins) attrNames concatMap listToAttrs filter;
 
   filterAttrs = pred: set:
     listToAttrs (concatMap (name: let
@@ -24,18 +24,31 @@ let
       then [{inherit name value;}]
       else []) (attrNames set));
 
-  systemPred = system: (_: v: builtins.match ".*${system}.*" v.hostPlatform != null);
+  removeEmptyAttrs = filterAttrs (_: v: v != {});
 
-  genFamily = filter: hosts: rec {
-    all = filterAttrs filter hosts;
+  genSystemGroups = hosts: let
+    systems = ["aarch64-linux" "x86_64-linux"];
+    systemHostGroup = name: {
+      inherit name;
+      value = filterAttrs (_: host: host.hostPlatform == name) hosts;
+    };
+  in
+    removeEmptyAttrs (listToAttrs (map systemHostGroup systems));
 
-    nixos = genFamily (_: v: v.type == "nixos") all;
-    homeManager = genFamily (_: v: v.type == "home-manager") all;
+  genTypeGroups = hosts: let
+    types = ["homeManager" "nixos"];
+    typeHostGroup = name: {
+      inherit name;
+      value = filterAttrs (_: host: host.type == name) hosts;
+    };
+  in
+    removeEmptyAttrs (listToAttrs (map typeHostGroup types));
 
-    linux = genFamily (systemPred "-linux") all;
-
-    aarch64-linux = genFamily (systemPred "aarch64-linux") all;
-    x86_64-linux = genFamily (systemPred "x86_64-linux") all;
-  };
+  genHostGroups = hosts: let
+    all = hosts;
+    systemGroups = genSystemGroups all;
+    typeGroups = genTypeGroups all;
+  in
+    all // systemGroups // typeGroups // {inherit all;};
 in
-  genFamily (_: _: true) hosts
+  genHostGroups hosts

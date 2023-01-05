@@ -6,9 +6,18 @@
   ...
 }: let
   inherit (nixpkgs) lib;
-  hosts = (import ./hosts.nix).homeManager.all;
+  hosts = let
+    hostsNix = import ./hosts.nix;
+  in
+    if builtins.hasAttr "homeManager" hostsNix
+    then hostsNix.homeManager
+    else {};
 
-  genModules = hostName: {homeDirectory, ...}: {config, ...}: {
+  genModules = hostName: {homeDirectory, ...}: {
+    config,
+    pkgs,
+    ...
+  }: {
     imports = [(../hosts + "/${hostName}")];
     nix.registry = {
       nixpkgs.flake = nixpkgs;

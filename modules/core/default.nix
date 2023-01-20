@@ -59,12 +59,6 @@ in {
         pull.rebase = true;
       };
     };
-    neovim = {
-      enable = true;
-      viAlias = true;
-      vimAlias = true;
-      defaultEditor = true;
-    };
   };
 
   system = {

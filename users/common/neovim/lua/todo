@@ -1,0 +1,57 @@
+keybinds:
+- comment.nvim
+- smarter keybinds for surround, e.g. "" on word --> "word", same for '', maybe others.
+- lsp keybinds
+- move block of lines
+- m to surround
+- dressing make larger
+
+
+
+- maybe install pynvim and npm neovim on update
+- nice wrapping behavior g<up> g<down>, setlocal linebreak, setlocal wrap, setlocal showbreak=\| \ \ \ , setlocal breakindent
+- when set wrap, have an alternative V and ctrlV that behave like the text was actually that way.
+
+
+- mundo
+- easyalign
+
+- nvim dap (some kind of debugger pls)
+
+- (link still applise= nvim cmp can kill nvim by completing /dev/ and going over stdin whoops.
+- long opening times when opening paper.jar
+- remove ZZ shortcut
+- converter: number <-> hex <-> oct <-> ...; camelcase pascalcase snakecase
+- gJ but delete every trailing and leading space, maybe gdJ
+- button to jump to end of match under cursor NOT in visual mode
+- visual mode f --> vf" should mark to next "
+- v......s<esc> sometimes jumps back some characters which makes inital cursor movement strange. subst shouldnt move cursor from beginning if characters are deleted or ever like noooooop
+- multi search highlight with different color.
+- make ctrl-shift-cv copy/insert things from * buffer
+- maybe an IDE init button like <F9>. before that only minimal plugins loaded, e.g. no completion no tabnine nothing too obstrusive and nothing that is slow on large arbitarary files.
+- textobject for "current functino parameter like ciw -> cip
+- multuple cursors on each line, then trigger completion, but allow two modes. either only first cursor gets completion, others get same completion,
+  or all cursors complete separately and take the first completion by themselves.
+- key for Crtl+[] for jump back and select in help
+- indent blankline error: when searching for a word, and a indentline begins in the next line such that it is under the first char of the marked word, the blankline will be visually marked too.
+- automacros: always record a macro when esc is pressed until esc is pressed again. Begin recording only on first actual action i.e. movement doesnt count before recording, only after starting -> things like Js<del><Esc> will become a repeat sequence yay.
+- after nvimcmp replaced text, goto end of this text.
+- search and replace "popup" or maybe just prefilled cmdline with interactive search visuals
+- whitespace
+- indentline
+- tabline for TABS not buffer :/
+- nvim-tree: a = create new in (selected folder if cursor is hovering over one, else current folder), A = create new in current folder regardless of cursor pos
+- lsp
+- colored parens
+- git
+- whitespace marker lines also in NvoimTree
+- show bad whitespace
+- markdown? latex?
+- highlight current line in more lighter cola
+- Create a virtualenv specifically for Nvim and use `g:python3_host_prog`.  This will avoid the need to install the pynvim module in each virtualenv.
+
+
+fast:
+- delete ; at end of each line
+- align on =
+- align function arguments

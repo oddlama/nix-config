@@ -3,6 +3,10 @@
   pkgs,
   ...
 }: {
+  # FIXME: ctrl-del not working
+  # FIXME: esc goes into vim mode, i hate it.
+  # FIXME: fzf on tab missing
+  # FIXME: DEL also deletes to the left :(
   programs = {
     fish = {
       enable = true;

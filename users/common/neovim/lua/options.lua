@@ -1,7 +1,6 @@
 local opt = vim.opt
 local g = vim.g
 
-g.python3_host_prog = vim.fn.stdpath "data" .. "/venv/bin/python3"
 g.mapleader = ","
 
 ----------------------------------------------------------------------------------------------------

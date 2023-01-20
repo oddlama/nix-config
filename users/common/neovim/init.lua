@@ -75,7 +75,7 @@ return packer.startup(function(use)
 	-- Rust specific tools
 	use { "simrat39/rust-tools.nvim", before = "nvim-lspconfig" }
 	-- Language server configurations
-	use { "neovim/nvim-lspconfig", config = conf_module "lspconfig", after = "mason-lspconfig.nvim" }
+	use { "neovim/nvim-lspconfig", config = conf_module "lspconfig" }
 	-- Neovim as an additional language server
 	use { "jose-elias-alvarez/null-ls.nvim", config = conf_fn "null-ls" }
 
@@ -108,9 +108,6 @@ return packer.startup(function(use)
 
 	-- Startup screen
 	use { "goolord/alpha-nvim", config = conf_module "alpha" }
-	-- Language server / DAP installer
-	use { "williamboman/mason.nvim", config = conf_setup "mason" }
-	use { "williamboman/mason-lspconfig.nvim", config = conf_setup "mason-lspconfig", after = "mason.nvim" }
 	-- Window Picker
 	use { "s1n7ax/nvim-window-picker", tag = "v1.*", config = conf_setup "window-picker" }
 	-- Filebrowser
@@ -137,12 +134,12 @@ return packer.startup(function(use)
 	-- Completion
 	----------------------------------------------------------------------------------------------------
 
-	-- Completion engine
-	use { "hrsh7th/nvim-cmp", config = conf_module "cmp" }
 	-- Snippet engine
-	use { "L3MON4D3/LuaSnip", after = "nvim-cmp" }
+	use { "L3MON4D3/LuaSnip" }
+	-- Completion engine
+	use { "hrsh7th/nvim-cmp", config = conf_module "cmp", after = "LuaSnip" }
 	-- Luasnip completion source
-	use { "saadparwaiz1/cmp_luasnip", after = "LuaSnip" }
+	use { "saadparwaiz1/cmp_luasnip", after = "nvim-cmp" }
 	-- Internal LSP completion source
 	use { "hrsh7th/cmp-nvim-lsp", after = "cmp_luasnip" }
 	-- Buffer words completion source

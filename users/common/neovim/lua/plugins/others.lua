@@ -15,7 +15,7 @@ local configs = {
 			sources = {
 				null_ls.builtins.code_actions.shellcheck,
 				null_ls.builtins.formatting.stylua,
-				null_ls.builtins.diagnostics.eslint,
+				--null_ls.builtins.diagnostics.eslint,
 				null_ls.builtins.completion.spell,
 			},
 		}
@@ -77,15 +77,6 @@ local configs = {
 			},
 		},
 		other_win_hl_color = "#4493c8",
-	},
-	["mason"] = {
-		ui = {
-			icons = {
-				package_pending = " ",
-				package_installed = " ",
-				package_uninstalled = " ﮊ",
-			},
-		},
 	},
 	["gomove"] = {
 		map_defaults = false,

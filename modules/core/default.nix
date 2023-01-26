@@ -9,6 +9,7 @@
   '';
 in {
   imports = [
+    ./rekey.nix
     ./inputrc.nix
     ./issue.nix
     ./nix.nix

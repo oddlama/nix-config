@@ -1,6 +1,7 @@
 {
   lib,
   pkgs,
+  config,
   ...
 }: let
   dummyConfig = pkgs.writeText "configuration.nix" ''
@@ -25,6 +26,14 @@ in {
   # Disable unnecessary stuff from the nixos defaults.
   services.udisks2.enable = false;
   security.sudo.enable = false;
+
+  rekey.hostPubkey = ../../secrets/pubkeys + "/${config.networking.hostName}.pub";
+  rekey.hostPrivkey = lib.head (map (e: e.path) (lib.filter (e: e.type == "ed25519") config.services.openssh.hostKeys));
+  rekey.masterIdentityPaths = [../../secrets/yk1-nix-rage.pub];
+  rekey.agePlugins = with pkgs; [age-plugin-yubikey];
+
+  rekey.secrets.yolo.file = ./yolo.age;
+  environment.etc."YOLO" = config.rekey.secrets.yolo.path;
 
   home-manager = {
     useGlobalPkgs = true;

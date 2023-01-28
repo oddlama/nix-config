@@ -6,70 +6,16 @@
   ...
 }:
 with lib; {
-  # TODO add /run to sandbox only for THIS derivation
-  # TODO interactiveness how
-  # TODO yubikeySupport=true convenience option
-  # TODO rekeyed secrets should only strip store path, not do basename
-
   config = let
-    rekeyedSecrets = pkgs.stdenv.mkDerivation rec {
-      pname = "host-secrets";
-      version = "1.0.0";
-      description = "Rekeyed secrets for this host.";
-
-      allSecrets = mapAttrsToList (_: value: value.file) config.rekey.secrets;
-      hostPubkeyStr =
-        if isPath config.rekey.hostPubkey
-        then readFile config.rekey.hostPubkey
-        else config.rekey.hostPubkey;
-
-      dontMakeSourcesWritable = true;
-      dontUnpack = true;
-      dontConfigure = true;
-      dontBuild = true;
-
-      installPhase = let
-        masterIdentityArgs = concatMapStrings (x: ''-i "${x}" '') config.rekey.masterIdentityPaths;
-        rekeyCommand = secret: ''
-          echo "Rekeying ${secret}" >&2
-          ${pkgs.rage}/bin/rage ${masterIdentityArgs} -d ${secret} \
-            | ${pkgs.rage}/bin/rage -r "${hostPubkeyStr}" -o "$out/${baseNameOf secret}" -e \
-            || { echo 1 > $out/status ; echo "error while rekeying secret!" | ${pkgs.rage}/bin/rage -r "${hostPubkeyStr}" -o "$out/${baseNameOf secret}" -e ; }
-        '';
-      in ''
-        set -euo pipefail
-        mkdir "$out"
-        echo 0 > $out/status
-
-        # Enable selected age plugins
-        export PATH="$PATH${concatMapStrings (x: ":${x}/bin") config.rekey.agePlugins}"
-
-        ${concatStringsSep "\n" (map rekeyCommand allSecrets)}
-      '';
-    };
-    rekeyedSecretPath = secret: "${rekeyedSecrets}/${baseNameOf secret}";
+    drv = import ../../apps/rekey-output-derivation.nix pkgs config;
   in
     mkIf (config.rekey.secrets != {}) {
-      environment.systemPackages = with pkgs; [rage];
-
-      # This polkit rule allows the nixbld users to access the pcsc-lite daemon,
-      # which is necessary to rekey the secrets.
-      security.polkit.extraConfig = mkIf (elem pkgs.age-plugin-yubikey config.rekey.agePlugins) ''
-        polkit.addRule(function(action, subject) {
-          if ((action.id == "org.debian.pcsc-lite.access_pcsc" || action.id == "org.debian.pcsc-lite.access_card") &&
-              subject.user.match(/^nixbld\d+$/))
-            return polkit.Result.YES;
-        });
-      '';
-
-      age.secrets =
-        # Produce a rekeyed age secret for each of the secrets defined in our secrets
-        mapAttrs (_:
-          mapAttrs (name: value:
-            if name == "file"
-            then rekeyedSecretPath value
-            else value))
-        config.rekey.secrets;
+      # Produce a rekeyed age secret for each of the secrets defined in our secrets
+      age.secrets = mapAttrs (secretName:
+        flip mergeAttrs {
+          file = "${drv}/${secretName}";
+        })
+      config.rekey.secrets;
 
       assertions = [
         {
@@ -88,7 +34,12 @@ with lib; {
       warnings = let
         hasGoodSuffix = x: strings.hasSuffix ".age" x || strings.hasSuffix ".pub" x;
       in
-        optional (toInt (readFile "${rekeyedSecrets}/status") == 1) "Failed to rekey secrets! Run nix log ${rekeyedSecrets}.drv for more information."
+        # drv.drvPath doesn't force evaluation, which allows the warning to be displayed
+        # before the error occurs
+        optional (!pathExists (removeSuffix ".drv" drv.drvPath)) ''
+          The secrets have not yet been rekeyed!
+          Be sure to run `nix run ".#rekey"` after changing your secrets!
+        ''
         ++ optional (!all hasGoodSuffix config.rekey.masterIdentityPaths)
         ''
           It seems like at least one of your rekey.masterIdentityPaths contains an
@@ -114,15 +65,6 @@ with lib; {
       #example = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEyH9Vx7WJZWW+6tnDsF7JuflcxgjhAQHoCWVrjLXQ2U my-host";
       #example = "age159tavn5rcfnq30zge2jfq4yx60uksz8udndp0g3njzhrns67ca5qq3n0tj";
       example = /etc/ssh/ssh_host_ed25519_key.pub;
-    };
-    rekey.hostPrivkey = mkOption {
-      # Str to prevent privkeys from entering the nix store
-      type = types.str;
-      description = ''
-        The age identity (private key) that should be used to decrypt the secrets on the target machine.
-        This corresponds to age.identityPaths and must match the pubkey set in rekey.hostPubkey.
-      '';
-      example = head (map (e: e.path) (filter (e: e.type == "ed25519") config.services.openssh.hostKeys));
     };
     rekey.masterIdentityPaths = mkOption {
       type = types.listOf types.path;

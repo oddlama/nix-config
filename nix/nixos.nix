@@ -20,10 +20,13 @@
     };
   };
 
-  genConfiguration = hostname: {hostPlatform, ...}:
+  genConfiguration = hostName: {hostPlatform, ...}:
     lib.nixosSystem {
       modules = [
-        (../hosts + "/${hostname}")
+        (../hosts + "/${hostName}")
+        # Set hostName to same value as key in nixosConfigurations
+        {networking.hostName = hostName;}
+        # Use correct pkgs definition
         {
           nixpkgs.pkgs = self.pkgs.${hostPlatform};
           # FIXME: This shouldn't be needed, but is for some reason

@@ -1,7 +1,6 @@
 {
   networking = {
     hostId = "4313abca";
-    hostName = "nom";
     wireless.iwd.enable = true;
   };
 

@@ -28,7 +28,6 @@ in {
   security.sudo.enable = false;
 
   rekey.hostPubkey = ../../secrets/pubkeys + "/${config.networking.hostName}.pub";
-  rekey.hostPrivkey = lib.head (map (e: e.path) (lib.filter (e: e.type == "ed25519") config.services.openssh.hostKeys));
   rekey.masterIdentityPaths = [../../secrets/yk1-nix-rage.pub];
   rekey.agePlugins = with pkgs; [age-plugin-yubikey];
 

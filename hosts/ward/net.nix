@@ -1,7 +1,6 @@
 {
   networking = {
     hostId = "49ce3b71";
-    hostName = "ward";
     wireless.iwd.enable = true;
   };
 

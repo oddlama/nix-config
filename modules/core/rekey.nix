@@ -6,79 +6,98 @@
   ...
 }:
 with lib; {
-  config.environment.systemPackages = with pkgs; [rage];
-  config.age = {
-    secrets = let
-      rekeyedSecrets = lazyDerivation {
-        derivation = pkgs.stdenv.mkDerivation rec {
-          pname = "host-secrets";
-          version = "1.0.0";
-          description = "Rekeyed secrets for this host.";
+  # TODO add /run to sandbox only for THIS derivation
+  # TODO interactiveness how
+  # TODO yubikeySupport=true convenience option
+  # TODO rekeyed secrets should only strip store path, not do basename
 
-          allSecrets = mapAttrsToList (_: value: value.file) config.rekey.secrets;
-          hostPubkeyStr =
-            if isPath config.rekey.hostPubkey
-            then readFile config.rekey.hostPubkey
-            else config.rekey.hostPubkey;
+  config = let
+    rekeyedSecrets = pkgs.stdenv.mkDerivation rec {
+      pname = "host-secrets";
+      version = "1.0.0";
+      description = "Rekeyed secrets for this host.";
 
-          dontMakeSourcesWritable = true;
-          dontUnpack = true;
-          dontConfigure = true;
-          dontBuild = true;
+      allSecrets = mapAttrsToList (_: value: value.file) config.rekey.secrets;
+      hostPubkeyStr =
+        if isPath config.rekey.hostPubkey
+        then readFile config.rekey.hostPubkey
+        else config.rekey.hostPubkey;
 
-          installPhase = let
-            masterIdentityArgs = concatMapStrings (x: ''-i "${x}" '') config.rekey.masterIdentityPaths;
-            rekeyCommand = secret: ''
-              echo "Rekeying ${secret}" >&2
-                    ${pkgs.rage}/bin/rage ${masterIdentityArgs} -d ${secret}
-                      | ${pkgs.rage}/bin/rage -r "${hostPubkeyStr}" -o "$out/${baseNameOf secret}" -e
-            '';
-          in ''
-            set -euo pipefail
-            mkdir "$out"
+      dontMakeSourcesWritable = true;
+      dontUnpack = true;
+      dontConfigure = true;
+      dontBuild = true;
 
-            # Enable selected age plugins
-            export PATH="$PATH${concatMapStrings (x: ":${x}/bin") config.rekey.agePlugins}"
+      installPhase = let
+        masterIdentityArgs = concatMapStrings (x: ''-i "${x}" '') config.rekey.masterIdentityPaths;
+        rekeyCommand = secret: ''
+          echo "Rekeying ${secret}" >&2
+          ${pkgs.rage}/bin/rage ${masterIdentityArgs} -d ${secret} \
+            | ${pkgs.rage}/bin/rage -r "${hostPubkeyStr}" -o "$out/${baseNameOf secret}" -e \
+            || { echo 1 > $out/status ; echo "error while rekeying secret!" | ${pkgs.rage}/bin/rage -r "${hostPubkeyStr}" -o "$out/${baseNameOf secret}" -e ; }
+        '';
+      in ''
+        set -euo pipefail
+        mkdir "$out"
+        echo 0 > $out/status
 
-            ${concatStringsSep "\n" (map rekeyCommand allSecrets)}
-          '';
-        };
-      };
-      rekeyedSecretPath = secret: "${rekeyedSecrets}/${baseNameOf secret}";
-    in
-      # Produce a rekeyed age secret for each of the secrets defined in our secrets
-      mapAttrs (_: secret:
-        mapAttrs (name: value:
-          if name == "file"
-          then rekeyedSecretPath value
-          else value)
-        secret)
-      config.rekey.secrets;
+        # Enable selected age plugins
+        export PATH="$PATH${concatMapStrings (x: ":${x}/bin") config.rekey.agePlugins}"
 
-    identityPaths = mkForce config.rekey.agePubkey;
-  };
-  config.assertions = mkIf (config.rekey.secrets != {}) [
-    {
-      assertion = pathExists config.rekey.hostPubkey;
-      message = "The public key required to rekey secrets for this host doesn't exist. If this is the first deploy, use a mock key until you know the real one.";
-    }
-    {
-      assertion = config.rekey.masterIdentityPaths != [];
-      message = "rekey.masterIdentityPaths must be set.";
-    }
-  ];
-  config.warnings = let
-    hasGoodSuffix = x: strings.hasSuffix ".age" x || strings.hasSuffix ".pub" x;
+        ${concatStringsSep "\n" (map rekeyCommand allSecrets)}
+      '';
+    };
+    rekeyedSecretPath = secret: "${rekeyedSecrets}/${baseNameOf secret}";
   in
-    mkIf (!all hasGoodSuffix config.rekey.masterIdentityPaths) [
-      ''
-        It seems like at least one of your rekey.masterIdentityPaths contains an
-        unencrypted age identity. These files will be copied to the nix store, so
-        make sure they don't contain any secret information!
+    mkIf (config.rekey.secrets != {}) {
+      environment.systemPackages = with pkgs; [rage];
 
-        To silence this warning, encrypt your keys and name them *.pub or *.age.
-      ''
-    ];
+      # This polkit rule allows the nixbld users to access the pcsc-lite daemon,
+      # which is necessary to rekey the secrets.
+      security.polkit.extraConfig = mkIf (elem pkgs.age-plugin-yubikey config.rekey.agePlugins) ''
+        polkit.addRule(function(action, subject) {
+          if ((action.id == "org.debian.pcsc-lite.access_pcsc" || action.id == "org.debian.pcsc-lite.access_card") &&
+              subject.user.match(/^nixbld\d+$/))
+            return polkit.Result.YES;
+        });
+      '';
+
+      age.secrets =
+        # Produce a rekeyed age secret for each of the secrets defined in our secrets
+        mapAttrs (_:
+          mapAttrs (name: value:
+            if name == "file"
+            then rekeyedSecretPath value
+            else value))
+        config.rekey.secrets;
+
+      assertions = [
+        {
+          assertion = pathExists config.rekey.hostPubkey;
+          message = ''
+            The path config.rekey.hostPubkey (${toString config.rekey.hostPubkey}) doesn't exist, but is required to rekey secrets for this host.
+            If this is the first deploy, use a mock key until you know the real one.
+          '';
+        }
+        {
+          assertion = config.rekey.masterIdentityPaths != [];
+          message = "rekey.masterIdentityPaths must be set.";
+        }
+      ];
+
+      warnings = let
+        hasGoodSuffix = x: strings.hasSuffix ".age" x || strings.hasSuffix ".pub" x;
+      in
+        optional (toInt (readFile "${rekeyedSecrets}/status") == 1) "Failed to rekey secrets! Run nix log ${rekeyedSecrets}.drv for more information."
+        ++ optional (!all hasGoodSuffix config.rekey.masterIdentityPaths)
+        ''
+          It seems like at least one of your rekey.masterIdentityPaths contains an
+          unencrypted age identity. These files will be copied to the nix store, so
+          make sure they don't contain any secret information!
+
+          To silence this warning, encrypt your keys and name them *.pub or *.age.
+        '';
+    };
 
   options = {
     rekey.secrets = options.age.secrets;
@@ -128,6 +147,3 @@ with lib; {
     };
   };
 }
-#rekey.secrets.my_secret.file = ./secrets/somekey.age;
-#pwdfile = rekey.secrets.mysecret.path;
-

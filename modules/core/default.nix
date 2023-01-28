@@ -33,7 +33,7 @@ in {
   rekey.agePlugins = with pkgs; [age-plugin-yubikey];
 
   rekey.secrets.yolo.file = ./yolo.age;
-  environment.etc."YOLO" = config.rekey.secrets.yolo.path;
+  environment.etc."YOLO".source = config.rekey.secrets.yolo.path;
 
   home-manager = {
     useGlobalPkgs = true;

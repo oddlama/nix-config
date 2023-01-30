@@ -22,8 +22,7 @@ in {
   boot.kernelParams = ["log_buf_len=10M"];
   environment.etc."nixos/configuration.nix".source = dummyConfig;
 
-  # Disable unnecessary stuff from the nixos defaults.
-  services.udisks2.enable = false;
+  # Disable sudo which is entierly unnecessary.
   security.sudo.enable = false;
 
   rekey.hostPubkey = ../../secrets/pubkeys + "/${config.networking.hostName}.pub";

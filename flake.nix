@@ -67,7 +67,7 @@
       homeConfigurations = import ./nix/home-manager.nix inputs;
       nixosConfigurations = import ./nix/nixos.nix inputs;
     }
-    // flake-utils.lib.eachSystem ["aarch64-linux" "x86_64-linux"] (localSystem: rec {
+    // flake-utils.lib.eachDefaultSystem (localSystem: rec {
       checks = import ./nix/checks.nix inputs localSystem;
       devShells.default = import ./nix/dev-shell.nix inputs localSystem;
 

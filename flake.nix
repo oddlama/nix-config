@@ -33,8 +33,19 @@
       inputs.flake-compat.follows = "flake-compat";
     };
 
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     ragenix = {
       url = "github:yaxitech/ragenix";
+      inputs.agenix.follows = "agenix";
+      inputs.flake-utils.follows = "flake-utils";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    agenix-rekey = {
+      url = "github:oddlama/agenix-rekey";
+      inputs.agenix.follows = "agenix";
       inputs.flake-utils.follows = "flake-utils";
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -76,7 +87,5 @@
         ];
         config.allowUnfree = true;
       };
-
-      apps = {} // import ./apps/rekey.nix inputs localSystem;
     });
 }

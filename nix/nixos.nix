@@ -5,6 +5,7 @@
   nixos-hardware,
   nixpkgs,
   ragenix,
+  agenix-rekey,
   templates,
   ...
 }: let
@@ -32,9 +33,10 @@
           nixpkgs.hostPlatform = hostPlatform;
         }
         nixRegistry
-        home-manager.nixosModules.home-manager
-        #impermanence.nixosModules.impermanence
-        ragenix.nixosModules.age
+        home-manager.nixosModules.default
+        #impermanence.nixosModules.default
+        ragenix.nixosModules.default
+        agenix-rekey.nixosModules.default
       ];
       specialArgs = {
         #impermanence = impermanence.nixosModules;

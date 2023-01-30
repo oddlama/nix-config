@@ -25,6 +25,7 @@
       rclone
       ripgrep
       rsync
+      sd
       tree
       rage
     ];

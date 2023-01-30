@@ -24,8 +24,8 @@
     lib.nixosSystem {
       modules = [
         (../hosts + "/${hostName}")
-		# By default, set networking.hostName to the hostName
-		{ networking.hostName = lib.mkDefault hostName; }
+        # By default, set networking.hostName to the hostName
+        {networking.hostName = lib.mkDefault hostName;}
         # Use correct pkgs definition
         {
           nixpkgs.pkgs = self.pkgs.${hostPlatform};

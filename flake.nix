@@ -50,6 +50,7 @@
     ...
   } @ inputs:
     {
+      hosts = import ./nix/hosts.nix;
       deploy = import ./nix/deploy.nix inputs;
       overlays = import ./nix/overlay.nix inputs;
       homeConfigurations = import ./nix/home-manager.nix inputs;

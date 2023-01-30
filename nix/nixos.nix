@@ -1,7 +1,7 @@
 {
   self,
   home-manager,
-  impermanence,
+  #impermanence,
   nixos-hardware,
   nixpkgs,
   ragenix,
@@ -9,7 +9,6 @@
   ...
 }: let
   inherit (nixpkgs) lib;
-  hosts = (import ./hosts.nix).nixos;
 
   nixRegistry = {
     nix.registry = {
@@ -24,8 +23,8 @@
     lib.nixosSystem {
       modules = [
         (../hosts + "/${hostName}")
-        # Set hostName to same value as key in nixosConfigurations
-        {networking.hostName = hostName;}
+		# By default, set networking.hostName to the hostName
+		{ networking.hostName = lib.mkDefault hostName; }
         # Use correct pkgs definition
         {
           nixpkgs.pkgs = self.pkgs.${hostPlatform};
@@ -34,13 +33,13 @@
         }
         nixRegistry
         home-manager.nixosModules.home-manager
-        impermanence.nixosModules.impermanence
+        #impermanence.nixosModules.impermanence
         ragenix.nixosModules.age
       ];
       specialArgs = {
-        impermanence = impermanence.nixosModules;
+        #impermanence = impermanence.nixosModules;
         nixos-hardware = nixos-hardware.nixosModules;
       };
     };
 in
-  lib.mapAttrs genConfiguration hosts
+  lib.mapAttrs genConfiguration (self.hosts.nixos or {})

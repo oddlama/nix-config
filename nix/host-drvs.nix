@@ -1,8 +1,6 @@
 {self, ...}: system: let
   inherit (self.pkgs.${system}) lib linkFarm;
 
-  hosts = import ./hosts.nix;
-
   nixosDrvs = lib.mapAttrs (_: nixos: nixos.config.system.build.toplevel) self.nixosConfigurations;
   homeDrvs = lib.mapAttrs (_: home: home.activationPackage) self.homeConfigurations;
   hostDrvs = nixosDrvs // homeDrvs;
@@ -11,7 +9,7 @@
     lib.mapAttrsRecursiveCond
     (hostAttr: !(hostAttr ? "type" && (lib.elem hostAttr.type ["homeManager" "nixos"])))
     (path: _: hostDrvs.${lib.last path})
-    hosts;
+    self.hosts;
 
   structuredHostFarms =
     lib.mapAttrsRecursiveCond

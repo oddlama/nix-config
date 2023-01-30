@@ -35,13 +35,12 @@ with lib; {
         hasGoodSuffix = x: strings.hasSuffix ".age" x || strings.hasSuffix ".pub" x;
       in
         # drv.drvPath doesn't force evaluation, which allows the warning to be displayed
-        # before the error occurs
+        # in case the derivation is not built before deploying
         optional (!pathExists (removeSuffix ".drv" drv.drvPath)) ''
-          The secrets have not yet been rekeyed!
+          The secrets for host ${config.networking.hostName} have not yet been rekeyed!
           Be sure to run `nix run ".#rekey"` after changing your secrets!
         ''
-        ++ optional (!all hasGoodSuffix config.rekey.masterIdentityPaths)
-        ''
+        ++ optional (!all hasGoodSuffix config.rekey.masterIdentityPaths) ''
           It seems like at least one of your rekey.masterIdentityPaths contains an
           unencrypted age identity. These files will be copied to the nix store, so
           make sure they don't contain any secret information!

@@ -5,13 +5,13 @@
   ...
 }: let
   inherit (nixpkgs) lib;
-  hosts = (import ./hosts.nix).all;
 
-  genNode = hostName: nixosCfg: let
-    inherit (hosts.${hostName}) hostname hostPlatform remoteBuild;
-    inherit (deploy-rs.lib.${hostPlatform}) activate;
+  generateNode = hostName: nixosCfg: let
+    host = self.hosts.${hostName};
+    inherit (deploy-rs.lib.${host.hostPlatform}) activate;
   in {
-    inherit remoteBuild hostname;
+    remoteBuild = host.remoteBuild or true;
+    hostname = host.address or hostName;
     profiles.system.path = activate.nixos nixosCfg;
   };
 in {
@@ -20,5 +20,5 @@ in {
   sshUser = "root";
   user = "root";
   sudo = "runuser -u";
-  nodes = lib.mapAttrs genNode self.nixosConfigurations;
+  nodes = lib.mapAttrs generateNode (self.nixosConfigurations or {});
 }

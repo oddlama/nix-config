@@ -6,12 +6,6 @@
   ...
 }: let
   inherit (nixpkgs) lib;
-  hosts = let
-    hostsNix = import ./hosts.nix;
-  in
-    if builtins.hasAttr "homeManager" hostsNix
-    then hostsNix.homeManager
-    else {};
 
   genModules = hostName: {homeDirectory, ...}: {
     config,
@@ -51,4 +45,4 @@
       modules = [(genModules hostName attrs)];
     };
 in
-  lib.mapAttrs genConfiguration hosts
+  lib.mapAttrs genConfiguration (self.hosts.homeManager or {})

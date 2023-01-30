@@ -2,13 +2,11 @@ let
   hosts = {
     nom = {
       type = "nixos";
-      hostname = "nom";
       hostPlatform = "x86_64-linux";
       remoteBuild = true;
     };
     ward = {
       type = "nixos";
-      hostname = "ward";
       hostPlatform = "x86_64-linux";
       remoteBuild = true;
     };

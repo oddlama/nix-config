@@ -2,9 +2,11 @@
   services.sshd.enable = true;
   services.openssh = {
     enable = true;
-    passwordAuthentication = false;
-    kbdInteractiveAuthentication = false;
-    permitRootLogin = "yes";
+    settings = {
+      PasswordAuthentication = false;
+      KbdInteractiveAuthentication = false;
+      PermitRootLogin = "yes";
+    };
     hostKeys = [
       {
         path = "/etc/ssh/ssh_host_ed25519_key";

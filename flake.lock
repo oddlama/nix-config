@@ -3,15 +3,16 @@
     "agenix": {
       "inputs": {
         "nixpkgs": [
+          "ragenix",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1675030834,
-        "narHash": "sha256-e1/7Z7rVRqy2NuEOxrRm560wc/Kn8NU7gz8CDfmu9F0=",
+        "lastModified": 1673301561,
+        "narHash": "sha256-gRUWHbBAtMuPDJQXotoI8u6+3DGBIUZHkyQWpIv7WpM=",
         "owner": "ryantm",
         "repo": "agenix",
-        "rev": "49798e535ebc07fec82256b283d35be36d8c6c9a",
+        "rev": "42d371d861a227149dc9a7e03350c9ab8b8ddd68",
         "type": "github"
       },
       "original": {
@@ -22,22 +23,14 @@
     },
     "agenix-rekey": {
       "inputs": {
-        "agenix": [
-          "agenix"
-        ],
-        "flake-utils": [
-          "flake-utils"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ]
+        "flake-utils": "flake-utils"
       },
       "locked": {
-        "lastModified": 1675114231,
-        "narHash": "sha256-lIPXmd2JRNv1D0CUmv8/djiIUZnm04MIHxLR7sm1PPo=",
+        "lastModified": 1675123691,
+        "narHash": "sha256-MyB+eQtV6/YRy1briQhVGOGW2FgvaEzco2epXCNEy+k=",
         "owner": "oddlama",
         "repo": "agenix-rekey",
-        "rev": "60829dfc172260dcff7bce9e03b24dd686a0a512",
+        "rev": "378105cc33e1b8245d002fa895f506414e21d258",
         "type": "github"
       },
       "original": {
@@ -89,6 +82,20 @@
       }
     },
     "flake-utils": {
+      "locked": {
+        "lastModified": 1667395993,
+        "narHash": "sha256-nuEHfE/LcWyuSWnS8t12N1wc105Qtau+/OdUAjtQ0rA=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "5aed5285a952e0b949eb3ba02c12fa4fcfef535f",
+        "type": "github"
+      },
+      "original": {
+        "id": "flake-utils",
+        "type": "indirect"
+      }
+    },
+    "flake-utils_2": {
       "locked": {
         "lastModified": 1667395993,
         "narHash": "sha256-nuEHfE/LcWyuSWnS8t12N1wc105Qtau+/OdUAjtQ0rA=",
@@ -239,9 +246,7 @@
     },
     "ragenix": {
       "inputs": {
-        "agenix": [
-          "agenix"
-        ],
+        "agenix": "agenix",
         "flake-utils": [
           "flake-utils"
         ],
@@ -266,11 +271,10 @@
     },
     "root": {
       "inputs": {
-        "agenix": "agenix",
         "agenix-rekey": "agenix-rekey",
         "deploy-rs": "deploy-rs",
         "flake-compat": "flake-compat",
-        "flake-utils": "flake-utils",
+        "flake-utils": "flake-utils_2",
         "home-manager": "home-manager",
         "impermanence": "impermanence",
         "nixos-hardware": "nixos-hardware",

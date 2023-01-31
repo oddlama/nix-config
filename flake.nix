@@ -33,19 +33,9 @@
       inputs.flake-compat.follows = "flake-compat";
     };
 
-    agenix = {
-      url = "github:ryantm/agenix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    agenix-rekey.url = "github:oddlama/agenix-rekey";
     ragenix = {
       url = "github:yaxitech/ragenix";
-      inputs.agenix.follows = "agenix";
-      inputs.flake-utils.follows = "flake-utils";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    agenix-rekey = {
-      url = "github:oddlama/agenix-rekey";
-      inputs.agenix.follows = "agenix";
       inputs.flake-utils.follows = "flake-utils";
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -58,6 +48,7 @@
     self,
     nixpkgs,
     flake-utils,
+    agenix-rekey,
     ...
   } @ inputs:
     {
@@ -67,25 +58,27 @@
       homeConfigurations = import ./nix/home-manager.nix inputs;
       nixosConfigurations = import ./nix/nixos.nix inputs;
     }
-    // flake-utils.lib.eachDefaultSystem (localSystem: rec {
-      checks = import ./nix/checks.nix inputs localSystem;
-      devShells.default = import ./nix/dev-shell.nix inputs localSystem;
+    // flake-utils.lib.eachDefaultSystem (system: rec {
+      checks = import ./nix/checks.nix inputs system;
+      devShells.default = import ./nix/dev-shell.nix inputs system;
 
       packages = let
-        hostDrvs = import ./nix/host-drvs.nix inputs localSystem;
+        hostDrvs = import ./nix/host-drvs.nix inputs system;
         default =
-          if builtins.hasAttr "${localSystem}" hostDrvs
-          then {default = self.packages.${localSystem}.${localSystem};}
+          if builtins.hasAttr "${system}" hostDrvs
+          then {default = self.packages.${system}.${system};}
           else {};
       in
         hostDrvs // default;
 
       pkgs = import nixpkgs {
-        inherit localSystem;
+        inherit system;
         overlays = [
           self.overlays.default
         ];
         config.allowUnfree = true;
       };
+
+      apps = agenix-rekey.defineApps inputs system;
     });
 }

@@ -35,7 +35,7 @@
         nixRegistry
         home-manager.nixosModules.default
         #impermanence.nixosModules.default
-        ragenix.nixosModules.default
+        ragenix.nixosModules.age
         agenix-rekey.nixosModules.default
       ];
       specialArgs = {

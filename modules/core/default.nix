@@ -5,7 +5,7 @@
   ...
 }: let
   dummyConfig = pkgs.writeText "configuration.nix" ''
-    assert builtins.trace "This is a dummy config, use deploy-rs!" false;
+    assert builtins.trace "This is a dummy config, use colmena!" false;
     { }
   '';
 in {
@@ -55,8 +55,6 @@ in {
     "nixpkgs=/run/current-system/nixpkgs"
     "nixpkgs-overlays=/run/current-system/overlays"
   ];
-
-  nixpkgs.config.allowUnfree = true;
 
   programs = {
     git = {

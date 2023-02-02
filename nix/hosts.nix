@@ -1,18 +1,14 @@
-let
+with builtins; let
   hosts = {
     nom = {
       type = "nixos";
-      hostPlatform = "x86_64-linux";
-      remoteBuild = true;
+      system = "x86_64-linux";
     };
     ward = {
       type = "nixos";
-      hostPlatform = "x86_64-linux";
-      remoteBuild = true;
+      system = "x86_64-linux";
     };
   };
-
-  inherit (builtins) attrNames concatMap listToAttrs filter;
 
   filterAttrs = pred: set:
     listToAttrs (concatMap (name: let
@@ -24,11 +20,12 @@ let
 
   removeEmptyAttrs = filterAttrs (_: v: v != {});
 
+  # TODO: so much strange shit
   genSystemGroups = hosts: let
     systems = ["aarch64-linux" "x86_64-linux"];
     systemHostGroup = name: {
       inherit name;
-      value = filterAttrs (_: host: host.hostPlatform == name) hosts;
+      value = filterAttrs (_: host: host.system == name) hosts;
     };
   in
     removeEmptyAttrs (listToAttrs (map systemHostGroup systems));

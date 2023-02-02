@@ -6,7 +6,7 @@ with self.pkgs.${system};
     nativeBuildInputs = [
       # Nix
       cachix
-      deploy-rs.deploy-rs
+      colmena
       nix-build-uncached
       alejandra
       ragenix

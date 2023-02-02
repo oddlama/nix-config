@@ -2,13 +2,10 @@
   description = "oddlama's NixOS Infrastructure";
 
   inputs = {
-    deploy-rs = {
-      url = "github:serokell/deploy-rs";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-compat.follows = "flake-compat";
-        utils.follows = "flake-utils";
-      };
+    colmena = {
+      url = "github:zhaofengli/colmena";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
     };
 
     flake-compat = {
@@ -46,6 +43,7 @@
 
   outputs = {
     self,
+    colmena,
     nixpkgs,
     flake-utils,
     agenix-rekey,
@@ -53,10 +51,9 @@
   } @ inputs:
     {
       hosts = import ./nix/hosts.nix;
-      deploy = import ./nix/deploy.nix inputs;
+      colmena = import ./nix/colmena.nix inputs;
       overlays = import ./nix/overlay.nix inputs;
       homeConfigurations = import ./nix/home-manager.nix inputs;
-      nixosConfigurations = import ./nix/nixos.nix inputs;
     }
     // flake-utils.lib.eachDefaultSystem (system: rec {
       checks = import ./nix/checks.nix inputs system;
@@ -79,6 +76,9 @@
         config.allowUnfree = true;
       };
 
-      apps = agenix-rekey.defineApps inputs system;
+      apps = let
+        inherit ((colmena.lib.makeHive self.colmena).introspect (x: x)) nodes;
+      in
+        agenix-rekey.defineApps inputs system nodes;
     });
 }

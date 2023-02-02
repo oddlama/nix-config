@@ -39,9 +39,9 @@
     };
   };
 
-  genConfiguration = hostName: {hostPlatform, ...} @ attrs:
+  genConfiguration = hostName: {system, ...} @ attrs:
     home-manager.lib.homeManagerConfiguration {
-      pkgs = self.pkgs.${hostPlatform};
+      pkgs = self.pkgs.${system};
       modules = [(genModules hostName attrs)];
     };
 in

@@ -26,11 +26,11 @@
         "flake-utils": "flake-utils"
       },
       "locked": {
-        "lastModified": 1675455064,
-        "narHash": "sha256-bpSrEuFUY0iw9DCGy1BGUhkDdcHfUEBKQEYeXJ0nSEQ=",
+        "lastModified": 1675460592,
+        "narHash": "sha256-aaLcOEpPw03bX/Ve9109L3Gqx7+EGkUu4TRzxDs1jOs=",
         "owner": "oddlama",
         "repo": "agenix-rekey",
-        "rev": "fc713fec49844330863f781864e6cd6ab61c25d6",
+        "rev": "5a26b79d857031059fa27d2454e778d7d5bdc98e",
         "type": "github"
       },
       "original": {

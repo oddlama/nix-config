@@ -26,8 +26,8 @@ in {
   security.sudo.enable = false;
 
   rekey.hostPubkey = ../../secrets/pubkeys + "/${config.networking.hostName}.pub";
-  rekey.masterIdentityPaths = [../../secrets/yk1-nix-rage.pub];
-  rekey.agePlugins = with pkgs; [age-plugin-yubikey];
+  rekey.masterIdentities = [../../secrets/yk1-nix-rage.pub];
+  rekey.extraEncryptionPubkeys = [../../secrets/backup.pub];
 
   rekey.secrets.yolo.file = ./yolo.age;
   environment.etc."YOLO".source = config.rekey.secrets.yolo.path;

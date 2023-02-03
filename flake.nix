@@ -8,11 +8,6 @@
       inputs.flake-utils.follows = "flake-utils";
     };
 
-    flake-compat = {
-      url = "github:edolstra/flake-compat";
-      flake = false;
-    };
-
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -27,7 +22,6 @@
       url = "github:cachix/pre-commit-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
-      inputs.flake-compat.follows = "flake-compat";
     };
 
     agenix-rekey.url = "github:oddlama/agenix-rekey";
@@ -54,6 +48,8 @@
       colmena = import ./nix/colmena.nix inputs;
       overlays = import ./nix/overlay.nix inputs;
       homeConfigurations = import ./nix/home-manager.nix inputs;
+
+      inherit ((colmena.lib.makeHive self.colmena).introspect (x: x)) nodes;
     }
     // flake-utils.lib.eachDefaultSystem (system: rec {
       checks = import ./nix/checks.nix inputs system;
@@ -76,9 +72,6 @@
         config.allowUnfree = true;
       };
 
-      apps = let
-        inherit ((colmena.lib.makeHive self.colmena).introspect (x: x)) nodes;
-      in
-        agenix-rekey.defineApps inputs system nodes;
+      apps = agenix-rekey.defineApps self pkgs self.nodes;
     });
 }

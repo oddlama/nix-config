@@ -55,15 +55,6 @@
       checks = import ./nix/checks.nix inputs system;
       devShells.default = import ./nix/dev-shell.nix inputs system;
 
-      packages = let
-        hostDrvs = import ./nix/host-drvs.nix inputs system;
-        default =
-          if builtins.hasAttr "${system}" hostDrvs
-          then {default = self.packages.${system}.${system};}
-          else {};
-      in
-        hostDrvs // default;
-
       pkgs = import nixpkgs {
         inherit system;
         overlays = [

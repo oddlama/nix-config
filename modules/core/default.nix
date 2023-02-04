@@ -19,18 +19,19 @@ in {
     ./xdg.nix
   ];
 
-  boot.kernelParams = ["log_buf_len=10M"];
+  boot = {
+    kernelParams = ["log_buf_len=10M"];
+    tmpOnTmpfs = true;
+  };
   environment.etc."nixos/configuration.nix".source = dummyConfig;
 
   # Disable sudo which is entierly unnecessary.
   security.sudo.enable = false;
 
+  # Setup to use Secrets
   rekey.hostPubkey = ../../secrets/pubkeys + "/${config.networking.hostName}.pub";
   rekey.masterIdentities = [../../secrets/yk1-nix-rage.pub];
   rekey.extraEncryptionPubkeys = [../../secrets/backup.pub];
-
-  rekey.secrets.yolo.file = ./yolo.age;
-  environment.etc."YOLO".source = config.rekey.secrets.yolo.path;
 
   home-manager = {
     useGlobalPkgs = true;

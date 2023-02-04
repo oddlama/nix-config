@@ -11,6 +11,7 @@
   ...
 }:
 with nixpkgs.lib; let
+  nixosHosts = filterAttrs (_: x: x.type == "nixos") self.hosts;
   generateColmenaNode = hostName: _: {
     imports = [
       {
@@ -37,8 +38,8 @@ in
       description = "oddlama's colmena configuration";
       # Just a required dummy for colmena, overwritten on a per-node basis by nodeNixpkgs below.
       nixpkgs = self.pkgs.x86_64-linux;
-      nodeNixpkgs = mapAttrs (hostName: {system, ...}: self.pkgs.${system}) (self.hosts.nixos or {});
-      #nodeSpecialArgs = mapAttrs (hostName: { system, ... }: {}) (self.hosts.nixos or {});
+      nodeNixpkgs = mapAttrs (hostName: {system, ...}: self.pkgs.${system}) nixosHosts;
+      #nodeSpecialArgs = mapAttrs (hostName: { system, ... }: {}) nixosHosts;
       specialArgs = {
         inherit (nixpkgs) lib;
         nixos-hardware = nixos-hardware.nixosModules;
@@ -46,4 +47,4 @@ in
       };
     };
   }
-  // mapAttrs generateColmenaNode (self.hosts.nixos or {})
+  // mapAttrs generateColmenaNode nixosHosts

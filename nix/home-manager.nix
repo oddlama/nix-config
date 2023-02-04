@@ -4,10 +4,10 @@
   nixpkgs,
   templates,
   ...
-}: let
-  inherit (nixpkgs) lib;
-
-  genModules = hostName: {homeDirectory, ...}: {
+}:
+with nixpkgs.lib; let
+  homeManagerHosts = filterAttrs (_: x: x.type == "homeManager") self.hosts;
+  moduleForHost = hostName: {homeDirectory, ...}: {
     config,
     pkgs,
     ...
@@ -22,7 +22,7 @@
 
     home = {
       inherit homeDirectory;
-      sessionVariables.NIX_PATH = lib.concatStringsSep ":" [
+      sessionVariables.NIX_PATH = concatStringsSep ":" [
         "nixpkgs=${config.xdg.dataHome}/nixpkgs"
         "nixpkgs-overlays=${config.xdg.dataHome}/overlays"
       ];
@@ -42,7 +42,7 @@
   genConfiguration = hostName: {system, ...} @ attrs:
     home-manager.lib.homeManagerConfiguration {
       pkgs = self.pkgs.${system};
-      modules = [(genModules hostName attrs)];
+      modules = [(moduleForHost hostName attrs)];
     };
 in
-  lib.mapAttrs genConfiguration (self.hosts.homeManager or {})
+  mapAttrs genConfiguration hostManagerHosts

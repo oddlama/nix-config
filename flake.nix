@@ -52,9 +52,6 @@
       inherit ((colmena.lib.makeHive self.colmena).introspect (x: x)) nodes;
     }
     // flake-utils.lib.eachDefaultSystem (system: rec {
-      checks = import ./nix/checks.nix inputs system;
-      devShells.default = import ./nix/dev-shell.nix inputs system;
-
       pkgs = import nixpkgs {
         inherit system;
         overlays = [
@@ -64,5 +61,8 @@
       };
 
       apps = agenix-rekey.defineApps self pkgs self.nodes;
+      checks = import ./nix/checks.nix inputs system;
+      devShells.default = import ./nix/dev-shell.nix inputs system;
+      formatter = pkgs.alejandra;
     });
 }

@@ -18,13 +18,8 @@ with self.pkgs.${system};
       (luajit.withPackages (p: with p; [luacheck]))
       sumneko-lua-language-server
 
-      # GitHub Actions
-      act
-      actionlint
-      python3Packages.pyflakes
-      shellcheck
-
       # Misc
+      shellcheck
       jq
       pre-commit
       rage

@@ -2,20 +2,16 @@
   nixpkgs,
   ragenix,
   ...
-}: let
-  inherit (nixpkgs) lib;
+}:
+with nixpkgs.lib; let
   localOverlays =
-    lib.mapAttrs'
-    (f: _:
-      lib.nameValuePair
-      (lib.removeSuffix ".nix" f)
-      (import (./overlays + "/${f}")))
+    mapAttrs'
+    (f: _: nameValuePair (removeSuffix ".nix" f) (import (./overlays + "/${f}")))
     (builtins.readDir ./overlays);
 in
   localOverlays
   // {
-    default = lib.composeManyExtensions ((lib.attrValues localOverlays)
-      ++ [
-        ragenix.overlays.default
-      ]);
+    default =
+      composeManyExtensions ((attrValues localOverlays)
+        ++ [ragenix.overlays.default]);
   }

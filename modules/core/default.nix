@@ -28,19 +28,22 @@ in {
   # Disable sudo which is entierly unnecessary.
   security.sudo.enable = false;
 
-  # Setup to use Secrets
-  rekey.hostPubkey = ../../secrets/pubkeys + "/${config.networking.hostName}.pub";
-  rekey.masterIdentities = [../../secrets/yk1-nix-rage.pub];
-  rekey.extraEncryptionPubkeys = [../../secrets/backup.pub];
-
-  home-manager = {
-    useGlobalPkgs = true;
-    useUserPackages = true;
-    verbose = true;
-  };
-
   time.timeZone = lib.mkDefault "Europe/Berlin";
   i18n.defaultLocale = "C.UTF-8";
+
+  console =
+    {
+      keyMap = "de-latin1-nodeadkeys";
+    }
+    // lib.mkIf video.hidpi.enable {
+      font = "ter-v28n";
+      packages = with pkgs; [terminus_font];
+    };
+
+  hardware = {
+    enableRedistributableFirmware = true;
+    enableAllFirmware = true;
+  };
 
   networking = {
     useDHCP = lib.mkForce false;
@@ -57,16 +60,6 @@ in {
     "nixpkgs-overlays=/run/current-system/overlays"
   ];
 
-  programs = {
-    git = {
-      enable = true;
-      config = {
-        init.defaultBranch = "main";
-        pull.rebase = true;
-      };
-    };
-  };
-
   system = {
     extraSystemBuilderCmds = ''
       ln -sv ${pkgs.path} $out/nixpkgs
@@ -82,4 +75,25 @@ in {
   };
 
   users.mutableUsers = false;
+
+  # Setup to use Secrets
+  rekey.hostPubkey = ../../secrets/pubkeys + "/${config.networking.hostName}.pub";
+  rekey.masterIdentities = [../../secrets/yk1-nix-rage.pub];
+  rekey.extraEncryptionPubkeys = [../../secrets/backup.pub];
+
+  home-manager = {
+    useGlobalPkgs = true;
+    useUserPackages = true;
+    verbose = true;
+  };
+
+  programs = {
+    git = {
+      enable = true;
+      config = {
+        init.defaultBranch = "main";
+        pull.rebase = true;
+      };
+    };
+  };
 }

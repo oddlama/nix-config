@@ -1,4 +1,5 @@
 {
+  environment.systemPackages = with pkgs; [powertop];
   services.logind = {
     lidSwitch = "ignore";
     lidSwitchDocked = "ignore";

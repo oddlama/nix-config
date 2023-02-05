@@ -9,7 +9,7 @@
     nixos-hardware.common-pc-ssd
 
     ../../modules/core
-
+    ../../modules/hardware/intel.nix
     ../../modules/efi.nix
     ../../modules/zfs.nix
 
@@ -19,25 +19,7 @@
     ./net.nix
   ];
 
-  boot = {
-    initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci"];
-    kernelModules = ["kvm-intel"];
-  };
-
-  console = {
-    font = "ter-v28n";
-    keyMap = "de-latin1-nodeadkeys";
-    packages = with pkgs; [terminus_font];
-  };
-
-  environment.systemPackages = with pkgs; [wireguard-tools powertop];
-
-  hardware = {
-    enableRedistributableFirmware = true;
-    enableAllFirmware = true;
-  };
-
-  powerManagement.cpuFreqGovernor = "powersave";
+  boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci"];
 
   services = {
     fwupd.enable = true;

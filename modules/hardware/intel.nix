@@ -1,0 +1,3 @@
+{pkgs, ...}: {
+  powerManagement.cpuFreqGovernor = "powersave";
+}

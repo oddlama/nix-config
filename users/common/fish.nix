@@ -5,9 +5,10 @@
 }:
 with lib; {
   # FIXME: ctrl-del not working
-  # FIXME: fzf on tab missing
   # FIXME: DEL also deletes to the left :(
   # FIXME: ignore certain history entries (" .*", ...)
+  # FIXME: after tab give space
+  # FIXME: fzf tab let multi
   programs.fish = {
     enable = true;
     interactiveShellInit = mkMerge [
@@ -15,7 +16,7 @@ with lib; {
         set -g ATUIN_NOBIND true
         set -g fish_greeting
         set -g fish_autosuggestion_enabled 0
-        set -U FZF_COMPLETE 0
+        set -g FZF_COMPLETE 2
       '')
       (mkAfter ''
         bind \cr _atuin_search

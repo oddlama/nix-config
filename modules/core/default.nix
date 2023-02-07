@@ -35,7 +35,7 @@ in {
     {
       keyMap = "de-latin1-nodeadkeys";
     }
-    // lib.mkIf video.hidpi.enable {
+    // lib.mkIf config.video.hidpi.enable {
       font = "ter-v28n";
       packages = with pkgs; [terminus_font];
     };

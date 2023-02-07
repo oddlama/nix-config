@@ -1,4 +1,4 @@
-{
+{pkgs, ...}: {
   environment.systemPackages = with pkgs; [powertop];
   services.logind = {
     lidSwitch = "ignore";

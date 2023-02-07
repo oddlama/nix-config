@@ -12,6 +12,7 @@ with self.pkgs.${system};
       ragenix
       rnix-lsp
       statix
+      update-nix-fetching
 
       # Lua
       stylua

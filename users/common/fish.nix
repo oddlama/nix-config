@@ -2,50 +2,35 @@
   lib,
   pkgs,
   ...
-}: {
+}:
+with lib; {
   # FIXME: ctrl-del not working
-  # FIXME: esc goes into vim mode, i hate it.
   # FIXME: fzf on tab missing
   # FIXME: DEL also deletes to the left :(
-  programs = {
-    fish = {
-      enable = true;
-      interactiveShellInit = lib.mkMerge [
-        (lib.mkBefore ''
-          set -g ATUIN_NOBIND true
-          set -g fish_escape_delay_ms 300
-          set -g fish_greeting
-        '')
-        (lib.mkAfter ''
-          enable_ayu_theme_dark
-          ${pkgs.any-nix-shell}/bin/any-nix-shell fish | source
-          fish_vi_key_bindings insert
-          # atuin
-          bind -M insert \cr _atuin_search
-          # quickly open text file
-          bind -M insert \co 'fzf | xargs -r $VISUAL'
-        '')
-      ];
-      plugins = [
-        {
-          name = "ayu-theme.fish";
-          src = pkgs.fetchFromGitHub {
-            owner = "edouard-lopez";
-            repo = "ayu-theme.fish";
-            rev = "d351d24263d87bef3a90424e0e9c74746673e383";
-            hash = "sha256-rx9izD2pc3hLObOehuiMwFB4Ta5G1lWVv9Jdb+JHIz0=";
-          };
-        }
-        {
-          name = "autopair.fish";
-          src = pkgs.fetchFromGitHub {
-            owner = "jorgebucaran";
-            repo = "autopair.fish";
-            rev = "1.0.4";
-            hash = "sha256-s1o188TlwpUQEN3X5MxUlD/2CFCpEkWu83U9O+wg3VU=";
-          };
-        }
-      ];
-    };
+  # FIXME: ignore certain history entries (" .*", ...)
+  programs.fish = {
+    enable = true;
+    interactiveShellInit = mkMerge [
+      (mkBefore ''
+        set -g ATUIN_NOBIND true
+        set -g fish_greeting
+        set -g fish_autosuggestion_enabled 0
+        set -U FZF_COMPLETE 0
+      '')
+      (mkAfter ''
+        bind \cr _atuin_search
+      '')
+    ];
+    plugins = [
+      {
+        name = "fzf";
+        src = pkgs.fetchFromGitHub {
+          owner = "jethrokuan";
+          repo = "fzf";
+          rev = "479fa67d7439b23095e01b64987ae79a91a4e283";
+          sha256 = "0k6l21j192hrhy95092dm8029p52aakvzis7jiw48wnbckyidi6v";
+        };
+      }
+    ];
   };
 }

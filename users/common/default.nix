@@ -21,6 +21,7 @@
       bandwhich
       btop
       fd
+      file
       neofetch
       rclone
       ripgrep
@@ -29,6 +30,7 @@
       tree
       rage
     ];
+
     shellAliases = {
       l = "ls -lahF --group-directories-first --show-control-chars --quoting-style=escape --color=auto";
       t = "tree -F --dirsfirst -L 2";
@@ -46,6 +48,8 @@
       ip = "ip --color";
       tmux = "tmux -2";
       rg = "rg -S";
+
+      zf = "zathura --fork";
     };
   };
 

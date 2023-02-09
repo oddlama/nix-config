@@ -24,6 +24,7 @@ with lib; {
       ../common
       ./dev.nix
       ./gpg.nix
+      ./ssh.nix
     ];
 
     home = {

@@ -7,7 +7,7 @@
       defaultFonts = {
         sansSerif = ["IBM Plex Sans"];
         serif = ["IBM Plex Sans"];
-        monospace = ["Hack Nerd Font"];
+        monospace = ["FiraCode Nerd Font"];
         emoji = ["Noto Color Emoji"];
       };
       localConf = ''
@@ -36,7 +36,7 @@
       '';
     };
     fonts = with pkgs; [
-      (nerdfonts.override {fonts = ["Hack"];})
+      (nerdfonts.override {fonts = ["FiraCode"];})
       ibm-plex
       dejavu_fonts
       unifont

@@ -11,6 +11,8 @@
 
     ../../modules/core
     ../../modules/dev
+    ../../modules/graphical
+
     ../../modules/hardware/intel.nix
     ../../modules/efi.nix
     ../../modules/laptop.nix

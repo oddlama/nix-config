@@ -15,11 +15,15 @@ with lib; {
       (mkBefore ''
         set -g ATUIN_NOBIND true
         set -g fish_greeting
-        set -g fish_autosuggestion_enabled 0
+        #set -g fish_autosuggestion_enabled 0
         set -g FZF_COMPLETE 2
       '')
       (mkAfter ''
         bind \cr _atuin_search
+        atuin gen-completions --shell fish | source
+
+        bind \e\[A history-prefix-search-backward
+        bind \e\[B history-prefix-search-forward
       '')
     ];
     plugins = [

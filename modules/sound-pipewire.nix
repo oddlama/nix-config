@@ -3,12 +3,11 @@
   pkgs,
   ...
 }: {
+  sound.enable = true;
   environment.systemPackages = with pkgs; [pulseaudio pulsemixer];
 
   hardware.pulseaudio.enable = lib.mkForce false;
-
   security.rtkit.enable = true;
-
   services.pipewire = {
     enable = true;
     alsa.enable = true;
@@ -34,6 +33,4 @@
       client-rt."stream.properties"."resample.quality" = 15;
     };
   };
-
-  sound.enable = true;
 }

@@ -1,5 +1,6 @@
 {pkgs, ...}: {
   environment.systemPackages = with pkgs; [powertop];
+  services.physlock.enable = true;
   services.logind = {
     lidSwitch = "ignore";
     lidSwitchDocked = "ignore";

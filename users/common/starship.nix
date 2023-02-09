@@ -80,7 +80,10 @@
           "[($ahead_behind )](green)"
         ];
       };
-      nix_shell.heuristic = true; # Also detect nix shell
+      nix_shell = {
+        format = ''[$symbol$state( \($name\))]($style)'';
+        heuristic = true; # Also detect nix shell
+      };
       status = {
         disabled = false;
         pipestatus = true;

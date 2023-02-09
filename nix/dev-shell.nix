@@ -2,26 +2,20 @@
 with self.pkgs.${system};
   mkShell {
     name = "nix-config";
-
-    nativeBuildInputs = [
+    packages = [
       # Nix
       cachix
       colmena
-      nix-build-uncached
       alejandra
-      ragenix
-      rnix-lsp
       statix
-      update-nix-fetching
+      update-nix-fetchgit
 
       # Lua
       stylua
       (luajit.withPackages (p: with p; [luacheck]))
-      sumneko-lua-language-server
 
       # Misc
       shellcheck
-      jq
       pre-commit
       rage
     ];

@@ -9,10 +9,9 @@ with self.pkgs.${system}; {
     {
       src = lib.cleanSource ../.;
       hooks = {
-        actionlint.enable = true;
-        luacheck.enable = true;
         alejandra.enable = true;
         statix.enable = true;
+        luacheck.enable = true;
         stylua.enable = true;
       };
     };

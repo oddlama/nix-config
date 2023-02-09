@@ -8,6 +8,7 @@ with lib; {
   users.groups.myuser.gid = config.users.users.myuser.uid;
   users.users.myuser = {
     uid = 1000;
+    hashedPassword = "$6$YogAnKRz8qW2Gz.I$chgMKKrpPAfV0WuGN6ChOgUJistpCzFsHOT6mhHyj07mwI1kSfDJvnMB13frMvkpv2aGpXHVH.yxk5fYHeeET/";
     createHome = true;
     group = "myuser";
     extraGroups =
@@ -22,13 +23,7 @@ with lib; {
       #impermanence.home-manager.impermanence
       ../common
       ./dev.nix
-      #]
-      #++ optionals config.programs.sway.enable [
-      #  ./graphical
-      #  ./graphical/sway
-      #] ++ optionals config.services.xserver.windowManager.i3.enable [
-      #  ./graphical
-      #  ./graphical/i3
+      ./gpg.nix
     ];
 
     home = {

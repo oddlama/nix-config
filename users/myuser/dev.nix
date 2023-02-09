@@ -7,11 +7,7 @@
         set auto-load safe-path /
       '';
     };
-    packages = with pkgs; [
-      git-lfs
-      nix-update
-      nixpkgs-review
-    ];
+    packages = with pkgs; [git-lfs];
   };
 
   programs = {

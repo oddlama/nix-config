@@ -1,5 +1,5 @@
 {nixpkgs, ...}:
-nixpkgs.lib.concatMapAttrs (hostName: fileType:
+nixpkgs.lib.concatMapAttrs (nodeName: fileType:
     if fileType == "directory"
-    then {${hostName} = import (../hosts + "/${hostName}/meta.nix");}
+    then {${nodeName} = import (../hosts + "/${nodeName}/meta.nix");}
     else {}) (builtins.readDir ../hosts)

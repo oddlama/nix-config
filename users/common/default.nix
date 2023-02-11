@@ -58,7 +58,10 @@
       enable = true;
       settings.auto_sync = false;
     };
-    bat.enable = true;
+    bat = {
+      enable = true;
+      config.theme = "base16";
+    };
     fzf.enable = true;
     gpg.enable = true;
   };

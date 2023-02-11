@@ -40,6 +40,9 @@
       ibm-plex
       dejavu_fonts
       unifont
+      freefont_ttf
+      gyre-fonts # TrueType substitutes for standard PostScript fonts
+      liberation_ttf
       noto-fonts
       noto-fonts-cjk-sans
       noto-fonts-cjk-serif

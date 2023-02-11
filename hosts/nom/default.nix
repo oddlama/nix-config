@@ -28,16 +28,9 @@
   ];
 
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod"];
-  environment.systemPackages = with pkgs; [wireguard-tools powertop];
 
   hardware = {
     video.hidpi.enable = true;
     opengl.enable = true;
-  };
-
-  services = {
-    fwupd.enable = true;
-    smartd.enable = true;
-    thermald.enable = true;
   };
 }

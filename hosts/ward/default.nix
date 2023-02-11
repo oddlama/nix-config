@@ -21,11 +21,6 @@
 
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci"];
 
-  services = {
-    fwupd.enable = true;
-    smartd.enable = true;
-  };
-
   services.home-assistant = {
     enable = true;
     extraComponents = ["default_config" "met" "zha"];

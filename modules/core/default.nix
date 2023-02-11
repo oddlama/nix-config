@@ -96,4 +96,10 @@ in {
       };
     };
   };
+
+  services = {
+    fwupd.enable = true;
+    smartd.enable = true;
+    thermald.enable = true;
+  };
 }

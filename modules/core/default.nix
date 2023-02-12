@@ -46,7 +46,8 @@ in {
   };
 
   networking = {
-    useDHCP = lib.mkForce false;
+    # FIXME: would like to use mkForce false for useDHCP, but nixpkgs#215908 blocks that.
+    useDHCP = true;
     useNetworkd = true;
     wireguard.enable = true;
     dhcpcd.enable = false;

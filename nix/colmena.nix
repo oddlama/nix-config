@@ -5,7 +5,7 @@
   #impermanence,
   nixos-hardware,
   nixpkgs,
-  ragenix,
+  agenix,
   agenix-rekey,
   templates,
   ...
@@ -28,7 +28,7 @@ with nixpkgs.lib; let
       (../hosts + "/${hostName}")
       home-manager.nixosModules.default
       #impermanence.nixosModules.default
-      ragenix.nixosModules.age
+      agenix.nixosModules.default
       agenix-rekey.nixosModules.default
     ];
   };

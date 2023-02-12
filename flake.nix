@@ -25,9 +25,8 @@
     };
 
     agenix-rekey.url = "github:oddlama/agenix-rekey";
-    ragenix = {
-      url = "github:yaxitech/ragenix";
-      inputs.flake-utils.follows = "flake-utils";
+    agenix = {
+      url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -60,7 +59,24 @@
         config.allowUnfree = true;
       };
 
-      apps = agenix-rekey.defineApps self pkgs self.nodes;
+      apps =
+        agenix-rekey.defineApps self pkgs self.nodes
+        // {
+          generate-initrd-keys = flake-utils.mkApp {
+            drv = let
+              generateHostKey = node: ''
+                if [[ ! -f ${node.config.rekey.secrets.initrd_host_ed25519_key.file} ]]; then
+                  ssh-keygen -t ed25519 -N "" -f /tmp/1
+                  TODO
+                fi
+              '';
+            in
+              pkgs.writeShellScript "generate-initrd-keys" ''
+                set -euo pipefail
+                ${pkgs.lib.concatStringsSep "\n" (pkgs.lib.mapAttrsToList generateHostKey self.nodes)}
+              '';
+          };
+        };
       checks = import ./nix/checks.nix inputs system;
       devShells.default = import ./nix/dev-shell.nix inputs system;
       formatter = pkgs.alejandra;

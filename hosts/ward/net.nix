@@ -1,21 +1,22 @@
 {
   networking = {
     hostId = "49ce3b71";
-    wireless.iwd.enable = true;
   };
 
   systemd.network.networks = {
-    enp1s0 = {
+    "10-lan0" = {
       DHCP = "yes";
       matchConfig.MACAddress = "00:00:00:00:00:00";
+      networkConfig.IPv6PrivacyExtensions = "kernel";
       dhcpV4Config.RouteMetric = 10;
       dhcpV6Config.RouteMetric = 10;
     };
-    enp2s0 = {
+    "10-lan1" = {
       DHCP = "yes";
       matchConfig.MACAddress = "00:00:00:00:00:00";
-      dhcpV4Config.RouteMetric = 10;
-      dhcpV6Config.RouteMetric = 10;
+      networkConfig.IPv6PrivacyExtensions = "kernel";
+      dhcpV4Config.RouteMetric = 20;
+      dhcpV6Config.RouteMetric = 20;
     };
   };
 }

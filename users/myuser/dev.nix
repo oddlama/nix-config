@@ -7,7 +7,10 @@
         set auto-load safe-path /
       '';
     };
-    packages = with pkgs; [git-lfs];
+    packages = with pkgs; [
+      git-lfs
+      d2
+    ];
   };
 
   programs = {

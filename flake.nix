@@ -61,22 +61,7 @@
 
       apps =
         agenix-rekey.defineApps self pkgs self.nodes
-        // {
-          generate-initrd-keys = flake-utils.mkApp {
-            drv = let
-              generateHostKey = node: ''
-                if [[ ! -f ${node.config.rekey.secrets.initrd_host_ed25519_key.file} ]]; then
-                  ssh-keygen -t ed25519 -N "" -f /tmp/1
-                  TODO
-                fi
-              '';
-            in
-              pkgs.writeShellScript "generate-initrd-keys" ''
-                set -euo pipefail
-                ${pkgs.lib.concatStringsSep "\n" (pkgs.lib.mapAttrsToList generateHostKey self.nodes)}
-              '';
-          };
-        };
+        // import ./nix/apps.nix inputs system;
       checks = import ./nix/checks.nix inputs system;
       devShells.default = import ./nix/dev-shell.nix inputs system;
       formatter = pkgs.alejandra;

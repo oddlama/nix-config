@@ -15,8 +15,6 @@ with lib; {
       (mkBefore ''
         set -g ATUIN_NOBIND true
         set -g fish_greeting
-        #set -g fish_autosuggestion_enabled 0
-        set -g FZF_COMPLETE 2
       '')
       (mkAfter ''
         bind \cr _atuin_search
@@ -30,10 +28,10 @@ with lib; {
       {
         name = "fzf";
         src = pkgs.fetchFromGitHub {
-          owner = "jethrokuan";
-          repo = "fzf";
-          rev = "479fa67d7439b23095e01b64987ae79a91a4e283";
-          sha256 = "0k6l21j192hrhy95092dm8029p52aakvzis7jiw48wnbckyidi6v";
+          owner = "oddlama";
+          repo = "fzf.fish";
+          rev = "63c8f8e65761295da51029c5b6c9e601571837a1";
+          sha256 = "036n50zr9kyg6ad408zn7wq2vpfwhmnfwab465km4dk60ywmrlcb";
         };
       }
     ];

@@ -7,8 +7,6 @@ with lib; {
   # FIXME: ctrl-del not working
   # FIXME: DEL also deletes to the left :(
   # FIXME: ignore certain history entries (" .*", ...)
-  # FIXME: after tab give space
-  # FIXME: fzf tab let multi
   programs.fish = {
     enable = true;
     interactiveShellInit = mkMerge [

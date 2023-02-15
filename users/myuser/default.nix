@@ -15,7 +15,7 @@ with lib; {
       ["wheel" "input" "video"]
       ++ optionals config.sound.enable ["audio"];
     isNormalUser = true;
-    shell = pkgs.fish;
+    shell = pkgs.zsh;
   };
 
   home-manager.users.myuser = {

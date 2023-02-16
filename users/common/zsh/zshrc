@@ -1,0 +1,274 @@
+# --------------------------------------------------------------------------------
+# Keybinds
+
+# Reset all keybinds and use "emacs" keybinds
+bindkey
+bindkey -d
+bindkey -e
+
+if autoload history-search-end; then
+    #zle -N history-beginning-search-backward-end history-search-end
+    zle -N history-beginning-search-forward-end  history-search-end
+fi
+
+function atuin-beginning-search-backward() {
+	LBUFFER="hi du fette sau $LBUFFER"
+    zle reset-prompt
+}; zle -N atuin-beginning-search-backward
+
+function atuin-beginning-search-backward-end() {
+    integer cursor=$CURSOR mark=$MARK
+
+    if [[ $LASTWIDGET = atuin-beginning-search-*-end ]]; then
+        # Last widget called set $MARK.
+        CURSOR=$MARK
+    else
+        MARK=$CURSOR
+    fi
+
+    if zle atuin-beginning-search-backward; then
+        # success, go to end of line
+        zle .end-of-line
+    else
+        # failure, restore position
+        CURSOR=$cursor
+        MARK=$mark
+        return 1
+    fi
+}; zle -N atuin-beginning-search-backward-end
+
+function nop() {
+    true
+}; zle -N nop
+
+function bindkeys() {
+	[[ "$#" -eq 2 ]] || return
+	local keys="$1"
+	for key in ${(P)keys}; do
+		bindkey "$key" "$2"
+	done
+}
+
+function setup_keybinds() {
+    local keys_Home=(           "${terminfo[khome]}" )
+    local keys_End=(            "${terminfo[kend]}"  )
+    local keys_Insert=(         "${terminfo[kich1]}" )
+
+    local keys_Tab=(            "${terminfo[ht]}"    )
+    local keys_ShiftTab=(       "${terminfo[kcbt]}"  )
+
+    local keys_ShiftBackspace=( "${terminfo[kbs]}"   )
+    local keys_CtrlBackspace=(  "${terminfo[cub1]}"  )
+
+    local keys_Delete=(         "${terminfo[kdch1]}" )
+    local keys_ShiftDelete=(    "${terminfo[kDC]}"   )
+    local keys_CtrlDelete=(     '\e[3;5~'            )
+    local keys_AltDelete=(      '\e[3;3~'            )
+
+    local keys_Up=(             "${terminfo[kcuu1]}" '\eOA' '\e[A' )
+    local keys_ShiftUp=(        "${terminfo[kri]}"   )
+    local keys_CtrlUp=(         '\e[1;5A'            )
+    local keys_AltUp=(          '\e[1;3A'            )
+
+    local keys_Down=(           "${terminfo[kcud1]}" '\eOB' '\e[B' )
+    local keys_ShiftDown=(      "${terminfo[kind]}"  )
+    local keys_CtrlDown=(       '\e[1;5B'            )
+    local keys_AltDown=(        '\e[1;3B'            )
+
+    local keys_Right=(          "${terminfo[kcuf1]}" '\eOC' '\e[C' )
+    local keys_ShiftRight=(     "${terminfo[kLFT]}"  )
+    local keys_CtrlRight=(      '\e[1;5C'            )
+    local keys_AltRight=(       '\e[1;3C'            )
+
+    local keys_Left=(           "${terminfo[kcub1]}" '\eOD' '\e[D' )
+    local keys_ShiftLeft=(      "${terminfo[kRIT]}"  )
+    local keys_CtrlLeft=(       '\e[1;5D'            )
+    local keys_AltLeft=(        '\e[1;3D'            )
+
+    local keys_PageUp=(         "${terminfo[kpp]}"   )
+    local keys_ShiftPageUp=(    "${terminfo[kPRV]}"  )
+
+    local keys_PageDown=(       "${terminfo[knp]}"   )
+    local keys_ShiftPageDown=(  "${terminfo[kNXT]}"  )
+
+    bindkeys keys_Home            beginning-of-line
+    bindkeys keys_End             end-of-line
+    bindkeys keys_Insert          nop
+
+    bindkeys keys_Tab             fzf-tab-complete
+    bindkeys keys_ShiftTab        nop
+
+    bindkeys keys_ShiftBackspace  backward-kill-word
+    bindkeys keys_CtrlBackspace   backward-kill-line
+
+    bindkeys keys_Delete          delete-char
+    bindkeys keys_ShiftDelete     delete-word
+    bindkeys keys_CtrlDelete      kill-line
+    bindkeys keys_AltDelete       delete-word
+
+    bindkeys keys_Up              atuin-beginning-search-backward-end
+    bindkeys keys_ShiftUp         up-line
+    bindkeys keys_CtrlUp          nop
+    bindkeys keys_AltUp           nop
+
+    bindkeys keys_Down            history-beginning-search-forward-end
+    bindkeys keys_ShiftDown       down-line
+    bindkeys keys_CtrlDown        nop
+    bindkeys keys_AltDown         nop
+
+    bindkeys keys_Right           forward-char
+    bindkeys keys_ShiftRight      forward-word
+    bindkeys keys_CtrlRight       nop
+    bindkeys keys_AltRight        nop
+
+    bindkeys keys_Left            backward-char
+    bindkeys keys_ShiftLeft       backward-word
+    bindkeys keys_CtrlLeft        nop
+    bindkeys keys_AltLeft         nop
+
+    bindkeys keys_PageUp          nop
+    bindkeys keys_ShiftPageUp     nop
+
+    bindkeys keys_PageDown        nop
+    bindkeys keys_ShiftPageDown   nop
+
+    # atuin
+    bindkey '^R' _atuin_search_widget
+
+    # fzf file and directory related expansions and functions
+    bindkey '\ef' fzf-select-file-or-dir
+    bindkey '\eF' fzf-select-file-or-dir-hidden
+    bindkey '\ed' fzf-select-dir
+    bindkey '\eD' fzf-select-dir-hidden
+    bindkey '\ec' fzf-cd
+}
+setup_keybinds
+unfunction setup_keybinds
+unfunction bindkeys
+
+
+# --------------------------------------------------------------------------------
+# Completion
+
+
+
+
+# disable sort when completing `git checkout`
+zstyle ':completion:*:git-checkout:*' sort false
+# set descriptions format to enable group support
+zstyle ':completion:*:descriptions' format '[%d]'
+# set list-colors to enable filename colorizing
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+# preview directory's content when completing cd
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls -lAhF --group-directories-first --show-control-chars --quoting-style=escape --color=always $realpath'
+zstyle ':fzf-tab:complete:cd:*' popup-pad 20 0
+
+
+# No correction
+zstyle ':completion:*' completer _oldlist _expand _complete _files _ignored
+
+# Don't insert tabs when there is no completion (e.g. beginning of line)
+zstyle ':completion:*' insert-tab false
+
+# allow one error for every three characters typed in approximate completer
+zstyle ':completion:*:approximate:'    max-errors 'reply=( $((($#PREFIX+$#SUFFIX)/3 )) numeric )'
+
+# start menu completion only if it could find no unambiguous initial string
+zstyle ':completion:*:correct:*'       insert-unambiguous true
+zstyle ':completion:*:corrections'     format $'%{\e[0;31m%}%d (errors: %e)%{\e[0m%}'
+zstyle ':completion:*:correct:*'       original true
+
+# List directory completions first
+zstyle ':completion:*' list-dirs-first true
+# Offer the original completion when using expanding / approximate completions
+zstyle ':completion:*' original true
+# Treat multiple slashes as a single / like UNIX does (instead of as /*/)
+zstyle ':completion:*' squeeze-slashes true
+
+# insert all expansions for expand completer
+# # ???????????????ßß
+zstyle ':completion:*:expand:*'        tag-order all-expansions
+
+# match uppercase from lowercase
+zstyle ':completion:*'                 matcher-list 'm:{a-z}={A-Z}'
+
+# separate matches into groups
+zstyle ':completion:*:matches'         group 'yes'
+zstyle ':completion:*'                 group-name ''
+
+zstyle ':completion:*:messages'        format '%d'
+zstyle ':completion:*:options'         auto-description '%d'
+
+# describe options in full
+zstyle ':completion:*:options'         description 'yes'
+
+# on processes completion complete all user processes
+zstyle ':completion:*:processes'       command 'ps -au$USER'
+
+# provide verbose completion information
+zstyle ':completion:*'                 verbose true
+
+# Ignore completion functions for commands you don't have:
+zstyle ':completion::(^approximate*):*:functions' ignored-patterns '_*'
+
+# Provide more processes in completion of programs like killall:
+zstyle ':completion:*:processes-names' command 'ps c -u ${USER} -o command | uniq'
+
+# complete manual by their section
+zstyle ':completion:*:manuals'    separate-sections true
+zstyle ':completion:*:manuals.*'  insert-sections   true
+zstyle ':completion:*:man:*'      menu yes select
+
+# provide .. as a completion
+zstyle ':completion:*' special-dirs ..
+
+
+# --------------------------------------------------------------------------------
+# ZSH Options
+
+# Emit an error when a glob has no match
+setopt nomatch
+# Don't use extended globbing
+setopt noextendedglob
+# * shouldn't match dotfiles. ever.
+setopt noglobdots
+# Whenever a command completion is attempted, make sure the entire
+# command path is hashed first.
+setopt hash_list_all
+
+# Change directory by typing the directory name
+setopt auto_cd
+# Automatically pushd on cd to have a directory stack
+setopt auto_pushd
+# Don't push the same dir twice
+setopt pushd_ignore_dups
+# Display PID when suspending processes as well
+setopt long_list_jobs
+# Don't send SIGHUP to background processes when the shell exits
+setopt nohup
+# Report the status of background jobs immediately
+setopt notify
+# Allow comments in interactive shells
+setopt interactive_comments
+# Don't beep
+setopt nobeep
+
+# Don't try to correct inputs
+setopt nocorrect
+# Allow in-word completion
+setopt complete_in_word
+# Don't autocorrect commands
+setopt no_correct_all
+# List choices on ambiguous completions
+setopt auto_list
+# Use menu completion if requested explicitly
+setopt auto_menu
+# Move cursor to end of word if there was only one match
+setopt always_to_end
+
+# Ignore certain commands in history
+HISTORY_IGNORE_REGEX='^(.|. |..|.. |rm .*|rmd .*|git fixup.*|git unstash|git stash.*|git checkout -f.*)$'
+function zshaddhistory() {
+	emulate -L zsh
+	[[ ! $1 =~ "$HISTORY_IGNORE_REGEX" ]]
+}

@@ -13,7 +13,7 @@
     ./starship.nix
     #./tmux.nix
     #./xdg.nix
-    ./zsh.nix
+    ./zsh
   ];
 
   home = {

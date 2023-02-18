@@ -1,3 +1,5 @@
+autoload -U add-zle-hook-widget
+
 # --------------------------------------------------------------------------------
 # Keybinds
 
@@ -6,47 +8,58 @@ bindkey
 bindkey -d
 bindkey -e
 
-if autoload history-search-end; then
-    #zle -N history-beginning-search-backward-end history-search-end
-    zle -N history-beginning-search-forward-end  history-search-end
-fi
-
 function str_to_hex() {
 	local str="$1"
 	for (( i=0; i<${#str}; i++ )); do
-		printf "%x" "'${str:$i:1}"
+		printf "%02x" "'${str:$i:1}"
 	done
 }
-function atuin-beginning-search-backward() {
-	if OUT=$(nix run p#sqlite -- ~/.local/share/atuin/history.db 'SELECT command FROM history WHERE command LIKE cast(x'"'$(str_to_hex ls)'"' as text) || "%" ORDER BY timestamp DESC LIMIT 1 OFFSET '"$OFFSET"); then
-		BUFFER="$OUT"
-	fi
-    zle reset-prompt
-}; zle -N atuin-beginning-search-backward
-
-function atuin-beginning-search-backward-end() {
-    integer cursor=$CURSOR mark=$MARK
-
-    if [[ $LASTWIDGET = atuin-beginning-search-*-end ]]; then
-        # Last widget called set $MARK.
-        CURSOR=$MARK
-		OFFSET=$((OFFSET + 1))
+function atuin-beginning-search-any-end() {
+	local reset_offset_to=$_atuin_search_offset
+    if [[ -v _atuin_search_last_buffer ]] && [[ "$_atuin_search_last_buffer" == "$BUFFER" ]]; then
+		_atuin_search_offset=$((_atuin_search_offset + $direction))
     else
-        MARK=$CURSOR
-		OFFSET=0
-		# TODO reset offset when query changes
+		# You cannot start searching "forward", so instead we wan't to do nothing.
+		[[ "$direction" == "-1" ]] && return 1
+
+		reset_offset_to=0
+		_atuin_search_offset=0
+		_atuin_search_prefix=$LBUFFER
+        _atuin_search_original_cursor=$CURSOR
+		_atuin_search_original_buffer=$BUFFER
     fi
 
-    if zle atuin-beginning-search-backward; then
-        # success, go to end of line
+	# If the offset would become than zero we want to stop searching and reset the buffer,
+	# since we essentiall pressed "down" past the first search
+    if [[ "$_atuin_search_offset" -ge 0 ]] && zle atuin-prefix-search; then
         zle .end-of-line
+		_atuin_search_last_buffer=$BUFFER
     else
-        # failure, restore position
-        CURSOR=$cursor
-        MARK=$mark
+		_atuin_search_offset=$reset_offset_to
+		# Reset to original input line if the history lookup fails
+		# while completing in "forward" direction (ArrowDown) i.e. the offset is 0
+		if [[ $_atuin_search_offset == 0 ]]; then
+			BUFFER=$_atuin_search_original_buffer
+			CURSOR=$_atuin_search_original_cursor
+		fi
         return 1
     fi
+}; zle -N atuin-beginning-search-any-end
+
+function atuin-reset-search() {
+	unset _atuin_search_last_buffer
+}; zle -N atuin-beginning-search-any-end
+add-zle-hook-widget line-init atuin-reset-search
+
+function atuin-beginning-search-backward-end() {
+	direction="1" atuin-beginning-search-any-end
 }; zle -N atuin-beginning-search-backward-end
+_zsh_autosuggest_bind_widget atuin-beginning-search-backward-end clear
+
+function atuin-beginning-search-forward-end() {
+	direction="-1" atuin-beginning-search-any-end
+}; zle -N atuin-beginning-search-forward-end
+_zsh_autosuggest_bind_widget atuin-beginning-search-forward-end clear
 
 function nop() {
     true
@@ -125,7 +138,7 @@ function setup_keybinds() {
     bindkeys keys_CtrlUp          nop
     bindkeys keys_AltUp           nop
 
-    bindkeys keys_Down            history-beginning-search-forward-end
+    bindkeys keys_Down            atuin-beginning-search-forward-end
     bindkeys keys_ShiftDown       down-line
     bindkeys keys_CtrlDown        nop
     bindkeys keys_AltDown         nop
@@ -155,6 +168,9 @@ function setup_keybinds() {
     bindkey '\ed' fzf-select-dir
     bindkey '\eD' fzf-select-dir-hidden
     bindkey '\ec' fzf-cd
+
+	# autosuggest Ctrl+space = accept
+	bindkey '^ ' autosuggest-accept
 }
 setup_keybinds
 unfunction setup_keybinds
@@ -163,9 +179,6 @@ unfunction bindkeys
 
 # --------------------------------------------------------------------------------
 # Completion
-
-
-
 
 # disable sort when completing `git checkout`
 zstyle ':completion:*:git-checkout:*' sort false

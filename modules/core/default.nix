@@ -89,6 +89,9 @@ in {
   };
 
   programs = {
+    # Required even when using home-manager's zsh module since the /etc/profile load order
+    # is partly controlled by this. See nix-community/home-manager#3681.
+    zsh.enable = true;
     git = {
       enable = true;
       config = {

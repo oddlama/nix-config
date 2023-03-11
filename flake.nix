@@ -24,9 +24,12 @@
       inputs.flake-utils.follows = "flake-utils";
     };
 
-    agenix-rekey.url = "github:oddlama/agenix-rekey";
     agenix = {
       url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    agenix-rekey = {
+      url = "github:oddlama/agenix-rekey";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

@@ -78,6 +78,7 @@ in {
   users.mutableUsers = false;
 
   # Setup to use Secrets
+  rekey.forceRekeyOnSystem = "x86_64-linux";
   rekey.hostPubkey = ../../secrets/pubkeys + "/${config.networking.hostName}.pub";
   rekey.masterIdentities = [../../secrets/yk1-nix-rage.pub];
   rekey.extraEncryptionPubkeys = [../../secrets/backup.pub];

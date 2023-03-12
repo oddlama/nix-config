@@ -8,6 +8,7 @@
       "esphome"
       "fritzbox"
       "spotify"
+      "zha"
       "mqtt"
     ];
     openFirewall = true;
@@ -33,6 +34,7 @@
       }
     ];
   };
+  networking.firewall.allowedTCPPorts = [8072];
   services.zigbee2mqtt = {
     enable = true;
     settings = {
@@ -40,6 +42,9 @@
       permit_join = true;
       serial = {
         port = "/dev/serial/by-id/usb-Silicon_Labs_Sonoff_Zigbee_3.0_USB_Dongle_Plus_0001-if00-port0";
+      };
+      frontend = {
+        port = 8072;
       };
     };
   };

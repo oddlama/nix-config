@@ -15,6 +15,7 @@
 
     ./fs.nix
     ./net.nix
+    ./home-assistant.nix
   ];
 
   boot.loader.grub.enable = false;
@@ -30,24 +31,4 @@
 
   # Fails if there are not SMART devices
   services.smartd.enable = lib.mkForce false;
-
-  services.home-assistant = {
-    enable = true;
-    extraComponents = ["default_config" "met"];
-    openFirewall = true;
-    config = {
-      default_config = {};
-      met = {};
-    };
-  };
-
-  #networking.firewall.allowedTCPPorts = [1883];
-  #services.zigbee2mqtt.enable = true;
-  #services.zigbee2mqtt.settings = {
-  #  homeassistant = config.services.home-assistant.enable;
-  #  permit_join = true;
-  #  serial = {
-  #    port = "/dev/serial/by-id/usb-Silicon_Labs_Sonoff_Zigbee_3.0_USB_Dongle_Plus_0001-if00-port0";
-  #  };
-  #};
 }

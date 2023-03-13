@@ -10,6 +10,7 @@
 
     ../../modules/core
     ../../modules/hardware/intel.nix
+    ../../modules/initrd-ssh.nix
     ../../modules/efi.nix
     ../../modules/zfs.nix
 

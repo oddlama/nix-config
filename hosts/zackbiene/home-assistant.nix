@@ -23,6 +23,13 @@
         libsoundtouch
       ];
   };
+
+  # TODO set lat long etc here not manually
+  # TODO HA and zigbee2mqtt behind nginx please
+  #   - auth for zigbee2mqtt
+  #   - auth for esphome dashboard
+  #   - only allow connections from privileged LAN to HA or from vpn range
+  # TODO use password auth for mosquitto
   services.mosquitto = {
     enable = true;
     persistence = true;

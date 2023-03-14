@@ -3,6 +3,9 @@
   pkgs,
   ...
 }: {
+  home.sessionVariables = {
+    TERMINFO_DIRS = "${pkgs.kitty.terminfo.outPath}/share/terminfo";
+  };
   programs.kitty = {
     enable = true;
     package = pkgs.kitty.overrideAttrs (finalAttrs: prevAttrs: {
@@ -14,9 +17,6 @@
       size = 10;
     };
     settings = {
-      # Use xterm-256color because copying terminfo-kitty is painful.
-      term = "xterm-256color";
-
       # Do not wait for inherited child processes.
       close_on_child_death = "yes";
 

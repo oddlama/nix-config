@@ -1,4 +1,8 @@
 {
+  lib,
+  config,
+  ...
+}: {
   services.home-assistant = {
     enable = true;
     extraComponents = [
@@ -13,6 +17,22 @@
     ];
     openFirewall = true;
     config = {
+      homeassistant = {
+        name = "!secret ha_name";
+        latitude = "!secret ha_latitude";
+        longitude = "!secret ha_longitude";
+        elevation = "!secret ha_elevation";
+        currency = "!secret ha_currency";
+        time_zone = "!secret ha_time_zone";
+        unit_system = "metric";
+        #external_url = "https://";
+        packages = {
+          manual = "!include manual.yaml";
+        };
+      };
+      #frontend = {
+      #  themes = "!include_dir_merge_named themes";
+      #};
       default_config = {};
       met = {};
     };
@@ -24,35 +44,20 @@
       ];
   };
 
-  # TODO set lat long etc here not manually
+  rekey.secrets."home-assistant-secrets.yaml" = {
+    file = ./home-assistant-secrets.yaml.age;
+    owner = "hass";
+  };
+
+  systemd.services.home-assistant = {
+    preStart = lib.mkBefore ''
+      ln -sf ${config.rekey.secrets."home-assistant-secrets.yaml".path} ${config.services.home-assistant.configDir}/secrets.yaml
+      touch -a ${config.services.home-assistant.configDir}/{automations,scenes,scripts,manual}.yaml
+    '';
+  };
+
   # TODO HA and zigbee2mqtt behind nginx please
-  #   - auth for zigbee2mqtt
+  #   - auth for zigbee2mqtt frontend
   #   - auth for esphome dashboard
   #   - only allow connections from privileged LAN to HA or from vpn range
-  # TODO use password auth for mosquitto
-  services.mosquitto = {
-    enable = true;
-    persistence = true;
-    listeners = [
-      {
-        acl = ["pattern readwrite #"];
-        omitPasswordAuth = true;
-        settings.allow_anonymous = true;
-      }
-    ];
-  };
-  networking.firewall.allowedTCPPorts = [8072];
-  services.zigbee2mqtt = {
-    enable = true;
-    settings = {
-      homeassistant = true;
-      permit_join = true;
-      serial = {
-        port = "/dev/serial/by-id/usb-Silicon_Labs_Sonoff_Zigbee_3.0_USB_Dongle_Plus_0001-if00-port0";
-      };
-      frontend = {
-        port = 8072;
-      };
-    };
-  };
 }

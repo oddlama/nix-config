@@ -15,7 +15,11 @@
 
     ./fs.nix
     ./net.nix
+
     ./home-assistant.nix
+    ./mosquitto.nix
+    ./zigbee2mqtt.nix
+    ./esphome.nix
   ];
 
   boot.loader.grub.enable = false;

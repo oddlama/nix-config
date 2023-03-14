@@ -41,8 +41,7 @@ in {
       ReadWritePaths = dataDir;
       RemoveIPC = true;
       RestrictAddressFamilies = [
-        "AF_INET"
-        "AF_INET6"
+        "AF_UNIX"
       ];
       RestrictNamespaces = true;
       RestrictRealtime = true;

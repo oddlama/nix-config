@@ -24,6 +24,11 @@ with nixpkgs.lib; let
           pkgs.flake = nixpkgs;
           templates.flake = templates;
         };
+        # Setup parameters for Secrets
+        rekey.forceRekeyOnSystem = "x86_64-linux";
+        rekey.hostPubkey = ../secrets/pubkeys + "/${config.networking.hostName}.pub";
+        rekey.masterIdentities = [../secrets/yk1-nix-rage.pub];
+        rekey.extraEncryptionPubkeys = [../secrets/backup.pub];
       }
       (../hosts + "/${hostName}")
       home-manager.nixosModules.default
@@ -39,9 +44,14 @@ in
       # Just a required dummy for colmena, overwritten on a per-node basis by nodeNixpkgs below.
       nixpkgs = self.pkgs.x86_64-linux;
       nodeNixpkgs = mapAttrs (hostName: {system, ...}: self.pkgs.${system}) nixosHosts;
-      #nodeSpecialArgs = mapAttrs (hostName: { system, ... }: {}) nixosHosts;
+      nodeSpecialArgs =
+        mapAttrs (hostName: _: {
+          nodeSecrets = self.secrets.nodes.${hostName};
+        })
+        nixosHosts;
       specialArgs = {
         inherit (nixpkgs) lib;
+        inherit (self) secrets;
         nixos-hardware = nixos-hardware.nixosModules;
         #impermanence = impermanence.nixosModules;
       };

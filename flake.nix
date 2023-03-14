@@ -47,6 +47,7 @@
   } @ inputs:
     {
       hosts = import ./nix/hosts.nix inputs;
+      secrets = import ./nix/secrets.nix inputs;
       colmena = import ./nix/colmena.nix inputs;
       overlays = import ./nix/overlay.nix inputs;
       homeConfigurations = import ./nix/home-manager.nix inputs;

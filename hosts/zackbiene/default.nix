@@ -20,6 +20,7 @@
     ./mosquitto.nix
     ./zigbee2mqtt.nix
     ./esphome.nix
+    ./nginx.nix
   ];
 
   boot.loader.grub.enable = false;

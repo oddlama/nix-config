@@ -4,13 +4,13 @@
   ...
 }: {
   rekey.secrets.mosquitto-pw-zigbee2mqtt = {
-    file = ./mosquitto-pw-zigbee2mqtt.age;
+    file = ./secrets/mosquitto-pw-zigbee2mqtt.age;
     mode = "440";
     owner = "zigbee2mqtt";
     group = "mosquitto";
   };
   rekey.secrets.mosquitto-pw-home_assistant = {
-    file = ./mosquitto-pw-home_assistant.age;
+    file = ./secrets/mosquitto-pw-home_assistant.age;
     mode = "440";
     owner = "hass";
     group = "mosquitto";

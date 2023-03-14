@@ -4,7 +4,7 @@
   ...
 }: {
   rekey.secrets."mosquitto-pw-zigbee2mqtt.yaml" = {
-    file = ./mosquitto-pw-zigbee2mqtt.yaml.age;
+    file = ./secrets/mosquitto-pw-zigbee2mqtt.yaml.age;
     mode = "440";
     owner = "zigbee2mqtt";
     group = "mosquitto";

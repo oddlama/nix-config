@@ -45,7 +45,7 @@
   };
 
   rekey.secrets."home-assistant-secrets.yaml" = {
-    file = ./home-assistant-secrets.yaml.age;
+    file = ./secrets/home-assistant-secrets.yaml.age;
     owner = "hass";
   };
 

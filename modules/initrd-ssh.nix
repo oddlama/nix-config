@@ -3,7 +3,7 @@
   name,
   ...
 }: {
-  rekey.secrets.initrd_host_ed25519_key.file = ../hosts/${name}/initrd_host_ed25519_key.age;
+  rekey.secrets.initrd_host_ed25519_key.file = ../hosts/${name}/secrets/initrd_host_ed25519_key.age;
 
   boot.initrd.network.enable = true;
   boot.initrd.network.ssh = {

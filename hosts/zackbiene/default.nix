@@ -21,6 +21,7 @@
     ./zigbee2mqtt.nix
     ./esphome.nix
     ./nginx.nix
+    ./hostapd.nix
   ];
 
   boot.loader.grub.enable = false;

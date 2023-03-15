@@ -2,14 +2,20 @@
 
 set -euo pipefail
 
+print_out_path=false
+if [[ "$1" == "--print-out-path" ]]; then
+	print_out_path=true
+	shift
+fi
+
 file="$1"
-[[ "$file" == "/nix/store/"* ]] || { echo "Input must be a store path!"; exit 1; }
 shift
 identities=("$@")
 
-# Strip .age suffix and store path prefix
+# Strip .age suffix, and store path prefix or ./ if applicable
 basename="${file%".age"}"
-basename="${basename#*"-"}"
+[[ "$file" == "/nix/store/"* ]] && basename="${basename#*"-"}"
+[[ "$file" == "./"* ]] && basename="${basename#"./"}"
 
 # Calculate a unique content-based identifier (relocations of
 # the source file in the nix store should not affect caching)
@@ -29,5 +35,5 @@ if [[ ! -e "$out" ]]; then
 	rage -d "${args[@]}" -o "$out" "$file"
 fi
 
-# Print decrypted content
-cat "$out"
+# Print out path or decrypted content
+[[ "$print_out_path" == true ]] && echo "$out" || cat "$out"

@@ -17,8 +17,6 @@
   ...
 } @ inputs:
 with nixpkgs.lib; let
-  # The identities that are used to decrypt any repository-wide secrets.
-  masterIdentities = [../secrets/yk1-nix-rage.pub];
   # If the given expression is a bare set, it will be wrapped in a function,
   # so that the imported file can always be applied to the inputs, similar to
   # how modules can be functions or sets.
@@ -30,7 +28,7 @@ with nixpkgs.lib; let
   importEncrypted = path:
     constSet (
       if builtins.pathExists path
-      then builtins.extraBuiltins.rageImportEncrypted masterIdentities path
+      then builtins.extraBuiltins.rageImportEncrypted self.secrets.masterIdentities path
       else {}
     );
 in

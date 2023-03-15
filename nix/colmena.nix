@@ -14,7 +14,7 @@ with nixpkgs.lib; let
   nixosHosts = filterAttrs (_: x: x.type == "nixos") self.hosts;
   generateColmenaNode = hostName: _: {
     imports = [
-      ({ config, ... }: {
+      ({config, ...}: {
         # By default, set networking.hostName to the hostName
         networking.hostName = mkDefault hostName;
         # Define global flakes for this system
@@ -27,8 +27,8 @@ with nixpkgs.lib; let
         # Setup parameters for Secrets
         rekey.forceRekeyOnSystem = "x86_64-linux";
         rekey.hostPubkey = ../secrets/pubkeys + "/${config.networking.hostName}.pub";
-        rekey.masterIdentities = [../secrets/yk1-nix-rage.pub];
-        rekey.extraEncryptionPubkeys = [../secrets/backup.pub];
+        rekey.masterIdentities = self.secrets.masterIdentities;
+        rekey.extraEncryptionPubkeys = self.secrets.extraEncryptionPubkeys;
       })
       (../hosts + "/${hostName}")
       home-manager.nixosModules.default
@@ -46,12 +46,12 @@ in
       nodeNixpkgs = mapAttrs (hostName: {system, ...}: self.pkgs.${system}) nixosHosts;
       nodeSpecialArgs =
         mapAttrs (hostName: _: {
-          nodeSecrets = self.secrets.nodes.${hostName};
+          nodeSecrets = self.secrets.content.nodes.${hostName};
         })
         nixosHosts;
       specialArgs = {
         inherit (nixpkgs) lib;
-        inherit (self) secrets;
+        secrets = self.secrets.content;
         nixos-hardware = nixos-hardware.nixosModules;
         #impermanence = impermanence.nixosModules;
       };

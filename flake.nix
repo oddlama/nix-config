@@ -46,8 +46,15 @@
     ...
   } @ inputs:
     {
+      # The identities that are used to rekey agenix secrets and to
+      # decrypt all repository-wide secrets.
+      secrets = {
+        masterIdentities = [./secrets/yk1-nix-rage.pub];
+        extraEncryptionPubkeys = [./secrets/backup.pub];
+        content = import ./nix/secrets.nix inputs;
+      };
+
       hosts = import ./nix/hosts.nix inputs;
-      secrets = import ./nix/secrets.nix inputs;
       colmena = import ./nix/colmena.nix inputs;
       overlays = import ./nix/overlay.nix inputs;
       homeConfigurations = import ./nix/home-manager.nix inputs;

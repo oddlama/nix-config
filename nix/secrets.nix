@@ -17,15 +17,24 @@
   ...
 } @ inputs:
 with nixpkgs.lib; let
-  mergeArray = f: unique (concatLists (mapAttrsToList (_: f) self.nodes));
-  mergedMasterIdentities = mergeArray (x: x.config.rekey.masterIdentities or []);
-  # "Imports" an encrypted .nix.age file
+  # The identities that are used to decrypt any repository-wide secrets.
+  masterIdentities = [../secrets/yk1-nix-rage.pub];
+  # If the given expression is a bare set, it will be wrapped in a function,
+  # so that the imported file can always be applied to the inputs, similar to
+  # how modules can be functions or sets.
+  constSet = x:
+    if builtins.isAttrs x
+    then (_: x)
+    else x;
+  # This "imports" an encrypted .nix.age file
   importEncrypted = path:
-    if builtins.pathExists path
-    then builtins.extraBuiltins.rageImportDecrypt mergedMasterIdentities path
-    else _: {};
+    constSet (
+      if builtins.pathExists path
+      then builtins.extraBuiltins.rageImportEncrypted masterIdentities path
+      else {}
+    );
 in
   (importEncrypted ../secrets/secrets.nix.age inputs)
   // {
-    nodes = mapAttrs (hostName: _: importEncrypted ../hosts/${hostName}/secrets/secrets.nix.age inputs) self.nodes;
+    nodes = mapAttrs (hostName: _: importEncrypted ../hosts/${hostName}/secrets/secrets.nix.age inputs) self.hosts;
   }

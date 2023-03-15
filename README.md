@@ -11,7 +11,7 @@ all commands using these extra parameters, or permanently add the following the 
 2. Run all commands with `--option plugin-files "$NIX_PLUGINS"/lib/nix/plugins --option extra-builtins-file ./nix/extra-builtins.nix`
    or permantently
 
-	```nix
+	```toml
 	plugin-files = <copy path from $NIX_PLUGINS>/lib/nix/plugins
 	extra-builtins-file = /path/to/nix-config/nix/extra-builtins.nix
 	```

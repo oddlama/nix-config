@@ -22,7 +22,7 @@
   in
     lenContent >= lenSuffix && builtins.substring (lenContent - lenSuffix) lenContent content == suffix;
 in {
-  rageImportDecrypt = identities: nixFile:
+  rageImportEncrypted = identities: nixFile:
     assert assertMsg (builtins.isPath nixFile) "The file to decrypt must be given as a path to prevent impurity.";
     assert assertMsg (hasSuffix ".nix.age" nixFile) "The content of the decrypted file must be a nix expression and should therefore end in .nix.age";
       exec (["rage" "-d"] ++ (builtins.concatMap (x: ["-i" x]) identities) ++ [nixFile]);

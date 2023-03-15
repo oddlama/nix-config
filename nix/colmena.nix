@@ -14,7 +14,7 @@ with nixpkgs.lib; let
   nixosHosts = filterAttrs (_: x: x.type == "nixos") self.hosts;
   generateColmenaNode = hostName: _: {
     imports = [
-      {
+      ({ config, ... }: {
         # By default, set networking.hostName to the hostName
         networking.hostName = mkDefault hostName;
         # Define global flakes for this system
@@ -29,7 +29,7 @@ with nixpkgs.lib; let
         rekey.hostPubkey = ../secrets/pubkeys + "/${config.networking.hostName}.pub";
         rekey.masterIdentities = [../secrets/yk1-nix-rage.pub];
         rekey.extraEncryptionPubkeys = [../secrets/backup.pub];
-      }
+      })
       (../hosts + "/${hostName}")
       home-manager.nixosModules.default
       #impermanence.nixosModules.default

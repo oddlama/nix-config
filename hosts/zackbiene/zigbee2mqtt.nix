@@ -14,6 +14,7 @@
   services.zigbee2mqtt = {
     enable = true;
     settings = {
+      advanced.log_level = "warn";
       homeassistant = true;
       permit_join = true;
       serial = {
@@ -24,9 +25,7 @@
         user = "zigbee2mqtt";
         password = "!${config.rekey.secrets."mosquitto-pw-zigbee2mqtt.yaml".path} password";
       };
-      frontend = {
-        port = 8072;
-      };
+      frontend.port = 8072;
     };
   };
 }

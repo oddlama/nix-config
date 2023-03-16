@@ -2,6 +2,7 @@
   lib,
   pkgs,
   config,
+  nodeSecrets,
   ...
 }: let
   dummyConfig = pkgs.writeText "configuration.nix" ''
@@ -54,6 +55,12 @@ in {
     nftables.enable = true;
     firewall.enable = true;
   };
+
+  # Rename known network interfaces
+  services.udev.extraRules = lib.concatStringsSep "\n" (lib.mapAttrsToList (
+      interface: attrs: ''SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="${attrs.mac}", NAME="${interface}"''
+    )
+    nodeSecrets.networking.interfaces);
 
   nix.nixPath = [
     "nixos-config=${dummyConfig}"

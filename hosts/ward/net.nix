@@ -1,4 +1,4 @@
-{ nodeSecrets, ... }: {
+{nodeSecrets, ...}: {
   networking.hostId = "49ce3b71";
 
   systemd.network.networks = {

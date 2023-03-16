@@ -1,4 +1,4 @@
-{ nodeSecrets, ... }: {
+{nodeSecrets, ...}: {
   networking = {
     hostId = "4313abca";
     wireless.iwd.enable = true;

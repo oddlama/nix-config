@@ -23,7 +23,7 @@ in {
       CapabilityBoundingSet = "";
       DevicePolicy = "closed";
       LockPersonality = true;
-      MemoryDenyWriteExecute = false;
+      MemoryDenyWriteExecute = false; # NodeJs-JIT :/
       NoNewPrivileges = true;
       PrivateDevices = true;
       PrivateUsers = true;
@@ -40,17 +40,12 @@ in {
       ProtectSystem = "strict";
       ReadWritePaths = dataDir;
       RemoveIPC = true;
-      RestrictAddressFamilies = [
-        "AF_UNIX"
-      ];
+      RestrictAddressFamilies = ["AF_UNIX" "AF_NETLINK" "AF_INET" "AF_INET6"];
       RestrictNamespaces = true;
       RestrictRealtime = true;
       RestrictSUIDSGID = true;
       SystemCallArchitectures = "native";
-      SystemCallFilter = [
-        "@system-service @pkey"
-        "~@privileged @resources"
-      ];
+      SystemCallFilter = ["@system-service" "~@privileged"];
       UMask = "0077";
     };
   };

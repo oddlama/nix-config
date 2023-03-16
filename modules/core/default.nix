@@ -57,10 +57,16 @@ in {
   };
 
   # Rename known network interfaces
-  services.udev.extraRules = lib.concatStringsSep "\n" (lib.mapAttrsToList (
-      interface: attrs: ''SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="${attrs.mac}", NAME="${interface}"''
-    )
-    nodeSecrets.networking.interfaces);
+  services.udev.packages = let
+    interfaceNamesUdevRules = pkgs.writeTextFile {
+      name = "interface-names-udev-rules";
+      text = lib.concatStringsSep "\n" (lib.mapAttrsToList (
+          interface: attrs: ''SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="${attrs.mac}", NAME:="${interface}"''
+        )
+        nodeSecrets.networking.interfaces);
+      destination = "/etc/udev/rules.d/01-interface-names.rules";
+    };
+  in [interfaceNamesUdevRules];
 
   nix.nixPath = [
     "nixos-config=${dummyConfig}"

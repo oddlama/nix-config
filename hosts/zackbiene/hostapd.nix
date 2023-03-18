@@ -1,6 +1,7 @@
 {
   lib,
   config,
+  pkgs,
   ...
 }: {
   services.hostapd = {
@@ -15,6 +16,7 @@
     channel = 13;
     # Respect the local regulations
     countryCode = "DE";
+    logLevel = 0;
 
     # This is made for a Mediatek mt7612u based device (ALFA AWUS036ACM)
     extraConfig = ''
@@ -50,10 +52,9 @@
       transition_disable=0x01
       # Derive PWE using both hunting-and-pecking loop and hash-to-element
       sae_pwe=2
-      # SAE can also use wpa_psk, which allows us to use a separate file,
-      # but it restricts the password length to [8,63] which is ok.
-      # This conatins a list of passwords for each client MAC.
-      wpa_psk_file=${config.rekey.secrets.wifi-clients.path}
+      # SAE passwords can be set via wpa_passphrase but not via wpa_psk_file. This sucks
+      # and means we have to add the passwords in pre-start to prevent them being visible here
+      {{SAE_PASSWORDS}}
 
       # Use a MAC-address access control list
       macaddr_acl=1
@@ -66,17 +67,24 @@
     '';
   };
   # TODO dont adverttise!
+  #wpa_psk_file=${config.rekey.secrets.wifi-clients.path}
 
   # Associates each known client to a unique password
   rekey.secrets.wifi-clients.file = ./secrets/wifi-clients.age;
   systemd.services.hostapd = {
-    # Filter the clients to get a list of all known MAC addresses,
-    # which we then use for MAC access control.
+    # Filter the clients to get a list of all known MAC addresses, which we
+    # then use for MAC access control. Afterwards, add the password for each
+    # client to the hostapd config.
     preStart = lib.mkBefore ''
       grep -o '^..:..:..:..:..:..' ${config.rekey.secrets.wifi-clients.path} > /run/hostapd/client-macs
+      hostapd_conf=$(cat ''${systemd.services.hostapd.serviceConfig.ExecStart})
+      sae_passwords=$(echo -e "sae_password=aa|mac=13:13:13:13:13:13\nsae_password=aa|mac=12:12:12:12:12:12")
+      hostapd_conf=''${hostapd_conf//"{{SAE_PASSWORDS}}"/$sae_passwords}
+      echo "$hostapd_conf" > /run/hostapd/config
     '';
     # Add some missing options to the upstream config
     serviceConfig = {
+      ExecStart = lib.mkForce "${pkgs.hostapd}/bin/hostapd /run/hostapd/config";
       ExecReload = "/bin/kill -HUP $MAINPID";
       RuntimeDirectory = "hostapd";
 

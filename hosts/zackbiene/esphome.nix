@@ -21,11 +21,12 @@ in {
 
       # Hardening
       CapabilityBoundingSet = "";
-      DevicePolicy = "closed";
       LockPersonality = true;
-      MemoryDenyWriteExecute = false; # NodeJs-JIT :/
+      MemoryDenyWriteExecute = true;
+      DevicePolicy = "closed";
+      DeviceAllow = "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0";
+      SupplementaryGroups = ["dialout"];
       NoNewPrivileges = true;
-      PrivateDevices = true;
       PrivateUsers = true;
       PrivateTmp = true;
       ProtectClock = true;
@@ -41,11 +42,15 @@ in {
       ReadWritePaths = dataDir;
       RemoveIPC = true;
       RestrictAddressFamilies = ["AF_UNIX" "AF_NETLINK" "AF_INET" "AF_INET6"];
-      RestrictNamespaces = true;
+      RestrictNamespaces = false; # Required by platformio for chroot
       RestrictRealtime = true;
       RestrictSUIDSGID = true;
       SystemCallArchitectures = "native";
-      SystemCallFilter = ["@system-service" "~@privileged"];
+      SystemCallFilter = [
+        "@system-service"
+        "~@privileged"
+        "@mount" # Required by platformio for chroot
+      ];
       UMask = "0077";
     };
   };
@@ -58,4 +63,25 @@ in {
   };
 
   users.groups.esphome.gid = 316;
+
+  services.nginx.upstreams = {
+    "esphome" = {
+      servers = {"unix:/run/esphome/esphome.sock" = {};};
+      extraConfig = ''
+        zone esphome 64k;
+        keepalive 2;
+      '';
+    };
+  };
+  services.nginx.virtualHosts = {
+    #"${nodeSecrets.esphome.domain}" = {
+    #  forceSSL = true;
+    #  enableACME = true;
+    "192.168.1.22" = {
+      locations."/" = {
+        proxyPass = "http://esphome";
+        proxyWebsockets = true;
+      };
+    };
+  };
 }

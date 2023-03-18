@@ -79,13 +79,13 @@
     serviceConfig = {
       ExecReload = "/bin/kill -HUP $MAINPID";
       RuntimeDirectory = "hostapd";
-      DeviceAllow = "/dev/rfkill rw";
 
       # Hardening
       LockPersonality = true;
       MemoryDenyWriteExecute = true;
+      DevicePolicy = "closed";
+      DeviceAllow = "/dev/rfkill rw";
       NoNewPrivileges = true;
-      PrivateDevices = true;
       PrivateUsers = false; # hostapd requires real system root access.
       PrivateTmp = true;
       ProtectClock = true;

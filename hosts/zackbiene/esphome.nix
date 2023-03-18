@@ -48,7 +48,6 @@ in {
       SystemCallArchitectures = "native";
       SystemCallFilter = [
         "@system-service"
-        "~@privileged"
         "@mount" # Required by platformio for chroot
       ];
       UMask = "0077";
@@ -64,6 +63,7 @@ in {
 
   users.groups.esphome.gid = 316;
 
+  # TODO esphome.sock permissions pls nginx currently world writable
   services.nginx.upstreams = {
     "esphome" = {
       servers = {"unix:/run/esphome/esphome.sock" = {};};

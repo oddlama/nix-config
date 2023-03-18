@@ -8,8 +8,8 @@
   imports = [
     nixos-hardware.common-pc-ssd
 
-    ../../modules/core
-    ../../modules/zfs.nix
+    ../common/core
+    ../common/zfs.nix
 
     ../../users/root
 

@@ -9,16 +9,16 @@
     nixos-hardware.common-pc-laptop
     nixos-hardware.common-pc-laptop-ssd
 
-    ../../modules/core
-    ../../modules/dev
-    ../../modules/graphical
+    ../common/core
+    ../common/dev
+    ../common/graphical
 
-    ../../modules/hardware/intel.nix
-    ../../modules/efi.nix
-    ../../modules/laptop.nix
-    ../../modules/sound-pipewire.nix
-    ../../modules/yubikey.nix
-    ../../modules/zfs.nix
+    ../common/hardware/intel.nix
+    ../common/efi.nix
+    ../common/laptop.nix
+    ../common/sound-pipewire.nix
+    ../common/yubikey.nix
+    ../common/zfs.nix
 
     ../../users/root
     ../../users/myuser

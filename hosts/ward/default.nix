@@ -8,11 +8,11 @@
     nixos-hardware.common-cpu-intel
     nixos-hardware.common-pc-ssd
 
-    ../../modules/core
-    ../../modules/hardware/intel.nix
-    ../../modules/initrd-ssh.nix
-    ../../modules/efi.nix
-    ../../modules/zfs.nix
+    ../common/core
+    ../common/hardware/intel.nix
+    ../common/initrd-ssh.nix
+    ../common/efi.nix
+    ../common/zfs.nix
 
     ../../users/root
 

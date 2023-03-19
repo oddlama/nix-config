@@ -24,7 +24,7 @@
       experimental-features = nix-command flakes recursive-nix
       flake-registry = /etc/nix/registry.json
       plugin-files = ${pkgs.nix-plugins}/lib/nix/plugins
-      extra-builtins-file = ${../../nix/extra-builtins.nix}
+      extra-builtins-file = ${../../../nix/extra-builtins.nix}
     '';
     optimise.automatic = true;
     gc.automatic = true;

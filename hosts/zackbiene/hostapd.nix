@@ -5,6 +5,7 @@
   ...
 }: {
   imports = [../../modules/hostapd.nix];
+  disabledModules = ["services/networking/hostapd.nix"];
 
   # Associates each known client to a unique password
   rekey.secrets.wifi-clients.file = ./secrets/wifi-clients.age;

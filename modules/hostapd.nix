@@ -8,38 +8,32 @@
 with lib; let
   # TODO: add multi AP support (aka EasyMesh(TM))
   # TODO DFS as separate setting ?
-  disabledModules = ["services/networking/hostapd.nix"];
-
   cfg = config.services.hostapd;
-
-  # Escapes a string as hex (hello -> 68656c6c6f)
-  escapeHex = s: toLower (stringAsChars (x: toHexString (strings.charToInt x)) s);
 
   # Maps the specified acl mode to values understood by hostapd
   macaddrAclModes = {
-    "allow" = 0;
-    "deny" = 1;
-    "radius" = 2;
+    "allow" = "0";
+    "deny" = "1";
+    "radius" = "2";
   };
   # Maps the specified ignore broadcast ssid mode to values understood by hostapd
   ignoreBroadcastSsidModes = {
-    "disabled" = 0;
-    "empty" = 1;
-    "clear" = 2;
+    "disabled" = "0";
+    "empty" = "1";
+    "clear" = "2";
   };
   # Maps the specified vht and he channel widths to values understood by hostapd
   operatingChannelWidth = {
-    "20or40" = 0;
-    "80" = 1;
-    "160" = 2;
-    "80+80" = 3;
+    "20or40" = "0";
+    "80" = "1";
+    "160" = "2";
+    "80+80" = "3";
   };
 
-  configFileForInterface = interface: let
-    ifcfg = cfg.interfaces.${interface};
+  configFileForInterface = interface: ifcfg: let
     escapedInterface = utils.escapeSystemdPath interface;
-    hasMacAllowList = count ifcfg.macAllow > 0 || ifcfg.macAllowFile != null;
-    hasMacDenyList = count ifcfg.macDeny > 0 || ifcfg.macDenyFile != null;
+    hasMacAllowList = length ifcfg.macAllow > 0 || ifcfg.macAllowFile != null;
+    hasMacDenyList = length ifcfg.macDeny > 0 || ifcfg.macDenyFile != null;
     bool01 = b:
       if b
       then "1"
@@ -58,7 +52,7 @@ with lib; let
 
       ##### IEEE 802.11 related configuration #######################################
 
-      ssid2=${escapeHex ifcfg.ssid}
+      ssid=${ifcfg.ssid}
       utf8_ssid=${ifcfg.hwMode}
       ${optionalString (ifcfg.countryCode != null) ''
         country_code=${ifcfg.countryCode}
@@ -136,6 +130,8 @@ with lib; let
 
       ${ifcfg.extraConfig}
     '';
+
+  configFiles = mapAttrsToList configFileForInterface cfg.interfaces;
 in {
   options = {
     services.hostapd = {
@@ -152,6 +148,7 @@ in {
 
       interfaces = mkOption {
         default = {};
+        # TODO
         example = literalExpression ''
           {
             # WiFi 4 - 2.4GHz
@@ -376,7 +373,7 @@ in {
                 multi_ap=1
               '';
               type = types.lines;
-              description = mdDoc "Extra configuration options to put in hostapd.conf.";
+              description = mdDoc "Extra configuration options to put at the end of this interface's hostapd.conf.";
             };
 
             #### IEEE 802.11n (WiFi 4) related configuration
@@ -558,22 +555,22 @@ in {
   config = mkIf cfg.enable {
     assertions = [
       {
-        assertion = count cfg.interfaces > 0;
+        assertion = length (attrNames cfg.interfaces) > 0;
         message = "At least one interface must be configured with hostapd!";
       }
     ];
 
     environment.systemPackages = [pkgs.hostapd];
 
-    services.udev.packages = optionals (cfg.countryCode != null) [pkgs.crda];
+    services.udev.packages = optionals (any (i: i.countryCode != null) (attrValues cfg.interfaces)) [pkgs.crda];
 
     systemd.services.hostapd = {
       description = "hostapd wireless AP";
 
       path = [pkgs.hostapd];
-      after = ["sys-subsystem-net-devices-${escapedInterface}.device"];
-      bindsTo = ["sys-subsystem-net-devices-${escapedInterface}.device"];
-      requiredBy = ["network-link-${cfg.interface}.service"];
+      after = mapAttrsToList (interface: _: "sys-subsystem-net-devices-${utils.escapeSystemdPath interface}.device") cfg.interfaces;
+      bindsTo = mapAttrsToList (interface: _: "sys-subsystem-net-devices-${utils.escapeSystemdPath interface}.device") cfg.interfaces;
+      requiredBy = mapAttrsToList (interface: _: "network-link-${interface}.service") cfg.interfaces;
       wantedBy = ["multi-user.target"];
 
       preStart = mkBefore ''
@@ -585,7 +582,7 @@ in {
       '';
 
       serviceConfig = {
-        ExecStart = "${pkgs.hostapd}/bin/hostapd ${configFile}";
+        ExecStart = "${pkgs.hostapd}/bin/hostapd ${concatStringsSep " " configFiles}";
         Restart = "always";
         ExecReload = "/bin/kill -HUP $MAINPID";
         RuntimeDirectory = "hostapd";

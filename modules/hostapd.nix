@@ -16,18 +16,27 @@ with lib; let
     "deny" = "1";
     "radius" = "2";
   };
+
   # Maps the specified ignore broadcast ssid mode to values understood by hostapd
   ignoreBroadcastSsidModes = {
     "disabled" = "0";
     "empty" = "1";
     "clear" = "2";
   };
+
   # Maps the specified vht and he channel widths to values understood by hostapd
   operatingChannelWidth = {
     "20or40" = "0";
     "80" = "1";
     "160" = "2";
     "80+80" = "3";
+  };
+
+  # Maps the specified vht and he channel widths to values understood by hostapd
+  managementFrameProtection = {
+    "disabled" = "0";
+    "optional" = "1";
+    "required" = "2";
   };
 
   configFileForInterface = interface: ifcfg: let
@@ -50,7 +59,7 @@ with lib; let
       ctrl_interface=/run/hostapd
       ctrl_interface_group=${ifcfg.group}
 
-      ##### IEEE 802.11 related configuration #######################################
+      ##### IEEE 802.11 general configuration #######################################
 
       ssid=${ifcfg.ssid}
       utf8_ssid=${ifcfg.hwMode}
@@ -63,7 +72,7 @@ with lib; let
       ''}
       hw_mode=${ifcfg.hwMode}
       channel=${toString ifcfg.channel}
-      ${optionalString ifcfg.noScan "noscan=1"}
+      noscan=${bool01 ifcfg.noScan}
       # Set the MAC-address access control mode
       macaddr_acl=${macaddrAclModes.${ifcfg.macAcl}}
       ${optionalString hasMacAllowList ''
@@ -82,48 +91,73 @@ with lib; let
       ap_isolate=${bool01 ifcfg.apIsolate}
 
       ##### IEEE 802.11n (WiFi 4) related configuration #######################################
-      # MIMO and channel bonding support
-      ieee80211n=${bool01 ifcfg.ieee80211n}
-      ht_capab=${concatMapStrings (x: "[${x}]") ifcfg.htCapab}
-      require_ht=${bool01 ifcfg.requireHt}
+
+      ieee80211n=${bool01 ifcfg.wifi4.enable}
+      ${optionalString ifcfg.wifi4.enable ''
+        ht_capab=${concatMapStrings (x: "[${x}]") ifcfg.wifi4.capabilities}
+        require_ht=${bool01 ifcfg.wifi4.require}
+      ''}
 
       ##### IEEE 802.11ac (WiFi 5) related configuration #####################################
 
-      ieee80211ac=${bool01 ifcfg.ieee80211ac}
-      vht_capab=${concatMapStrings (x: "[${x}]") ifcfg.vhtCapab}
-      require_vht=${bool01 ifcfg.requireVht}
-      vht_oper_chwidth=${operatingChannelWidth.${ifcfg.vhtOperatingChannelWidth}}
+      ieee80211ac=${bool01 ifcfg.wifi5.enable}
+      ${optionalString ifcfg.wifi5.enable ''
+        vht_capab=${concatMapStrings (x: "[${x}]") ifcfg.wifi5.capabilities}
+        require_vht=${bool01 ifcfg.wifi5.require}
+        vht_oper_chwidth=${operatingChannelWidth.${ifcfg.wifi5.operatingChannelWidth}}
+      ''}
 
       ##### IEEE 802.11ax (WiFi 6) related configuration #####################################
 
-      ieee80211ax=${bool01 ifcfg.ieee80211ax}
-      require_he=${bool01 ifcfg.requireHe}
-      he_oper_chwidth=${operatingChannelWidth.${ifcfg.heOperatingChannelWidth}}
-      he_su_beamformer=${bool01 ifcfg.heSuBeamformer}
-      he_su_beamformee=${bool01 ifcfg.heSuBeamformee}
-      he_mu_beamformer=${bool01 ifcfg.heMuBeamformer}
+      ieee80211ax=${bool01 ifcfg.wifi6.enable}
+      ${optionalString ifcfg.wifi6.enable ''
+        require_he=${bool01 ifcfg.wifi6.require}
+        he_oper_chwidth=${operatingChannelWidth.${ifcfg.wifi6.operatingChannelWidth}}
+        he_su_beamformer=${bool01 ifcfg.wifi6.singleUserBeamformer}
+        he_su_beamformee=${bool01 ifcfg.wifi6.singleUserBeamformee}
+        he_mu_beamformer=${bool01 ifcfg.wifi6.multiUserBeamformer}
+      ''}
 
       ##### IEEE 802.11be (WiFi 7) related configuration #####################################
 
-      ieee80211be=${bool01 ifcfg.ieee80211be}
-      eht_oper_chwidth=${operatingChannelWidth.${ifcfg.ehtOperatingChannelWidth}}
-      eht_su_beamformer=${bool01 ifcfg.ehtSuBeamformer}
-      eht_su_beamformee=${bool01 ifcfg.ehtSuBeamformee}
-      eht_mu_beamformer=${bool01 ifcfg.ehtMuBeamformer}
+      ieee80211be=${bool01 ifcfg.wifi7.enable}
+      ${optionalString ifcfg.wifi7.enable ''
+        eht_oper_chwidth=${operatingChannelWidth.${ifcfg.wifi7.operatingChannelWidth}}
+        eht_su_beamformer=${bool01 ifcfg.wifi7.singleUserBeamformer}
+        eht_su_beamformee=${bool01 ifcfg.wifi7.singleUserBeamformee}
+        eht_mu_beamformer=${bool01 ifcfg.wifi7.multiUserBeamformer}
+      ''}
 
       ##### WPA/IEEE 802.11i configuration ##########################################
 
-      # WPA3
-      wpa=2
-      wpa_pairwise=CCMP CCMP-256
-      rsn_pairwise=CCMP CCMP-256
-      wpa_key_mgmt=SAE
+      ${optionalString (ifcfg.authentication.mode == "none") ''
+        wpa=0
+      ''}
+      ${optionalString (ifcfg.authentication.mode == "wpa3-sae") ''
+        wpa=2
+        wpa_key_mgmt=SAE
+        # Derive PWE using both hunting-and-pecking loop and hash-to-element
+        sae_pwe=2
+        # Prevent downgrade attacks by indicating to clients that they should
+        # disable any transition modes from now on.
+        transition_disable=0x01
+      ''}
+      ${optionalString (ifcfg.authentication.mode == "wpa3-sae-transition") ''
+        wpa=2
+        wpa_key_mgmt=WPA-PSK-SHA256 SAE
+      ''}
+      ${optionalString (ifcfg.authentication.mode == "wpa2-sha256") ''
+        wpa=2
+        wpa_key_mgmt=WPA-PSK-SHA256
+      ''}
+      ${optionalString (ifcfg.authentication.mode != "none") ''
+        wpa_pairwise=CCMP CCMP-256
+        rsn_pairwise=CCMP CCMP-256
+      ''}
+
       # Encrypt management frames to protect against deauthentication and similar attacks
-      ieee80211w=2
-      # Force WPA3-Personal without transition
-      transition_disable=0x01
-      # Derive PWE using both hunting-and-pecking loop and hash-to-element
-      sae_pwe=2
+      ieee80211w=${managementFrameProtection.${ifcfg.managementFrameProtection}}
+
       # SAE passwords can be set via wpa_passphrase but not via wpa_psk_file. This sucks
       # and means we have to add the passwords in pre-start to prevent them being visible here
       {{SAE_PASSWORDS}}
@@ -228,7 +262,7 @@ in {
             ssid = mkOption {
               default = config.system.nixos.distroId;
               defaultText = literalExpression "config.system.nixos.distroId";
-              example = "mySpecialSSID";
+              example = "❄️ cool ❄️";
               type = types.str;
               description = mdDoc "SSID to be used in IEEE 802.11 management frames.";
             };
@@ -268,7 +302,7 @@ in {
                 This special case is currently supported only with drivers with which
                 offloaded ACS is used.
 
-                Most likely you to select a (5GHz & 6GHz a/n/ac/ax) or g (2Ghz b/g/n) here.
+                Most likely you to select 'a' (5GHz & 6GHz a/n/ac/ax) or 'g' (2.4GHz b/g/n) here.
               '';
             };
 
@@ -378,187 +412,346 @@ in {
 
             #### IEEE 802.11n (WiFi 4) related configuration
 
-            ieee80211n = mkOption {
-              default = true;
-              type = types.bool;
-              description = mdDoc "Enables support for IEEE 802.11n (WiFi 4, HT)";
-            };
+            wifi4 = {
+              enable = mkOption {
+                default = true;
+                type = types.bool;
+                description = mdDoc "Enables support for IEEE 802.11n (WiFi 4, HT)";
+              };
 
-            htCapab = mkOption {
-              type = types.listOf types.str;
-              default = ["HT40" "HT40-" "SHORT-GI-20" "SHORT-GI-40"];
-              example = ["LDPC" "HT40+" "HT40-" "GF" "SHORT-GI-20" "SHORT-GI-40" "TX-STBC" "RX-STBC1"];
-              description = mdDoc ''
-                HT (High Throughput) capabilities given as a list of flags.
-                Please refer to the hostapd documentation for allowed values and
-                only set values supported by your physical adapter.
+              capabilities = mkOption {
+                type = types.listOf types.str;
+                default = ["HT40" "HT40-" "SHORT-GI-20" "SHORT-GI-40"];
+                example = ["LDPC" "HT40+" "HT40-" "GF" "SHORT-GI-20" "SHORT-GI-40" "TX-STBC" "RX-STBC1"];
+                description = mdDoc ''
+                  HT (High Throughput) capabilities given as a list of flags.
+                  Please refer to the hostapd documentation for allowed values and
+                  only set values supported by your physical adapter.
 
-                The default contains common values supported by most adapters.
-              '';
-            };
+                  The default contains common values supported by most adapters.
+                '';
+              };
 
-            requireHt = mkOption {
-              default = false;
-              type = types.bool;
-              description = mdDoc "Require stations (clients) to support WiFi 4 (HT) and disassociate them if they don't.";
+              require = mkOption {
+                default = false;
+                type = types.bool;
+                description = mdDoc "Require stations (clients) to support WiFi 4 (HT) and disassociate them if they don't.";
+              };
             };
 
             #### IEEE 802.11ac (WiFi 5) related configuration
 
-            ieee80211ac = mkOption {
-              default = true;
-              type = types.bool;
-              description = mdDoc "Enables support for IEEE 802.11ac (WiFi 5, VHT)";
-            };
+            wifi5 = {
+              enable = mkOption {
+                default = false;
+                type = types.bool;
+                description = mdDoc "Enables support for IEEE 802.11ac (WiFi 5, VHT)";
+              };
 
-            vhtCapab = mkOption {
-              type = types.listOf types.str;
-              default = [];
-              example = ["SHORT-GI-80" "TX-STBC-2BY1" "RX-STBC-1" "RX-ANTENNA-PATTERN" "TX-ANTENNA-PATTERN"];
-              description = mdDoc ''
-                VHT (Very High Throughput) capabilities given as a list of flags.
-                Please refer to the hostapd documentation for allowed values and
-                only set values supported by your physical adapter.
-              '';
-            };
+              capabilities = mkOption {
+                type = types.listOf types.str;
+                default = [];
+                example = ["SHORT-GI-80" "TX-STBC-2BY1" "RX-STBC-1" "RX-ANTENNA-PATTERN" "TX-ANTENNA-PATTERN"];
+                description = mdDoc ''
+                  VHT (Very High Throughput) capabilities given as a list of flags.
+                  Please refer to the hostapd documentation for allowed values and
+                  only set values supported by your physical adapter.
+                '';
+              };
 
-            requireVht = mkOption {
-              default = false;
-              type = types.bool;
-              description = mdDoc "Require stations (clients) to support WiFi 5 (VHT) and disassociate them if they don't.";
-            };
+              requireVht = mkOption {
+                default = false;
+                type = types.bool;
+                description = mdDoc "Require stations (clients) to support WiFi 5 (VHT) and disassociate them if they don't.";
+              };
 
-            vhtOperatingChannelWidth = mkOption {
-              default = "20or40";
-              type = types.enum ["20or40" "80" "160" "80+80"];
-              description = mdDoc ''
-                Determines the operating channel width for VHT.
+              operatingChannelWidth = mkOption {
+                default = "20or40";
+                type = types.enum ["20or40" "80" "160" "80+80"];
+                description = mdDoc ''
+                  Determines the operating channel width for VHT.
 
-                - {var}`"20or40"`: 20 or 40 MHz operating channel width
-                - {var}`"80"`: 80 MHz channel width
-                - {var}`"160"`: 160 MHz channel width
-                - {var}`"80+80"`: 80+80 MHz channel width
-              '';
+                  - {var}`"20or40"`: 20 or 40 MHz operating channel width
+                  - {var}`"80"`: 80 MHz channel width
+                  - {var}`"160"`: 160 MHz channel width
+                  - {var}`"80+80"`: 80+80 MHz channel width
+                '';
+              };
             };
 
             ##### IEEE 802.11ax (WiFi 6) related configuration
 
-            ieee80211ax = mkOption {
-              default = true;
-              type = types.bool;
-              description = mdDoc "Enables support for IEEE 802.11ax (WiFi 6, HE)";
-            };
+            wifi6 = {
+              enable = mkOption {
+                default = false;
+                type = types.bool;
+                description = mdDoc "Enables support for IEEE 802.11ax (WiFi 6, HE)";
+              };
 
-            requireHe = mkOption {
-              default = false;
-              type = types.bool;
-              description = mdDoc "Require stations (clients) to support WiFi 6 (HE) and disassociate them if they don't.";
-            };
+              require = mkOption {
+                default = false;
+                type = types.bool;
+                description = mdDoc "Require stations (clients) to support WiFi 6 (HE) and disassociate them if they don't.";
+              };
 
-            heSuBeamformer = mkOption {
-              default = false;
-              type = types.bool;
-              description = mdDoc "HE single user beamformer support";
-            };
+              singleUserBeamformer = mkOption {
+                default = false;
+                type = types.bool;
+                description = mdDoc "HE single user beamformer support";
+              };
 
-            heSuBeamformee = mkOption {
-              default = false;
-              type = types.bool;
-              description = mdDoc "HE single user beamformee support";
-            };
+              singleUserBeamformee = mkOption {
+                default = false;
+                type = types.bool;
+                description = mdDoc "HE single user beamformee support";
+              };
 
-            heMuBeamformer = mkOption {
-              default = false;
-              type = types.bool;
-              description = mdDoc "HE multi user beamformee support";
-            };
+              multiUserBeamformer = mkOption {
+                default = false;
+                type = types.bool;
+                description = mdDoc "HE multi user beamformee support";
+              };
 
-            heOperatingChannelWidth = mkOption {
-              default = "20or40";
-              type = types.enum ["20or40" "80" "160" "80+80"];
-              description = mdDoc ''
-                Determines the operating channel width for HE.
+              operatingChannelWidth = mkOption {
+                default = "20or40";
+                type = types.enum ["20or40" "80" "160" "80+80"];
+                description = mdDoc ''
+                  Determines the operating channel width for HE.
 
-                - {var}`"20or40"`: 20 or 40 MHz operating channel width
-                - {var}`"80"`: 80 MHz channel width
-                - {var}`"160"`: 160 MHz channel width
-                - {var}`"80+80"`: 80+80 MHz channel width
-              '';
+                  - {var}`"20or40"`: 20 or 40 MHz operating channel width
+                  - {var}`"80"`: 80 MHz channel width
+                  - {var}`"160"`: 160 MHz channel width
+                  - {var}`"80+80"`: 80+80 MHz channel width
+                '';
+              };
             };
 
             ##### IEEE 802.11be (WiFi 7) related configuration
 
-            ieee80211be = mkOption {
-              default = true;
-              type = types.bool;
-              description = mdDoc "Enables support for IEEE 802.11be (WiFi 7, EHT)";
+            wifi7 = {
+              enable = mkOption {
+                default = false;
+                type = types.bool;
+                description = mdDoc "Enables support for IEEE 802.11be (WiFi 7, EHT)";
+              };
+
+              singleUserBeamformer = mkOption {
+                default = false;
+                type = types.bool;
+                description = mdDoc "EHT single user beamformer support";
+              };
+
+              singleUserBeamformee = mkOption {
+                default = false;
+                type = types.bool;
+                description = mdDoc "EHT single user beamformee support";
+              };
+
+              multiUserBeamformer = mkOption {
+                default = false;
+                type = types.bool;
+                description = mdDoc "EHT multi user beamformee support";
+              };
+
+              operatingChannelWidth = mkOption {
+                default = "20or40";
+                type = types.enum ["20or40" "80" "160" "80+80"];
+                description = mdDoc ''
+                  Determines the operating channel width for EHT.
+
+                  - {var}`"20or40"`: 20 or 40 MHz operating channel width
+                  - {var}`"80"`: 80 MHz channel width
+                  - {var}`"160"`: 160 MHz channel width
+                  - {var}`"80+80"`: 80+80 MHz channel width
+                '';
+              };
             };
 
-            ehtSuBeamformer = mkOption {
-              default = false;
-              type = types.bool;
-              description = mdDoc "EHT single user beamformer support";
+            ##### IEEE 802.11i (WPA) configuration
+
+            authentication = {
+              mode = mkOption {
+                default = "wpa3-sae";
+                type = types.enum ["none" "wpa2-sha256" "wpa3-sae-transition" "wpa3-sae"];
+                description = mdDoc ''
+                  Selects the authentication mode for this AP.
+
+                  - {var}`"none"`: Don't configure any authentication. This will disable wpa alltogether
+                    and create an open AP. Use {option}`extraConfig` together with this option if you
+                    want to configure the authentication manually. Any password options will still be
+                    effective, if set.
+                  - {var}`"wpa2-sha256"`: WPA2-Personal using SHA256 (IEEE 802.11i/RSN). Passwords are set
+                    using {option}`wpaPassword` or preferably by {option}`wpaPasswordFile` or {option}`wpaPskFile`.
+                  - {var}`"wpa3-sae-transition"`: Use WPA3-Personal (SAE) if possible, otherwise fallback
+                    to WPA2-SHA256. Only use if necessary and switch to the newer WPA3-SAE when possible.
+                    You will have to specify both {option}`wpaPassword` and {option}`saePasswords` (or one of their alternatives).
+                  - {var}`"wpa3-sae"`: Use WPA3-Personal (SAE). This is currently the recommended way to
+                    setup a secured WiFi AP (as of March 2023) and therefore the default. Passwords are set
+                    using either {option}`saePasswords` or preferably {option}`saePasswordsFile`.
+                '';
+              };
+
+              wpaPassword = mkOption {
+                default = null;
+                example = "a flakey password";
+                type = types.uniq (types.nullOr types.str);
+                description = mdDoc ''
+                  Sets the password for WPA-PSK that will be converted to the pre-shared key.
+                  The password length must be in the range [8, 63] characters. While some devices
+                  may allow arbitrary characters (such as UTF-8) to be used, but the standard specifies
+                  that each character in the passphrase must be an ASCII character in the range [0x20, 0x7e]
+                  (IEEE Std. 802.11i-2004, Annex H.4.1). Use emojis at your own risk.
+
+                  Not used when {option}`mode` is {var}`"wpa3-sae"`.
+
+                  Warning: This passphrase will get put into a world-readable file in
+                  the Nix store! Using {option}`wpaPasswordFile` or {option}`wpaPskFile` is recommended.
+                '';
+              };
+
+              wpaPasswordFile = mkOption {
+                default = null;
+                type = types.uniq (types.nullOr types.path);
+                description = mdDoc ''
+                  Sets the password for WPA-PSK. Follows the same rules as {option}`wpaPassword`,
+                  but reads the password from the given file to prevent the password from being
+                  put into the Nix store.
+
+                  Not used when {option}`mode` is {var}`"wpa3-sae"`.
+                '';
+              };
+
+              wpaPskFile = mkOption {
+                default = null;
+                type = types.uniq (types.nullOr types.path);
+                description = mdDoc ''
+                  Sets the password(s) for WPA-PSK. Similar to {option}`wpaPasswordFile`,
+                  but additionally allows specifying multiple passwords, and some other options.
+
+                  Each line, except for empty lines and lines starting with #, must contain a
+                  MAC address and either a 64-hex-digit PSK or a password separated with a space.
+                  The password must follow the same rules as outlined in {option}`wpaPassword`.
+                  The special MAC address `00:00:00:00:00:00` can be used to configure PSKs
+                  that any client can use.
+
+                  An optional key identifier can be added by prefixing the line with `keyid=<keyid_string>`
+                  An optional VLAN ID can be specified by prefixing the line with `vlanid=<VLAN ID>`.
+                  An optional WPS tag can be added by prefixing the line with `wps=<0/1>` (default: 0).
+                  Any matching entry with that tag will be used when generating a PSK for a WPS Enrollee
+                  instead of generating a new random per-Enrollee PSK.
+
+                  Not used when {option}`mode` is {var}`"wpa3-sae"`.
+                '';
+              };
+
+              saePasswords = mkOption {
+                default = null;
+                example = literalExpression ''
+                  [
+                    # Any client may use these passwords
+                    "Wi-Figure it out"
+                    "second password for everyone|mac=ff:ff:ff:ff:ff:ff"
+                    # Only the client with MAC-address 11:22:33:44:55:66 can use this password
+                    "sekret pazzword|mac=11:22:33:44:55:66"
+                  ]
+                '';
+                type = types.listOf types.str;
+                description = mdDoc ''
+                  Sets allowed passwords for WPA3-SAE. The password entries use the following format:
+                  `<password>[|mac=<peer mac>][|vlanid=<VLAN ID>][|pk=<m:ECPrivateKey-base64>][|id=<identifier>]`
+                  The order of optional parameters doesn't matter.
+
+                  If `mac=` is not included or is set to the wildcard address (`ff:ff:ff:ff:ff:ff`),
+                  the entry is available for any station to use. If a specific peer MAC address is included,
+                  only a station with that MAC address is allowed to use the entry.
+
+                  If `vlanid=` is given, all clients using this entry will get tagged with the given VLAN ID.
+
+                  If `pk=` is given, SAE-PK will be enabled for this connection.
+                  This prevents evil-twin attacks on this AP, but a public key is required.
+                  (Essentially adds pubkey authentication such that the client can verify identity of the AP)
+
+                  If `id=` (the password identifier) is given with non-zero length, the entry is
+                  limited to be used only with that specified identifier.
+
+                  The last matching (based on peer MAC address and identifier) entry is used to
+                  select which password to use. An empty string has the special meaning of
+                  removing all previously added entries.
+
+                  SAE technically imposes no restrictions on password length and
+                  or characters. But due to limitations of {command}`hostapd`'s config file format,
+                  a true newline character cannot be parsed.
+
+                  Warning: This passphrase will get put into a world-readable file in
+                  the Nix store! Using {option}`wpaPasswordFile` or {option}`wpaPskFile` is recommended.
+
+                  Not used when {option}`mode` is {var}`"wpa2-sha256"`.
+                '';
+              };
+
+              saePasswordsFile = mkOption {
+                default = null;
+                type = types.uniq (types.nullOr types.path);
+                description = mdDoc ''
+                  Sets the password for WPA3-SAE. Follows the same rules as {option}`saePasswords`,
+                  but reads the entries from the given file to prevent them from being
+                  put into the Nix store.
+
+                  One entry per line, empty lines and lines beginning with # will be ignored.
+
+                  Not used when {option}`mode` is {var}`"wpa2-sha256"`.
+                '';
+              };
             };
 
-            ehtSuBeamformee = mkOption {
-              default = false;
-              type = types.bool;
-              description = mdDoc "EHT single user beamformee support";
-            };
-
-            ehtMuBeamformer = mkOption {
-              default = false;
-              type = types.bool;
-              description = mdDoc "EHT multi user beamformee support";
-            };
-
-            ehtOperatingChannelWidth = mkOption {
-              default = "20or40";
-              type = types.enum ["20or40" "80" "160" "80+80"];
+            managementFrameProtection = mkOption {
+              default = "required";
+              type = types.enum ["disabled" "optional" "required"];
               description = mdDoc ''
-                Determines the operating channel width for EHT.
+                Management frame protection (MFP) authenticates management frames
+                to prevent deauthentication (or related) attacks.
 
-                - {var}`"20or40"`: 20 or 40 MHz operating channel width
-                - {var}`"80"`: 80 MHz channel width
-                - {var}`"160"`: 160 MHz channel width
-                - {var}`"80+80"`: 80+80 MHz channel width
+                - {var}`"disabled"`: No management frame protection
+                - {var}`"optional"`: Use MFP if a connection allows it
+                - {var}`"required"`: Force MFP for all clients
               '';
             };
           };
         });
       };
-
-      #wpa = mkOption {
-      #  type = types.bool;
-      #  default = true;
-      #  description = mdDoc ''
-      #    Enable WPA (IEEE 802.11i/D3.0) to authenticate with the access point.
-      #  '';
-      #};
-
-      #wpaPassphrase = mkOption {
-      #  default = "my_sekret";
-      #  example = "any_64_char_string";
-      #  type = types.str;
-      #  description = mdDoc ''
-      #    WPA-PSK (pre-shared-key) passphrase. Clients will need this
-      #    passphrase to associate with this access point.
-      #    Warning: This passphrase will get put into a world-readable file in
-      #    the Nix store!
-      #  '';
-      #};
     };
   };
 
   ###### implementation
 
   config = mkIf cfg.enable {
-    assertions = [
-      {
-        assertion = length (attrNames cfg.interfaces) > 0;
-        message = "At least one interface must be configured with hostapd!";
-      }
-    ];
+    assertions =
+      [
+        {
+          assertion = length (attrNames cfg.interfaces) > 0;
+          message = "At least one interface must be configured with hostapd!";
+        }
+      ]
+      ++ (concatLists (mapAttrsToList (interface: ifcfg: [
+          {
+            assertion = (ifcfg.wifi5.enable || ifcfg.wifi6.enable || ifcfg.wifi7.enable) -> ifcfg.hwMode == "a";
+            message = ''hostapd interface ${interface} has enabled WiFi 5 or above, which requires hwMode="a"'';
+          }
+          {
+            assertion = ifcfg.authentication.mode == "wpa3-sae" -> ifcfg.managementFrameProtection == "required";
+            message = ''hostapd interface ${interface} uses WPA3-SAE which requires managementFrameProtection="required".'';
+          }
+          {
+            assertion = ifcfg.authentication.mode == "wpa3-sae-transition" -> ifcfg.managementFrameProtection != "disabled";
+            message = ''hostapd interface ${interface} uses WPA3-SAE in transition mode with WPA2-SHA256, which requires managementFrameProtection="optional" or ="required".'';
+          }
+          # TODO one of wpaPassword, wpaPasswordFile, wpaPskFile
+          # TODO one of saePasswords, saePasswordsFile
+          # TODO if wpa3-sae then no wpaPassword anmd one of saepass
+          # TODO if wpa3-sae-transition then both wpa and sae passes
+          # TODO if wpa2-sha256 then only wpa and not sae passes
+        ])
+        cfg.interfaces));
 
     environment.systemPackages = [pkgs.hostapd];
 

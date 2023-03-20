@@ -35,7 +35,7 @@ in
       '');
     generate-initrd-keys = let
       generateHostKey = node: ''
-        if [[ ! -f ${node.config.rekey.secrets.initrd_host_ed25519_key.file} ]]; then
+        if [[ ! -f ${escapeShellArg node.config.rekey.secrets.initrd_host_ed25519_key.file} ]]; then
           ssh-keygen -t ed25519 -N "" -f /tmp/1
           TODO
         fi
@@ -47,13 +47,13 @@ in
       '');
     format-secrets = let
       isAbsolutePath = x: substring 0 1 x == "/";
-      masterIdentityArgs = concatMapStrings (x: ''-i "${x}" '') self.secrets.masterIdentities;
+      masterIdentityArgs = concatMapStrings (x: ''-i ${escapeShellArg x} '') self.secrets.masterIdentities;
       extraEncryptionPubkeys =
         concatMapStrings (
           x:
             if isAbsolutePath x
-            then ''-R "${x}" ''
-            else ''-r "${x}" ''
+            then ''-R ${escapeShellArg x} ''
+            else ''-r ${escapeShellArg x} ''
         )
         self.secrets.extraEncryptionPubkeys;
       formatSecret = path: ''

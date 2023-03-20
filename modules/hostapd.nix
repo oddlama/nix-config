@@ -6,8 +6,6 @@
   ...
 }:
 with lib; let
-  # TODO: add multi AP support (aka EasyMesh(TM))
-  # TODO DFS as separate setting ?
   cfg = config.services.hostapd;
 
   # Maps the specified acl mode to values understood by hostapd
@@ -39,8 +37,11 @@ with lib; let
     "required" = "2";
   };
 
+  # A marker that will be replaced in service.hostapd.preStart to possibly add the
+  # AP password from a store-external location.
+  runtimePasswordDefinitionMarker = "##RUNTIME_PASSWORDS_DEFINITION##";
+
   configFileForInterface = interface: ifcfg: let
-    escapedInterface = utils.escapeSystemdPath interface;
     hasMacAllowList = length ifcfg.macAllow > 0 || ifcfg.macAllowFile != null;
     hasMacDenyList = length ifcfg.macDeny > 0 || ifcfg.macDenyFile != null;
     bool01 = b:
@@ -48,7 +49,7 @@ with lib; let
       then "1"
       else "0";
   in
-    pkgs.writeText "hostapd-${escapedInterface}.conf" ''
+    pkgs.writeText "hostapd-${interface}.conf" ''
       logger_syslog=-1
       logger_syslog_level=${toString ifcfg.logLevel}
       logger_stdout=-1
@@ -76,10 +77,10 @@ with lib; let
       # Set the MAC-address access control mode
       macaddr_acl=${macaddrAclModes.${ifcfg.macAcl}}
       ${optionalString hasMacAllowList ''
-        accept_mac_file=/run/hostapd/mac-${escapedInterface}.allow
+        accept_mac_file=/run/hostapd/${interface}.mac.allow
       ''}
       ${optionalString hasMacDenyList ''
-        deny_mac_file=/run/hostapd/mac-${escapedInterface}.deny
+        deny_mac_file=/run/hostapd/${interface}.mac.deny
       ''}
       # Only allow WPA, disable WEP (insecure)
       auth_algs=1
@@ -151,21 +152,64 @@ with lib; let
         wpa_key_mgmt=WPA-PSK-SHA256
       ''}
       ${optionalString (ifcfg.authentication.mode != "none") ''
-        wpa_pairwise=CCMP CCMP-256
-        rsn_pairwise=CCMP CCMP-256
+        wpa_pairwise=${concatStringsSep " " ifcfg.authentication.pairwiseCiphers}
+        rsn_pairwise=${concatStringsSep " " ifcfg.authentication.pairwiseCiphers}
       ''}
+
+      ${optionalString (ifcfg.authentication.wpaPassword != null) ''
+        wpa_passphrase=${ifcfg.authentication.wpaPassword}
+      ''}
+      ${optionalString (ifcfg.authentication.wpaPskFile != null) ''
+        wpa_passphrase=${ifcfg.authentication.wpaPskFile}
+      ''}
+      ${optionalString (length ifcfg.authentication.saePasswords > 0) (concatMapStrings (pw: "sae_password=${pw}\n") ifcfg.authentication.saePasswords)}
+      ${runtimePasswordDefinitionMarker}
 
       # Encrypt management frames to protect against deauthentication and similar attacks
       ieee80211w=${managementFrameProtection.${ifcfg.managementFrameProtection}}
 
-      # SAE passwords can be set via wpa_passphrase but not via wpa_psk_file. This sucks
-      # and means we have to add the passwords in pre-start to prevent them being visible here
-      {{SAE_PASSWORDS}}
+      ##### User-provided extra configuration ##########################################
 
       ${ifcfg.extraConfig}
     '';
 
-  configFiles = mapAttrsToList configFileForInterface cfg.interfaces;
+  runtimeConfigFiles = mapAttrsToList (i: _: "/run/hostapd/${i}.hostapd.conf") cfg.interfaces;
+
+  makeInterfaceRuntimeFiles = interface: ifcfg:
+    pkgs.writeShellScript ("make-hostapd-${interface}-files" ''
+        set -euo pipefail
+
+        rm -f /run/hostapd/${interface}.mac.allow
+        touch /run/hostapd/${interface}.mac.allow
+        rm -f /run/hostapd/${interface}.mac.deny
+        touch /run/hostapd/${interface}.mac.deny
+        rm -f /run/hostapd/${interface}.hostapd.conf
+        cp ${configFileForInterface interface ifcfg} /run/hostapd/${interface}.hostapd.conf
+
+      ''
+      ++ concatStringsSep "\n" (
+        optional (length ifcfg.macAllow > 0) ''
+          cat >> /run/hostapd/${interface}.mac.allow <<EOF
+          ${concatStringsSep "\n" ifcfg.macAllow}
+          EOF
+        ''
+        ++ optional (ifcfg.macAllowFile != null) ''
+          grep -Eo '^([0-9A-Fa-f]{2}[:]){5}([0-9A-Fa-f]{2})' ${escapeShellArg ifcfg.macAllowFile} >> /run/hostapd/${interface}.mac.allow
+        ''
+        # Create combined mac.deny list from macDeny and macDenyFile
+        ++ optional (length ifcfg.macDeny > 0) ''
+          cat >> /run/hostapd/${interface}.mac.deny <<EOF
+          ${concatStringsSep "\n" ifcfg.macDeny}
+          EOF
+        ''
+        ++ optional (ifcfg.macDenyFile != null) ''
+          grep -Eo '^([0-9A-Fa-f]{2}[:]){5}([0-9A-Fa-f]{2})' ${escapeShellArg ifcfg.macDenyFile} >> /run/hostapd/${interface}.mac.deny
+        ''
+        ++ optional (ifcfg.wpaPasswordFile != null) ''
+          awk -v marker=${escapeShellArg (escapeRegex runtimePasswordDefinitionMarker)} -v content="$replacement" '{gsub(marker,content)}' /run/hostapd/${interface}.hostapd.conf
+        ''
+        # TODO replace marker if it's left.
+      ));
 in {
   options = {
     services.hostapd = {
@@ -350,8 +394,8 @@ in {
               description = mdDoc ''
                 Specifies a file containing the MAC addresses to allow if {option}`macAcl` is set to {var}`"deny"` or {var}`"radius"`.
                 The file should contain exactly one MAC address per line. Comments and empty lines are ignored,
-                only lines matching the regex `^..:..:..:..:..:..\b` will be considered.
-                Any content after the MAC address is ignored.
+                only lines starting with a valid MAC address will be considered (e.g. `11:22:33:44:55:66`) and
+                any content after the MAC address is ignored.
               '';
             };
 
@@ -372,8 +416,8 @@ in {
               description = mdDoc ''
                 Specifies a file containing the MAC addresses to allow if {option}`macAcl` is set to {var}`"deny"` or {var}`"radius"`.
                 The file should contain exactly one MAC address per line. Comments and empty lines are ignored,
-                only lines matching the regex `^..:..:..:..:..:..\b` will be considered.
-                Any content after the MAC address is ignored.
+                only lines starting with a valid MAC address will be considered (e.g. `11:22:33:44:55:66`) and
+                any content after the MAC address is ignored.
               '';
             };
 
@@ -591,6 +635,18 @@ in {
                 '';
               };
 
+              pairwiseCiphers = mkOption {
+                default = ["CCMP" "CCMP-256" "GCMP" "GCMP-256"];
+                example = ["CCMP-256" "GCMP-256"];
+                type = types.listOf types.str;
+                description = mdDoc ''
+                  Set of accepted cipher suites (encryption algorithms) for pairwise keys (unicast packets).
+                  Please refer to the hostapd documentation for allowed values. Generally, only
+                  CCMP or GCMP modes should be considered safe options. Most devices support CCMP while
+                  GCMP is often only available when using devices supporting WiFi 5 (IEEE 802.11ac) or higher.
+                '';
+              };
+
               wpaPassword = mkOption {
                 default = null;
                 example = "a flakey password";
@@ -722,8 +778,6 @@ in {
     };
   };
 
-  ###### implementation
-
   config = mkIf cfg.enable {
     assertions =
       [
@@ -732,24 +786,42 @@ in {
           message = "At least one interface must be configured with hostapd!";
         }
       ]
-      ++ (concatLists (mapAttrsToList (interface: ifcfg: [
+      # Interface warnings
+      ++ (concatLists (mapAttrsToList (interface: ifcfg: let
+          countWpaPasswordDefinitions = count (x: x != null) [ifcfg.wpaPassword ifcfg.wpaPasswordFile ifcfg.wpaPskFile];
+        in [
           {
             assertion = (ifcfg.wifi5.enable || ifcfg.wifi6.enable || ifcfg.wifi7.enable) -> ifcfg.hwMode == "a";
             message = ''hostapd interface ${interface} has enabled WiFi 5 or above, which requires hwMode="a"'';
           }
           {
             assertion = ifcfg.authentication.mode == "wpa3-sae" -> ifcfg.managementFrameProtection == "required";
-            message = ''hostapd interface ${interface} uses WPA3-SAE which requires managementFrameProtection="required".'';
+            message = ''hostapd interface ${interface} uses WPA3-SAE which requires managementFrameProtection="required"'';
           }
           {
             assertion = ifcfg.authentication.mode == "wpa3-sae-transition" -> ifcfg.managementFrameProtection != "disabled";
-            message = ''hostapd interface ${interface} uses WPA3-SAE in transition mode with WPA2-SHA256, which requires managementFrameProtection="optional" or ="required".'';
+            message = ''hostapd interface ${interface} uses WPA3-SAE in transition mode with WPA2-SHA256, which requires managementFrameProtection="optional" or ="required"'';
           }
-          # TODO one of wpaPassword, wpaPasswordFile, wpaPskFile
-          # TODO one of saePasswords, saePasswordsFile
-          # TODO if wpa3-sae then no wpaPassword anmd one of saepass
-          # TODO if wpa3-sae-transition then both wpa and sae passes
-          # TODO if wpa2-sha256 then only wpa and not sae passes
+          {
+            assertion = countWpaPasswordDefinitions <= 1;
+            message = ''hostapd interface ${interface} must use at most one WPA password option (wpaPassword, wpaPasswordFile, wpaPskFile)'';
+          }
+          {
+            assertion = length ifcfg.saePasswords == 0 || ifcfg.saePasswordsFile == null;
+            message = ''hostapd interface ${interface} must use only one SAE password option (saePasswords or saePasswordsFile)'';
+          }
+          {
+            assertion = ifcfg.authentication.mode == "wpa3-sae" -> (length ifcfg.saePasswords > 0 || ifcfg.saePasswordsFile != null);
+            message = ''hostapd interface ${interface} uses WPA3-SAE which requires defining a sae password option'';
+          }
+          {
+            assertion = ifcfg.authentication.mode == "wpa3-sae-transition" -> (length ifcfg.saePasswords > 0 || ifcfg.saePasswordsFile != null) && countWpaPasswordDefinitions == 1;
+            message = ''hostapd interface ${interface} uses WPA3-SAE in transition mode requires defining both a wpa password option and a sae password option'';
+          }
+          {
+            assertion = ifcfg.authentication.mode == "wpa2-sha256" -> countWpaPasswordDefinitions == 1;
+            message = ''hostapd interface ${interface} uses WPA2-SHA256 which requires defining a wpa password option'';
+          }
         ])
         cfg.interfaces));
 
@@ -758,7 +830,7 @@ in {
     services.udev.packages = optionals (any (i: i.countryCode != null) (attrValues cfg.interfaces)) [pkgs.crda];
 
     systemd.services.hostapd = {
-      description = "hostapd wireless AP";
+      description = "Hostapd IEEE 802.11 AP";
 
       path = [pkgs.hostapd];
       after = mapAttrsToList (interface: _: "sys-subsystem-net-devices-${utils.escapeSystemdPath interface}.device") cfg.interfaces;
@@ -766,16 +838,11 @@ in {
       requiredBy = mapAttrsToList (interface: _: "network-link-${interface}.service") cfg.interfaces;
       wantedBy = ["multi-user.target"];
 
-      preStart = mkBefore ''
-        grep -o '^..:..:..:..:..:..' ${config.rekey.secrets.wifi-clients.path} > /run/hostapd/client-macs
-        hostapd_conf=$(cat ''${systemd.services.hostapd.serviceConfig.ExecStart})
-        sae_passwords=$(echo -e "sae_password=aa|mac=13:13:13:13:13:13\nsae_password=aa|mac=12:12:12:12:12:12")
-        hostapd_conf=''${hostapd_conf//"{{SAE_PASSWORDS}}"/$sae_passwords}
-        echo "$hostapd_conf" > /run/hostapd/config/$interface
-      '';
+      # Create merged configuration and acl files for each interface prior to starting
+      preStart = concatStringsSep "\n" (mapAttrsToList makeInterfaceRuntimeFiles cfg.interfaces);
 
       serviceConfig = {
-        ExecStart = "${pkgs.hostapd}/bin/hostapd ${concatStringsSep " " configFiles}";
+        ExecStart = "${pkgs.hostapd}/bin/hostapd ${concatStringsSep " " runtimeConfigFiles}";
         Restart = "always";
         ExecReload = "/bin/kill -HUP $MAINPID";
         RuntimeDirectory = "hostapd";

@@ -270,23 +270,11 @@ in {
         default = {};
         example = literalExpression ''
           {
-            # WiFi 4 (2.4GHz)
+            # Simple 2.4GHz AP
             "wlp2s0" = {
               ssid = "AP 1";
               # countryCode = "US";
               authentication.saePasswords = [{ password = "a flakey password"; }]; # Use saePasswordsFile if possible.
-            };
-
-            # Hidden hotspot for IoT devices (MAC ACL list, invisible ssid, isolated traffic)
-            "wlp3s0" = {
-              ssid = "IoT Isolated AP";
-              # countryCode = "US";
-              macAcl = "deny";
-              apIsolate = true;
-              authentication = {
-                saePasswords = [{ password = "a flakey password"; }]; # Use saePasswordsFile if possible.
-                saeAddToMacAllow = true;
-              };
             };
 
             # WiFi 5 (5GHz)
@@ -775,7 +763,7 @@ in {
 
             wifi5 = {
               enable = mkOption {
-                default = false;
+                default = true;
                 type = types.bool;
                 description = mdDoc "Enables support for IEEE 802.11ac (WiFi 5, VHT)";
               };
@@ -791,7 +779,7 @@ in {
                 '';
               };
 
-              requireVht = mkOption {
+              require = mkOption {
                 default = false;
                 type = types.bool;
                 description = mdDoc "Require stations (clients) to support WiFi 5 (VHT) and disassociate them if they don't.";
@@ -815,6 +803,7 @@ in {
 
             wifi6 = {
               enable = mkOption {
+                # TODO Change this once WiFi 6 is enabled in hostapd upstream
                 default = false;
                 type = types.bool;
                 description = mdDoc "Enables support for IEEE 802.11ax (WiFi 6, HE)";
@@ -862,6 +851,7 @@ in {
 
             wifi7 = {
               enable = mkOption {
+                # FIXME: Change this to true once WiFi 7 is stable
                 default = false;
                 type = types.bool;
                 description = mdDoc ''
@@ -919,10 +909,6 @@ in {
       ++ (concatLists (mapAttrsToList (interface: ifcfg: let
           countWpaPasswordDefinitions = count (x: x != null) [ifcfg.authentication.wpaPassword ifcfg.authentication.wpaPasswordFile ifcfg.authentication.wpaPskFile];
         in [
-          {
-            assertion = (ifcfg.wifi5.enable || ifcfg.wifi6.enable || ifcfg.wifi7.enable) -> ifcfg.hwMode == "a";
-            message = ''hostapd interface ${interface} has enabled WiFi 5 or above, which requires hwMode="a"'';
-          }
           {
             assertion = ifcfg.authentication.mode == "wpa3-sae" -> ifcfg.managementFrameProtection == "required";
             message = ''hostapd interface ${interface} uses WPA3-SAE which requires managementFrameProtection="required"'';

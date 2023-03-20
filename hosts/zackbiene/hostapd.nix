@@ -14,7 +14,6 @@
     enable = true;
     interfaces = {
       "wlan1" = {
-        logLevel = 0;
         ssid = "🍯🐝💨";
         hwMode = "g";
         countryCode = "DE";

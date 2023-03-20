@@ -14,19 +14,18 @@
     enable = true;
     interfaces = {
       "wlan1" = {
+        logLevel = 0;
         ssid = "🍯🐝💨";
         hwMode = "g";
-        #wifi4.enable = true;
-        #wifi5.enable = true;
         countryCode = "DE";
-        # Automatic Channel Selection (ACS) is unfortunately not implemented for mt7612u.
-        channel = 13;
-
-        #wpa = 3;
-        # TODO dont adverttise!
-
-        # TODO away
-        logLevel = 0;
+        channel = 13; # Automatic Channel Selection (ACS) is unfortunately not implemented for mt7612u.
+        macAcl = "deny";
+        apIsolate = true;
+        authentication = {
+          saePasswordsFile = config.rekey.secrets.wifi-clients.path;
+          saeAddToMacAllow = true;
+        };
+        wifi4.capabilities = ["LDPC" "HT40+" "HT40-" "GF" "SHORT-GI-20" "SHORT-GI-40" "TX-STBC" "RX-STBC1"];
       };
     };
   };

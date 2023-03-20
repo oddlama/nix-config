@@ -16,7 +16,6 @@
     escapeShellArg
     filter
     literalExpression
-    mapAttrs
     mapAttrsToList
     mdDoc
     mkIf
@@ -79,7 +78,7 @@
       ##### IEEE 802.11 general configuration #######################################
 
       ssid=${ifcfg.ssid}
-      utf8_ssid=${ifcfg.hwMode}
+      utf8_ssid=${bool01 ifcfg.utf8Ssid}
       ${optionalString (ifcfg.countryCode != null) ''
         country_code=${ifcfg.countryCode}
         # IEEE 802.11d: Limit to frequencies allowed in country
@@ -92,19 +91,17 @@
       noscan=${bool01 ifcfg.noScan}
       # Set the MAC-address access control mode
       macaddr_acl=${macaddrAclModes.${ifcfg.macAcl}}
-      ${optionalString (ifcfg.macAllow != [] || ifcfg.macAllowFile != null) ''
+      ${optionalString (ifcfg.macAllow != [] || ifcfg.macAllowFile != null || ifcfg.authentication.saeAddToMacAllow) ''
         accept_mac_file=/run/hostapd/${interface}.mac.allow
       ''}
       ${optionalString (ifcfg.macDeny != [] || ifcfg.macDenyFile != null) ''
         deny_mac_file=/run/hostapd/${interface}.mac.deny
       ''}
-      # Only allow WPA, disable WEP (insecure)
+      # Only allow WPA, disable insecure WEP
       auth_algs=1
-      # Set ssid broadcasting mode (0=normal, 1=empty, 2=clear)
       ignore_broadcast_ssid=${ignoreBroadcastSsidModes.${ifcfg.ignoreBroadcastSsid}}
-      # Always enable QoS, which is required for 802.11n/ac/ax
+      # Always enable QoS, which is required for 802.11n and above
       wmm_enabled=1
-      # Whether to disallow clients to communicate with each other
       ap_isolate=${bool01 ifcfg.apIsolate}
 
       ##### IEEE 802.11n (WiFi 4) related configuration #######################################
@@ -115,30 +112,28 @@
         require_ht=${bool01 ifcfg.wifi4.require}
       ''}
 
-      ##### IEEE 802.11ac (WiFi 5) related configuration #####################################
-
-      ieee80211ac=${bool01 ifcfg.wifi5.enable}
       ${optionalString ifcfg.wifi5.enable ''
+        ##### IEEE 802.11ac (WiFi 5) related configuration #####################################
+
+        ieee80211ac=1
         vht_capab=${concatMapStrings (x: "[${x}]") ifcfg.wifi5.capabilities}
         require_vht=${bool01 ifcfg.wifi5.require}
         vht_oper_chwidth=${operatingChannelWidth.${ifcfg.wifi5.operatingChannelWidth}}
       ''}
-
-      ##### IEEE 802.11ax (WiFi 6) related configuration #####################################
-
-      ieee80211ax=${bool01 ifcfg.wifi6.enable}
       ${optionalString ifcfg.wifi6.enable ''
+        ##### IEEE 802.11ax (WiFi 6) related configuration #####################################
+
+        ieee80211ax=1
         require_he=${bool01 ifcfg.wifi6.require}
         he_oper_chwidth=${operatingChannelWidth.${ifcfg.wifi6.operatingChannelWidth}}
         he_su_beamformer=${bool01 ifcfg.wifi6.singleUserBeamformer}
         he_su_beamformee=${bool01 ifcfg.wifi6.singleUserBeamformee}
         he_mu_beamformer=${bool01 ifcfg.wifi6.multiUserBeamformer}
       ''}
-
-      ##### IEEE 802.11be (WiFi 7) related configuration #####################################
-
-      ieee80211be=${bool01 ifcfg.wifi7.enable}
       ${optionalString ifcfg.wifi7.enable ''
+        ##### IEEE 802.11be (WiFi 7) related configuration #####################################
+
+        ieee80211be=1
         eht_oper_chwidth=${operatingChannelWidth.${ifcfg.wifi7.operatingChannelWidth}}
         eht_su_beamformer=${bool01 ifcfg.wifi7.singleUserBeamformer}
         eht_su_beamformee=${bool01 ifcfg.wifi7.singleUserBeamformee}
@@ -185,7 +180,7 @@
 
   makeInterfaceRuntimeFiles = interface: ifcfg: let
     # All MAC addresses from SAE entries that aren't the wildcard address
-    saeMacs = filter (mac: mac != null && (toLower mac) != "ff:ff:ff:ff:ff:ff") (mapAttrs (x: x.mac) ifcfg.authentication.saePasswords);
+    saeMacs = filter (mac: mac != null && (toLower mac) != "ff:ff:ff:ff:ff:ff") (map (x: x.mac) ifcfg.authentication.saePasswords);
   in
     pkgs.writeShellScript "make-hostapd-${interface}-files" (''
         set -euo pipefail
@@ -213,17 +208,17 @@
         ''
         # Populate mac allow list from saePasswords
         ++ optional (ifcfg.authentication.saeAddToMacAllow && saeMacs != []) ''
-          cat >> "$mac_deny_file" <<EOF
+          cat >> "$mac_allow_file" <<EOF
           ${concatStringsSep "\n" saeMacs}
           EOF
         ''
         # Populate mac allow list from saePasswordsFile
         # (filter for lines with mac=;  exclude commented lines; filter for real mac-addresses; strip mac=)
-        ++ optional (ifcfg.authentication.saeAddToMacAllow && ifcfg.authentication.saePasswords != []) ''
+        ++ optional (ifcfg.authentication.saeAddToMacAllow && ifcfg.authentication.saePasswordsFile != null) ''
           grep mac= ${escapeShellArg ifcfg.authentication.saePasswordsFile} \
             | grep -v '\s*#' \
             | grep -Eo 'mac=([0-9A-Fa-f]{2}[:]){5}([0-9A-Fa-f]{2})' \
-            | sed 's|^mac=||' >> "$mac_deny_file"
+            | sed 's|^mac=||' >> "$mac_allow_file"
         ''
         # Create combined mac.deny list from macDeny and macDenyFile
         ++ optional (ifcfg.macDeny != []) ''
@@ -234,14 +229,16 @@
         ++ optional (ifcfg.macDenyFile != null) ''
           grep -Eo '^([0-9A-Fa-f]{2}[:]){5}([0-9A-Fa-f]{2})' ${escapeShellArg ifcfg.macDenyFile} >> "$mac_deny_file"
         ''
-        # Depending on which password sources are defined, add corresponding definitions.
+        # Add WPA passphrase from file if necessary
         ++ optional (ifcfg.authentication.wpaPasswordFile != null) ''
           cat >> "$hostapd_config_file" <<EOF
           wpa_passphrase=$(cat ${escapeShellArg ifcfg.authentication.wpaPasswordFile})
           EOF
         ''
+        # Add SAE passwords from file if necessary
         ++ optional (ifcfg.authentication.saePasswordsFile != null) ''
-          sed 's/^/sae_password=/' ${escapeShellArg ifcfg.authentication.saePasswordsFile} >> "$hostapd_config_file"
+          grep -v '\s*#' ${escapeShellArg ifcfg.authentication.saePasswordsFile} \
+            | sed 's/^/sae_password=/' >> "$hostapd_config_file"
         ''
         # Finally append extraConfig if necessary.
         ++ optional (ifcfg.extraConfig != "") ''
@@ -276,19 +273,34 @@ in {
             # WiFi 4 (2.4GHz)
             "wlp2s0" = {
               ssid = "AP 1";
+              # countryCode = "US";
               authentication.saePasswords = [{ password = "a flakey password"; }]; # Use saePasswordsFile if possible.
+            };
+
+            # Hidden hotspot for IoT devices (MAC ACL list, invisible ssid, isolated traffic)
+            "wlp3s0" = {
+              ssid = "IoT Isolated AP";
+              # countryCode = "US";
+              macAcl = "deny";
+              apIsolate = true;
+              authentication = {
+                saePasswords = [{ password = "a flakey password"; }]; # Use saePasswordsFile if possible.
+                saeAddToMacAllow = true;
+              };
             };
 
             # WiFi 5 (5GHz)
             "wlp4s0" = {
               ssid = "Open AP with WiFi5";
+              # countryCode = "US";
               hwMode = "a";
               authentication.mode = "none";
             };
 
             # Legacy WPA2 example
-            "wlp3s0" = {
+            "wlp5s0" = {
               ssid = "AP 2";
+              # countryCode = "US";
               channel = 0; # Enables automatic channel selection ACS. Use only if your hardware support's it.
               authentication = {
                 mode = "wpa2-sha256";
@@ -485,7 +497,9 @@ in {
               type = types.enum ["disabled" "empty" "clear"];
               description = mdDoc ''
                 Send empty SSID in beacons and ignore probe request frames that do not
-                specify full SSID, i.e., require stations to know SSID.
+                specify full SSID, i.e., require stations to know SSID. Note that this does
+                not increase security, since your clients will then broadcast the SSID instead,
+                which can increase congestion.
 
                 - {var}`"disabled"`: Advertise ssid normally.
                 - {var}`"empty"`: send empty (length=0) SSID in beacon and ignore probe request for broadcast SSID
@@ -850,7 +864,10 @@ in {
               enable = mkOption {
                 default = false;
                 type = types.bool;
-                description = mdDoc "Enables support for IEEE 802.11be (WiFi 7, EHT)";
+                description = mdDoc ''
+                  Enables support for IEEE 802.11be (WiFi 7, EHT). This is currently experimental
+                  and requires you to manually enable CONFIG_IEEE80211BE when building hostapd.
+                '';
               };
 
               singleUserBeamformer = mkOption {
@@ -956,7 +973,7 @@ in {
       serviceConfig = {
         ExecStart = "${pkgs.hostapd}/bin/hostapd ${concatStringsSep " " runtimeConfigFiles}";
         Restart = "always";
-        ExecReload = "/bin/kill -HUP $MAINPID";
+        ExecReload = "${pkgs.coreutils}/bin/kill -HUP $MAINPID";
         RuntimeDirectory = "hostapd";
 
         # Hardening

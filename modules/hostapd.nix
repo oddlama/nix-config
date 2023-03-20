@@ -4,8 +4,30 @@
   pkgs,
   utils,
   ...
-}:
-with lib; let
+}: let
+  inherit
+    (lib)
+    any
+    attrValues
+    concatLists
+    concatMapStrings
+    concatStringsSep
+    count
+    escapeShellArg
+    filter
+    literalExpression
+    mapAttrs
+    mapAttrsToList
+    mdDoc
+    mkIf
+    mkOption
+    optional
+    optionals
+    optionalString
+    toLower
+    types
+    ;
+
   cfg = config.services.hostapd;
 
   # Maps the specified acl mode to values understood by hostapd
@@ -37,18 +59,12 @@ with lib; let
     "required" = "2";
   };
 
-  # A marker that will be replaced in service.hostapd.preStart to possibly add the
-  # AP password from a store-external location.
-  runtimePasswordDefinitionMarker = "##RUNTIME_PASSWORDS_DEFINITION##";
+  bool01 = b:
+    if b
+    then "1"
+    else "0";
 
-  configFileForInterface = interface: ifcfg: let
-    hasMacAllowList = length ifcfg.macAllow > 0 || ifcfg.macAllowFile != null;
-    hasMacDenyList = length ifcfg.macDeny > 0 || ifcfg.macDenyFile != null;
-    bool01 = b:
-      if b
-      then "1"
-      else "0";
-  in
+  configFileForInterface = interface: ifcfg:
     pkgs.writeText "hostapd-${interface}.conf" ''
       logger_syslog=-1
       logger_syslog_level=${toString ifcfg.logLevel}
@@ -76,10 +92,10 @@ with lib; let
       noscan=${bool01 ifcfg.noScan}
       # Set the MAC-address access control mode
       macaddr_acl=${macaddrAclModes.${ifcfg.macAcl}}
-      ${optionalString hasMacAllowList ''
+      ${optionalString (ifcfg.macAllow != [] || ifcfg.macAllowFile != null) ''
         accept_mac_file=/run/hostapd/${interface}.mac.allow
       ''}
-      ${optionalString hasMacDenyList ''
+      ${optionalString (ifcfg.macDeny != [] || ifcfg.macDenyFile != null) ''
         deny_mac_file=/run/hostapd/${interface}.mac.deny
       ''}
       # Only allow WPA, disable WEP (insecure)
@@ -131,6 +147,8 @@ with lib; let
 
       ##### WPA/IEEE 802.11i configuration ##########################################
 
+      # Encrypt management frames to protect against deauthentication and similar attacks
+      ieee80211w=${managementFrameProtection.${ifcfg.managementFrameProtection}}
       ${optionalString (ifcfg.authentication.mode == "none") ''
         wpa=0
       ''}
@@ -162,54 +180,81 @@ with lib; let
       ${optionalString (ifcfg.authentication.wpaPskFile != null) ''
         wpa_passphrase=${ifcfg.authentication.wpaPskFile}
       ''}
-      ${optionalString (length ifcfg.authentication.saePasswords > 0) (concatMapStrings (pw: "sae_password=${pw}\n") ifcfg.authentication.saePasswords)}
-      ${runtimePasswordDefinitionMarker}
-
-      # Encrypt management frames to protect against deauthentication and similar attacks
-      ieee80211w=${managementFrameProtection.${ifcfg.managementFrameProtection}}
-
-      ##### User-provided extra configuration ##########################################
-
-      ${ifcfg.extraConfig}
+      ${optionalString (ifcfg.authentication.saePasswords != []) (concatMapStrings (pw: "sae_password=${pw}\n") ifcfg.authentication.saePasswords)}
     '';
 
-  runtimeConfigFiles = mapAttrsToList (i: _: "/run/hostapd/${i}.hostapd.conf") cfg.interfaces;
-
-  makeInterfaceRuntimeFiles = interface: ifcfg:
-    pkgs.writeShellScript ("make-hostapd-${interface}-files" ''
+  makeInterfaceRuntimeFiles = interface: ifcfg: let
+    # All MAC addresses from SAE entries that aren't the wildcard address
+    saeMacs = filter (mac: mac != null && (toLower mac) != "ff:ff:ff:ff:ff:ff") (mapAttrs (x: x.mac) ifcfg.authentication.saePasswords);
+  in
+    pkgs.writeShellScript "make-hostapd-${interface}-files" (''
         set -euo pipefail
 
-        rm -f /run/hostapd/${interface}.mac.allow
-        touch /run/hostapd/${interface}.mac.allow
-        rm -f /run/hostapd/${interface}.mac.deny
-        touch /run/hostapd/${interface}.mac.deny
-        rm -f /run/hostapd/${interface}.hostapd.conf
-        cp ${configFileForInterface interface ifcfg} /run/hostapd/${interface}.hostapd.conf
+        mac_allow_file=/run/hostapd/${escapeShellArg interface}.mac.allow
+        mac_deny_file=/run/hostapd/${escapeShellArg interface}.mac.deny
+        hostapd_config_file=/run/hostapd/${escapeShellArg interface}.hostapd.conf
+
+        rm -f "$mac_allow_file"
+        touch "$mac_allow_file"
+        rm -f "$mac_deny_file"
+        touch "$mac_deny_file"
+        rm -f "$hostapd_config_file"
+        cp ${configFileForInterface interface ifcfg} "$hostapd_config_file"
 
       ''
-      ++ concatStringsSep "\n" (
-        optional (length ifcfg.macAllow > 0) ''
-          cat >> /run/hostapd/${interface}.mac.allow <<EOF
+      + concatStringsSep "\n" (
+        optional (ifcfg.macAllow != []) ''
+          cat >> "$mac_allow_file" <<EOF
           ${concatStringsSep "\n" ifcfg.macAllow}
           EOF
         ''
         ++ optional (ifcfg.macAllowFile != null) ''
-          grep -Eo '^([0-9A-Fa-f]{2}[:]){5}([0-9A-Fa-f]{2})' ${escapeShellArg ifcfg.macAllowFile} >> /run/hostapd/${interface}.mac.allow
+          grep -Eo '^([0-9A-Fa-f]{2}[:]){5}([0-9A-Fa-f]{2})' ${escapeShellArg ifcfg.macAllowFile} >> "$mac_allow_file"
+        ''
+        # Populate mac allow list from saePasswords
+        ++ optional (ifcfg.authentication.saeAddToMacAllow && saeMacs != []) ''
+          cat >> "$mac_deny_file" <<EOF
+          ${concatStringsSep "\n" saeMacs}
+          EOF
+        ''
+        # Populate mac allow list from saePasswordsFile
+        # (filter for lines with mac=;  exclude commented lines; filter for real mac-addresses; strip mac=)
+        ++ optional (ifcfg.authentication.saeAddToMacAllow && ifcfg.authentication.saePasswords != []) ''
+          grep mac= ${escapeShellArg ifcfg.authentication.saePasswordsFile} \
+            | grep -v '\s*#' \
+            | grep -Eo 'mac=([0-9A-Fa-f]{2}[:]){5}([0-9A-Fa-f]{2})' \
+            | sed 's|^mac=||' >> "$mac_deny_file"
         ''
         # Create combined mac.deny list from macDeny and macDenyFile
-        ++ optional (length ifcfg.macDeny > 0) ''
-          cat >> /run/hostapd/${interface}.mac.deny <<EOF
+        ++ optional (ifcfg.macDeny != []) ''
+          cat >> "$mac_deny_file" <<EOF
           ${concatStringsSep "\n" ifcfg.macDeny}
           EOF
         ''
         ++ optional (ifcfg.macDenyFile != null) ''
-          grep -Eo '^([0-9A-Fa-f]{2}[:]){5}([0-9A-Fa-f]{2})' ${escapeShellArg ifcfg.macDenyFile} >> /run/hostapd/${interface}.mac.deny
+          grep -Eo '^([0-9A-Fa-f]{2}[:]){5}([0-9A-Fa-f]{2})' ${escapeShellArg ifcfg.macDenyFile} >> "$mac_deny_file"
         ''
-        ++ optional (ifcfg.wpaPasswordFile != null) ''
-          awk -v marker=${escapeShellArg (escapeRegex runtimePasswordDefinitionMarker)} -v content="$replacement" '{gsub(marker,content)}' /run/hostapd/${interface}.hostapd.conf
+        # Depending on which password sources are defined, add corresponding definitions.
+        ++ optional (ifcfg.authentication.wpaPasswordFile != null) ''
+          cat >> "$hostapd_config_file" <<EOF
+          wpa_passphrase=$(cat ${escapeShellArg ifcfg.authentication.wpaPasswordFile})
+          EOF
         ''
-        # TODO replace marker if it's left.
+        ++ optional (ifcfg.authentication.saePasswordsFile != null) ''
+          sed 's/^/sae_password=/' ${escapeShellArg ifcfg.authentication.saePasswordsFile} >> "$hostapd_config_file"
+        ''
+        # Finally append extraConfig if necessary.
+        ++ optional (ifcfg.extraConfig != "") ''
+          cat >> "$hostapd_config_file" <<EOF
+
+          ##### User-provided extra configuration ##########################################
+
+          EOF
+          cat ${escapeShellArg (pkgs.writeText ifcfg.extraConfig)} >> "$hostapd_config_file"
+        ''
       ));
+
+  runtimeConfigFiles = mapAttrsToList (i: _: "/run/hostapd/${i}.hostapd.conf") cfg.interfaces;
 in {
   options = {
     services.hostapd = {
@@ -226,15 +271,29 @@ in {
 
       interfaces = mkOption {
         default = {};
-        # TODO
         example = literalExpression ''
           {
-            # WiFi 4 - 2.4GHz
+            # WiFi 4 (2.4GHz)
             "wlp2s0" = {
-              ssid = "";
+              ssid = "AP 1";
+              authentication.saePasswords = [{ password = "a flakey password"; }]; # Use saePasswordsFile if possible.
             };
-            # WiFi 5 - 5GHz
+
+            # WiFi 5 (5GHz)
+            "wlp4s0" = {
+              ssid = "Open AP with WiFi5";
+              hwMode = "a";
+              authentication.mode = "none";
+            };
+
+            # Legacy WPA2 example
             "wlp3s0" = {
+              ssid = "AP 2";
+              channel = 0; # Enables automatic channel selection ACS. Use only if your hardware support's it.
+              authentication = {
+                mode = "wpa2-sha256";
+                wpaPassword = "a flakey password"; # Use wpaPasswordFile if possible.
+              };
             };
           }
         '';
@@ -440,8 +499,8 @@ in {
               default = false;
               type = types.bool;
               description = mdDoc ''
-                Isolate traffic between stations (clients) and prevent
-                them from communicating with each other.
+                Isolate traffic between stations (clients) and prevent them from
+                communicating with each other.
               '';
             };
 
@@ -454,13 +513,228 @@ in {
               description = mdDoc "Extra configuration options to put at the end of this interface's hostapd.conf.";
             };
 
+            #### IEEE 802.11i (WPA) configuration
+
+            authentication = {
+              mode = mkOption {
+                default = "wpa3-sae";
+                type = types.enum ["none" "wpa2-sha256" "wpa3-sae-transition" "wpa3-sae"];
+                description = mdDoc ''
+                  Selects the authentication mode for this AP.
+
+                  - {var}`"none"`: Don't configure any authentication. This will disable wpa alltogether
+                    and create an open AP. Use {option}`extraConfig` together with this option if you
+                    want to configure the authentication manually. Any password options will still be
+                    effective, if set.
+                  - {var}`"wpa2-sha256"`: WPA2-Personal using SHA256 (IEEE 802.11i/RSN). Passwords are set
+                    using {option}`wpaPassword` or preferably by {option}`wpaPasswordFile` or {option}`wpaPskFile`.
+                  - {var}`"wpa3-sae-transition"`: Use WPA3-Personal (SAE) if possible, otherwise fallback
+                    to WPA2-SHA256. Only use if necessary and switch to the newer WPA3-SAE when possible.
+                    You will have to specify both {option}`wpaPassword` and {option}`saePasswords` (or one of their alternatives).
+                  - {var}`"wpa3-sae"`: Use WPA3-Personal (SAE). This is currently the recommended way to
+                    setup a secured WiFi AP (as of March 2023) and therefore the default. Passwords are set
+                    using either {option}`saePasswords` or preferably {option}`saePasswordsFile`.
+                '';
+              };
+
+              pairwiseCiphers = mkOption {
+                default = ["CCMP" "CCMP-256" "GCMP" "GCMP-256"];
+                example = ["CCMP-256" "GCMP-256"];
+                type = types.listOf types.str;
+                description = mdDoc ''
+                  Set of accepted cipher suites (encryption algorithms) for pairwise keys (unicast packets).
+                  Please refer to the hostapd documentation for allowed values. Generally, only
+                  CCMP or GCMP modes should be considered safe options. Most devices support CCMP while
+                  GCMP is often only available when using devices supporting WiFi 5 (IEEE 802.11ac) or higher.
+                '';
+              };
+
+              wpaPassword = mkOption {
+                default = null;
+                example = "a flakey password";
+                type = types.uniq (types.nullOr types.str);
+                description = mdDoc ''
+                  Sets the password for WPA-PSK that will be converted to the pre-shared key.
+                  The password length must be in the range [8, 63] characters. While some devices
+                  may allow arbitrary characters (such as UTF-8) to be used, but the standard specifies
+                  that each character in the passphrase must be an ASCII character in the range [0x20, 0x7e]
+                  (IEEE Std. 802.11i-2004, Annex H.4.1). Use emojis at your own risk.
+
+                  Not used when {option}`mode` is {var}`"wpa3-sae"`.
+
+                  Warning: This password will get put into a world-readable file in the Nix store!
+                  Using {option}`wpaPasswordFile` or {option}`wpaPskFile` instead is recommended.
+                '';
+              };
+
+              wpaPasswordFile = mkOption {
+                default = null;
+                type = types.uniq (types.nullOr types.path);
+                description = mdDoc ''
+                  Sets the password for WPA-PSK. Follows the same rules as {option}`wpaPassword`,
+                  but reads the password from the given file to prevent the password from being
+                  put into the Nix store.
+
+                  Not used when {option}`mode` is {var}`"wpa3-sae"`.
+                '';
+              };
+
+              wpaPskFile = mkOption {
+                default = null;
+                type = types.uniq (types.nullOr types.path);
+                description = mdDoc ''
+                  Sets the password(s) for WPA-PSK. Similar to {option}`wpaPasswordFile`,
+                  but additionally allows specifying multiple passwords, and some other options.
+
+                  Each line, except for empty lines and lines starting with #, must contain a
+                  MAC address and either a 64-hex-digit PSK or a password separated with a space.
+                  The password must follow the same rules as outlined in {option}`wpaPassword`.
+                  The special MAC address `00:00:00:00:00:00` can be used to configure PSKs
+                  that any client can use.
+
+                  An optional key identifier can be added by prefixing the line with `keyid=<keyid_string>`
+                  An optional VLAN ID can be specified by prefixing the line with `vlanid=<VLAN ID>`.
+                  An optional WPS tag can be added by prefixing the line with `wps=<0/1>` (default: 0).
+                  Any matching entry with that tag will be used when generating a PSK for a WPS Enrollee
+                  instead of generating a new random per-Enrollee PSK.
+
+                  Not used when {option}`mode` is {var}`"wpa3-sae"`.
+                '';
+              };
+
+              saePasswords = mkOption {
+                default = [];
+                example = literalExpression ''
+                  [
+                    # Any client may use these passwords
+                    { password = "Wi-Figure it out"; }
+                    { password = "second password for everyone"; mac = "ff:ff:ff:ff:ff:ff"; }
+
+                    # Only the client with MAC-address 11:22:33:44:55:66 can use this password
+                    { password = "sekret pazzword"; mac = "11:22:33:44:55:66"; }
+                  ]
+                '';
+                description = mdDoc ''
+                  Sets allowed passwords for WPA3-SAE.
+
+                  The last matching (based on peer MAC address and identifier) entry is used to
+                  select which password to use. An empty string has the special meaning of
+                  removing all previously added entries.
+
+                  Warning: These entries will get put into a world-readable file in
+                  the Nix store! Using {option}`saePasswordFile` instead is recommended.
+
+                  Not used when {option}`mode` is {var}`"wpa2-sha256"`.
+                '';
+                type = types.listOf (types.submodule {
+                  options = {
+                    password = mkOption {
+                      example = "a flakey password";
+                      type = types.str;
+                      description = mdDoc ''
+                        The password for this entry. SAE technically imposes no restrictions on
+                        password length or character set. But due to limitations of {command}`hostapd`'s
+                        config file format, a true newline character cannot be parsed.
+
+                        Warning: This password will get put into a world-readable file in
+                        the Nix store! Using {option}`wpaPasswordFile` or {option}`wpaPskFile` is recommended.
+                      '';
+                    };
+
+                    mac = mkOption {
+                      default = null;
+                      example = "11:22:33:44:55:66";
+                      type = types.uniq (types.nullOr types.str);
+                      description = mdDoc ''
+                        If this attribute is not included, or if is set to the wildcard address (`ff:ff:ff:ff:ff:ff`),
+                        the entry is available for any station (client) to use. If a specific peer MAC address is included,
+                        only a station with that MAC address is allowed to use the entry.
+                      '';
+                    };
+
+                    vlanid = mkOption {
+                      default = null;
+                      example = 1;
+                      type = types.uniq (types.nullOr types.int);
+                      description = mdDoc "If this attribute is given, all clients using this entry will get tagged with the given VLAN ID.";
+                    };
+
+                    pk = mkOption {
+                      default = null;
+                      example = "";
+                      type = types.uniq (types.nullOr types.str);
+                      description = mdDoc ''
+                        If this attribute is given, SAE-PK will be enabled for this connection.
+                        This prevents evil-twin attacks, but a public key is required additionally to connect.
+                        (Essentially adds pubkey authentication such that the client can verify identity of the AP)
+                      '';
+                    };
+
+                    id = mkOption {
+                      default = null;
+                      example = "";
+                      type = types.uniq (types.nullOr types.str);
+                      description = mdDoc ''
+                        If this attribute is given with non-zero length, it will set the password identifier
+                        for this entry. It can then only be used with that identifier.
+                      '';
+                    };
+                  };
+                });
+              };
+
+              saePasswordsFile = mkOption {
+                default = null;
+                type = types.uniq (types.nullOr types.path);
+                description = mdDoc ''
+                  Sets the password for WPA3-SAE. Follows the same rules as {option}`saePasswords`,
+                  but reads the entries from the given file to prevent them from being
+                  put into the Nix store.
+
+                  One entry per line, empty lines and lines beginning with # will be ignored.
+                  Each line must match the following format, although the order of optional
+                  parameters doesn't matter:
+                  `<password>[|mac=<peer mac>][|vlanid=<VLAN ID>][|pk=<m:ECPrivateKey-base64>][|id=<identifier>]`
+
+                  Not used when {option}`mode` is {var}`"wpa2-sha256"`.
+                '';
+              };
+
+              saeAddToMacAllow = mkOption {
+                type = types.bool;
+                default = false;
+                description = mdDoc ''
+                  If set, all sae password entries that have a non-wildcard MAC associated to
+                  them will additionally be used to populate the MAC allow list. This is
+                  additional to any entries set via {option}`macAllow` or {option}`macAllowFile`.
+                '';
+              };
+            };
+
+            managementFrameProtection = mkOption {
+              default = "required";
+              type = types.enum ["disabled" "optional" "required"];
+              description = mdDoc ''
+                Management frame protection (MFP) authenticates management frames
+                to prevent deauthentication (or related) attacks.
+
+                - {var}`"disabled"`: No management frame protection
+                - {var}`"optional"`: Use MFP if a connection allows it
+                - {var}`"required"`: Force MFP for all clients
+              '';
+            };
+
             #### IEEE 802.11n (WiFi 4) related configuration
 
             wifi4 = {
               enable = mkOption {
                 default = true;
                 type = types.bool;
-                description = mdDoc "Enables support for IEEE 802.11n (WiFi 4, HT)";
+                description = mdDoc ''
+                  Enables support for IEEE 802.11n (WiFi 4, HT).
+                  This is enabled by default, since the vase majority of devices
+                  are expected to support this.
+                '';
               };
 
               capabilities = mkOption {
@@ -523,7 +797,7 @@ in {
               };
             };
 
-            ##### IEEE 802.11ax (WiFi 6) related configuration
+            #### IEEE 802.11ax (WiFi 6) related configuration
 
             wifi6 = {
               enable = mkOption {
@@ -570,7 +844,7 @@ in {
               };
             };
 
-            ##### IEEE 802.11be (WiFi 7) related configuration
+            #### IEEE 802.11be (WiFi 7) related configuration
 
             wifi7 = {
               enable = mkOption {
@@ -610,168 +884,6 @@ in {
                 '';
               };
             };
-
-            ##### IEEE 802.11i (WPA) configuration
-
-            authentication = {
-              mode = mkOption {
-                default = "wpa3-sae";
-                type = types.enum ["none" "wpa2-sha256" "wpa3-sae-transition" "wpa3-sae"];
-                description = mdDoc ''
-                  Selects the authentication mode for this AP.
-
-                  - {var}`"none"`: Don't configure any authentication. This will disable wpa alltogether
-                    and create an open AP. Use {option}`extraConfig` together with this option if you
-                    want to configure the authentication manually. Any password options will still be
-                    effective, if set.
-                  - {var}`"wpa2-sha256"`: WPA2-Personal using SHA256 (IEEE 802.11i/RSN). Passwords are set
-                    using {option}`wpaPassword` or preferably by {option}`wpaPasswordFile` or {option}`wpaPskFile`.
-                  - {var}`"wpa3-sae-transition"`: Use WPA3-Personal (SAE) if possible, otherwise fallback
-                    to WPA2-SHA256. Only use if necessary and switch to the newer WPA3-SAE when possible.
-                    You will have to specify both {option}`wpaPassword` and {option}`saePasswords` (or one of their alternatives).
-                  - {var}`"wpa3-sae"`: Use WPA3-Personal (SAE). This is currently the recommended way to
-                    setup a secured WiFi AP (as of March 2023) and therefore the default. Passwords are set
-                    using either {option}`saePasswords` or preferably {option}`saePasswordsFile`.
-                '';
-              };
-
-              pairwiseCiphers = mkOption {
-                default = ["CCMP" "CCMP-256" "GCMP" "GCMP-256"];
-                example = ["CCMP-256" "GCMP-256"];
-                type = types.listOf types.str;
-                description = mdDoc ''
-                  Set of accepted cipher suites (encryption algorithms) for pairwise keys (unicast packets).
-                  Please refer to the hostapd documentation for allowed values. Generally, only
-                  CCMP or GCMP modes should be considered safe options. Most devices support CCMP while
-                  GCMP is often only available when using devices supporting WiFi 5 (IEEE 802.11ac) or higher.
-                '';
-              };
-
-              wpaPassword = mkOption {
-                default = null;
-                example = "a flakey password";
-                type = types.uniq (types.nullOr types.str);
-                description = mdDoc ''
-                  Sets the password for WPA-PSK that will be converted to the pre-shared key.
-                  The password length must be in the range [8, 63] characters. While some devices
-                  may allow arbitrary characters (such as UTF-8) to be used, but the standard specifies
-                  that each character in the passphrase must be an ASCII character in the range [0x20, 0x7e]
-                  (IEEE Std. 802.11i-2004, Annex H.4.1). Use emojis at your own risk.
-
-                  Not used when {option}`mode` is {var}`"wpa3-sae"`.
-
-                  Warning: This passphrase will get put into a world-readable file in
-                  the Nix store! Using {option}`wpaPasswordFile` or {option}`wpaPskFile` is recommended.
-                '';
-              };
-
-              wpaPasswordFile = mkOption {
-                default = null;
-                type = types.uniq (types.nullOr types.path);
-                description = mdDoc ''
-                  Sets the password for WPA-PSK. Follows the same rules as {option}`wpaPassword`,
-                  but reads the password from the given file to prevent the password from being
-                  put into the Nix store.
-
-                  Not used when {option}`mode` is {var}`"wpa3-sae"`.
-                '';
-              };
-
-              wpaPskFile = mkOption {
-                default = null;
-                type = types.uniq (types.nullOr types.path);
-                description = mdDoc ''
-                  Sets the password(s) for WPA-PSK. Similar to {option}`wpaPasswordFile`,
-                  but additionally allows specifying multiple passwords, and some other options.
-
-                  Each line, except for empty lines and lines starting with #, must contain a
-                  MAC address and either a 64-hex-digit PSK or a password separated with a space.
-                  The password must follow the same rules as outlined in {option}`wpaPassword`.
-                  The special MAC address `00:00:00:00:00:00` can be used to configure PSKs
-                  that any client can use.
-
-                  An optional key identifier can be added by prefixing the line with `keyid=<keyid_string>`
-                  An optional VLAN ID can be specified by prefixing the line with `vlanid=<VLAN ID>`.
-                  An optional WPS tag can be added by prefixing the line with `wps=<0/1>` (default: 0).
-                  Any matching entry with that tag will be used when generating a PSK for a WPS Enrollee
-                  instead of generating a new random per-Enrollee PSK.
-
-                  Not used when {option}`mode` is {var}`"wpa3-sae"`.
-                '';
-              };
-
-              saePasswords = mkOption {
-                default = null;
-                example = literalExpression ''
-                  [
-                    # Any client may use these passwords
-                    "Wi-Figure it out"
-                    "second password for everyone|mac=ff:ff:ff:ff:ff:ff"
-                    # Only the client with MAC-address 11:22:33:44:55:66 can use this password
-                    "sekret pazzword|mac=11:22:33:44:55:66"
-                  ]
-                '';
-                type = types.listOf types.str;
-                description = mdDoc ''
-                  Sets allowed passwords for WPA3-SAE. The password entries use the following format:
-                  `<password>[|mac=<peer mac>][|vlanid=<VLAN ID>][|pk=<m:ECPrivateKey-base64>][|id=<identifier>]`
-                  The order of optional parameters doesn't matter.
-
-                  If `mac=` is not included or is set to the wildcard address (`ff:ff:ff:ff:ff:ff`),
-                  the entry is available for any station to use. If a specific peer MAC address is included,
-                  only a station with that MAC address is allowed to use the entry.
-
-                  If `vlanid=` is given, all clients using this entry will get tagged with the given VLAN ID.
-
-                  If `pk=` is given, SAE-PK will be enabled for this connection.
-                  This prevents evil-twin attacks on this AP, but a public key is required.
-                  (Essentially adds pubkey authentication such that the client can verify identity of the AP)
-
-                  If `id=` (the password identifier) is given with non-zero length, the entry is
-                  limited to be used only with that specified identifier.
-
-                  The last matching (based on peer MAC address and identifier) entry is used to
-                  select which password to use. An empty string has the special meaning of
-                  removing all previously added entries.
-
-                  SAE technically imposes no restrictions on password length and
-                  or characters. But due to limitations of {command}`hostapd`'s config file format,
-                  a true newline character cannot be parsed.
-
-                  Warning: This passphrase will get put into a world-readable file in
-                  the Nix store! Using {option}`wpaPasswordFile` or {option}`wpaPskFile` is recommended.
-
-                  Not used when {option}`mode` is {var}`"wpa2-sha256"`.
-                '';
-              };
-
-              saePasswordsFile = mkOption {
-                default = null;
-                type = types.uniq (types.nullOr types.path);
-                description = mdDoc ''
-                  Sets the password for WPA3-SAE. Follows the same rules as {option}`saePasswords`,
-                  but reads the entries from the given file to prevent them from being
-                  put into the Nix store.
-
-                  One entry per line, empty lines and lines beginning with # will be ignored.
-
-                  Not used when {option}`mode` is {var}`"wpa2-sha256"`.
-                '';
-              };
-            };
-
-            managementFrameProtection = mkOption {
-              default = "required";
-              type = types.enum ["disabled" "optional" "required"];
-              description = mdDoc ''
-                Management frame protection (MFP) authenticates management frames
-                to prevent deauthentication (or related) attacks.
-
-                - {var}`"disabled"`: No management frame protection
-                - {var}`"optional"`: Use MFP if a connection allows it
-                - {var}`"required"`: Force MFP for all clients
-              '';
-            };
           };
         });
       };
@@ -782,13 +894,13 @@ in {
     assertions =
       [
         {
-          assertion = length (attrNames cfg.interfaces) > 0;
+          assertion = cfg.interfaces != {};
           message = "At least one interface must be configured with hostapd!";
         }
       ]
       # Interface warnings
       ++ (concatLists (mapAttrsToList (interface: ifcfg: let
-          countWpaPasswordDefinitions = count (x: x != null) [ifcfg.wpaPassword ifcfg.wpaPasswordFile ifcfg.wpaPskFile];
+          countWpaPasswordDefinitions = count (x: x != null) [ifcfg.authentication.wpaPassword ifcfg.authentication.wpaPasswordFile ifcfg.authentication.wpaPskFile];
         in [
           {
             assertion = (ifcfg.wifi5.enable || ifcfg.wifi6.enable || ifcfg.wifi7.enable) -> ifcfg.hwMode == "a";
@@ -807,15 +919,15 @@ in {
             message = ''hostapd interface ${interface} must use at most one WPA password option (wpaPassword, wpaPasswordFile, wpaPskFile)'';
           }
           {
-            assertion = length ifcfg.saePasswords == 0 || ifcfg.saePasswordsFile == null;
+            assertion = ifcfg.authentication.saePasswords == [] || ifcfg.authentication.saePasswordsFile == null;
             message = ''hostapd interface ${interface} must use only one SAE password option (saePasswords or saePasswordsFile)'';
           }
           {
-            assertion = ifcfg.authentication.mode == "wpa3-sae" -> (length ifcfg.saePasswords > 0 || ifcfg.saePasswordsFile != null);
+            assertion = ifcfg.authentication.mode == "wpa3-sae" -> (ifcfg.authentication.saePasswords != [] || ifcfg.authentication.saePasswordsFile != null);
             message = ''hostapd interface ${interface} uses WPA3-SAE which requires defining a sae password option'';
           }
           {
-            assertion = ifcfg.authentication.mode == "wpa3-sae-transition" -> (length ifcfg.saePasswords > 0 || ifcfg.saePasswordsFile != null) && countWpaPasswordDefinitions == 1;
+            assertion = ifcfg.authentication.mode == "wpa3-sae-transition" -> (ifcfg.authentication.saePasswords != [] || ifcfg.authentication.saePasswordsFile != null) && countWpaPasswordDefinitions == 1;
             message = ''hostapd interface ${interface} uses WPA3-SAE in transition mode requires defining both a wpa password option and a sae password option'';
           }
           {

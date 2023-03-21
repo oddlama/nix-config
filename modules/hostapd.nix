@@ -23,6 +23,7 @@
     optional
     optionals
     optionalString
+    stringLength
     toLower
     types
     ;
@@ -851,7 +852,7 @@ in {
 
             wifi7 = {
               enable = mkOption {
-                # FIXME: Change this to true once WiFi 7 is stable
+                # FIXME: Change this to true once WiFi 7 is stable and hostapd is built with CONFIG_IEEE80211BE by default
                 default = false;
                 type = types.bool;
                 description = mdDoc ''
@@ -922,6 +923,10 @@ in {
             message = ''hostapd interface ${interface} must use at most one WPA password option (wpaPassword, wpaPasswordFile, wpaPskFile)'';
           }
           {
+            assertion = ifcfg.authentication.wpaPassword != null -> (stringLength ifcfg.authentication.wpaPassword >= 8 && stringLength ifcfg.authentication.wpaPassword <= 63);
+            message = ''hostapd interface ${interface} uses a wpaPassword of invalid length (must be in [8,63]).'';
+          }
+          {
             assertion = ifcfg.authentication.saePasswords == [] || ifcfg.authentication.saePasswordsFile == null;
             message = ''hostapd interface ${interface} must use only one SAE password option (saePasswords or saePasswordsFile)'';
           }
@@ -945,7 +950,7 @@ in {
     services.udev.packages = optionals (any (i: i.countryCode != null) (attrValues cfg.interfaces)) [pkgs.crda];
 
     systemd.services.hostapd = {
-      description = "Hostapd IEEE 802.11 AP";
+      description = "Hostapd IEEE 802.11 AP Daemon";
 
       path = [pkgs.hostapd];
       after = mapAttrsToList (interface: _: "sys-subsystem-net-devices-${utils.escapeSystemdPath interface}.device") cfg.interfaces;

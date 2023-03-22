@@ -7,21 +7,22 @@
 }: let
   inherit
     (lib)
-    any
+    attrNames
     attrValues
     concatLists
+    concatMap
     concatMapStrings
     concatStringsSep
     count
     escapeShellArg
     filter
+    getAttr
     literalExpression
     mapAttrsToList
     mdDoc
     mkIf
     mkOption
     optional
-    optionals
     optionalString
     stringLength
     toLower
@@ -29,35 +30,6 @@
     ;
 
   cfg = config.services.hostapd;
-
-  # Maps the specified acl mode to values understood by hostapd
-  macaddrAclModes = {
-    "allow" = "0";
-    "deny" = "1";
-    "radius" = "2";
-  };
-
-  # Maps the specified ignore broadcast ssid mode to values understood by hostapd
-  ignoreBroadcastSsidModes = {
-    "disabled" = "0";
-    "empty" = "1";
-    "clear" = "2";
-  };
-
-  # Maps the specified vht and he channel widths to values understood by hostapd
-  operatingChannelWidth = {
-    "20or40" = "0";
-    "80" = "1";
-    "160" = "2";
-    "80+80" = "3";
-  };
-
-  # Maps the specified vht and he channel widths to values understood by hostapd
-  managementFrameProtection = {
-    "disabled" = "0";
-    "optional" = "1";
-    "required" = "2";
-  };
 
   bool01 = b:
     if b
@@ -91,7 +63,7 @@
       channel=${toString ifcfg.channel}
       noscan=${bool01 ifcfg.noScan}
       # Set the MAC-address access control mode
-      macaddr_acl=${macaddrAclModes.${ifcfg.macAcl}}
+      macaddr_acl=${ifcfg.macAcl}
       ${optionalString (ifcfg.macAllow != [] || ifcfg.macAllowFile != null || ifcfg.authentication.saeAddToMacAllow) ''
         accept_mac_file=/run/hostapd/${interface}.mac.allow
       ''}
@@ -100,7 +72,7 @@
       ''}
       # Only allow WPA, disable insecure WEP
       auth_algs=1
-      ignore_broadcast_ssid=${ignoreBroadcastSsidModes.${ifcfg.ignoreBroadcastSsid}}
+      ignore_broadcast_ssid=${ifcfg.ignoreBroadcastSsid}
       # Always enable QoS, which is required for 802.11n and above
       wmm_enabled=1
       ap_isolate=${bool01 ifcfg.apIsolate}
@@ -119,14 +91,14 @@
         ieee80211ac=1
         vht_capab=${concatMapStrings (x: "[${x}]") ifcfg.wifi5.capabilities}
         require_vht=${bool01 ifcfg.wifi5.require}
-        vht_oper_chwidth=${operatingChannelWidth.${ifcfg.wifi5.operatingChannelWidth}}
+        vht_oper_chwidth=${ifcfg.wifi5.operatingChannelWidth}
       ''}
       ${optionalString ifcfg.wifi6.enable ''
         ##### IEEE 802.11ax (WiFi 6) related configuration #####################################
 
         ieee80211ax=1
         require_he=${bool01 ifcfg.wifi6.require}
-        he_oper_chwidth=${operatingChannelWidth.${ifcfg.wifi6.operatingChannelWidth}}
+        he_oper_chwidth=${ifcfg.wifi6.operatingChannelWidth}
         he_su_beamformer=${bool01 ifcfg.wifi6.singleUserBeamformer}
         he_su_beamformee=${bool01 ifcfg.wifi6.singleUserBeamformee}
         he_mu_beamformer=${bool01 ifcfg.wifi6.multiUserBeamformer}
@@ -135,7 +107,7 @@
         ##### IEEE 802.11be (WiFi 7) related configuration #####################################
 
         ieee80211be=1
-        eht_oper_chwidth=${operatingChannelWidth.${ifcfg.wifi7.operatingChannelWidth}}
+        eht_oper_chwidth=${ifcfg.wifi7.operatingChannelWidth}
         eht_su_beamformer=${bool01 ifcfg.wifi7.singleUserBeamformer}
         eht_su_beamformee=${bool01 ifcfg.wifi7.singleUserBeamformee}
         eht_mu_beamformer=${bool01 ifcfg.wifi7.multiUserBeamformer}
@@ -144,7 +116,7 @@
       ##### WPA/IEEE 802.11i configuration ##########################################
 
       # Encrypt management frames to protect against deauthentication and similar attacks
-      ieee80211w=${managementFrameProtection.${ifcfg.managementFrameProtection}}
+      ieee80211w=${ifcfg.managementFrameProtection}
       ${optionalString (ifcfg.authentication.mode == "none") ''
         wpa=0
       ''}
@@ -424,6 +396,12 @@ in {
             macAcl = mkOption {
               default = "allow";
               type = types.enum ["allow" "deny" "radius"];
+              apply = x:
+                getAttr x {
+                  "allow" = "0";
+                  "deny" = "1";
+                  "radius" = "2";
+                };
               description = mdDoc ''
                 Station MAC address -based authentication. The following modes are available:
 
@@ -484,6 +462,12 @@ in {
             ignoreBroadcastSsid = mkOption {
               default = "disabled";
               type = types.enum ["disabled" "empty" "clear"];
+              apply = x:
+                getAttr x {
+                  "disabled" = "0";
+                  "empty" = "1";
+                  "clear" = "2";
+                };
               description = mdDoc ''
                 Send empty SSID in beacons and ignore probe request frames that do not
                 specify full SSID, i.e., require stations to know SSID. Note that this does
@@ -717,6 +701,12 @@ in {
             managementFrameProtection = mkOption {
               default = "required";
               type = types.enum ["disabled" "optional" "required"];
+              apply = x:
+                getAttr x {
+                  "disabled" = "0";
+                  "optional" = "1";
+                  "required" = "2";
+                };
               description = mdDoc ''
                 Management frame protection (MFP) authenticates management frames
                 to prevent deauthentication (or related) attacks.
@@ -789,6 +779,13 @@ in {
               operatingChannelWidth = mkOption {
                 default = "20or40";
                 type = types.enum ["20or40" "80" "160" "80+80"];
+                apply = x:
+                  getAttr x {
+                    "20or40" = "0";
+                    "80" = "1";
+                    "160" = "2";
+                    "80+80" = "3";
+                  };
                 description = mdDoc ''
                   Determines the operating channel width for VHT.
 
@@ -837,6 +834,13 @@ in {
               operatingChannelWidth = mkOption {
                 default = "20or40";
                 type = types.enum ["20or40" "80" "160" "80+80"];
+                apply = x:
+                  getAttr x {
+                    "20or40" = "0";
+                    "80" = "1";
+                    "160" = "2";
+                    "80+80" = "3";
+                  };
                 description = mdDoc ''
                   Determines the operating channel width for HE.
 
@@ -882,6 +886,13 @@ in {
               operatingChannelWidth = mkOption {
                 default = "20or40";
                 type = types.enum ["20or40" "80" "160" "80+80"];
+                apply = x:
+                  getAttr x {
+                    "20or40" = "0";
+                    "80" = "1";
+                    "160" = "2";
+                    "80+80" = "3";
+                  };
                 description = mdDoc ''
                   Determines the operating channel width for EHT.
 
@@ -908,14 +919,18 @@ in {
       ]
       # Interface warnings
       ++ (concatLists (mapAttrsToList (interface: ifcfg: let
-          countWpaPasswordDefinitions = count (x: x != null) [ifcfg.authentication.wpaPassword ifcfg.authentication.wpaPasswordFile ifcfg.authentication.wpaPskFile];
+          countWpaPasswordDefinitions = count (x: x != null) [
+            ifcfg.authentication.wpaPassword
+            ifcfg.authentication.wpaPasswordFile
+            ifcfg.authentication.wpaPskFile
+          ];
         in [
           {
-            assertion = ifcfg.authentication.mode == "wpa3-sae" -> ifcfg.managementFrameProtection == "required";
+            assertion = ifcfg.authentication.mode == "wpa3-sae" -> ifcfg.managementFrameProtection == "2";
             message = ''hostapd interface ${interface} uses WPA3-SAE which requires managementFrameProtection="required"'';
           }
           {
-            assertion = ifcfg.authentication.mode == "wpa3-sae-transition" -> ifcfg.managementFrameProtection != "disabled";
+            assertion = ifcfg.authentication.mode == "wpa3-sae-transition" -> ifcfg.managementFrameProtection != "0";
             message = ''hostapd interface ${interface} uses WPA3-SAE in transition mode with WPA2-SHA256, which requires managementFrameProtection="optional" or ="required"'';
           }
           {
@@ -947,15 +962,14 @@ in {
 
     environment.systemPackages = [pkgs.hostapd];
 
-    services.udev.packages = optionals (any (i: i.countryCode != null) (attrValues cfg.interfaces)) [pkgs.crda];
+    services.udev.packages = with pkgs; [crda];
 
     systemd.services.hostapd = {
-      description = "Hostapd IEEE 802.11 AP Daemon";
+      description = "IEEE 802.11 Host Access-Point Daemon";
 
       path = [pkgs.hostapd];
-      after = mapAttrsToList (interface: _: "sys-subsystem-net-devices-${utils.escapeSystemdPath interface}.device") cfg.interfaces;
-      bindsTo = mapAttrsToList (interface: _: "sys-subsystem-net-devices-${utils.escapeSystemdPath interface}.device") cfg.interfaces;
-      requiredBy = mapAttrsToList (interface: _: "network-link-${interface}.service") cfg.interfaces;
+      after = map (interface: "sys-subsystem-net-devices-${utils.escapeSystemdPath interface}.device") (attrNames cfg.interfaces);
+      bindsTo = map (interface: "sys-subsystem-net-devices-${utils.escapeSystemdPath interface}.device") (attrNames cfg.interfaces);
       wantedBy = ["multi-user.target"];
 
       # Create merged configuration and acl files for each interface prior to starting
@@ -973,7 +987,7 @@ in {
         DevicePolicy = "closed";
         DeviceAllow = "/dev/rfkill rw";
         NoNewPrivileges = true;
-        PrivateUsers = false; # hostapd requires real system root access.
+        PrivateUsers = false; # hostapd requires true root access.
         PrivateTmp = true;
         ProtectClock = true;
         ProtectControlGroups = true;
@@ -985,12 +999,21 @@ in {
         ProtectProc = "invisible";
         ProcSubset = "pid";
         ProtectSystem = "strict";
-        RestrictAddressFamilies = ["AF_UNIX" "AF_NETLINK" "AF_INET" "AF_INET6"];
+        RestrictAddressFamilies = [
+          "AF_INET"
+          "AF_INET6"
+          "AF_NETLINK"
+          "AF_UNIX"
+        ];
         RestrictNamespaces = true;
         RestrictRealtime = true;
         RestrictSUIDSGID = true;
         SystemCallArchitectures = "native";
-        SystemCallFilter = ["@system-service" "~@privileged" "@chown"];
+        SystemCallFilter = [
+          "@system-service"
+          "~@privileged"
+          "@chown"
+        ];
         UMask = "0077";
       };
     };

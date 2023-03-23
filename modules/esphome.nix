@@ -7,6 +7,7 @@
   inherit
     (lib)
     literalExpression
+    maintainers
     mkEnableOption
     mkIf
     mkOption
@@ -16,10 +17,15 @@
 
   cfg = config.services.esphome;
 
-  name = "esphome";
+  stateDir = "/var/lib/esphome";
 
-  stateDir = "/var/lib/${name}";
+  esphomeParams =
+    if cfg.enableUnixSocket
+    then "--socket /run/esphome/esphome.sock"
+    else "--address ${cfg.address} --port ${toString cfg.port}";
 in {
+  meta.maintainers = with maintainers; [oddlama];
+
   options.services.esphome = {
     enable = mkEnableOption (mdDoc "esphome");
 
@@ -30,9 +36,11 @@ in {
       description = mdDoc "The package to use for the esphome command.";
     };
 
-    enableUnixSocket = mkEnableOption (lib.mdDoc ''
-      Expose a unix socket under /run/esphome/esphome.sock instead of using a TCP socket.
-    '');
+    enableUnixSocket = mkOption {
+      type = types.bool;
+      default = false;
+      description = lib.mdDoc "Listen on a unix socket `/run/esphome/esphome.sock` instead of the TCP port.";
+    };
 
     address = mkOption {
       type = types.str;
@@ -95,20 +103,18 @@ in {
       after = ["network.target"];
       wantedBy = ["multi-user.target"];
       path = [cfg.package];
+      environment.PLATFORMIO_CORE_DIR = "${stateDir}/.platformio";
 
       serviceConfig = {
-        ExecStart = let
-          extraParams =
-            if cfg.enableUnixSocket
-            then "--socket /run/${name}/esphome.sock"
-            else "--address ${cfg.address} --port ${toString cfg.port}";
-        in "${cfg.package}/bin/esphome dashboard ${extraParams} ${stateDir}";
+        ExecStart = "${cfg.package}/bin/esphome dashboard ${esphomeParams} ${stateDir}";
         DynamicUser = true;
+        User = "esphome";
+        Group = "esphome";
         WorkingDirectory = stateDir;
-        StateDirectory = name;
+        StateDirectory = "esphome";
         StateDirectoryMode = "0750";
         Restart = "on-failure";
-        RuntimeDirectory = mkIf cfg.enableUnixSocket name;
+        RuntimeDirectory = mkIf cfg.enableUnixSocket "esphome";
         RuntimeDirectoryMode = "0750";
 
         # Hardening

@@ -1,4 +1,8 @@
-{nodeSecrets, ...}: {
+{
+  config,
+  nodeSecrets,
+  ...
+}: {
   imports = [../../modules/esphome.nix];
 
   services.esphome = {
@@ -12,7 +16,8 @@
     ];
   };
 
-  # TODO esphome.sock permissions pls nginx currently world writable
+  systemd.services.nginx.serviceConfig.SupplementaryGroups = ["esphome"];
+  systemd.services.nginx.requires = ["esphome.service"];
   services.nginx.upstreams = {
     "esphome" = {
       servers = {"unix:/run/esphome/esphome.sock" = {};};

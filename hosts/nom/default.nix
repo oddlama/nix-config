@@ -29,8 +29,10 @@
 
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod"];
 
-  hardware = {
-    video.hidpi.enable = true;
-    opengl.enable = true;
+  hardware.opengl.enable = true;
+
+  console = {
+    font = "ter-v28n";
+    packages = with pkgs; [terminus_font];
   };
 }

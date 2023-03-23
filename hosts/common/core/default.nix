@@ -32,14 +32,7 @@ in {
   time.timeZone = lib.mkDefault "Europe/Berlin";
   i18n.defaultLocale = "C.UTF-8";
 
-  console =
-    {
-      keyMap = "de-latin1-nodeadkeys";
-    }
-    // lib.optionalAttrs config.hardware.video.hidpi.enable {
-      font = "ter-v28n";
-      packages = with pkgs; [terminus_font];
-    };
+  console.keyMap = "de-latin1-nodeadkeys";
 
   hardware = {
     enableRedistributableFirmware = true;

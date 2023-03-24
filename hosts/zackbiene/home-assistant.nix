@@ -20,10 +20,10 @@ in {
     ];
     config = {
       http = {
-        server_host = ["127.0.0.1" "::1"];
+        server_host = ["127.0.0.1"];
         server_port = haPort;
         use_x_forwarded_for = true;
-        trusted_proxies = ["127.0.0.1" "::1"];
+        trusted_proxies = ["127.0.0.1"];
       };
       homeassistant = {
         name = "!secret ha_name";
@@ -64,10 +64,10 @@ in {
     '';
   };
 
-  # TODO HA and zigbee2mqtt behind nginx please
-  #   - auth for zigbee2mqtt frontend
-  #   - auth for esphome dashboard
-  #   - only allow connections from privileged LAN to HA or from vpn range
+  # TODO
+  # - auth for zigbee2mqtt frontend
+  # - auth for esphome dashboard
+  # - only allow connections from privileged LAN to HA or from vpn range
 
   services.nginx = {
     upstreams."homeassistant" = {

@@ -1,6 +1,7 @@
 {
   lib,
   config,
+  nodeSecrets,
   ...
 }: {
   rekey.secrets."mosquitto-pw-zigbee2mqtt.yaml" = {
@@ -10,7 +11,6 @@
     group = "mosquitto";
   };
 
-  networking.firewall.allowedTCPPorts = [8072];
   services.zigbee2mqtt = {
     enable = true;
     settings = {
@@ -25,7 +25,31 @@
         user = "zigbee2mqtt";
         password = "!${config.rekey.secrets."mosquitto-pw-zigbee2mqtt.yaml".path} password";
       };
+      # TODO once > 1.30.2 is out
+      # frontend.host = "/run/zigbee2mqtt/zigbee2mqtt.sock";
       frontend.port = 8072;
+    };
+  };
+
+  services.nginx = {
+    upstreams."zigbee2mqtt" = {
+      servers = {"localhost:8072" = {};};
+      extraConfig = ''
+        zone zigbee2mqtt 64k;
+        keepalive 2;
+      '';
+    };
+    virtualHosts."${nodeSecrets.zigbee2mqtt.domain}" = {
+      forceSSL = true;
+      #enableACME = true;
+      sslCertificate = config.rekey.secrets."selfcert.crt".path;
+      sslCertificateKey = config.rekey.secrets."selfcert.key".path;
+      locations."/".proxyPass = "http://zigbee2mqtt";
+      # TODO dynamic definitions for the "local" network, IPv6
+      extraConfig = ''
+        allow 192.168.0.0/22;
+        deny all;
+      '';
     };
   };
 }

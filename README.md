@@ -15,3 +15,13 @@ all commands using these extra parameters, or permanently add the following the 
 	plugin-files = <copy path from $NIX_PLUGINS>/lib/nix/plugins
 	extra-builtins-file = /path/to/nix-config/nix/extra-builtins.nix
 	```
+
+# Misc
+
+Generate self-signed cert:
+
+```bash
+openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
+  -keyout zackbiene-selfcert.key -out zackbiene-selfcert.crt -subj \
+  "/CN=example.com" -addext "subjectAltName=DNS:example.com,DNS:sub1.example.com,DNS:sub2.example.com,IP:10.0.0.1"
+```

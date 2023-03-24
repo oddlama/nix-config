@@ -16,26 +16,33 @@
     ];
   };
 
-  systemd.services.nginx.serviceConfig.SupplementaryGroups = ["esphome"];
-  systemd.services.nginx.requires = ["esphome.service"];
-  services.nginx.upstreams = {
-    "esphome" = {
+  systemd.services.nginx = {
+    serviceConfig.SupplementaryGroups = ["esphome"];
+    requires = ["esphome.service"];
+  };
+
+  services.nginx = {
+    upstreams."esphome" = {
       servers = {"unix:/run/esphome/esphome.sock" = {};};
       extraConfig = ''
         zone esphome 64k;
         keepalive 2;
       '';
     };
-  };
-  services.nginx.virtualHosts = {
-    #"${nodeSecrets.esphome.domain}" = {
-    #  forceSSL = true;
-    #  enableACME = true;
-    "192.168.1.22" = {
+    virtualHosts."${nodeSecrets.esphome.domain}" = {
+      forceSSL = true;
+      #enableACME = true;
+      sslCertificate = config.rekey.secrets."selfcert.crt".path;
+      sslCertificateKey = config.rekey.secrets."selfcert.key".path;
       locations."/" = {
         proxyPass = "http://esphome";
         proxyWebsockets = true;
       };
+      # TODO dynamic definitions for the "local" network, IPv6
+      extraConfig = ''
+        allow 192.168.0.0/22;
+        deny all;
+      '';
     };
   };
 }

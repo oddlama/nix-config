@@ -1,8 +1,11 @@
 {
   lib,
   config,
+  nodeSecrets,
   ...
-}: {
+}: let
+  haPort = 8123;
+in {
   services.home-assistant = {
     enable = true;
     extraComponents = [
@@ -15,8 +18,13 @@
       "zha"
       "mqtt"
     ];
-    openFirewall = true;
     config = {
+      http = {
+        server_host = ["127.0.0.1" "::1"];
+        server_port = haPort;
+        use_x_forwarded_for = true;
+        trusted_proxies = ["127.0.0.1" "::1"];
+      };
       homeassistant = {
         name = "!secret ha_name";
         latitude = "!secret ha_latitude";
@@ -60,4 +68,29 @@
   #   - auth for zigbee2mqtt frontend
   #   - auth for esphome dashboard
   #   - only allow connections from privileged LAN to HA or from vpn range
+
+  services.nginx = {
+    upstreams."homeassistant" = {
+      servers = {"localhost:${toString haPort}" = {};};
+      extraConfig = ''
+        zone homeassistant 64k;
+        keepalive 2;
+      '';
+    };
+    virtualHosts."${nodeSecrets.homeassistant.domain}" = {
+      forceSSL = true;
+      #enableACME = true;
+      sslCertificate = config.rekey.secrets."selfcert.crt".path;
+      sslCertificateKey = config.rekey.secrets."selfcert.key".path;
+      locations."/" = {
+        proxyPass = "http://homeassistant";
+        proxyWebsockets = true;
+      };
+      # TODO dynamic definitions for the "local" network, IPv6
+      extraConfig = ''
+        allow 192.168.0.0/22;
+        deny all;
+      '';
+    };
+  };
 }

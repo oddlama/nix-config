@@ -38,11 +38,53 @@ in {
           manual = "!include manual.yaml";
         };
       };
-      #frontend = {
-      #  themes = "!include_dir_merge_named themes";
-      #};
-      default_config = {};
       met = {};
+
+      #### only selected components from default_config ####
+
+      automation = {};
+      backup = {};
+      bluetooth = {};
+      config = {};
+      #conversation = {};
+      counter = {};
+      dhcp = {};
+      energy = {};
+      frontend = {
+        #themes = "!include_dir_merge_named themes";
+      };
+      hardware = {};
+      history = {};
+      homeassistant_alerts = {};
+      #cloud = {};
+      image_upload = {};
+      input_boolean = {};
+      input_button = {};
+      input_datetime = {};
+      input_number = {};
+      input_select = {};
+      input_text = {};
+      logbook = {};
+      logger = {};
+      map = {};
+      #media_source = {};
+      mobile_app = {};
+      #my = {};
+      network = {};
+      person = {};
+      schedule = {};
+      scene = {};
+      script = {};
+      ssdp = {};
+      stream = {};
+      sun = {};
+      system_health = {};
+      tag = {};
+      timer = {};
+      #usb = {};
+      webhook = {};
+      zeroconf = {};
+      zone = {};
     };
     extraPackages = python3Packages:
       with python3Packages; [

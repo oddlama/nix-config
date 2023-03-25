@@ -16,12 +16,13 @@
     ./fs.nix
     ./net.nix
 
-    ./home-assistant.nix
-    ./mosquitto.nix
-    ./zigbee2mqtt.nix
+    ./dnsmasq.nix
     ./esphome.nix
-    ./nginx.nix
+    ./home-assistant.nix
     ./hostapd.nix
+    ./mosquitto.nix
+    ./nginx.nix
+    ./zigbee2mqtt.nix
   ];
 
   boot.loader.grub.enable = false;

@@ -2,13 +2,12 @@
   imports = [
     ./modules/uid.nix
 
-    #./atuin.nix
-    #./bash.nix
     #./btop.nix
-    ./fish.nix
+    #./fish.nix
     ./git.nix
     ./htop.nix
     ./neovim
+    ./nushell.nix
     #./ssh.nix
     ./starship.nix
     #./tmux.nix
@@ -17,7 +16,7 @@
   ];
 
   home = {
-    stateVersion = "22.11";
+    stateVersion = "23.05";
     packages = with pkgs; [
       bandwhich
       btop
@@ -26,6 +25,7 @@
       neofetch
       rclone
       ripgrep
+      rnr
       rsync
       sd
       tree

@@ -1,3 +1,8 @@
+# About
+
+
+## Stuff
+
 This is my personal nix config.
 
 - Secrets can be created/edited by running `nix run .#edit-secret some/secret.age`
@@ -16,7 +21,7 @@ all commands using these extra parameters, or permanently add the following the 
 	extra-builtins-file = /path/to/nix-config/nix/extra-builtins.nix
 	```
 
-# Misc
+## Misc
 
 Generate self-signed cert:
 

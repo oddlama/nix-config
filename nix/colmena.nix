@@ -26,7 +26,11 @@ with nixpkgs.lib; let
         };
         # Setup parameters for Secrets
         rekey.forceRekeyOnSystem = "x86_64-linux";
-        rekey.hostPubkey = ../secrets/pubkeys + "/${config.networking.hostName}.pub";
+        rekey.hostPubkey = let
+          pubkeyPath = ../hosts + "/${hostName}/secrets/host.pub";
+        in
+          mkIf (pathExists pubkeyPath || trace "Missing pubkey for ${hostName}: ${toString pubkeyPath} not found, using dummy replacement key for now." false)
+          pubkeyPath;
         rekey.masterIdentities = self.secrets.masterIdentities;
         rekey.extraEncryptionPubkeys = self.secrets.extraEncryptionPubkeys;
       })

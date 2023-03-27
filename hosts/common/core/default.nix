@@ -73,7 +73,7 @@ in {
       ln -sv ${../../../nix/overlays} $out/overlays
     '';
 
-    stateVersion = "22.11";
+    stateVersion = "23.05";
   };
 
   systemd = {

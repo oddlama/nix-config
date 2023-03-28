@@ -1,5 +1,7 @@
 # About
 
+This is my personal nix config.
+
 ## Structure
 
 - `hosts/` contains configuration for all hosts.
@@ -53,8 +55,6 @@
 ...
 
 ## Stuff
-
-This is my personal nix config.
 
 - Secrets can be created/edited by running `nix run .#edit-secret some/secret.age`
 - Secrets can be rekeyed by running `nix run .#rekey` (you will be prompted to do so in an error message if neccessary)

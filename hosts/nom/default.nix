@@ -16,7 +16,7 @@
     ../common/hardware/intel.nix
     ../common/efi.nix
     ../common/laptop.nix
-    ../common/sound-pipewire.nix
+    ../common/sound.nix
     ../common/yubikey.nix
     ../common/zfs.nix
 

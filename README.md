@@ -33,8 +33,6 @@ This is my personal nix config.
   - `extra-builtins.nix` Extra builtins via nix-plugins to support transparent repository-wide secrets
   - `home-manager.nix` Definition of home-manager only hosts (not used currently)
   - `hosts.nix` Wrapper that extracts all defined hosts from `hosts/`
-  - `overlays/**` Local overlay packages. Subject for removal.
-  - `overlay.nix` Overlay defintions
   - `rage-decrypt.sh` Auxiliary script for repository-wide secrets
   - `secrets.nix` Helper to access repository-wide secrets, used by colmena.nix
 - `secrets/` Global secrets and age identities

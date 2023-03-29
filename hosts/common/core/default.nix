@@ -64,13 +64,11 @@ in {
   nix.nixPath = [
     "nixos-config=${dummyConfig}"
     "nixpkgs=/run/current-system/nixpkgs"
-    "nixpkgs-overlays=/run/current-system/overlays"
   ];
 
   system = {
     extraSystemBuilderCmds = ''
       ln -sv ${pkgs.path} $out/nixpkgs
-      ln -sv ${../../../nix/overlays} $out/overlays
     '';
 
     stateVersion = "23.05";

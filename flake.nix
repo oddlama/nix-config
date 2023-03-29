@@ -18,6 +18,12 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    microvm = {
+      url = "github:astro/microvm.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
+    };
+
     pre-commit-hooks = {
       url = "github:cachix/pre-commit-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -56,7 +62,6 @@
 
       hosts = import ./nix/hosts.nix inputs;
       colmena = import ./nix/colmena.nix inputs;
-      overlays = import ./nix/overlay.nix inputs;
       homeConfigurations = import ./nix/home-manager.nix inputs;
 
       inherit ((colmena.lib.makeHive self.colmena).introspect (x: x)) nodes;
@@ -64,9 +69,6 @@
     // flake-utils.lib.eachDefaultSystem (system: rec {
       pkgs = import nixpkgs {
         inherit system;
-        overlays = [
-          self.overlays.default
-        ];
         config.allowUnfree = true;
       };
 

@@ -3,9 +3,8 @@
   pkgs,
   ...
 }: {
-  sound.enable = true;
   environment.systemPackages = with pkgs; [pulseaudio pulsemixer];
-
+  sound.enable = false; # ALSA
   hardware.pulseaudio.enable = lib.mkForce false;
   security.rtkit.enable = true;
   services.pipewire = {

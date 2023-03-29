@@ -1,7 +1,9 @@
 {
+  inputs,
   lib,
   pkgs,
   config,
+  nodeName,
   nodeSecrets,
   ...
 }: let
@@ -19,6 +21,16 @@ in {
     ./tmux.nix
     ./xdg.nix
   ];
+
+  # Setup secret rekeying parameters
+  rekey.forceRekeyOnSystem = "x86_64-linux";
+  rekey.hostPubkey = let
+    pubkeyPath = ../.. + "/${nodeName}/secrets/host.pub";
+  in
+    lib.mkIf (lib.pathExists pubkeyPath || lib.trace "Missing pubkey for ${nodeName}: ${toString pubkeyPath} not found, using dummy replacement key for now." false)
+    pubkeyPath;
+  rekey.masterIdentities = inputs.self.secrets.masterIdentities;
+  rekey.extraEncryptionPubkeys = inputs.self.secrets.extraEncryptionPubkeys;
 
   boot = {
     kernelParams = ["log_buf_len=10M"];
@@ -40,6 +52,7 @@ in {
   };
 
   networking = {
+    hostName = lib.mkDefault nodeName;
     # FIXME: would like to use mkForce false for useDHCP, but nixpkgs#215908 blocks that.
     useDHCP = true;
     useNetworkd = true;

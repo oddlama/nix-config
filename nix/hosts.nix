@@ -1,5 +1,10 @@
-{nixpkgs, ...}:
-nixpkgs.lib.concatMapAttrs (nodeName: fileType:
+{nixpkgs, ...}: let
+  hostDefaults = {
+    physicalConnections = {};
+    microVmHost = false;
+  };
+in
+  nixpkgs.lib.concatMapAttrs (nodeName: fileType:
     if fileType == "directory" && nodeName != "common"
-    then {${nodeName} = import (../hosts + "/${nodeName}/meta.nix");}
+    then {${nodeName} = hostDefaults // import (../hosts + "/${nodeName}/meta.nix");}
     else {}) (builtins.readDir ../hosts)

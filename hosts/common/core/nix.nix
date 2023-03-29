@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  inputs,
+  pkgs,
+  ...
+}: {
   nix = {
     settings = {
       auto-optimise-store = true;
@@ -28,5 +32,12 @@
     '';
     optimise.automatic = true;
     gc.automatic = true;
+    # Define global flakes for this system
+    registry = {
+      nixpkgs.flake = inputs.nixpkgs;
+      p.flake = inputs.nixpkgs;
+      pkgs.flake = inputs.nixpkgs;
+      templates.flake = inputs.templates;
+    };
   };
 }

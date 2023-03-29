@@ -63,6 +63,7 @@
       hosts = import ./nix/hosts.nix inputs;
       colmena = import ./nix/colmena.nix inputs;
       homeConfigurations = import ./nix/home-manager.nix inputs;
+      microVms = import ./nix/microvms.nix inputs;
 
       inherit ((colmena.lib.makeHive self.colmena).introspect (x: x)) nodes;
     }

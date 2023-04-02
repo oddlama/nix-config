@@ -16,7 +16,7 @@
     ./fs.nix
     ./net.nix
 
-    ./dnsmasq.nix
+    #./dnsmasq.nix
     ./esphome.nix
     ./home-assistant.nix
     ./hostapd.nix

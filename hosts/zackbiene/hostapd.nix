@@ -2,6 +2,7 @@
   lib,
   config,
   pkgs,
+  nodeSecrets,
   ...
 }: {
   imports = [../../modules/hostapd.nix];
@@ -12,19 +13,24 @@
 
   services.hostapd = {
     enable = true;
-    interfaces = {
-      "wlan1" = {
-        ssid = "🍯🐝💨";
-        hwMode = "g";
-        countryCode = "DE";
-        channel = 13; # Automatic Channel Selection (ACS) is unfortunately not implemented for mt7612u.
+    radios.wlan1 = {
+      hwMode = "g";
+      countryCode = "DE";
+      channel = 13; # Automatic Channel Selection (ACS) is unfortunately not implemented for mt7612u.
+      wifi4.capabilities = ["LDPC" "HT40+" "HT40-" "GF" "SHORT-GI-20" "SHORT-GI-40" "TX-STBC" "RX-STBC1"];
+      networks.wlan1 = {
+        inherit (nodeSecrets.hostapd) ssid;
         macAcl = "deny";
         apIsolate = true;
         authentication = {
           saePasswordsFile = config.rekey.secrets.wifi-clients.path;
           saeAddToMacAllow = true;
+          enableRecommendedPairwiseCiphers = true;
         };
-        wifi4.capabilities = ["LDPC" "HT40+" "HT40-" "GF" "SHORT-GI-20" "SHORT-GI-40" "TX-STBC" "RX-STBC1"];
+      };
+      networks.wlan1-1 = {
+        ssid = "Open";
+        authentication.mode = "none";
       };
     };
   };

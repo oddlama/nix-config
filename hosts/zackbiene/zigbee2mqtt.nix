@@ -25,7 +25,7 @@
         user = "zigbee2mqtt";
         password = "!${config.rekey.secrets."mosquitto-pw-zigbee2mqtt.yaml".path} password";
       };
-      # TODO once > 1.30.2 is out
+      # TODO once 1.30.3 is out
       # frontend.host = "/run/zigbee2mqtt/zigbee2mqtt.sock";
       frontend.port = 8072;
     };

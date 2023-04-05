@@ -149,19 +149,19 @@ let
       channel=${toString radioCfg.channel}
       noscan=${bool01 radioCfg.noScan}
 
-      ##### IEEE 802.11n (WiFi 4) related configuration #######################################
-      ieee80211n=${bool01 radioCfg.wifi4.enable}
       ${optionalString radioCfg.wifi4.enable ''
+        ##### IEEE 802.11n (WiFi 4) related configuration #######################################
+        ieee80211n=1
+        ${optionalString radioCfg.wifi4.require "require_ht=1"}
         ht_capab=${concatMapStrings (x: "[${x}]") radioCfg.wifi4.capabilities}
-        require_ht=${bool01 radioCfg.wifi4.require}
       ''}
 
-      ##### IEEE 802.11ac (WiFi 5) related configuration #####################################
-      ieee80211ac=${bool01 radioCfg.wifi5.enable}
       ${optionalString radioCfg.wifi5.enable ''
-        vht_capab=${concatMapStrings (x: "[${x}]") radioCfg.wifi5.capabilities}
-        require_vht=${bool01 radioCfg.wifi5.require}
+        ##### IEEE 802.11ac (WiFi 5) related configuration #####################################
+        ieee80211ac=1
+        ${optionalString radioCfg.wifi5.require "require_vht=1"}
         vht_oper_chwidth=${radioCfg.wifi5.operatingChannelWidth}
+        vht_capab=${concatMapStrings (x: "[${x}]") radioCfg.wifi5.capabilities}
       ''}
 
       ${ # ieee80211ax support must be enabled in hostapd,
@@ -169,7 +169,7 @@ let
         optionalString radioCfg.wifi6.enable ''
           ##### IEEE 802.11ax (WiFi 6) related configuration #####################################
           ieee80211ax=1
-          require_he=${bool01 radioCfg.wifi6.require}
+          ${optionalString radioCfg.wifi6.require "require_he=1"}
           he_oper_chwidth=${radioCfg.wifi6.operatingChannelWidth}
           he_su_beamformer=${bool01 radioCfg.wifi6.singleUserBeamformer}
           he_su_beamformee=${bool01 radioCfg.wifi6.singleUserBeamformee}
@@ -203,7 +203,7 @@ let
 
           ##### User-provided extra radio configuration ##########################################
           EOF
-          cat ${escapeShellArg (pkgs.writeText radioCfg.extraConfig)} >> "$hostapd_config_file"
+          cat ${escapeShellArg (pkgs.writeText "hostapd-radio-${radio}-extra.conf" radioCfg.extraConfig)} >> "$hostapd_config_file"
         ''}
       ''
       + concatStringsSep "\n" (imap0 (i: f: f i) (mapAttrsToList (
@@ -274,7 +274,7 @@ let
 
                 ##### User-provided extra BSS configuration ##########################################
                 EOF
-                cat ${escapeShellArg (pkgs.writeText bssCfg.extraConfig)} >> "$hostapd_config_file"
+                cat ${escapeShellArg (pkgs.writeText "hostapd-radio-${radio}-bss-${bss}-extra.conf" bssCfg.extraConfig)} >> "$hostapd_config_file"
               ''
             )
         )

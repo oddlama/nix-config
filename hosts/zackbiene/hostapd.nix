@@ -20,17 +20,23 @@
       wifi4.capabilities = ["LDPC" "HT40+" "HT40-" "GF" "SHORT-GI-20" "SHORT-GI-40" "TX-STBC" "RX-STBC1"];
       networks.wlan1 = {
         inherit (nodeSecrets.hostapd) ssid;
-        macAcl = "deny";
+        macAcl = "allow";
         apIsolate = true;
         authentication = {
           saePasswordsFile = config.rekey.secrets.wifi-clients.path;
           saeAddToMacAllow = true;
           enableRecommendedPairwiseCiphers = true;
         };
+        extraConfig = ''
+          bssid=00:c0:ca:b1:4f:9e
+        '';
       };
-      networks.wlan1-1 = {
+      networks.testtest = {
         ssid = "Open";
         authentication.mode = "none";
+        extraConfig = ''
+          bssid=00:c0:ca:b1:4f:9f
+        '';
       };
     };
   };

@@ -1,4 +1,5 @@
 {
+  lib,
   config,
   nodeSecrets,
   ...
@@ -8,12 +9,8 @@
   services.esphome = {
     enable = true;
     enableUnixSocket = true;
-    allowedDevices = [
-      {
-        node = "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0";
-        modifier = "rw";
-      }
-    ];
+    #allowedDevices = lib.mkForce ["/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0"];
+    # TODO instead deny the zigbee device
   };
 
   systemd.services.nginx = {

@@ -120,6 +120,7 @@ in {
       '';
     };
     virtualHosts."${nodeSecrets.homeassistant.domain}" = {
+      serverAliases = ["192.168.1.21"]; # TODO remove later
       forceSSL = true;
       #enableACME = true;
       sslCertificate = config.rekey.secrets."selfcert.crt".path;

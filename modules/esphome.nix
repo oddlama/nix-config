@@ -61,37 +61,15 @@ in {
     };
 
     allowedDevices = mkOption {
-      default = [];
-      example = [
-        {
-          node = "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0";
-          modifier = "rw";
-        }
-      ];
+      default = ["char-ttyS" "char-ttyUSB"];
+      example = ["/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0"];
       description = lib.mdDoc ''
         A list of device nodes to which {command}`esphome` has access to.
-        Beware that permissions are not added dynamically when a device
-        is plugged in while the service is already running.
+        Refer to DeviceAllow in systemd.resource-control(5) for more information.
+        Beware that if a device is referred to by an absolute path instead of a device category,
+        it will only allow devices that already are plugged in when the service is started.
       '';
-      type = types.listOf (types.submodule {
-        options = {
-          node = mkOption {
-            example = "/dev/ttyUSB*";
-            type = types.str;
-            description = lib.mdDoc "Path to device node";
-          };
-          modifier = mkOption {
-            example = "rw";
-            type = types.str;
-            description = lib.mdDoc ''
-              Device node access modifier. Takes a combination
-              `r` (read), `w` (write), and `m` (mknod). See the
-              `systemd.resource-control(5)` man page for more
-              information.
-            '';
-          };
-        };
-      });
+      type = types.listOf types.str;
     };
   };
 
@@ -103,6 +81,8 @@ in {
       after = ["network.target"];
       wantedBy = ["multi-user.target"];
       path = [cfg.package];
+
+      # platformio fails to determine the home directory when using DynamicUser
       environment.PLATFORMIO_CORE_DIR = "${stateDir}/.platformio";
 
       serviceConfig = {
@@ -122,11 +102,11 @@ in {
         LockPersonality = true;
         MemoryDenyWriteExecute = true;
         DevicePolicy = "closed";
-        DeviceAllow = map (d: "${d.node} ${d.modifier}") cfg.allowedDevices;
+        DeviceAllow = map (d: "${d} rw") cfg.allowedDevices;
         SupplementaryGroups = ["dialout"];
-        NoNewPrivileges = true;
+        #NoNewPrivileges = true; # Implied by DynamicUser
         PrivateUsers = true;
-        PrivateTmp = true;
+        #PrivateTmp = true; # Implied by DynamicUser
         ProtectClock = true;
         ProtectControlGroups = true;
         ProtectHome = true;
@@ -137,7 +117,7 @@ in {
         ProtectProc = "invisible";
         ProcSubset = "pid";
         ProtectSystem = "strict";
-        RemoveIPC = true;
+        #RemoveIPC = true; # Implied by DynamicUser
         RestrictAddressFamilies = [
           "AF_INET"
           "AF_INET6"
@@ -146,7 +126,7 @@ in {
         ];
         RestrictNamespaces = false; # Required by platformio for chroot
         RestrictRealtime = true;
-        RestrictSUIDSGID = true;
+        #RestrictSUIDSGID = true; # Implied by DynamicUser
         SystemCallArchitectures = "native";
         SystemCallFilter = [
           "@system-service"

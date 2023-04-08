@@ -28,16 +28,16 @@
           enableRecommendedPairwiseCiphers = true;
         };
         extraConfig = ''
-          bssid=00:c0:ca:b1:4f:9e
-        '';
-      };
-      networks.testtest = {
-        ssid = "Open";
-        authentication.mode = "none";
-        extraConfig = ''
           bssid=00:c0:ca:b1:4f:9f
         '';
       };
+      #networks.wlan1-2 = {
+      #  inherit (nodeSecrets.hostapd) ssid;
+      #  authentication.mode = "none";
+      #  extraConfig = ''
+      #    bssid=02:c0:ca:b1:4f:9f
+      #  '';
+      #};
     };
   };
 }

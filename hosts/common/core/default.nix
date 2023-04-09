@@ -87,9 +87,10 @@ in {
     stateVersion = "23.05";
   };
 
-  systemd = {
-    enableUnifiedCgroupHierarchy = true;
-    network.wait-online.anyInterface = true;
+  systemd.enableUnifiedCgroupHierarchy = true;
+  systemd.network = {
+    enable = true;
+    wait-online.anyInterface = true;
   };
 
   users.mutableUsers = false;

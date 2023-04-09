@@ -75,7 +75,7 @@
 
       apps =
         agenix-rekey.defineApps self pkgs self.nodes
-        // import ./nix/apps.nix inputs system;
+        // import ./nix/apps inputs system;
       checks = import ./nix/checks.nix inputs system;
       devShells.default = import ./nix/dev-shell.nix inputs system;
       formatter = pkgs.alejandra;

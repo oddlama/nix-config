@@ -26,7 +26,12 @@ This is my personal nix config.
   - not yet ready for publicized: my main development machine, powerful home server, some services ... (still in transition from gentoo :/)
 - `modules/` additional NixOS modules that are not yet upstreamed.
 - `nix/` library functions and plumbing
-  - `apps.nix` Additional runnable actions for this flake (**WIP:** infrastructure graph renderer)
+  - `apps/` Additional runnable actions for this flake
+    - `default.nix` Collects all apps and generates a definition for a specified system
+    - `draw-graph.nix` (**WIP:** infrastructure graph renderer)
+    - `format-secrets.nix` Runs the code formatter on the secret .nix files
+    - `generate-initrd-keys.nix` Generates initrd hostkeys for each host if they don't exist yet (for setup)
+    - `generate-wireguard-keys.nix` Generates wireguard keys for each server-and-peer pair
   - `checks.nix` pre-commit-hooks for this repository
   - `colmena.nix` Setup for distributed deployment using colmena (actually defines all NixOS hosts)
   - `dev-shell.nix` Environment setup for `nix develop` for using this flake
@@ -47,6 +52,12 @@ This is my personal nix config.
 #### Add and deploy new machine
 
 ...
+
+- add hosts/<name>
+- fill meta.nix
+- fill net.nix
+- todo: hostid (move to nodeSecrets)
+- generate-initrd-keys
 
 #### New secret
 

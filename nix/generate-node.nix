@@ -23,6 +23,7 @@ in
       inherit inputs;
       inherit nodeName;
       inherit nodeMeta;
+      inherit (self) nodes;
       secrets = self.secrets.content;
       nodeSecrets = self.secrets.content.nodes.${nodeName};
       nixos-hardware = nixos-hardware.nixosModules;

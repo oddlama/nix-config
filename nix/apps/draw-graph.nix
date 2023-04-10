@@ -28,8 +28,9 @@
       ${filterMapAttrsToLines (_: v: v.matchConfig ? MACAddress) renderNic node.config.systemd.network.networks}
     }
   '';
+  # TODO vms
   graph = ''
-    ${mapAttrsToLines renderNode self.nodes}
+    ${mapAttrsToLines renderNode self.colmenaNodes}
   '';
 in
   pkgs.writeShellScript "draw-graph" ''

@@ -62,10 +62,11 @@
 
       hosts = import ./nix/hosts.nix inputs;
       colmena = import ./nix/colmena.nix inputs;
-      homeConfigurations = import ./nix/home-manager.nix inputs;
-      microVms = import ./nix/microvms.nix inputs;
+      colmenaNodes = ((colmena.lib.makeHive self.colmena).introspect (x: x)).nodes;
+      microvmNodes = import ./nix/microvms.nix inputs;
 
-      inherit ((colmena.lib.makeHive self.colmena).introspect (x: x)) nodes;
+      # All nixos based hosts collected together
+      nodes = self.colmenaNodes // self.microvmNodes;
     }
     // flake-utils.lib.eachDefaultSystem (system: rec {
       pkgs = import nixpkgs {

@@ -16,7 +16,7 @@ This is my personal nix config.
 	  - `secrets.nix.age` Repository-wide local secrets. Decrypted on import via `builtins.extraBuiltins.rageImportEncrypted`.
 	  - `host.pub` This host's public key. Used for agenix rekeying.
 	- `default.nix` The actual system definition. Follow the imports from there to see what it entails.
-	- `meta.nix` Determines the type and architecture of this system, and some other optional meta information. Used e.g. by `nix/colmena.nix` to know which hosts are NixOS and which are home-manger only.
+	- `meta.nix` Determines the type and architecture of this system, and some other optional meta information. Used e.g. by `nix/colmena.nix` to know which hosts are real NixOS hosts, and which are VMs or some other type.
 	- `fs.nix` Filesystem setup.
 	- `net.nix` Networking setup.
   - `nom/` - My laptop and main development machine
@@ -36,7 +36,6 @@ This is my personal nix config.
   - `colmena.nix` Setup for distributed deployment using colmena (actually defines all NixOS hosts)
   - `dev-shell.nix` Environment setup for `nix develop` for using this flake
   - `extra-builtins.nix` Extra builtins via nix-plugins to support transparent repository-wide secrets
-  - `home-manager.nix` Definition of home-manager only hosts (not used currently)
   - `hosts.nix` Wrapper that extracts all defined hosts from `hosts/`
   - `rage-decrypt.sh` Auxiliary script for repository-wide secrets
   - `secrets.nix` Helper to access repository-wide secrets, used by colmena.nix

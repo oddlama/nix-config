@@ -14,12 +14,15 @@
     (nixpkgs.lib)
     optionals
     ;
+
+  extraLib = import ./lib.nix inputs;
 in
   nodeName: nodeMeta: {
     inherit (nodeMeta) system;
     pkgs = self.pkgs.${nodeMeta.system};
     specialArgs = {
       inherit (nixpkgs) lib;
+      inherit extraLib;
       inherit inputs;
       inherit nodeName;
       inherit nodeMeta;

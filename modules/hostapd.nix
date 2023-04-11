@@ -522,7 +522,6 @@ in {
 
             wifi6 = {
               enable = mkOption {
-                # TODO Change this default once WiFi 6 is enabled in hostapd upstream
                 default = false;
                 type = types.bool;
                 description = mdDoc "Enables support for IEEE 802.11ax (WiFi 6, HE)";

@@ -20,6 +20,8 @@ in {
     ./ssh.nix
     ./tmux.nix
     ./xdg.nix
+
+    ../../../modules/wireguard.nix
   ];
 
   # Setup secret rekeying parameters

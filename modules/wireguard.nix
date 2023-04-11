@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  extraLib,
   pkgs,
   nodes,
   nodeName,
@@ -8,108 +9,118 @@
 }: let
   inherit
     (lib)
+    any
     attrNames
+    attrValues
+    concatMap
     concatMapAttrs
+    concatMapStrings
+    concatStringsSep
     filter
+    flatten
     foldl'
     genAttrs
-    mapAttrsToList
+    head
+    mapAttrs
     mapAttrs'
+    mapAttrsToList
     mdDoc
+    mergeAttrs
     mkIf
     mkOption
     nameValuePair
+    optional
     recursiveUpdate
+    splitString
+    subtractLists
     types
+    unique
     ;
+
+  inherit (extraLib) duplicates;
 
   cfg = config.extra.wireguard;
 
-  peerPublicKey = wgName: peerName: builtins.readFile (../secrets/wireguard + "/${wgName}/${peerName}.pub");
-  peerPrivateKeyFile = wgName: peerName: ../secrets/wireguard + "/${wgName}/${peerName}.priv.age";
-  peerPrivateKeySecret = wgName: peerName: "wireguard-${wgName}-${peerName}.priv";
-
-  peerPresharedKeyFile = wgName: peerA: peerB: let
-    sortedPeers =
-      if peerA < peerB
-      then {
-        peer1 = peerA;
-        peer2 = peerB;
-      }
-      else {
-        peer1 = peerB;
-        peer2 = peerA;
-      };
-    inherit (sortedPeers) peer1 peer2;
-  in
-    ../secrets/wireguard + "/${wgName}/${peer1}-${peer2}.psk.age";
-
-  peerPresharedKeySecret = wgName: peerA: peerB: let
-    sortedPeers =
-      if peerA < peerB
-      then {
-        peer1 = peerA;
-        peer2 = peerB;
-      }
-      else {
-        peer1 = peerB;
-        peer2 = peerA;
-      };
-    inherit (sortedPeers) peer1 peer2;
-  in "wireguard-${wgName}-${peer1}-${peer2}.psk";
-
-  peerDefinition = wgName: peerName: peerAllowedIPs: {
-    wireguardPeerConfig = {
-      PublicKey = peerPublicKey wgName peerName;
-      PresharedKeyFile = config.rekey.secrets.${peerPresharedKeySecret wgName nodeName peerName}.path;
-      AllowedIPs = peerAllowedIPs;
-
-      # TODO only if we are the ones listening
-      PersistentKeepalive = 25;
+  sortedPeers = peerA: peerB:
+    if peerA < peerB
+    then {
+      peer1 = peerA;
+      peer2 = peerB;
+    }
+    else {
+      peer1 = peerB;
+      peer2 = peerA;
     };
-  };
 
   configForNetwork = wgName: wg: let
+    peerPublicKey = peerName: builtins.readFile (../secrets/wireguard + "/${wgName}/${peerName}.pub");
+    peerPrivateKeyFile = peerName: ../secrets/wireguard + "/${wgName}/${peerName}.priv.age";
+    peerPrivateKeySecret = peerName: "wireguard-${wgName}-${peerName}.priv";
+
+    peerPresharedKeyFile = peerA: peerB: let
+      inherit (sortedPeers peerA peerB) peer1 peer2;
+    in
+      ../secrets/wireguard + "/${wgName}/${peer1}-${peer2}.psk.age";
+
+    peerPresharedKeySecret = peerA: peerB: let
+      inherit (sortedPeers peerA peerB) peer1 peer2;
+    in "wireguard-${wgName}-${peer1}-${peer2}.psk";
+
     # All peers that are other nodes
-    nodePeerNames = filter (n: n != nodeName && builtins.hasAttr wgName nodes.${n}.config.extra.wireguard.networks) (attrNames nodes);
-    nodePeers = genAttrs nodePeerNames (n: nodes.${n}.config.extra.wireguard.networks.${wgName}.address);
+    nodesWithThisNetwork = filter (n: builtins.hasAttr wgName nodes.${n}.config.extra.wireguard.networks) (attrNames nodes);
+    nodePeers = genAttrs (filter (n: n != nodeName) nodesWithThisNetwork) (n: nodes.${n}.config.extra.wireguard.networks.${wgName}.address);
     # All peers that are defined as externalPeers on any node. Also prepends "external-" to their name.
-    externalPeers = foldl' recursiveUpdate {} (map (n: mapAttrs' (extPeerName: nameValuePair "external-${extPeerName}") nodes.${n}.config.extra.wireguard.networks.${wgName}.externalPeers) (attrNames nodes));
+    externalPeers = foldl' recursiveUpdate {} (
+      map (n: mapAttrs' (extPeerName: nameValuePair "external-${extPeerName}") nodes.${n}.config.extra.wireguard.networks.${wgName}.externalPeers)
+      nodesWithThisNetwork
+    );
 
     peers = nodePeers // externalPeers;
+
+    peerDefinition = peerName: peerAllowedIPs: {
+      wireguardPeerConfig =
+        {
+          PublicKey = peerPublicKey wgName peerName;
+          PresharedKeyFile = config.rekey.secrets.${peerPresharedKeySecret wgName nodeName peerName}.path;
+          AllowedIPs = peerAllowedIPs;
+        }
+        // optional wg.listen {
+          PersistentKeepalive = 25;
+        };
+    };
   in {
-    rekey.secrets =
-      foldl' recursiveUpdate {
-        ${peerPrivateKeySecret wgName nodeName}.file = peerPrivateKeyFile wgName nodeName;
+    inherit nodesWithThisNetwork wgName;
+
+    secrets =
+      foldl' mergeAttrs {
+        ${peerPrivateKeySecret nodeName}.file = peerPrivateKeyFile nodeName;
       } (map (peerName: {
-        ${peerPresharedKeySecret wgName nodeName peerName}.file = peerPresharedKeyFile wgName nodeName peerName;
+        ${peerPresharedKeySecret nodeName peerName}.file = peerPresharedKeyFile nodeName peerName;
       }) (attrNames peers));
 
-    systemd.network = {
-      netdevs."${wg.priority}-${wgName}" = {
-        netdevConfig = {
-          Kind = "wireguard";
-          Name = "${wgName}";
-          Description = "Wireguard network ${wgName}";
-        };
-        wireguardConfig = {
-          PrivateKeyFile = config.rekey.secrets.${peerPrivateKeySecret wgName nodeName}.path;
-          ListenPort = wg.listenPort;
-        };
-        wireguardPeers = mapAttrsToList (peerDefinition wgName) peers;
+    netdevs."${wg.priority}-${wgName}" = {
+      netdevConfig = {
+        Kind = "wireguard";
+        Name = "${wgName}";
+        Description = "Wireguard network ${wgName}";
       };
+      wireguardConfig = {
+        PrivateKeyFile = config.rekey.secrets.${peerPrivateKeySecret nodeName}.path;
+        ListenPort = wg.listenPort;
+      };
+      wireguardPeers = mapAttrsToList peerDefinition peers;
+    };
 
-      networks."${wg.priority}-${wgName}" = {
-        matchConfig.Name = wgName;
-        networkConfig.Address = wg.address;
-      };
+    networks."${wg.priority}-${wgName}" = {
+      matchConfig.Name = wgName;
+      networkConfig.Address = wg.address;
     };
   };
 in {
   options = {
-    networks = mkOption {
+    extra.wireguard.networks = mkOption {
       default = {};
-      description = "";
+      description = "Configures wireguard networks via systemd-networkd.";
       type = types.attrsOf (types.submodule {
         options = {
           address = mkOption {
@@ -161,12 +172,40 @@ in {
     };
   };
 
-  config = mkIf (cfg.networks != {}) ({
-      # TODO assert that at least one peer has listen true
-      # TODO assert that no external peers are specified twice in different node configs
-      #assertions = [];
+  config = mkIf (cfg.networks != {}) (let
+    networkCfgs = mapAttrsToList configForNetwork cfg.networks;
+    collectAttrs = x: foldl' mergeAttrs {} (map (y: y.${x}) networkCfgs);
+  in {
+    assertions =
+      concatMap (netCfg: let
+        inherit netCfg wgName;
+        externalPeers = concatMap (n: attrNames nodes.${n}.config.extra.wireguard.networks.${wgName}.externalPeers) netCfg.nodesWithThisNetwork;
+        duplicatePeers = duplicates externalPeers;
+        usedAddresses =
+          concatMap (n: nodes.${n}.config.extra.wireguard.networks.${wgName}.address) netCfg.nodesWithThisNetwork
+          ++ flatten (concatMap (n: attrValues nodes.${n}.config.extra.wireguard.networks.${wgName}.externalPeers) netCfg.nodesWithThisNetwork);
+        duplicateAddrs = duplicates (map (x: head (splitString "/" x)) usedAddresses);
+      in [
+        {
+          assertion = any (n: nodes.${n}.config.extra.wireguard.networks.${wgName}.listen) netCfg.nodesWithThisNetwork;
+          message = "Wireguard network '${wgName}': At least one node must be listening.";
+        }
+        {
+          assertion = duplicatePeers == [];
+          message = "Wireguard network '${wgName}': Multiple definitions for external peer(s):${concatMapStrings (x: " '${x}'") duplicatePeers}";
+        }
+        {
+          assertion = duplicateAddrs == [];
+          message = "Wireguard network '${wgName}': Addresses used multiple times: ${concatStringsSep ", " duplicateAddrs}";
+        }
+      ])
+      networkCfgs;
 
-      networking.firewall.allowedUDPPorts = mkIf (cfg.listen && cfg.openFirewall) [cfg.listenPort];
-    }
-    // foldl' recursiveUpdate {} (map configForNetwork cfg.networks));
+    networking.firewall.allowedUDPPorts = mkIf (cfg.listen && cfg.openFirewall) [cfg.listenPort];
+    rekey.secrets = collectAttrs "secrets";
+    systemd.network = {
+      netdevs = collectAttrs "netdevs";
+      networks = collectAttrs "networks";
+    };
+  });
 }

@@ -22,7 +22,6 @@
     };
   };
 
-  imports = [../../modules/wireguard.nix];
   extra.wireguard.networks.vms = {
     address = ["10.0.0.1/24"];
     listen = true;

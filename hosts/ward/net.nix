@@ -28,7 +28,9 @@
     listenPort = 51822;
     openFirewall = true;
     externalPeers = {
-      test = ["10.0.0.91/32"];
+      test1 = ["10.0.0.91/32"];
+      test2 = ["10.0.0.92/32"];
+      test3 = ["10.0.0.93/32"];
     };
   };
 }

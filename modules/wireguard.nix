@@ -49,18 +49,18 @@
     };
 
   configForNetwork = wgName: wg: let
-    peerPublicKey = peerName: builtins.readFile (../secrets/wireguard + "/${wgName}/${peerName}.pub");
-    peerPrivateKeyFile = peerName: ../secrets/wireguard + "/${wgName}/${peerName}.priv.age";
-    peerPrivateKeySecret = peerName: "wireguard-${wgName}-${peerName}.priv";
+    peerPublicKey = peerName: builtins.readFile (../secrets/wireguard + "/${wgName}/keys/${peerName}.pub");
+    peerPrivateKeyFile = peerName: ../secrets/wireguard + "/${wgName}/keys/${peerName}.age";
+    peerPrivateKeySecret = peerName: "wireguard-${wgName}-priv-${peerName}";
 
     peerPresharedKeyFile = peerA: peerB: let
       inherit (sortedPeers peerA peerB) peer1 peer2;
     in
-      ../secrets/wireguard + "/${wgName}/${peer1}-${peer2}.psk.age";
+      ../secrets/wireguard + "/${wgName}/psks/${peer1}-${peer2}.age";
 
     peerPresharedKeySecret = peerA: peerB: let
       inherit (sortedPeers peerA peerB) peer1 peer2;
-    in "wireguard-${wgName}-${peer1}-${peer2}.psk";
+    in "wireguard-${wgName}-psks-${peer1}-${peer2}";
 
     # All peers that are other nodes
     nodesWithThisNetwork = filter (n: builtins.hasAttr wgName nodes.${n}.config.extra.wireguard.networks) (attrNames nodes);

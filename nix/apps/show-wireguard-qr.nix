@@ -22,5 +22,5 @@ in
   # TODO generate "classic" config and run qrencode
   pkgs.writeShellScript "show-wireguard-qr" ''
     set -euo pipefail
-    echo ${concatStringsSep " " (map (x: "${x.net}.${x.peer}") externalPeers)} | fzf
+    echo ${escapeShellArg (concatStringsSep "\n" (map (x: "${x.net}.${x.peer}") externalPeers))} | fzf
   ''

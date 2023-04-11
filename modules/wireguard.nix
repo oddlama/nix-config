@@ -174,7 +174,7 @@ in {
   in {
     assertions =
       concatMap (netCfg: let
-        inherit netCfg wgName;
+        inherit (netCfg) wgName;
         externalPeers = concatMap (n: attrNames nodes.${n}.config.extra.wireguard.networks.${wgName}.externalPeers) netCfg.nodesWithThisNetwork;
         duplicatePeers = duplicates externalPeers;
         usedAddresses =

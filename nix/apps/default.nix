@@ -15,6 +15,7 @@
     ./format-secrets.nix
     ./generate-initrd-keys.nix
     ./generate-wireguard-keys.nix
+    ./show-wireguard-qr.nix
   ];
 in
   builtins.listToAttrs (map (appPath: nameValuePair (removeSuffix ".nix" (builtins.baseNameOf appPath)) (mkApp (import appPath args))) apps)

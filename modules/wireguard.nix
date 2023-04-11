@@ -13,7 +13,6 @@
     attrNames
     attrValues
     concatMap
-    concatMapAttrs
     concatMapStrings
     concatStringsSep
     filter
@@ -21,7 +20,6 @@
     foldl'
     genAttrs
     head
-    mapAttrs
     mapAttrs'
     mapAttrsToList
     mdDoc
@@ -32,9 +30,7 @@
     optional
     recursiveUpdate
     splitString
-    subtractLists
     types
-    unique
     ;
 
   inherit (extraLib) duplicates;

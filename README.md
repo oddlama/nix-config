@@ -37,6 +37,7 @@ This is my personal nix config.
   - `dev-shell.nix` Environment setup for `nix develop` for using this flake
   - `extra-builtins.nix` Extra builtins via nix-plugins to support transparent repository-wide secrets
   - `hosts.nix` Wrapper that extracts all defined hosts from `hosts/`
+  - `lib.nix` Commonly used functionality or helpers that weren't available in the standard library
   - `rage-decrypt.sh` Auxiliary script for repository-wide secrets
   - `secrets.nix` Helper to access repository-wide secrets, used by colmena.nix
 - `secrets/` Global secrets and age identities
@@ -57,6 +58,12 @@ This is my personal nix config.
 - fill net.nix
 - todo: hostid (move to nodeSecrets)
 - generate-initrd-keys
+- generate-wireguard-keys
+
+#### Show QR for external wireguard client
+
+nix run show-wireguard-qr
+then select the host in the fzf menu
 
 #### New secret
 

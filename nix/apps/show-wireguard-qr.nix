@@ -2,7 +2,7 @@
   self,
   pkgs,
   ...
-}: let
+} @ inputs: let
   inherit
     (pkgs.lib)
     attrNames
@@ -13,14 +13,18 @@
     unique
     ;
 
+  extraLib = import ../lib.nix inputs;
+
   nodeNames = attrNames self.nodes;
-  nodesWithNet = net: filter (n: builtins.hasAttr net self.nodes.${n}.config.extra.wireguard.networks) nodeNames;
-  wireguardNetworks = unique (concatMap (n: attrNames self.nodes.${n}.config.extra.wireguard.networks) nodeNames);
-  externalPeersForNet = net: concatMap (n: attrNames self.nodes.${n}.config.extra.wireguard.networks.${net}.externalPeers) (nodesWithNet net);
-  externalPeers = concatMap (net: map (peer: {inherit net peer;}) (externalPeersForNet net)) wireguardNetworks;
+  wireguardNetworks = unique (concatMap (n: attrNames self.nodes.${n}.config.extra.wireguard) nodeNames);
+
+  externalPeersForNet = wgName:
+    map (peer: {inherit wgName peer;})
+    (attrNames ((extraLib.wireguard wgName).externalPeers self.nodes));
+  allExternalPeers = concatMap externalPeersForNet wireguardNetworks;
 in
   # TODO generate "classic" config and run qrencode
   pkgs.writeShellScript "show-wireguard-qr" ''
     set -euo pipefail
-    echo ${escapeShellArg (concatStringsSep "\n" (map (x: "${x.net}.${x.peer}") externalPeers))} | fzf
+    echo ${escapeShellArg (concatStringsSep "\n" (map (x: "${x.wgName}.${x.peer}") allExternalPeers))} | ${pkgs.fzf}/bin/fzf
   ''

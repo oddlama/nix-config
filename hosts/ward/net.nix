@@ -22,11 +22,13 @@
     };
   };
 
-  extra.wireguard.networks.vms = {
+  extra.wireguard.vms = {
+    server = {
+      enable = true;
+      port = 51822;
+      openFirewall = true;
+    };
     address = ["10.0.0.1/24"];
-    listen = true;
-    listenPort = 51822;
-    openFirewall = true;
     externalPeers = {
       test1 = ["10.0.0.91/32"];
       test2 = ["10.0.0.92/32"];

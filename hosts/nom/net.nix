@@ -21,5 +21,8 @@
     };
   };
 
-  extra.wireguard.vms.address = ["10.0.0.10/32"];
+  extra.wireguard.vms = {
+    via = "ward";
+    addresses = ["10.0.0.10/32"];
+  };
 }

@@ -15,8 +15,11 @@
   self,
   nixpkgs,
   ...
-} @ inputs:
-with nixpkgs.lib; let
+} @ inputs: let
+  inherit
+    (nixpkgs.lib)
+    mapAttrs
+    ;
   # If the given expression is a bare set, it will be wrapped in a function,
   # so that the imported file can always be applied to the inputs, similar to
   # how modules can be functions or sets.

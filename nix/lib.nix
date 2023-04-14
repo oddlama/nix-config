@@ -1,9 +1,15 @@
-{nixpkgs, ...}: let
+{
+  self,
+  nixpkgs,
+  ...
+}: let
   inherit
     (nixpkgs.lib)
     attrNames
     attrValues
     concatMap
+    concatMapStrings
+    escapeShellArg
     filter
     flatten
     foldl'
@@ -12,6 +18,7 @@
     mergeAttrs
     nameValuePair
     partition
+    substring
     unique
     ;
 in rec {
@@ -33,8 +40,24 @@ in rec {
   # Concatenates all given attrsets as if calling a // b in order.
   concatAttrs = foldl' mergeAttrs {};
 
+  # True if the path or string starts with /
+  isAbsolutePath = x: substring 0 1 x == "/";
+
+  rageMasterIdentityArgs = concatMapStrings (x: ''-i ${escapeShellArg x} '') self.secrets.masterIdentities;
+  rageExtraEncryptionPubkeys =
+    concatMapStrings (
+      x:
+        if isAbsolutePath x
+        then ''-R ${escapeShellArg x} ''
+        else ''-r ${escapeShellArg x} ''
+    )
+    self.secrets.extraEncryptionPubkeys;
+  # The arguments required to de-/encrypt a secret in this repository
+  rageDecryptArgs = "${rageMasterIdentityArgs}";
+  rageEncryptArgs = "${rageMasterIdentityArgs} ${rageExtraEncryptionPubkeys}";
+
   # Wireguard related functions that are reused in several files of this flake
-  wireguard = wgName: nodes: rec {
+  wireguard = wgName: rec {
     sortedPeers = peerA: peerB:
       if peerA < peerB
       then {
@@ -64,25 +87,27 @@ in rec {
     # All nodes that are part of this network
     associatedNodes =
       filter
-      (n: builtins.hasAttr wgName nodes.${n}.config.extra.wireguard)
-      (attrNames nodes);
+      (n: builtins.hasAttr wgName self.nodes.${n}.config.extra.wireguard)
+      (attrNames self.nodes);
 
     # Partition nodes by whether they are servers
     _associatedNodes_isServerPartition =
       partition
-      (n: nodes.${n}.config.extra.wireguard.${wgName}.server.enable)
+      (n: self.nodes.${n}.config.extra.wireguard.${wgName}.server.enable)
       associatedNodes;
 
     associatedServerNodes = _associatedNodes_isServerPartition.right;
     associatedClientNodes = _associatedNodes_isServerPartition.wrong;
 
     # Maps all nodes that are part of this network to their addresses
-    nodePeers = genAttrs associatedNodes (n: nodes.${n}.config.extra.wireguard.${wgName}.address);
+    nodePeers = genAttrs associatedNodes (n: self.nodes.${n}.config.extra.wireguard.${wgName}.addresses);
+
+    externalPeerName = p: "external-${p}";
 
     # Only peers that are defined as externalPeers on the given node.
     # Prepends "external-" to their name.
     externalPeersForNode = node:
-      mapAttrs' (p: nameValuePair "external-${p}") nodes.${node}.config.extra.wireguard.${wgName}.externalPeers;
+      mapAttrs' (p: nameValuePair (externalPeerName p)) self.nodes.${node}.config.extra.wireguard.${wgName}.server.externalPeers;
 
     # All peers that are defined as externalPeers on any node.
     # Prepends "external-" to their name.
@@ -92,11 +117,11 @@ in rec {
     allPeers = nodePeers // allExternalPeers;
 
     # Concatenation of all external peer names names without any transformations.
-    externalPeerNamesRaw = concatMap (n: attrNames nodes.${n}.config.extra.wireguard.${wgName}.externalPeers) associatedNodes;
+    externalPeerNamesRaw = concatMap (n: attrNames self.nodes.${n}.config.extra.wireguard.${wgName}.server.externalPeers) associatedNodes;
 
     # A list of all occurring addresses.
     usedAddresses =
-      concatMap (n: nodes.${n}.config.extra.wireguard.${wgName}.address) associatedNodes
-      ++ flatten (concatMap (n: attrValues nodes.${n}.config.extra.wireguard.${wgName}.externalPeers) associatedNodes);
+      concatMap (n: self.nodes.${n}.config.extra.wireguard.${wgName}.addresses) associatedNodes
+      ++ flatten (concatMap (n: attrValues self.nodes.${n}.config.extra.wireguard.${wgName}.server.externalPeers) associatedNodes);
   };
 }

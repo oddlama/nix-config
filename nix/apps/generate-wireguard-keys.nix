@@ -17,24 +17,14 @@
     unique
     ;
 
-  extraLib = import ../lib.nix inputs;
-  isAbsolutePath = x: substring 0 1 x == "/";
-  masterIdentityArgs = concatMapStrings (x: ''-i ${escapeShellArg x} '') self.secrets.masterIdentities;
-  extraEncryptionPubkeys =
-    concatMapStrings (
-      x:
-        if isAbsolutePath x
-        then ''-R ${escapeShellArg x} ''
-        else ''-r ${escapeShellArg x} ''
-    )
-    self.secrets.extraEncryptionPubkeys;
+  inherit (self.extraLib) rageEncryptArgs;
 
   nodeNames = attrNames self.nodes;
   wireguardNetworks = unique (concatMap (n: attrNames self.nodes.${n}.config.extra.wireguard) nodeNames);
 
   generateNetworkKeys = wgName: let
     inherit
-      (extraLib.wireguard wgName self.nodes)
+      (self.extraLib.wireguard wgName)
       allPeers
       associatedNodes
       associatedServerNodes
@@ -57,7 +47,7 @@
         echo "Generating [34m"${keyBasename}".{[31mage[34m,[32mpub[34m}[m"
         privkey=$(${pkgs.wireguard-tools}/bin/wg genkey)
         echo "$privkey" | ${pkgs.wireguard-tools}/bin/wg pubkey > ${pubkeyFile}
-        ${pkgs.rage}/bin/rage -e ${masterIdentityArgs} ${extraEncryptionPubkeys} <<< "$privkey" > ${privkeyFile} \
+        ${pkgs.rage}/bin/rage -e ${rageEncryptArgs} <<< "$privkey" > ${privkeyFile} \
           || { echo "[1;31merror:[m Failed to encrypt wireguard private key for peer ${peerName} on network ${wgName}!" >&2; exit 1; }
       fi
     '';
@@ -73,7 +63,7 @@
         mkdir -p $(dirname ${pskFile})
         echo "Generating [33m"${pskFile}"[m"
         psk=$(${pkgs.wireguard-tools}/bin/wg genpsk)
-        ${pkgs.rage}/bin/rage -e ${masterIdentityArgs} ${extraEncryptionPubkeys} <<< "$psk" > ${pskFile} \
+        ${pkgs.rage}/bin/rage -e ${rageEncryptArgs} <<< "$psk" > ${pskFile} \
           || { echo "[1;31merror:[m Failed to encrypt wireguard psk for peers ${peer1} and ${peer2} on network ${wgName}!" >&2; exit 1; }
       fi
     '';

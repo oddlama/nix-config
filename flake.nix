@@ -52,6 +52,8 @@
     ...
   } @ inputs:
     {
+      extraLib = import ./nix/lib.nix inputs;
+
       # The identities that are used to rekey agenix secrets and to
       # decrypt all repository-wide secrets.
       secrets = {

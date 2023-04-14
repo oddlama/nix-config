@@ -27,12 +27,12 @@
       enable = true;
       port = 51822;
       openFirewall = true;
+      externalPeers = {
+        test1 = ["10.0.0.91/32"];
+        test2 = ["10.0.0.92/32"];
+        test3 = ["10.0.0.93/32"];
+      };
     };
-    address = ["10.0.0.1/24"];
-    externalPeers = {
-      test1 = ["10.0.0.91/32"];
-      test2 = ["10.0.0.92/32"];
-      test3 = ["10.0.0.93/32"];
-    };
+    addresses = ["10.0.0.1/24"];
   };
 }

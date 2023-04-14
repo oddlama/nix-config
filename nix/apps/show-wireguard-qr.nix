@@ -9,22 +9,57 @@
     concatMap
     concatStringsSep
     escapeShellArg
-    filter
     unique
     ;
 
-  extraLib = import ../lib.nix inputs;
+  inherit (self.extraLib) rageDecryptArgs;
 
   nodeNames = attrNames self.nodes;
   wireguardNetworks = unique (concatMap (n: attrNames self.nodes.${n}.config.extra.wireguard) nodeNames);
 
   externalPeersForNet = wgName:
-    map (peer: {inherit wgName peer;})
-    (attrNames (extraLib.wireguard wgName self.nodes).allExternalPeers);
+    concatMap (serverNode:
+      map
+      (peer: {inherit wgName serverNode peer;})
+      (attrNames self.nodes.${serverNode}.config.extra.wireguard.${wgName}.server.externalPeers))
+    (self.extraLib.wireguard wgName).associatedServerNodes;
   allExternalPeers = concatMap externalPeersForNet wireguardNetworks;
 in
-  # TODO generate "classic" config and run qrencode
   pkgs.writeShellScript "show-wireguard-qr" ''
     set -euo pipefail
-    echo ${escapeShellArg (concatStringsSep "\n" (map (x: "${x.wgName}.${x.peer}") allExternalPeers))} | ${pkgs.fzf}/bin/fzf
+    json_sel=$(echo ${escapeShellArg (concatStringsSep "\n" (map (x: "${builtins.toJSON x}\t[33m${x.wgName}[m.[34m${x.serverNode}[m.[32m${x.peer}[m") allExternalPeers))} \
+      | ${pkgs.fzf}/bin/fzf --delimiter='\t' --ansi --multi --query="''${1-}" --tiebreak=end --bind=tab:down,btab:up,change:top,ctrl-space:toggle --with-nth=2.. --height='~50%' --tac \
+      | ${pkgs.coreutils}/bin/cut -d$'\t' -f1)
+    [[ -n "$json_sel" ]] || exit 1
+
+    # TODO for each output line
+    # TODO maybe just call a json -> make script that gives wireguard config to make this easier
+
+    wgName=$(${pkgs.jq}/bin/jq -r .wgName <<< "$json_sel")
+    serverNode=$(${pkgs.jq}/bin/jq -r .serverNode <<< "$json_sel")
+    peer=$(${pkgs.jq}/bin/jq -r .peer <<< "$json_sel")
+
+    serverPubkey=$(nix eval --raw ".#extraLib" \
+      --apply 'extraLib: builtins.readFile ((extraLib.wireguard "'"$wgName"'").peerPublicKeyPath "'"$serverNode"'")')
+    privKeyPath=$(nix eval --raw ".#extraLib" \
+      --apply 'extraLib: (extraLib.wireguard "'"$wgName"'").peerPrivateKeyPath "'"$peer"'"')
+    serverPskPath=$(nix eval --raw ".#extraLib" \
+      --apply 'extraLib: (extraLib.wireguard "'"$wgName"'").peerPresharedKeyPath "'"$serverNode"'" "'"$peer"'"')
+
+    privKey=$(${pkgs.rage}/bin/rage -d ${rageDecryptArgs} "$privKeyPath") \
+      || { echo "[1;31merror:[m Failed to decrypt!" >&2; exit 1; }
+    serverPsk=$(${pkgs.rage}/bin/rage -d ${rageDecryptArgs} "$serverPskPath") \
+      || { echo "[1;31merror:[m Failed to decrypt!" >&2; exit 1; }
+
+    cat <<EOF | tee /dev/tty | ${pkgs.qrencode}/bin/qrencode -t ansiutf8
+    [Interface]
+    Address =
+    PrivateKey = $privKey
+
+    [Peer]
+    PublicKey = $serverPubkey
+    PresharedKey = $serverPsk
+    AllowedIPs =
+    Endpoint =
+    EOF
   ''

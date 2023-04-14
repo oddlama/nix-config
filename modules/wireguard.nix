@@ -11,9 +11,11 @@
     (lib)
     any
     attrNames
+    attrValues
     concatMap
     concatMapStrings
     concatStringsSep
+    filter
     filterAttrs
     head
     mapAttrsToList
@@ -23,6 +25,7 @@
     mkOption
     mkEnableOption
     optionalAttrs
+    optionals
     splitString
     types
     ;
@@ -35,10 +38,12 @@
 
   cfg = config.extra.wireguard;
 
-  configForNetwork = wgName: wg: let
+  configForNetwork = wgName: wgCfg: let
     inherit
-      (extraLib.wireguard wgName nodes)
-      allPeers
+      (extraLib.wireguard wgName)
+      associatedServerNodes
+      associatedClientNodes
+      externalPeerName
       peerPresharedKeyPath
       peerPresharedKeySecret
       peerPrivateKeyPath
@@ -46,17 +51,32 @@
       peerPublicKeyPath
       ;
 
-    otherPeers = filterAttrs (n: _: n != nodeName) allPeers;
+    filterSelf = filter (x: x != nodeName);
+    wgCfgOf = node: nodes.${node}.config.extra.wireguard.${wgName};
+
+    ourClientNodes =
+      optionals wgCfg.server.enable
+      (filter (n: (wgCfgOf n).via == nodeName) associatedClientNodes);
+
+    # The list of peers that we have to know the psk to.
+    neededPeers =
+      if wgCfg.server.enable
+      then
+        filterSelf associatedServerNodes
+        ++ map externalPeerName (attrNames wgCfg.server.externalPeers)
+        ++ ourClientNodes
+      else [wgCfg.via];
   in {
     secrets =
       concatAttrs (map (other: {
-        ${peerPresharedKeySecret nodeName other}.file = peerPresharedKeyPath nodeName other;
-      }) (attrNames otherPeers))
+          ${peerPresharedKeySecret nodeName other}.file = peerPresharedKeyPath nodeName other;
+        })
+        neededPeers)
       // {
         ${peerPrivateKeySecret nodeName}.file = peerPrivateKeyPath nodeName;
       };
 
-    netdevs."${wg.priority}-${wgName}" = {
+    netdevs."${wgCfg.priority}-${wgName}" = {
       netdevConfig = {
         Kind = "wireguard";
         Name = "${wgName}";
@@ -66,27 +86,64 @@
         {
           PrivateKeyFile = config.rekey.secrets.${peerPrivateKeySecret nodeName}.path;
         }
-        // optionalAttrs wg.server.enable {
-          ListenPort = wg.server.port;
+        // optionalAttrs wgCfg.server.enable {
+          ListenPort = wgCfg.server.port;
         };
       wireguardPeers =
-        mapAttrsToList (peerName: peerAllowedIPs: {
-          wireguardPeerConfig =
-            {
+        if wgCfg.server.enable
+        then
+          # Always include all other server nodes.
+          map (serverNode: {
+            wireguardPeerConfig = {
+              PublicKey = builtins.readFile (peerPublicKeyPath serverNode);
+              PresharedKeyFile = config.rekey.secrets.${peerPresharedKeySecret nodeName serverNode}.path;
+              # The allowed ips of a server node are it's own addreses,
+              # plus each external peer's addresses,
+              # plus each client's addresses that is connected via this node.
+              AllowedIPs =
+                (wgCfgOf serverNode).addresses
+                ++ attrValues (wgCfgOf serverNode).server.externalPeers
+                ++ map (n: (wgCfgOf n).addresses) ourClientNodes;
+            };
+          }) (filterSelf associatedServerNodes)
+          # All our external peers
+          ++ mapAttrsToList (extPeer: allowedIPs: let
+            peerName = externalPeerName extPeer;
+          in {
+            wireguardPeerConfig = {
               PublicKey = builtins.readFile (peerPublicKeyPath peerName);
               PresharedKeyFile = config.rekey.secrets.${peerPresharedKeySecret nodeName peerName}.path;
-              AllowedIPs = peerAllowedIPs;
-            }
-            // optionalAttrs wg.server.enable {
+              AllowedIPs = allowedIPs;
               PersistentKeepalive = 25;
             };
-        })
-        otherPeers;
+          })
+          wgCfg.server.externalPeers
+          # All client nodes that have their via set to us.
+          ++ mapAttrsToList (clientNode: {
+            wireguardPeerConfig = {
+              PublicKey = builtins.readFile (peerPublicKeyPath clientNode);
+              PresharedKeyFile = config.rekey.secrets.${peerPresharedKeySecret nodeName clientNode}.path;
+              AllowedIPs = (wgCfgOf clientNode).addresses;
+              PersistentKeepalive = 25;
+            };
+          })
+          ourClientNodes
+        else
+          # We are a client node, so only include our via server.
+          [
+            {
+              wireguardPeerConfig = {
+                PublicKey = builtins.readFile (peerPublicKeyPath wgCfg.via);
+                PresharedKeyFile = config.rekey.secrets.${peerPresharedKeySecret nodeName wgCfg.via}.path;
+                AllowedIPs = (wgCfgOf wgCfg.via).addresses;
+              };
+            }
+          ];
     };
 
-    networks."${wg.priority}-${wgName}" = {
+    networks."${wgCfg.priority}-${wgName}" = {
       matchConfig.Name = wgName;
-      networkConfig.Address = wg.address;
+      networkConfig.Address = wgCfg.addresses;
     };
   };
 in {
@@ -109,6 +166,20 @@ in {
             type = types.bool;
             description = mdDoc "Whether to open the firewall for the specified `listenPort`, if {option}`listen` is `true`.";
           };
+
+          externalPeers = mkOption {
+            type = types.attrsOf (types.listOf types.str);
+            default = {};
+            example = {my-android-phone = ["10.0.0.97/32"];};
+            description = mdDoc ''
+              Allows defining an extra set of peers that should be added to this wireguard network,
+              but will not be managed by this flake. (e.g. phones)
+
+              These external peers will only know this node as a peer, which will forward
+              their traffic to other members of the network if required. This requires
+              this node to act as a server.
+            '';
+          };
         };
 
         priority = mkOption {
@@ -117,25 +188,20 @@ in {
           description = mdDoc "The order priority used when creating systemd netdev and network files.";
         };
 
-        address = mkOption {
+        via = mkOption {
+          default = null;
+          type = types.uniq (types.nullOr types.str);
+          description = mdDoc ''
+            The server node via which to connect to the network.
+            This must defined if and only if this node is not a server.
+          '';
+        };
+
+        addresses = mkOption {
           type = types.listOf types.str;
           description = mdDoc ''
             The addresses to configure for this interface. Will automatically be added
             as this peer's allowed addresses to all other peers.
-          '';
-        };
-
-        externalPeers = mkOption {
-          type = types.attrsOf (types.listOf types.str);
-          default = {};
-          example = {my-android-phone = ["10.0.0.97/32"];};
-          description = mdDoc ''
-                     Allows defining an extra set of peers that should be added to this wireguard network,
-            but will not be managed by this flake. (e.g. phones)
-
-            These external peers will only know this node as a peer, which will forward
-            their traffic to other members of the network if required. This requires
-            this node to act as a server.
           '';
         };
       };
@@ -148,12 +214,14 @@ in {
   in {
     assertions = concatMap (wgName: let
       inherit
-        (extraLib.wireguard wgName nodes)
+        (extraLib.wireguard wgName)
         externalPeerNamesRaw
         usedAddresses
         associatedNodes
         ;
 
+      wgCfg = cfg.${wgName};
+      wgCfgOf = node: nodes.${node}.config.extra.wireguard.${wgName};
       duplicatePeers = duplicates externalPeerNamesRaw;
       duplicateAddrs = duplicates (map (x: head (splitString "/" x)) usedAddresses);
     in [
@@ -169,9 +237,19 @@ in {
         assertion = duplicateAddrs == [];
         message = "Wireguard network '${wgName}': Addresses used multiple times: ${concatStringsSep ", " duplicateAddrs}";
       }
-      # TODO externalPeers != [] -> server.listen
-      # TODO externalPeers != [] -> ip forwarding
-      # TODO psks only between all nodes and each node-externalpeer pair
+      {
+        assertion = wgCfg.server.externalPeers != {} -> wgCfg.server.enable;
+        message = "Wireguard network '${wgName}': Defining external peers requires server.enable = true.";
+      }
+      {
+        assertion = wgCfg.server.enable == (wgCfg.via == null);
+        message = "Wireguard network '${wgName}': A via server must be defined exactly iff this isn't a server node.";
+      }
+      {
+        assertion = wgCfg.via != null -> (wgCfgOf wgCfg.via).server.enable;
+        message = "Wireguard network '${wgName}': The specified via node '${wgCfg.via}' must be a wireguard server.";
+      }
+      # TODO externalPeers != {} -> ip forwarding
       # TODO no overlapping allowed ip range? 0.0.0.0 would be ok to overlap though
     ]) (attrNames cfg);
 

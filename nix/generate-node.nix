@@ -10,19 +10,14 @@
   agenix-rekey,
   ...
 } @ inputs: let
-  inherit
-    (nixpkgs.lib)
-    optionals
-    ;
-
-  extraLib = import ./lib.nix inputs;
+  inherit (nixpkgs.lib) optionals;
 in
   nodeName: nodeMeta: {
     inherit (nodeMeta) system;
     pkgs = self.pkgs.${nodeMeta.system};
     specialArgs = {
       inherit (nixpkgs) lib;
-      inherit extraLib;
+      inherit (self) extraLib;
       inherit inputs;
       inherit nodeName;
       inherit nodeMeta;

@@ -20,4 +20,6 @@
       dhcpV6Config.RouteMetric = 40;
     };
   };
+
+  extra.wireguard.vms.address = ["10.0.0.10/32"];
 }

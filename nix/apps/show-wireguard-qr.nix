@@ -20,7 +20,7 @@
 
   externalPeersForNet = wgName:
     map (peer: {inherit wgName peer;})
-    (attrNames ((extraLib.wireguard wgName).externalPeers self.nodes));
+    (attrNames (extraLib.wireguard wgName self.nodes).allExternalPeers);
   allExternalPeers = concatMap externalPeersForNet wireguardNetworks;
 in
   # TODO generate "classic" config and run qrencode

@@ -37,7 +37,7 @@
 
   configForNetwork = wgName: wg: let
     inherit
-      (extraLib.wireguard wgName)
+      (extraLib.wireguard wgName nodes)
       allPeers
       peerPresharedKeyPath
       peerPresharedKeySecret
@@ -46,7 +46,7 @@
       peerPublicKeyPath
       ;
 
-    otherPeers = filterAttrs (n: _: n != nodeName) (allPeers nodes);
+    otherPeers = filterAttrs (n: _: n != nodeName) allPeers;
   in {
     secrets =
       concatAttrs (map (other: {
@@ -130,8 +130,12 @@ in {
           default = {};
           example = {my-android-phone = ["10.0.0.97/32"];};
           description = mdDoc ''
-            Allows defining extra set of external peers that should be added to the configuration.
-            For each external peers you can define one or multiple allowed ips.
+                     Allows defining an extra set of peers that should be added to this wireguard network,
+            but will not be managed by this flake. (e.g. phones)
+
+            These external peers will only know this node as a peer, which will forward
+            their traffic to other members of the network if required. This requires
+            this node to act as a server.
           '';
         };
       };
@@ -144,17 +148,17 @@ in {
   in {
     assertions = concatMap (wgName: let
       inherit
-        (extraLib.wireguard wgName)
+        (extraLib.wireguard wgName nodes)
         externalPeerNamesRaw
         usedAddresses
         associatedNodes
         ;
 
-      duplicatePeers = duplicates (externalPeerNamesRaw nodes);
-      duplicateAddrs = duplicates (map (x: head (splitString "/" x)) (usedAddresses nodes));
+      duplicatePeers = duplicates externalPeerNamesRaw;
+      duplicateAddrs = duplicates (map (x: head (splitString "/" x)) usedAddresses);
     in [
       {
-        assertion = any (n: nodes.${n}.config.extra.wireguard.${wgName}.server.enable) (associatedNodes nodes);
+        assertion = any (n: nodes.${n}.config.extra.wireguard.${wgName}.server.enable) associatedNodes;
         message = "Wireguard network '${wgName}': At least one node must be a server.";
       }
       {
@@ -165,6 +169,10 @@ in {
         assertion = duplicateAddrs == [];
         message = "Wireguard network '${wgName}': Addresses used multiple times: ${concatStringsSep ", " duplicateAddrs}";
       }
+      # TODO externalPeers != [] -> server.listen
+      # TODO externalPeers != [] -> ip forwarding
+      # TODO psks only between all nodes and each node-externalpeer pair
+      # TODO no overlapping allowed ip range? 0.0.0.0 would be ok to overlap though
     ]) (attrNames cfg);
 
     networking.firewall.allowedUDPPorts = mkIf (cfg.server.enable && cfg.server.openFirewall) [cfg.server.port];

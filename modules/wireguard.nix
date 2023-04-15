@@ -102,9 +102,10 @@
               # The allowed ips of a server node are it's own addreses,
               # plus each external peer's addresses,
               # plus each client's addresses that is connected via that node.
-              AllowedIPs =
-                snCfg.addresses
-                ++ attrValues snCfg.server.externalPeers; # TODO ++ map (n: (wgCfgOf n).addresses) snCfg.ourClientNodes;
+              AllowedIPs = snCfg.addresses;
+              # TODO this needed? or even wanted at all?
+              # ++ attrValues snCfg.server.externalPeers;
+              # ++ map (n: (wgCfgOf n).addresses) snCfg.ourClientNodes;
               Endpoint = "${snCfg.server.host}:${toString snCfg.server.port}";
             };
           }) (filterSelf associatedServerNodes)

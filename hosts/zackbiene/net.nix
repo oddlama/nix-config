@@ -17,17 +17,4 @@
       };
     };
   };
-
-  extra.wireguard.vms = {
-    server = {
-      enable = true;
-      host = "vms";
-      port = 51822;
-      openFirewall = true;
-      externalPeers = {
-        zack1 = ["10.0.0.90/32"];
-      };
-    };
-    addresses = ["10.0.0.2/24"];
-  };
 }

@@ -3,6 +3,11 @@
   pkgs,
   ...
 }: {
+  environment.etc."nixos/configuration.nix".source = pkgs.writeText "configuration.nix" ''
+    assert builtins.trace "This is a dummy config, use colmena!" false;
+    { }
+  '';
+
   nix = {
     settings = {
       auto-optimise-store = true;
@@ -30,6 +35,7 @@
       plugin-files = ${pkgs.nix-plugins}/lib/nix/plugins
       extra-builtins-file = ${../../../nix/extra-builtins.nix}
     '';
+    nixPath = ["nixpkgs=/run/current-system/nixpkgs"];
     optimise.automatic = true;
     gc.automatic = true;
     # Define global flakes for this system
@@ -39,5 +45,12 @@
       pkgs.flake = inputs.nixpkgs;
       templates.flake = inputs.templates;
     };
+  };
+
+  system = {
+    extraSystemBuilderCmds = ''
+      ln -sv ${pkgs.path} $out/nixpkgs
+    '';
+    stateVersion = "23.05";
   };
 }

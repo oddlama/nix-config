@@ -16,6 +16,12 @@
 
     impermanence.url = "github:nix-community/impermanence";
     nixos-hardware.url = "github:NixOS/nixos-hardware";
+
+    nixos-nftables-firewall = {
+      url = "github:thelegy/nixos-nftables-firewall";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     microvm = {

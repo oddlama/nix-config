@@ -4,6 +4,7 @@
   home-manager,
   #impermanence,
   nixos-hardware,
+  nixos-nftables-firewall,
   nixpkgs,
   microvm,
   agenix,
@@ -25,6 +26,7 @@ in
       secrets = self.secrets.content;
       nodeSecrets = self.secrets.content.nodes.${nodeName};
       nixos-hardware = nixos-hardware.nixosModules;
+      nixos-nftables-firewall = nixos-nftables-firewall.nixosModules;
       #impermanence = impermanence.nixosModules;
     };
     imports =

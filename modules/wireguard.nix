@@ -93,17 +93,19 @@
         if wgCfg.server.enable
         then
           # Always include all other server nodes.
-          map (serverNode: {
+          map (serverNode: let
+            snCfg = wgCfgOf serverNode;
+          in {
             wireguardPeerConfig = {
               PublicKey = builtins.readFile (peerPublicKeyPath serverNode);
               PresharedKeyFile = config.rekey.secrets.${peerPresharedKeySecret nodeName serverNode}.path;
               # The allowed ips of a server node are it's own addreses,
               # plus each external peer's addresses,
-              # plus each client's addresses that is connected via this node.
+              # plus each client's addresses that is connected via that node.
               AllowedIPs =
-                (wgCfgOf serverNode).addresses
-                ++ attrValues (wgCfgOf serverNode).server.externalPeers
-                ++ map (n: (wgCfgOf n).addresses) ourClientNodes;
+                snCfg.addresses
+                ++ attrValues snCfg.server.externalPeers; # TODO ++ map (n: (wgCfgOf n).addresses) snCfg.ourClientNodes;
+              Endpoint = "${snCfg.server.host}:${toString snCfg.server.port}";
             };
           }) (filterSelf associatedServerNodes)
           # All our external peers
@@ -155,10 +157,15 @@ in {
         server = {
           enable = mkEnableOption (mdDoc "wireguard server");
 
+          host = mkOption {
+            type = types.str;
+            description = mdDoc "The hostname or ip address which other peers can use to reach this host.";
+          };
+
           port = mkOption {
             default = 51820;
             type = types.port;
-            description = mdDoc "The port to listen on, if {option}`listen` is `true`.";
+            description = mdDoc "The port to listen on.";
           };
 
           openFirewall = mkOption {

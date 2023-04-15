@@ -12,8 +12,6 @@
     unique
     ;
 
-  inherit (self.extraLib) rageDecryptArgs;
-
   nodeNames = attrNames self.nodes;
   wireguardNetworks = unique (concatMap (n: attrNames self.nodes.${n}.config.extra.wireguard) nodeNames);
 
@@ -39,27 +37,8 @@ in
     serverNode=$(${pkgs.jq}/bin/jq -r .serverNode <<< "$json_sel")
     peer=$(${pkgs.jq}/bin/jq -r .peer <<< "$json_sel")
 
-    serverPubkey=$(nix eval --raw ".#extraLib" \
-      --apply 'extraLib: builtins.readFile ((extraLib.wireguard "'"$wgName"'").peerPublicKeyPath "'"$serverNode"'")')
-    privKeyPath=$(nix eval --raw ".#extraLib" \
-      --apply 'extraLib: (extraLib.wireguard "'"$wgName"'").peerPrivateKeyPath "'"$peer"'"')
-    serverPskPath=$(nix eval --raw ".#extraLib" \
-      --apply 'extraLib: (extraLib.wireguard "'"$wgName"'").peerPresharedKeyPath "'"$serverNode"'" "'"$peer"'"')
+    createConfigScript=$(nix build --no-link --print-out-paths --impure --show-trace --expr \
+      'let flk = builtins.getFlake "${../../.}"; in (flk.extraLib.wireguard "'"$wgName"'").wgQuickConfigScript "${pkgs.system}" "'"$serverNode"'" "'"$peer"'"')
 
-    privKey=$(${pkgs.rage}/bin/rage -d ${rageDecryptArgs} "$privKeyPath") \
-      || { echo "[1;31merror:[m Failed to decrypt!" >&2; exit 1; }
-    serverPsk=$(${pkgs.rage}/bin/rage -d ${rageDecryptArgs} "$serverPskPath") \
-      || { echo "[1;31merror:[m Failed to decrypt!" >&2; exit 1; }
-
-    cat <<EOF | tee /dev/tty | ${pkgs.qrencode}/bin/qrencode -t ansiutf8
-    [Interface]
-    Address =
-    PrivateKey = $privKey
-
-    [Peer]
-    PublicKey = $serverPubkey
-    PresharedKey = $serverPsk
-    AllowedIPs =
-    Endpoint =
-    EOF
+    "$createConfigScript" | tee /dev/tty | ${pkgs.qrencode}/bin/qrencode -t ansiutf8
   ''

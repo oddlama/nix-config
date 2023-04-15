@@ -9,6 +9,7 @@
     attrValues
     concatMap
     concatMapStrings
+    concatStringsSep
     escapeShellArg
     filter
     flatten
@@ -18,6 +19,7 @@
     mergeAttrs
     nameValuePair
     partition
+    removeSuffix
     substring
     unique
     ;
@@ -123,5 +125,32 @@ in rec {
     usedAddresses =
       concatMap (n: self.nodes.${n}.config.extra.wireguard.${wgName}.addresses) associatedNodes
       ++ flatten (concatMap (n: attrValues self.nodes.${n}.config.extra.wireguard.${wgName}.server.externalPeers) associatedNodes);
+
+    # Creates a script that when executed outputs a wg-quick compatible configuration
+    # file for use with external peers. This is a script so we can access secrets without
+    # storing them in the nix-store.
+    wgQuickConfigScript = system: serverNode: extPeer: let
+      pkgs = self.pkgs.${system};
+      snCfg = self.nodes.${serverNode}.config.extra.wireguard.${wgName};
+      peerName = externalPeerName extPeer;
+    in
+      pkgs.writeShellScript "create-wg-conf-${wgName}-${serverNode}-${extPeer}" ''
+        privKey=$(${pkgs.rage}/bin/rage -d ${rageDecryptArgs} ${escapeShellArg (peerPrivateKeyPath peerName)}) \
+          || { echo "[1;31merror:[m Failed to decrypt!" >&2; exit 1; }
+        serverPsk=$(${pkgs.rage}/bin/rage -d ${rageDecryptArgs} ${escapeShellArg (peerPresharedKeyPath serverNode peerName)}) \
+          || { echo "[1;31merror:[m Failed to decrypt!" >&2; exit 1; }
+
+        cat <<EOF
+        [Interface]
+        Address = ${concatStringsSep ", " snCfg.server.externalPeers.${extPeer}}
+        PrivateKey = $privKey
+
+        [Peer]
+        PublicKey = ${removeSuffix "\n" (builtins.readFile (peerPublicKeyPath serverNode))}
+        PresharedKey = $serverPsk
+        AllowedIPs = ${concatStringsSep ", " snCfg.addresses}
+        Endpoint = ${snCfg.server.host}:${toString snCfg.server.port}
+        EOF
+      '';
   };
 }

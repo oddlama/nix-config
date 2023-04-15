@@ -25,6 +25,7 @@
   extra.wireguard.vms = {
     server = {
       enable = true;
+      host = "ward";
       port = 51822;
       openFirewall = true;
       externalPeers = {

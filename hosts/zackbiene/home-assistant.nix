@@ -14,6 +14,7 @@ in {
       "met"
       "esphome"
       "fritzbox"
+      "soundtouch"
       "spotify"
       "zha"
       "mqtt"
@@ -45,6 +46,7 @@ in {
       automation = {};
       backup = {};
       bluetooth = {};
+      #cloud = {};
       config = {};
       #conversation = {};
       counter = {};
@@ -56,7 +58,6 @@ in {
       hardware = {};
       history = {};
       homeassistant_alerts = {};
-      #cloud = {};
       image_upload = {};
       input_boolean = {};
       input_button = {};
@@ -86,12 +87,7 @@ in {
       zeroconf = {};
       zone = {};
     };
-    extraPackages = python3Packages:
-      with python3Packages; [
-        psycopg2
-        securetar
-        libsoundtouch
-      ];
+    extraPackages = python3Packages: with python3Packages; [psycopg2];
   };
 
   rekey.secrets."home-assistant-secrets.yaml" = {

@@ -27,7 +27,9 @@
       extraEncryptionPubkeys
       ;
 
-    forceRekeyOnSystem = "x86_64-linux";
+    # This is technically impure, but intended. We need to rekey on the
+    # current system due to yubikey availability.
+    forceRekeyOnSystem = builtins.extraBuiltins.unsafeCurrentSystem;
     hostPubkey = let
       pubkeyPath = ../.. + "/${nodeName}/secrets/host.pub";
     in

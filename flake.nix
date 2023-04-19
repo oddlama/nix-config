@@ -11,10 +11,15 @@
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.utils.follows = "flake-utils";
     };
 
     impermanence.url = "github:nix-community/impermanence";
+
+    lib-net = {
+      url = "https://gist.github.com/duairc/5c9bb3c922e5d501a1edb9e7b3b845ba/archive/3885f7cd9ed0a746a9d675da6f265d41e9fd6704.tar.gz";
+      flake = false;
+    };
+
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
     nixos-nftables-firewall = {

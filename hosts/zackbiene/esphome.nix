@@ -4,8 +4,6 @@
   nodeSecrets,
   ...
 }: {
-  imports = [../../modules/esphome.nix];
-
   services.esphome = {
     enable = true;
     enableUnixSocket = true;

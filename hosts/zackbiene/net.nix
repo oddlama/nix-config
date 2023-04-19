@@ -1,5 +1,5 @@
 {nodeSecrets, ...}: {
-  networking.hostId = "f7e6acdc";
+  networking.hostId = nodeSecrets.networking.hostId;
 
   systemd.network.networks = {
     "10-lan1" = {
@@ -12,9 +12,7 @@
     "10-wlan1" = {
       DHCP = "no";
       matchConfig.MACAddress = nodeSecrets.networking.interfaces.wlan1.mac;
-      networkConfig = {
-        Address = "10.90.0.1/24";
-      };
+      address = ["10.90.0.1/24"];
     };
   };
 }

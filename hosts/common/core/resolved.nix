@@ -1,10 +1,7 @@
 {lib, ...}: {
-  networking = {
-    firewall = {
-      allowedTCPPorts = [5355];
-      allowedUDPPorts = [5353 5355];
-    };
-    networkmanager.dns = "systemd-resolved";
+  networking.firewall = {
+    allowedTCPPorts = [5355];
+    allowedUDPPorts = [5353 5355];
   };
 
   services.resolved = {
@@ -16,7 +13,7 @@
       "8.8.8.8"
       "2001:4860:4860::8844"
     ];
-    llmnr = "true";
+    llmnr = "true"; # Microsoft's version of mDNS
     extraConfig = ''
       Domains=~.
       MulticastDNS=true

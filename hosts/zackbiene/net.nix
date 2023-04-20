@@ -1,4 +1,14 @@
-{nodeSecrets, ...}: {
+{
+  lib,
+  config,
+  nodeSecrets,
+  ...
+}: let
+  inherit (config.lib.net) cidr;
+
+  net.iot.ipv4cidr = "10.90.0.1/24";
+  net.iot.ipv6cidr = "fd90::1/64";
+in {
   networking.hostId = nodeSecrets.networking.hostId;
 
   systemd.network.networks = {
@@ -10,9 +20,27 @@
       dhcpV6Config.RouteMetric = 10;
     };
     "10-wlan1" = {
-      DHCP = "no";
+      address = [net.iot.ipv4cidr net.iot.ipv6cidr];
       matchConfig.MACAddress = nodeSecrets.networking.interfaces.wlan1.mac;
-      address = ["10.90.0.1/24"];
+    };
+  };
+
+  networking.nftables.firewall = {
+    zones = lib.mkForce {
+      lan.interfaces = ["lan1"];
+    };
+
+    rules = lib.mkForce {
+      int-to-local = {
+        from = ["lan"];
+        to = ["local"];
+
+        inherit
+          (config.networking.firewall)
+          allowedTCPPorts
+          allowedUDPPorts
+          ;
+      };
     };
   };
 }

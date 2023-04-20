@@ -19,6 +19,20 @@
     ../../../modules/wireguard.nix
   ];
 
+  # IP address math library
+  # https://gist.github.com/duairc/5c9bb3c922e5d501a1edb9e7b3b845ba
+  # Plus some extensions by us
+  lib = let
+    libWithNet = (import "${inputs.lib-net}/net.nix" {inherit lib;}).lib;
+  in
+    lib.recursiveUpdate libWithNet {
+      net.cidr = rec {
+        hostCidr = n: x: "${libWithNet.net.cidr.host n x}/${libWithNet.net.cidr.length x}";
+        ip = x: lib.head (lib.splitString "/" x);
+        canonicalize = x: libWithNet.net.cidr.make (libWithNet.net.cidr.length x) (ip x);
+      };
+    };
+
   # Setup secret rekeying parameters
   rekey = {
     inherit

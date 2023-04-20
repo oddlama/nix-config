@@ -24,6 +24,7 @@
     mkIf
     mkOption
     mkEnableOption
+    net
     optionalAttrs
     optionals
     splitString

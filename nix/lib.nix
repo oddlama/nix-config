@@ -15,11 +15,13 @@
     flatten
     foldl'
     genAttrs
+    head
     mapAttrs'
     mergeAttrs
     nameValuePair
     partition
     removeSuffix
+    splitString
     substring
     unique
     ;

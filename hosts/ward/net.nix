@@ -15,7 +15,10 @@ in {
     "10-lan" = {
       address = [net.lan.ipv4cidr net.lan.ipv6cidr];
       matchConfig.MACAddress = nodeSecrets.networking.interfaces.lan.mac;
-      networkConfig.IPv6PrivacyExtensions = "kernel";
+      networkConfig = {
+        IPForward = "yes";
+        IPv6PrivacyExtensions = "kernel";
+      };
       dhcpV4Config.RouteMetric = 10;
       dhcpV6Config.RouteMetric = 10;
     };
@@ -38,15 +41,15 @@ in {
     zones = lib.mkForce {
       lan = {
         interfaces = ["lan"];
-        ipv4Addresses = [(cidr.canonicalize net.lan.ipv4cidr)];
-        ipv6Addresses = [(cidr.canonicalize net.lan.ipv6cidr)];
+        #ipv4Addresses = [(cidr.canonicalize net.lan.ipv4cidr)];
+        #ipv6Addresses = [(cidr.canonicalize net.lan.ipv6cidr)];
       };
       wan = {
         interfaces = ["wan"];
         # TODO ipv4Addresses = [ net.wan.netv4 ];
         # TODO ipv6Addresses = [ net.wan.netv6 ];
-        ipv4Addresses = ["192.168.1.0/22"];
-        ipv6Addresses = ["fd00::/64"];
+        #ipv4Addresses = ["192.168.1.0/22"];
+        #ipv6Addresses = ["fd00::/64"];
       };
     };
 

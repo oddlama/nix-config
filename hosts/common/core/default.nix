@@ -53,7 +53,7 @@
 
   boot = {
     kernelParams = ["log_buf_len=10M"];
-    tmpOnTmpfs = true;
+    tmp.useTmpfs = true;
   };
 
   # Disable sudo which is entierly unnecessary.

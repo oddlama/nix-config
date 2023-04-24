@@ -10,7 +10,7 @@
 
     ../common/core
     ../common/hardware/intel.nix
-    #../common/initrd-ssh.nix
+    ../common/initrd-ssh.nix
     ../common/efi.nix
     ../common/zfs.nix
 
@@ -20,7 +20,7 @@
     ./net.nix
   ];
 
-  boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci"];
+  boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" "r8169"];
 
   #services.authelia.instances.main = {
   #  enable = true;

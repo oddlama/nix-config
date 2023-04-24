@@ -52,6 +52,7 @@
   };
 
   boot = {
+    initrd.systemd.enable = true;
     kernelParams = ["log_buf_len=10M"];
     tmp.useTmpfs = true;
   };

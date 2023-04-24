@@ -74,6 +74,11 @@ in {
     };
   };
 
+  systemd.network = {
+    enable = true;
+    wait-online.anyInterface = true;
+  };
+
   # Rename known network interfaces
   services.udev.packages = let
     interfaceNamesUdevRules = pkgs.writeTextFile {
@@ -85,9 +90,4 @@ in {
       destination = "/etc/udev/rules.d/01-interface-names.rules";
     };
   in [interfaceNamesUdevRules];
-
-  systemd.network = {
-    enable = true;
-    wait-online.anyInterface = true;
-  };
 }

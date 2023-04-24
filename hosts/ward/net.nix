@@ -11,6 +11,11 @@
 in {
   networking.hostId = nodeSecrets.networking.hostId;
 
+  boot.initrd.systemd.network = {
+    enable = true;
+    networks = {inherit (config.systemd.network.networks) "10-wan";};
+  };
+
   systemd.network.networks = {
     "10-lan" = {
       address = [net.lan.ipv4cidr net.lan.ipv6cidr];
@@ -39,18 +44,8 @@ in {
 
   networking.nftables.firewall = {
     zones = lib.mkForce {
-      lan = {
-        interfaces = ["lan"];
-        #ipv4Addresses = [(cidr.canonicalize net.lan.ipv4cidr)];
-        #ipv6Addresses = [(cidr.canonicalize net.lan.ipv6cidr)];
-      };
-      wan = {
-        interfaces = ["wan"];
-        # TODO ipv4Addresses = [ net.wan.netv4 ];
-        # TODO ipv6Addresses = [ net.wan.netv6 ];
-        #ipv4Addresses = ["192.168.1.0/22"];
-        #ipv6Addresses = ["fd00::/64"];
-      };
+      lan.interfaces = ["lan"];
+      wan.interfaces = ["wan"];
     };
 
     rules = lib.mkForce {

@@ -15,6 +15,7 @@
 
     ../common/hardware/intel.nix
     ../common/efi.nix
+    ../common/initrd-ssh.nix
     ../common/laptop.nix
     ../common/sound.nix
     ../common/yubikey.nix

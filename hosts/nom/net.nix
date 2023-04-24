@@ -4,6 +4,11 @@
     wireless.iwd.enable = true;
   };
 
+  boot.initrd.systemd.network = {
+    enable = true;
+    networks = {inherit (config.systemd.network.networks) "10-lan1";};
+  };
+
   systemd.network.networks = {
     "10-lan1" = {
       DHCP = "yes";

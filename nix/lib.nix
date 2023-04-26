@@ -20,6 +20,7 @@
     mergeAttrs
     nameValuePair
     partition
+    recursiveUpdate
     removeSuffix
     splitString
     substring
@@ -46,6 +47,50 @@ in rec {
 
   # True if the path or string starts with /
   isAbsolutePath = x: substring 0 1 x == "/";
+
+  # Defines a simple encrypted and compressed pool
+  # with datasets necessary datasets for use with impermanence
+  disko.defineEncryptedZpool = name:
+    recursiveUpdate {
+      ${name} = {
+        type = "zpool";
+        mode = "mirror";
+        rootFsOptions = {
+          compression = "zstd";
+          acltype = "posix";
+          atime = "off";
+          xattr = "sa";
+          dnodesize = "auto";
+          mountpoint = "none";
+          canmount = "off";
+          devices = "off";
+          encryption = "aes-256-gcm";
+          keyformat = "passphrase";
+          keylocation = "prompt";
+        };
+        options.ashift = "12";
+        datasets = {
+          "local".type = "zfs_fs";
+          "local/root" = {
+            type = "zfs_fs";
+            postCreateHook = "zfs snapshot ${name}/local/root@blank";
+            options.canmount = "on";
+            mountpoint = "/";
+          };
+          "local/nix" = {
+            type = "zfs_fs";
+            options.canmount = "on";
+            mountpoint = "/nix";
+          };
+          "safe".type = "zfs_fs";
+          "safe/persist" = {
+            type = "zfs_fs";
+            options.canmount = "on";
+            mountpoint = "/persist";
+          };
+        };
+      };
+    };
 
   rageMasterIdentityArgs = concatMapStrings (x: ''-i ${escapeShellArg x} '') self.secrets.masterIdentities;
   rageExtraEncryptionPubkeys =

@@ -1,6 +1,7 @@
 {
   self,
   colmena,
+  disko,
   home-manager,
   #impermanence,
   nixos-hardware,
@@ -34,6 +35,7 @@ in
         #impermanence.nixosModules.default
         agenix.nixosModules.default
         agenix-rekey.nixosModules.default
+        disko.nixosModules.disko
         nixos-nftables-firewall.nixosModules.default
       ]
       ++ optionals nodeMeta.microVmHost [

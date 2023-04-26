@@ -8,6 +8,11 @@
       inputs.flake-utils.follows = "flake-utils";
     };
 
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -21,6 +26,11 @@
     };
 
     nixos-hardware.url = "github:NixOS/nixos-hardware";
+
+    nixos-generators = {
+      url = "github:nix-community/nixos-generators";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     nixos-nftables-firewall = {
       url = "github:thelegy/nixos-nftables-firewall";
@@ -57,11 +67,14 @@
   outputs = {
     self,
     colmena,
+    nixos-generators,
     nixpkgs,
     flake-utils,
     agenix-rekey,
     ...
-  } @ inputs:
+  } @ inputs: let
+    recursiveMergeAttrs = nixpkgs.lib.foldl' nixpkgs.lib.recursiveUpdate {};
+  in
     {
       extraLib = import ./nix/lib.nix inputs;
 
@@ -80,6 +93,15 @@
 
       # All nixos based hosts collected together
       nodes = self.colmenaNodes // self.microvmNodes;
+
+      # Collect installer packages
+      inherit
+        (recursiveMergeAttrs
+          (nixpkgs.lib.mapAttrsToList
+            (import ./nix/generate-installer.nix inputs)
+            self.colmenaNodes))
+        packages
+        ;
     }
     // flake-utils.lib.eachDefaultSystem (system: rec {
       pkgs = import nixpkgs {

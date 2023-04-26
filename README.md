@@ -32,6 +32,7 @@ This is my personal nix config.
     - `format-secrets.nix` Runs the code formatter on the secret .nix files
     - `generate-initrd-keys.nix` Generates initrd hostkeys for each host if they don't exist yet (for setup)
     - `generate-wireguard-keys.nix` Generates wireguard keys for each server-and-peer pair
+    - `show-wireguard-qr.nix` Generates a QR code for external wireguard participants
   - `checks.nix` pre-commit-hooks for this repository
   - `colmena.nix` Setup for distributed deployment using colmena (actually defines all NixOS hosts)
   - `dev-shell.nix` Environment setup for `nix develop` for using this flake
@@ -49,7 +50,7 @@ This is my personal nix config.
 
 ## How-To
 
-#### Add and deploy new machine
+#### Add new machine
 
 ...
 
@@ -59,6 +60,11 @@ This is my personal nix config.
 - todo: hostid (move to nodeSecrets)
 - generate-initrd-keys
 - generate-wireguard-keys
+
+#### Initial deploy
+
+- Boot from some nixos-minimal.iso
+- 
 
 #### Show QR for external wireguard client
 

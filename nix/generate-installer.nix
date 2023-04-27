@@ -4,18 +4,27 @@
   ...
 }: nodeName: nodeAttrs: let
   inherit (self.hosts.${nodeName}) system;
-  configuration = {pkgs, ...}: {
+  configuration = {
+    pkgs,
+    lib,
+    ...
+  }: {
     system.stateVersion = "23.05";
     nix.extraOptions = ''
       experimental-features = nix-command flakes recursive-nix
     '';
+
+    isoImage.isoName = lib.mkForce "nixos-image-${nodeName}.iso";
 
     services.openssh = {
       enable = true;
       settings.PermitRootLogin = "yes";
     };
 
-    users.users.root.password = "nixos";
+    users.users.root = {
+      password = "nixos";
+      openssh.authorizedKeys.keys = ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA5Uq+CDy5Pmt3If5M6d8K/Q7HArU6sZ7sgoj3T521Wm"];
+    };
 
     environment = {
       variables.EDITOR = "nvim";

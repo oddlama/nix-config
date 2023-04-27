@@ -63,8 +63,8 @@ This is my personal nix config.
 
 #### Initial deploy
 
-- Boot from some nixos-minimal.iso
-- 
+- Create a iso disk image for the system using `nix build --print-out-paths --no-link .#installer-image-<hostname>`
+- dd the resulting image to a stick and boot from it
 
 #### Show QR for external wireguard client
 

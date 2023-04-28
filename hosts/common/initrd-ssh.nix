@@ -11,4 +11,19 @@
     port = 4;
     hostKeys = [config.rekey.secrets.initrd_host_ed25519_key.path];
   };
+
+  # Make sure that there is always a valid initrd hostkey available that can be installed into
+  # the initrd. When bootstrapping a system (or re-installing), agenix cannot succeed in decrypting
+  # whatever is given, since the correct hostkey doesn't even exist yet. We still require
+  # a valid hostkey to be available so that the initrd can be generated successfully.
+  # The correct initrd host-key will be installed with the next update after the host is booted
+  # for the first time, and the secrets were rekeyed for the the new host identity.
+  system.activationScripts.agenixEnsureInitrdHostkey = {
+    text = ''
+      [[ -e ${rekey.secrets.initrd_host_ed25519_key.path} ]] \
+        || ssh-keygen -t ed25519 -N "" -f ${rekey.secrets.initrd_host_ed25519_key.path}
+    '';
+    deps = ["agenixInstall"];
+  };
+  system.activationScripts.agenixChown.deps = ["agenixEnsureInitrdHostkey"];
 }

@@ -7,7 +7,7 @@
     disk = {
       m2-ssd = {
         type = "disk";
-        device = "/dev/disk/by-id/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+        device = "/dev/disk/by-id/nvme-Samsung_SSD_980_1TB_S649NL0TC36758M";
         content = {
           type = "table";
           format = "gpt";
@@ -17,6 +17,7 @@
               start = "2048";
               end = "1GiB";
               fs-type = "fat32";
+              bootable = true;
               content = {
                 type = "filesystem";
                 format = "vfat";
@@ -27,6 +28,7 @@
               name = "swap";
               start = "1GiB";
               end = "17GiB";
+              fs-type = "linux-swap";
               content = {
                 type = "swap";
                 randomEncryption = true;

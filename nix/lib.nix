@@ -54,7 +54,6 @@ in rec {
     recursiveUpdate {
       ${name} = {
         type = "zpool";
-        mode = "mirror";
         rootFsOptions = {
           compression = "zstd";
           acltype = "posix";
@@ -74,19 +73,25 @@ in rec {
           "local/root" = {
             type = "zfs_fs";
             postCreateHook = "zfs snapshot ${name}/local/root@blank";
-            options.canmount = "on";
-            mountpoint = "/";
+            options = {
+              canmount = "on";
+              mountpoint = "/";
+            };
           };
           "local/nix" = {
             type = "zfs_fs";
-            options.canmount = "on";
-            mountpoint = "/nix";
+            options = {
+              canmount = "on";
+              mountpoint = "/nix";
+            };
           };
           "safe".type = "zfs_fs";
           "safe/persist" = {
             type = "zfs_fs";
-            options.canmount = "on";
-            mountpoint = "/persist";
+            options = {
+              canmount = "on";
+              mountpoint = "/persist";
+            };
           };
         };
       };

@@ -8,18 +8,30 @@
     pkgs,
     lib,
     ...
-  }: {
+  }: let
+    disko = pkgs.writeShellScriptBin "disko" "${nodeAttrs.config.system.build.disko}";
+    disko-mount = pkgs.writeShellScriptBin "disko-mount" "${nodeAttrs.config.system.build.mountScript}";
+    disko-format = pkgs.writeShellScriptBin "disko-format" "${nodeAttrs.config.system.build.formatScript}";
+
+    install-system = pkgs.writeShellScriptBin "install-system" ''
+      set -euo pipefail
+
+      echo "Formatting disks..."
+      ${disko}/bin/disko
+
+      echo "Installing system..."
+      nixos-install --no-root-password --system ${nodeAttrs.config.system.build.toplevel}
+
+      echo "Done!"
+    '';
+  in {
+    isoImage.isoName = lib.mkForce "nixos-image-${nodeName}.iso";
     system.stateVersion = "23.05";
     nix.extraOptions = ''
       experimental-features = nix-command flakes recursive-nix
     '';
 
-    isoImage.isoName = lib.mkForce "nixos-image-${nodeName}.iso";
-
-    services.openssh = {
-      enable = true;
-      settings.PermitRootLogin = "yes";
-    };
+    console.keyMap = "de-latin1-nodeadkeys";
 
     users.users.root = {
       password = "nixos";
@@ -37,14 +49,21 @@
         fzf
         wget
         curl
-        # TODO nodeAttrs.config.boot.system.
+
+        disko
+        disko-mount
+        disko-format
+        install-system
       ];
     };
   };
 in {
   packages.${system}."installer-image-${nodeName}" = nixos-generators.nixosGenerate {
     pkgs = self.pkgs.${system};
-    modules = [configuration];
+    modules = [
+      configuration
+      ../hosts/common/core/ssh.nix
+    ];
     format =
       {
         x86_64-linux = "install-iso";

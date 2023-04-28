@@ -22,8 +22,8 @@ This is my personal nix config.
   - `nom/` - My laptop and main development machine
   - `ward/` - ODROID H3, energy efficient SBC. Used as a firewall betwenn my ISP and internal home network. Hosts some lightweight services using full KVM virtual machines.
   - `envoy/` - Hetzner Cloud server. Primarily used as my mailserver and VPN provider.
-  - `zackbiene/` - ODROID N2+. Hosts IoT and Home Automation stuff and fully isolates that from my internal network.
-  - not yet ready for publicized: my main development machine, powerful home server, some services ... (still in transition from gentoo :/)
+  - `zackbiene/` - ODROID N2+. Hosts IoT and Home Automation stuff and fully isolates that stuff from my internal network.
+  - not yet ready for publicized: my main development machine, the powerful home server, some services ... (still in transition from gentoo :/)
 - `modules/` additional NixOS modules that are not yet upstreamed.
 - `nix/` library functions and plumbing
   - `apps/` Additional runnable actions for this flake
@@ -52,19 +52,24 @@ This is my personal nix config.
 
 #### Add new machine
 
-...
+... incomplete.
 
 - add hosts/<name>
 - fill meta.nix
 - fill net.nix
-- todo: hostid (move to nodeSecrets)
+- fill fs.nix (you need to know the device by-id paths in advance for formatting to work!)
 - generate-initrd-keys
 - generate-wireguard-keys
 
 #### Initial deploy
 
-- Create a iso disk image for the system using `nix build --print-out-paths --no-link .#installer-image-<hostname>`
-- dd the resulting image to a stick and boot from it
+- Create a iso disk image for the system by using `nix build --print-out-paths --no-link .#installer-image-<host>`
+- dd the resulting image to a stick and boot from it on the target
+- (Optional) ssh into the target (keys are already set up)
+- Run `install-system` and reboot
+- Retrieve the new host identity by using `ssh-keyscan <host/ip> | grep -o 'ed25519.*' > host/<host>/secrets/host.pub`
+- Rekey the secrets for the new identity `nix run .#rekey`
+- Deploy again remotely via colmena
 
 #### Show QR for external wireguard client
 

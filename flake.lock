@@ -116,15 +116,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1682795657,
-        "narHash": "sha256-tLZV918KDU8GrucWqliAwO87mqWJhIrvaF17LU51UjE=",
-        "owner": "oddlama",
+        "lastModified": 1682802069,
+        "narHash": "sha256-hctikxnF3AvHckQqzNa/4YLHbNNrdC733VsTZPWeyTo=",
+        "owner": "nix-community",
         "repo": "disko",
-        "rev": "3a952244d422ea0e25b0e53c1fe2798605a59434",
+        "rev": "c917cb9cdb621f3b60a7ccc77729cab52250da81",
         "type": "github"
       },
       "original": {
-        "owner": "oddlama",
+        "owner": "nix-community",
         "repo": "disko",
         "type": "github"
       }

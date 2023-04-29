@@ -23,7 +23,7 @@ This is my personal nix config.
   - `ward/` - ODROID H3, energy efficient SBC. Used as a firewall betwenn my ISP and internal home network. Hosts some lightweight services using full KVM virtual machines.
   - `envoy/` - Hetzner Cloud server. Primarily used as my mailserver and VPN provider.
   - `zackbiene/` - ODROID N2+. Hosts IoT and Home Automation stuff and fully isolates that stuff from my internal network.
-  - not yet ready for publicized: my main development machine, the powerful home server, some services ... (still in transition from gentoo :/)
+  - not yet ready to be publicized: my main development machine, the powerful home server, some services ... (still in transition from gentoo :/)
 - `modules/` additional NixOS modules that are not yet upstreamed.
 - `nix/` library functions and plumbing
   - `apps/` Additional runnable actions for this flake

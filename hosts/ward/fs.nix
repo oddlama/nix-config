@@ -14,7 +14,7 @@
           partitions = [
             {
               name = "efi";
-              start = "2048";
+              start = "0%";
               end = "1GiB";
               fs-type = "fat32";
               bootable = true;

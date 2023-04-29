@@ -9,7 +9,9 @@
     };
 
     disko = {
-      url = "github:nix-community/disko";
+      # TODO temporary until reimport PR merged
+      #url = "github:nix-community/disko";
+      url = "github:oddlama/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

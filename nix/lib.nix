@@ -54,6 +54,7 @@ in rec {
     recursiveUpdate {
       ${name} = {
         type = "zpool";
+        mountRoot = "/mnt";
         rootFsOptions = {
           compression = "zstd";
           acltype = "posix";
@@ -77,6 +78,7 @@ in rec {
               canmount = "on";
               mountpoint = "/";
             };
+            mountpoint = "/";
           };
           "local/nix" = {
             type = "zfs_fs";
@@ -84,6 +86,7 @@ in rec {
               canmount = "on";
               mountpoint = "/nix";
             };
+            mountpoint = "/nix";
           };
           "safe".type = "zfs_fs";
           "safe/persist" = {
@@ -92,6 +95,7 @@ in rec {
               canmount = "on";
               mountpoint = "/persist";
             };
+            mountpoint = "/persist";
           };
         };
       };

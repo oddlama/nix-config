@@ -1,6 +1,7 @@
 {
   config,
   name,
+  pkgs,
   ...
 }: {
   rekey.secrets.initrd_host_ed25519_key.file = ../${name}/secrets/initrd_host_ed25519_key.age;
@@ -20,8 +21,8 @@
   # for the first time, and the secrets were rekeyed for the the new host identity.
   system.activationScripts.agenixEnsureInitrdHostkey = {
     text = ''
-      [[ -e ${rekey.secrets.initrd_host_ed25519_key.path} ]] \
-        || ssh-keygen -t ed25519 -N "" -f ${rekey.secrets.initrd_host_ed25519_key.path}
+      [[ -e ${config.rekey.secrets.initrd_host_ed25519_key.path} ]] \
+        || ${pkgs.openssh}/bin/ssh-keygen -t ed25519 -N "" -f ${config.rekey.secrets.initrd_host_ed25519_key.path}
     '';
     deps = ["agenixInstall"];
   };

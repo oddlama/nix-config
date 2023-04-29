@@ -71,6 +71,11 @@ This is my personal nix config.
 - Rekey the secrets for the new identity `nix run .#rekey`
 - Deploy again remotely via colmena
 
+#### Remote encrypted unlock
+
+If a host uses encrypted root together with the `common/initrd-ssh.nix` module,
+it can be unlocked remotely by connecting via ssh on port 4 and executing `systemd-tty-ask-password-agent`.
+
 #### Show QR for external wireguard client
 
 nix run show-wireguard-qr

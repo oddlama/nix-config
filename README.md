@@ -63,7 +63,7 @@ This is my personal nix config.
 
 #### Initial deploy
 
-- Create a iso disk image for the system by using `nix build --print-out-paths --no-link .#installer-image-<host>`
+- Create a iso disk image for the system with `nix build --print-out-paths --no-link .#installer-image-<host>`
 - dd the resulting image to a stick and boot from it on the target
 - (Optional) ssh into the target (keys are already set up)
 - Run `install-system` and reboot

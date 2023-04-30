@@ -1,5 +1,6 @@
 {
   extraLib,
+  nodeSecrets,
   pkgs,
   ...
 }: {
@@ -7,49 +8,38 @@
     disk = {
       m2-ssd = {
         type = "disk";
-        device = "/dev/disk/by-id/nvme-Samsung_SSD_980_1TB_S649NL0TC36758M";
-        content = {
+        device = "/dev/disk/by-id/${nodeSecrets.disk.m2-ssd}";
+        content = with extraLib.disko.gpt; {
           type = "table";
           format = "gpt";
           partitions = [
-            {
-              name = "efi";
-              start = "0%";
-              end = "1GiB";
-              fs-type = "fat32";
-              bootable = true;
-              content = {
-                type = "filesystem";
-                format = "vfat";
-                mountpoint = "/boot";
-              };
-            }
-            {
-              name = "swap";
-              start = "1GiB";
-              end = "17GiB";
-              fs-type = "linux-swap";
-              content = {
-                type = "swap";
-                randomEncryption = true;
-              };
-            }
-            {
-              name = "rpool";
-              start = "17GiB";
-              end = "100%";
-              content = {
-                type = "zfs";
-                pool = "rpool";
-              };
-            }
+            (partEfi "efi" "0%" "1GiB")
+            (partSwap "swap" "1GiB" "17GiB")
+            (partZfs "rpool" "17GiB" "100%")
           ];
         };
       };
     };
-    zpool = extraLib.disko.defineEncryptedZpool "rpool" {};
+    zpool = with extraLib.disko.zfs; {
+      rpool =
+        encryptedZpool
+        // {
+          datasets = {
+            "local" = unmountable;
+            "local/root" =
+              filesystem "/"
+              // {
+                postCreateHook = "zfs snapshot rpool/local/root@blank";
+              };
+            "local/nix" = filesystem "/nix";
+            "safe" = unmountable;
+            "safe/persist" = filesystem "/persist";
+          };
+        };
+    };
   };
 
+  # After importing the rpool, rollback the root system to be empty.
   boot.initrd.systemd.services = {
     impermanence-root = {
       wantedBy = ["initrd.target"];

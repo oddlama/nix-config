@@ -19,6 +19,7 @@
     mapAttrs'
     mergeAttrs
     nameValuePair
+    optionalAttrs
     partition
     recursiveUpdate
     removeSuffix
@@ -48,11 +49,36 @@ in rec {
   # True if the path or string starts with /
   isAbsolutePath = x: substring 0 1 x == "/";
 
-  # Defines a simple encrypted and compressed pool
-  # with datasets necessary datasets for use with impermanence
-  disko.defineEncryptedZpool = name:
-    recursiveUpdate {
-      ${name} = {
+  disko = {
+    gpt = {
+      partEfi = name: start: end: {
+        inherit name start end;
+        fs-type = "fat32";
+        bootable = true;
+        content = {
+          type = "filesystem";
+          format = "vfat";
+          mountpoint = "/boot";
+        };
+      };
+      partSwap = name: start: end: {
+        inherit name start end;
+        fs-type = "linux-swap";
+        content = {
+          type = "swap";
+          randomEncryption = true;
+        };
+      };
+      partZfs = name: start: end: {
+        inherit name start end;
+        content = {
+          type = "zfs";
+          pool = name;
+        };
+      };
+    };
+    zfs = {
+      encryptedZpool = {
         type = "zpool";
         mountRoot = "/mnt";
         rootFsOptions = {
@@ -69,37 +95,23 @@ in rec {
           keylocation = "prompt";
         };
         options.ashift = "12";
-        datasets = {
-          "local".type = "zfs_fs";
-          "local/root" = {
-            type = "zfs_fs";
-            postCreateHook = "zfs snapshot ${name}/local/root@blank";
-            options = {
-              canmount = "on";
-              mountpoint = "/";
-            };
-            mountpoint = "/";
-          };
-          "local/nix" = {
-            type = "zfs_fs";
-            options = {
-              canmount = "on";
-              mountpoint = "/nix";
-            };
-            mountpoint = "/nix";
-          };
-          "safe".type = "zfs_fs";
-          "safe/persist" = {
-            type = "zfs_fs";
-            options = {
-              canmount = "on";
-              mountpoint = "/persist";
-            };
-            mountpoint = "/persist";
-          };
-        };
       };
+
+      unmountable = {type = "zfs_fs";};
+      filesystem = mountpoint:
+        {
+          type = "zfs_fs";
+          options = {
+            canmount = "on";
+            inherit mountpoint;
+          };
+        }
+        // optionalAttrs (mountpoint == "/") {
+          # Required to add dependencies for initrd
+          inherit mountpoint;
+        };
     };
+  };
 
   rageMasterIdentityArgs = concatMapStrings (x: ''-i ${escapeShellArg x} '') self.secrets.masterIdentities;
   rageExtraEncryptionPubkeys =

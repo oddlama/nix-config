@@ -1,4 +1,8 @@
-{nodeSecrets, ...}: {
+{
+  config,
+  nodeSecrets,
+  ...
+}: {
   networking = {
     inherit (nodeSecrets.networking) hostId;
     wireless.iwd.enable = true;

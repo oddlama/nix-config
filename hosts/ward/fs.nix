@@ -39,6 +39,10 @@
     };
   };
 
+  #environment.persistence."/persist".directories = [
+  #  { directory = "/var/lib/acme"; user = "acme"; group = "acme"; }
+  #];
+
   # After importing the rpool, rollback the root system to be empty.
   boot.initrd.systemd.services = {
     impermanence-root = {

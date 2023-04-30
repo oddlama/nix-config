@@ -1,15 +1,15 @@
 {
   self,
+  agenix,
+  agenix-rekey,
   colmena,
   disko,
   home-manager,
   #impermanence,
+  microvm,
   nixos-hardware,
   nixos-nftables-firewall,
   nixpkgs,
-  microvm,
-  agenix,
-  agenix-rekey,
   ...
 } @ inputs: let
   inherit (nixpkgs.lib) optionals;
@@ -22,23 +22,21 @@ in
       inherit (self) extraLib nodes;
       inherit inputs;
       inherit nodeName;
-      inherit nodeMeta;
       secrets = self.secrets.content;
       nodeSecrets = self.secrets.content.nodes.${nodeName};
       nixos-hardware = nixos-hardware.nixosModules;
-      #impermanence = impermanence.nixosModules;
     };
     imports =
       [
         (../hosts + "/${nodeName}")
-        home-manager.nixosModules.default
-        #impermanence.nixosModules.default
         agenix.nixosModules.default
         agenix-rekey.nixosModules.default
         disko.nixosModules.disko
+        home-manager.nixosModules.default
+        #impermanence.nixosModules.default
         nixos-nftables-firewall.nixosModules.default
       ]
-      ++ optionals nodeMeta.microVmHost [
+      ++ optionals (nodeMeta.microVmHost or false) [
         microvm.nixosModules.host
       ]
       ++ optionals (nodeMeta.type == "microvm") [

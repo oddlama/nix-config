@@ -86,7 +86,22 @@
         content = import ./nix/secrets.nix inputs;
       };
 
-      hosts = import ./nix/hosts.nix inputs;
+      hosts = {
+        nom = {
+          type = "nixos";
+          system = "x86_64-linux";
+        };
+        ward = {
+          type = "nixos";
+          system = "x86_64-linux";
+          microVmHost = true;
+        };
+        zackbiene = {
+          type = "nixos";
+          system = "aarch64-linux";
+        };
+      };
+
       colmena = import ./nix/colmena.nix inputs;
       colmenaNodes = ((colmena.lib.makeHive self.colmena).introspect (x: x)).nodes;
       microvmNodes = import ./nix/microvms.nix inputs;

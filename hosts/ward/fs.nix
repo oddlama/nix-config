@@ -1,4 +1,5 @@
 {
+  lib,
   extraLib,
   nodeSecrets,
   pkgs,
@@ -38,6 +39,8 @@
         };
     };
   };
+
+  fileSystems."/persist".neededForBoot = true;
 
   #environment.persistence."/persist".directories = [
   #  { directory = "/var/lib/acme"; user = "acme"; group = "acme"; }

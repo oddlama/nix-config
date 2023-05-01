@@ -8,6 +8,7 @@
 }: {
   imports = [
     ./inputrc.nix
+    ./impermanence.nix
     ./issue.nix
     ./net.nix
     ./nix.nix

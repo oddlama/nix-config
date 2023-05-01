@@ -16,7 +16,6 @@ This is my personal nix config.
 	  - `secrets.nix.age` Repository-wide local secrets. Decrypted on import via `builtins.extraBuiltins.rageImportEncrypted`.
 	  - `host.pub` This host's public key. Used for agenix rekeying.
 	- `default.nix` The actual system definition. Follow the imports from there to see what it entails.
-	- `meta.nix` Determines the type and architecture of this system, and some other optional meta information. Used e.g. by `nix/colmena.nix` to know which hosts are real NixOS hosts, and which are VMs or some other type.
 	- `fs.nix` Filesystem setup.
 	- `net.nix` Networking setup.
   - `nom/` - My laptop and main development machine
@@ -54,8 +53,8 @@ This is my personal nix config.
 
 ... incomplete.
 
-- add hosts/<name>
-- fill meta.nix
+- add <name> to `hosts` in `flake.nix`
+- create hosts/<name>
 - fill net.nix
 - fill fs.nix (you need to know the device by-id paths in advance for formatting to work!)
 - generate-initrd-keys

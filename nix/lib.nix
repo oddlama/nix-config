@@ -98,18 +98,15 @@ in rec {
       };
 
       unmountable = {type = "zfs_fs";};
-      filesystem = mountpoint:
-        {
-          type = "zfs_fs";
-          options = {
-            canmount = "on";
-            inherit mountpoint;
-          };
-        }
-        // optionalAttrs (mountpoint == "/") {
-          # Required to add dependencies for initrd
+      filesystem = mountpoint: {
+        type = "zfs_fs";
+        options = {
+          canmount = "on";
           inherit mountpoint;
         };
+        # Required to add dependencies for initrd
+        inherit mountpoint;
+      };
     };
   };
 

@@ -14,6 +14,7 @@
     ../common/graphical
 
     ../common/hardware/intel.nix
+    ../common/hardware/physical.nix
     ../common/efi.nix
     ../common/initrd-ssh.nix
     ../common/laptop.nix

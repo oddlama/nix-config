@@ -10,6 +10,7 @@
 
     ../common/core
     ../common/hardware/intel.nix
+    ../common/hardware/physical.nix
     ../common/initrd-ssh.nix
     ../common/efi.nix
     ../common/zfs.nix

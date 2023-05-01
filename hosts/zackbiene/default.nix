@@ -9,6 +9,8 @@
     nixos-hardware.common-pc-ssd
 
     ../common/core
+    ../common/hardware/physical.nix
+    #../common/initrd-ssh.nix
     ../common/zfs.nix
 
     ../../users/root

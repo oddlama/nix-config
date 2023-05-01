@@ -5,14 +5,11 @@
     difftastic.enable = true;
     lfs.enable = lib.mkDefault false;
     extraConfig = {
-      #diff = {
-      #  colorMoved = "default";
-      #  age.textconv = "${pkgs.rage}/bin/rage -i ~/.ssh/username --decrypt";
-      #};
       difftool.prompt = true;
       init.defaultBranch = "main";
       merge.conflictstyle = "diff3";
       mergetool.prompt = true;
+      pull.rebase = true;
     };
     aliases = {
       unstash = "stash pop";

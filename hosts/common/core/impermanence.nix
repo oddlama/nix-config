@@ -4,14 +4,13 @@
   #environment.persistence."/nix/state" = {
   #  hideMounts = true;
   #  files = [
-  #    "/etc/machine-id"
-  #    "/etc/ssh/ssh_host_ed25519_key"
-  #    "/etc/ssh/ssh_host_ed25519_key.pub"
   #  ];
   #  directories = [
-  #    "/var/log"
   #  ];
   #};
+
+  # Give agenix access to the hostkey independent of impermanence activation
+  age.identityPaths = ["/persist/etc/ssh/ssh_host_ed25519_key"];
 
   # State that should be kept forever, and backed up accordingly.
   environment.persistence."/persist" = {

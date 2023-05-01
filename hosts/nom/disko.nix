@@ -1,3 +1,4 @@
+# TODO subject for deletion (moves into fs.nix like for ward)
 {
   nom = {
     disk = {

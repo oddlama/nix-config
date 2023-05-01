@@ -26,7 +26,7 @@
     '';
   in {
     isoImage.isoName = lib.mkForce "nixos-image-${nodeName}.iso";
-    system.stateVersion = "23.05";
+    system.stateVersion = self.stateVersion;
     nix.extraOptions = ''
       experimental-features = nix-command flakes recursive-nix
     '';

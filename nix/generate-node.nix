@@ -19,7 +19,7 @@ in
     pkgs = self.pkgs.${nodeMeta.system};
     specialArgs = {
       inherit (nixpkgs) lib;
-      inherit (self) extraLib nodes;
+      inherit (self) extraLib nodes stateVersion;
       inherit inputs;
       inherit nodeName;
       secrets = self.secrets.content;

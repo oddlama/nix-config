@@ -16,7 +16,7 @@
   ];
 
   home = {
-    stateVersion = "23.05";
+    inherit stateVersion;
     packages = with pkgs; [
       bandwhich
       btop

@@ -1,6 +1,7 @@
 {
   inputs,
   pkgs,
+  stateVersion,
   ...
 }: {
   environment.etc."nixos/configuration.nix".source = pkgs.writeText "configuration.nix" ''
@@ -32,12 +33,14 @@
       builders-use-substitutes = true
       experimental-features = nix-command flakes recursive-nix
       flake-registry = /etc/nix/registry.json
-      plugin-files = ${pkgs.nix-plugins}/lib/nix/plugins
-      extra-builtins-file = ${../../../nix/extra-builtins.nix}
     '';
     nixPath = ["nixpkgs=/run/current-system/nixpkgs"];
     optimise.automatic = true;
-    gc.automatic = true;
+    gc = {
+      automatic = true;
+      dates = "biweekly";
+      options = "--delete-older-than 90d";
+    };
     # Define global flakes for this system
     registry = {
       nixpkgs.flake = inputs.nixpkgs;
@@ -51,6 +54,6 @@
     extraSystemBuilderCmds = ''
       ln -sv ${pkgs.path} $out/nixpkgs
     '';
-    stateVersion = "23.05";
+    inherit stateVersion;
   };
 }

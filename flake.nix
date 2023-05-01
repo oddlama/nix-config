@@ -86,6 +86,8 @@
         content = import ./nix/secrets.nix inputs;
       };
 
+      stateVersion = "23.05";
+
       hosts = {
         nom = {
           type = "nixos";

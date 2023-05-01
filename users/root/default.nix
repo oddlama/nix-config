@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  stateVersion,
   ...
 }:
 with lib; {
@@ -16,7 +17,10 @@ with lib; {
       ../common
     ];
 
-    home.username = config.users.users.root.name;
-    home.uid = config.users.users.root.uid;
+    home = {
+      inherit stateVersion;
+      inherit (config.users.users.root) uid;
+      username = config.users.users.root.name;
+    };
   };
 }

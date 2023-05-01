@@ -3,6 +3,7 @@
   lib,
   pkgs,
   secrets,
+  stateVersion,
   ...
 }:
 with lib; let
@@ -31,8 +32,9 @@ in {
     ];
 
     home = {
-      username = config.users.users.${myuser}.name;
+      inherit stateVersion;
       inherit (config.users.users.${myuser}) uid;
+      username = config.users.users.${myuser}.name;
       shellAliases = {
         p = "cd ~/projects";
       };

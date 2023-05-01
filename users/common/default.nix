@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  stateVersion,
+  ...
+}: {
   imports = [
     ./modules/uid.nix
 
@@ -16,7 +20,6 @@
   ];
 
   home = {
-    inherit stateVersion;
     packages = with pkgs; [
       bandwhich
       btop

@@ -1,4 +1,6 @@
 {lib, ...}: {
+  # TODO use git-fuzzy.
+  # TODO integrate git-fuzzy and difft
   programs.gitui.enable = true;
   programs.git = {
     enable = true;

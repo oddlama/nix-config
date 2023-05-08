@@ -24,7 +24,7 @@ in {
   home-manager.users.${myuser} = {
     imports = [
       #impermanence.home-manager.impermanence
-      ../common
+      ../common/core
       ./dev.nix
       ./gpg.nix
       ./ssh.nix
@@ -36,6 +36,7 @@ in {
       username = config.users.users.${myuser}.name;
       shellAliases = {
         p = "cd ~/projects";
+        zf = "zathura --fork";
       };
     };
   };

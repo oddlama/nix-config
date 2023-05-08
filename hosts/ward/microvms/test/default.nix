@@ -13,6 +13,8 @@
     ../../../../users/root
   ];
 
+  home-manager.users.root.home.minimal = true;
+
   systemd.network.networks = {
     "10-wan" = {
       # TODO

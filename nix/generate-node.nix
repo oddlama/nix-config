@@ -28,7 +28,7 @@ in
       microvm = microvm.nixosModules;
     };
     imports = [
-      (nodeMeta.config or ../hosts + "/${nodeName}")
+      (nodeMeta.config or (../hosts + "/${nodeName}"))
       agenix.nixosModules.default
       agenix-rekey.nixosModules.default
       disko.nixosModules.disko

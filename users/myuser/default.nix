@@ -5,8 +5,7 @@
   secrets,
   stateVersion,
   ...
-}:
-with lib; let
+}: let
   inherit (secrets) myuser;
 in {
   users.groups.${myuser}.gid = config.users.users.${myuser}.uid;
@@ -17,7 +16,7 @@ in {
     group = myuser;
     extraGroups =
       ["wheel" "input" "video"]
-      ++ optionals config.sound.enable ["audio"];
+      ++ lib.optionals config.sound.enable ["audio"];
     isNormalUser = true;
     shell = pkgs.zsh;
   };

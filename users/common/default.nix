@@ -1,8 +1,4 @@
-{
-  pkgs,
-  stateVersion,
-  ...
-}: {
+{pkgs, ...}: {
   imports = [
     ./modules/uid.nix
 

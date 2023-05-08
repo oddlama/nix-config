@@ -2,8 +2,7 @@
   lib,
   pkgs,
   ...
-}:
-with lib; {
+}: {
   programs.zsh = {
     enable = true;
     envExtra = ''
@@ -15,11 +14,11 @@ with lib; {
       save = 0;
       size = 0;
     };
-    initExtra = mkMerge [
-      (mkBefore ''
+    initExtra = lib.mkMerge [
+      (lib.mkBefore ''
         unset HISTFILE
       '')
-      (mkAfter (''
+      (lib.mkAfter (''
               function atuin-prefix-search() {
                   local out
                   if out=$(${pkgs.sqlite}/bin/sqlite3 -readonly ~/.local/share/atuin/history.db \
@@ -31,7 +30,7 @@ with lib; {
                   fi
               }; zle -N atuin-prefix-search
         ''
-        + readFile ./zshrc))
+        + lib.readFile ./zshrc))
     ];
     plugins = [
       {

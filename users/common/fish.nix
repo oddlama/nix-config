@@ -2,19 +2,18 @@
   lib,
   pkgs,
   ...
-}:
-with lib; {
+}: {
   # FIXME: ctrl-del not working
   # FIXME: DEL also deletes to the left :(
   # FIXME: ignore certain history entries (" .*", ...)
   programs.fish = {
     enable = true;
-    interactiveShellInit = mkMerge [
-      (mkBefore ''
+    interactiveShellInit = lib.mkMerge [
+      (lib.mkBefore ''
         set -g ATUIN_NOBIND true
         set -g fish_greeting
       '')
-      (mkAfter ''
+      (lib.mkAfter ''
         bind \cr _atuin_search
         atuin gen-completions --shell fish | source
 

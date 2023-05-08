@@ -105,7 +105,16 @@
       };
 
       colmena = import ./nix/colmena.nix inputs;
-      inherit ((colmena.lib.makeHive self.colmena).introspect (x: x)) nodes;
+      colmenaNodes = ((colmena.lib.makeHive self.colmena).introspect (x: x)).nodes;
+      microvmNodes =
+        nixpkgs.lib.concatMapAttrs (
+          nodeName: nodeAttrs:
+            nixpkgs.lib.mapAttrs'
+            (n: nixpkgs.lib.nameValuePair "${nodeName}-microvm-${n}")
+            (self.colmenaNodes.${nodeName}.config.microvm.vms or {})
+        )
+        self.colmenaNodes;
+      nodes = self.colmenaNodes // self.microvmNodes;
 
       # Collect installer packages
       inherit

@@ -258,7 +258,7 @@
       },
       "locked": {
         "lastModified": 1682972682,
-        "narHash": "sha256-IYInF92rLqqVk/dyugT2QVbVeEfYx1rbBJjbUlRD8oE=",
+        "narHash": "sha256-+XyTwr4jZuDlT5l/0LynDVtvdWj8WmAwDEP/2rZ+1hk=",
         "type": "git",
         "url": "file:///root/projects/microvm.nix"
       },

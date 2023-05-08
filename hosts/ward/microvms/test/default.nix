@@ -8,8 +8,6 @@
   ...
 }: {
   imports = [
-    microvm.microvm
-
     ../../../common/core
 
     ../../../../users/root

@@ -11,6 +11,7 @@
     ./xdg.nix
 
     ../../../modules/wireguard.nix
+    ../../../modules/microvms.nix
   ];
 
   home-manager = {

@@ -16,7 +16,7 @@
     ;
 in {
   networking = {
-    hostName = mkDefault nodeName;
+    hostName = nodeName;
     useDHCP = mkForce false;
     useNetworkd = true;
     dhcpcd.enable = false;
@@ -80,14 +80,16 @@ in {
   };
 
   # Rename known network interfaces
-  services.udev.packages = let
-    interfaceNamesUdevRules = pkgs.writeTextFile {
-      name = "interface-names-udev-rules";
-      text = concatStringsSep "\n" (mapAttrsToList (
-          interface: attrs: ''SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="${attrs.mac}", NAME:="${interface}"''
-        )
-        nodeSecrets.networking.interfaces);
-      destination = "/etc/udev/rules.d/01-interface-names.rules";
-    };
-  in [interfaceNamesUdevRules];
+  services.udev.packages =
+    lib.mkIf ((nodeSecrets.networking.interfaces or {}) != {})
+    (let
+      interfaceNamesUdevRules = pkgs.writeTextFile {
+        name = "interface-names-udev-rules";
+        text = concatStringsSep "\n" (mapAttrsToList (
+            interface: attrs: ''SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="${attrs.mac}", NAME:="${interface}"''
+          )
+          nodeSecrets.networking.interfaces);
+        destination = "/etc/udev/rules.d/01-interface-names.rules";
+      };
+    in [interfaceNamesUdevRules]);
 }

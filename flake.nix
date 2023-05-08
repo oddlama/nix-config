@@ -69,6 +69,7 @@
     colmena,
     nixos-generators,
     nixpkgs,
+    microvm,
     flake-utils,
     agenix-rekey,
     ...
@@ -96,7 +97,6 @@
         ward = {
           type = "nixos";
           system = "x86_64-linux";
-          microVmHost = true;
         };
         zackbiene = {
           type = "nixos";
@@ -105,25 +105,24 @@
       };
 
       colmena = import ./nix/colmena.nix inputs;
-      colmenaNodes = ((colmena.lib.makeHive self.colmena).introspect (x: x)).nodes;
-      microvmNodes = import ./nix/microvms.nix inputs;
-
-      # All nixos based hosts collected together
-      nodes = self.colmenaNodes // self.microvmNodes;
+      inherit ((colmena.lib.makeHive self.colmena).introspect (x: x)) nodes;
 
       # Collect installer packages
       inherit
         (recursiveMergeAttrs
           (nixpkgs.lib.mapAttrsToList
             (import ./nix/generate-installer.nix inputs)
-            self.colmenaNodes))
+            self.nodes))
         packages
         ;
     }
     // flake-utils.lib.eachDefaultSystem (system: rec {
       pkgs = import nixpkgs {
-        inherit system;
+        localSystem = system;
         config.allowUnfree = true;
+        overlays = [
+          microvm.overlay
+        ];
       };
 
       apps =

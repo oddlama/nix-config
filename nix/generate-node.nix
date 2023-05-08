@@ -25,21 +25,15 @@ in
       secrets = self.secrets.content;
       nodeSecrets = self.secrets.content.nodes.${nodeName};
       nixos-hardware = nixos-hardware.nixosModules;
+      microvm = microvm.nixosModules;
     };
-    imports =
-      [
-        (../hosts + "/${nodeName}")
-        agenix.nixosModules.default
-        agenix-rekey.nixosModules.default
-        disko.nixosModules.disko
-        home-manager.nixosModules.default
-        impermanence.nixosModules.impermanence
-        nixos-nftables-firewall.nixosModules.default
-      ]
-      ++ optionals (nodeMeta.microVmHost or false) [
-        microvm.nixosModules.host
-      ]
-      ++ optionals (nodeMeta.type == "microvm") [
-        microvm.nixosModules.microvm
-      ];
+    imports = [
+      (nodeMeta.config or ../hosts + "/${nodeName}")
+      agenix.nixosModules.default
+      agenix-rekey.nixosModules.default
+      disko.nixosModules.disko
+      home-manager.nixosModules.default
+      impermanence.nixosModules.impermanence
+      nixos-nftables-firewall.nixosModules.default
+    ];
   }

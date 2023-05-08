@@ -1,5 +1,8 @@
 {
   config,
+  inputs,
+  lib,
+  microvm,
   nixos-hardware,
   pkgs,
   ...
@@ -7,6 +10,8 @@
   imports = [
     nixos-hardware.common-cpu-intel
     nixos-hardware.common-pc-ssd
+
+    microvm.host
 
     ../common/core
     ../common/hardware/intel.nix
@@ -22,6 +27,22 @@
   ];
 
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" "r8169"];
+
+  microvm.vms = {
+    test = let
+      node =
+        (import ../../nix/generate-node.nix inputs)
+        "ward-microvm-test" {
+          system = "x86_64-linux";
+          config = ./microvms/test;
+        };
+    in {
+      inherit (node) pkgs specialArgs;
+      config = {
+        inherit (node) imports;
+      };
+    };
+  };
 
   #services.authelia.instances.main = {
   #  enable = true;

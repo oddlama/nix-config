@@ -27,8 +27,11 @@ let
     escapeShellArg
     filter
     getAttr
+    hasPrefix
     imap0
+    length
     literalExpression
+    maintainers
     mapAttrsToList
     mdDoc
     mkIf
@@ -71,6 +74,9 @@ let
         then "interface"
         else "bss"
       }=${bss}
+      ${optionalString (bssCfg.bssid != null) ''
+        bssid=${bssCfg.bssid}
+      ''}
       ssid=${bssCfg.ssid}
       utf8_ssid=${bool01 bssCfg.utf8Ssid}
 
@@ -282,6 +288,8 @@ let
 
   runtimeConfigFiles = mapAttrsToList (radio: _: "/run/hostapd/${radio}.hostapd.conf") cfg.radios;
 in {
+  meta.maintainers = with maintainers; [oddlama];
+
   options = {
     services.hostapd = {
       enable = mkOption {
@@ -522,6 +530,7 @@ in {
 
             wifi6 = {
               enable = mkOption {
+                # TODO Change this default once WiFi 6 is enabled in hostapd upstream
                 default = false;
                 type = types.bool;
                 description = mdDoc "Enables support for IEEE 802.11ax (WiFi 6, HE)";
@@ -671,7 +680,7 @@ in {
                   utf8Ssid = mkOption {
                     default = true;
                     type = types.bool;
-                    description = mdDoc "Whether the SSID is to be interpreted using UTF-8 encoding";
+                    description = mdDoc "Whether the SSID is to be interpreted using UTF-8 encoding.";
                   };
 
                   ssid = mkOption {
@@ -682,20 +691,34 @@ in {
                     description = mdDoc "SSID to be used in IEEE 802.11 management frames.";
                   };
 
+                  bssid = mkOption {
+                    type = types.uniq (types.nullOr types.str);
+                    default = null;
+                    example = "11:22:33:44:55:66";
+                    description = mdDoc ''
+                      Specifies the BSSID for this BSS. Usually determined automatically,
+                      but for now you have to manually specify them when using multiple BSS.
+                      Try assigning related addresses from the locally administered MAC address ranges,
+                      by reusing the hardware address but replacing the second nibble with 2, 6, A or E.
+                      (e.g. if real address is `XX:XX:XX:XX:XX`, try `X2:XX:XX:XX:XX:XX`, `X6:XX:XX:XX:XX:XX`, ...
+                      for the second, third, ... BSS)
+                    '';
+                  };
+
                   macAcl = mkOption {
                     default = "allow";
-                    type = types.enum ["allow" "deny" "radius"];
+                    type = types.enum ["deny" "allow" "radius"];
                     apply = x:
                       getAttr x {
-                        "allow" = "0";
-                        "deny" = "1";
+                        "deny" = "0";
+                        "allow" = "1";
                         "radius" = "2";
                       };
                     description = mdDoc ''
                       Station MAC address -based authentication. The following modes are available:
 
-                      - {var}`"allow"`: Allow unless listed in {option}`macDeny` (default)
-                      - {var}`"deny"`: Deny unless listed in {option}`macAllow`
+                      - {var}`"deny"`: Allow unless listed in {option}`macDeny` (default)
+                      - {var}`"allow"`: Deny unless listed in {option}`macAllow`
                       - {var}`"radius"`: Use external radius server, but check both {option}`macAllow` and {option}`macDeny` first
 
                       Please note that this kind of access control requires a driver that uses
@@ -709,7 +732,7 @@ in {
                     default = [];
                     example = ["11:22:33:44:55:66"];
                     description = mdDoc ''
-                      Specifies the MAC addresses to allow if {option}`macAcl` is set to {var}`"deny"` or {var}`"radius"`.
+                      Specifies the MAC addresses to allow if {option}`macAcl` is set to {var}`"allow"` or {var}`"radius"`.
                       These values will be world-readable in the Nix store. Values will automatically be merged with
                       {option}`macAllowFile` if necessary.
                     '';
@@ -719,7 +742,7 @@ in {
                     type = types.uniq (types.nullOr types.path);
                     default = null;
                     description = mdDoc ''
-                      Specifies a file containing the MAC addresses to allow if {option}`macAcl` is set to {var}`"deny"` or {var}`"radius"`.
+                      Specifies a file containing the MAC addresses to allow if {option}`macAcl` is set to {var}`"allow"` or {var}`"radius"`.
                       The file should contain exactly one MAC address per line. Comments and empty lines are ignored,
                       only lines starting with a valid MAC address will be considered (e.g. `11:22:33:44:55:66`) and
                       any content after the MAC address is ignored.
@@ -731,7 +754,7 @@ in {
                     default = [];
                     example = ["11:22:33:44:55:66"];
                     description = mdDoc ''
-                      Specifies the MAC addresses to deny if {option}`macAcl` is set to {var}`"allow"` or {var}`"radius"`.
+                      Specifies the MAC addresses to deny if {option}`macAcl` is set to {var}`"deny"` or {var}`"radius"`.
                       These values will be world-readable in the Nix store. Values will automatically be merged with
                       {option}`macDenyFile` if necessary.
                     '';
@@ -741,7 +764,7 @@ in {
                     type = types.uniq (types.nullOr types.path);
                     default = null;
                     description = mdDoc ''
-                      Specifies a file containing the MAC addresses to allow if {option}`macAcl` is set to {var}`"deny"` or {var}`"radius"`.
+                      Specifies a file containing the MAC addresses to deny if {option}`macAcl` is set to {var}`"deny"` or {var}`"radius"`.
                       The file should contain exactly one MAC address per line. Comments and empty lines are ignored,
                       only lines starting with a valid MAC address will be considered (e.g. `11:22:33:44:55:66`) and
                       any content after the MAC address is ignored.
@@ -1041,10 +1064,6 @@ in {
           message = "At least one radio must be configured with hostapd!";
         }
       ]
-      # TODO check that multiple BSS -> bssid is defined or hardware bssids are used.
-      # TODO check that network name for each bss is prefixed with radio name
-      # TODO check that no bss name appears twice, even globally.
-      # TODO check that first bss has same name as radio.
       # Radio warnings
       ++ (concatLists (mapAttrsToList (
           radio: radioCfg:
@@ -1057,6 +1076,10 @@ in {
                 assertion = radioCfg.hwMode == "a" -> radioCfg.wifi5.enable;
                 message = ''hostapd radio ${radio}: Must set at least wifi5.enable=true in order to use hwMode="a"'';
               }
+              {
+                assertion = length (filter (bss: bss == radio) (attrNames radioCfg.networks)) == 1;
+                message = ''hostapd radio ${radio}: Exactly one network must be named like the radio, for reasons internal to hostapd.'';
+              }
             ]
             # BSS warnings
             ++ (concatLists (mapAttrsToList (bss: bssCfg: let
@@ -1067,6 +1090,14 @@ in {
                   auth.wpaPskFile
                 ];
               in [
+                {
+                  assertion = hasPrefix radio bss;
+                  message = "hostapd radio ${radio} bss ${bss}: The bss (network) name ${bss} is invalid. It must be prefixed by the radio name for reasons internal to hostapd. A valid name would be e.g. ${radio}, ${radio}-1, ...";
+                }
+                {
+                  assertion = (length (attrNames radioCfg.networks) > 1) -> (auth.bssid != null);
+                  message = ''hostapd radio ${radio} bss ${bss}: bssid must be specified manually (for now) since this radio uses multiple BSS.'';
+                }
                 {
                   assertion = auth.mode == "wpa3-sae" -> bssCfg.managementFrameProtection == "2";
                   message = ''hostapd radio ${radio} bss ${bss}: uses WPA3-SAE which requires managementFrameProtection="required"'';

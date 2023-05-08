@@ -27,16 +27,12 @@
           saeAddToMacAllow = true;
           enableRecommendedPairwiseCiphers = true;
         };
-        extraConfig = ''
-          bssid=00:c0:ca:b1:4f:9f
-        '';
+        bssid = "00:c0:ca:b1:4f:9f";
       };
       #networks.wlan1-2 = {
       #  inherit (nodeSecrets.hostapd) ssid;
       #  authentication.mode = "none";
-      #  extraConfig = ''
-      #    bssid=02:c0:ca:b1:4f:9f
-      #  '';
+      #  bssid = "02:c0:ca:b1:4f:9f";
       #};
     };
   };

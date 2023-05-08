@@ -39,6 +39,14 @@
 
   cfg = config.extra.wireguard;
 
+  # TODO use netlib types!!!!!!
+  # TODO use netlib types!!!!!!
+  # TODO use netlib types!!!!!!
+  # TODO use netlib types!!!!!!
+  # TODO use netlib types!!!!!!
+  # TODO use netlib types!!!!!!
+  # TODO use netlib types!!!!!!
+  # TODO use netlib types!!!!!!
   configForNetwork = wgName: wgCfg: let
     inherit
       (extraLib.wireguard wgName)

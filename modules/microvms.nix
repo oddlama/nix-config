@@ -36,14 +36,34 @@
       microvm = {
         hypervisor = mkDefault "cloud-hypervisor";
 
-        # Share the nix-store of the host
+        # MACVTAP bridge to the host's network
+        interfaces = [
+          {
+            type = "macvtap";
+            id = "macvtap1";
+            macvtap = {
+              link = "wan0";
+              mode = "bridge";
+            };
+            inherit (vmCfg) mac;
+          }
+        ];
+
         shares = [
+          # Share the nix-store of the host
           {
             source = "/nix/store";
             mountPoint = "/nix/.ro-store";
             tag = "ro-store";
             proto = "virtiofs";
           }
+          # Mount persistent data from the host
+          #{
+          #  source = "/persist/vms/${vmName}";
+          #  mountPoint = "/persist";
+          #  tag = "persist";
+          #  proto = "virtiofs";
+          #}
         ];
       };
 
@@ -63,6 +83,11 @@ in {
           type = types.str;
           description = mdDoc "The system that this microvm should use";
         };
+
+        mac = mkOption {
+          type = types.mac;
+          description = mdDoc "The MAC address to assign to this VM";
+        };
       };
     });
   };
@@ -74,5 +99,17 @@ in {
       restartIfChanged = true;
       vms = mkIf (cfg != {}) (mapAttrs defineMicrovm cfg);
     };
+
+    #systemd.network.netdevs.jrsptap = {
+    #  netdevConfig = {
+    #    Name = "jrsptap";
+    #    Kind = "macvtap";
+    #    MACAddress = "...";
+    #  };
+    #};
+    #systemd.network.networks.vms = {
+    #  matchConfig.Name = "vms";
+    #  networkConfig.MACVTAP = "jrsptap";
+    #};
   };
 }

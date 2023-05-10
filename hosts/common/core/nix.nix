@@ -38,7 +38,7 @@
     optimise.automatic = true;
     gc = {
       automatic = true;
-      dates = "biweekly";
+      dates = "monthly";
       options = "--delete-older-than 90d";
     };
     # Define global flakes for this system

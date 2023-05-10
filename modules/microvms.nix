@@ -72,6 +72,21 @@
         ];
       };
 
+      extra.networking.renameInterfacesByMac.${vmCfg.linkName} = vmCfg.mac;
+
+      systemd.network.networks = {
+        "10-${vmCfg.linkName}" = {
+          matchConfig.Name = vmCfg.linkName;
+          DHCP = "yes";
+          networkConfig = {
+            IPv6PrivacyExtensions = "kernel";
+            ConfigureWithoutCarrier = true;
+          };
+          dhcpV4Config.RouteMetric = 20;
+          dhcpV6Config.RouteMetric = 20;
+        };
+      };
+
       # TODO change once microvms are compatible with stage-1 systemd
       boot.initrd.systemd.enable = mkForce false;
     };
@@ -88,6 +103,12 @@ in {
           type = types.bool;
           default = false;
           description = mdDoc "Whether this VM should be started automatically with the host";
+        };
+
+        linkName = mkOption {
+          type = types.str;
+          default = "wan";
+          description = mdDoc "The main ethernet link name inside of the VM";
         };
 
         mac = mkOption {

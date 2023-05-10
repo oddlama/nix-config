@@ -13,24 +13,12 @@ in {
 
   boot.initrd.systemd.network = {
     enable = true;
-    networks."10-wan" = {
-      DHCP = "yes";
-      #address = [
-      #  "192.168.178.2/24"
-      #  "fd00::1/64"
-      #];
-      #gateway = [
-      #];
-      matchConfig.MACAddress = nodeSecrets.networking.interfaces."wan-nic".mac;
-      networkConfig.IPv6PrivacyExtensions = "kernel";
-      dhcpV4Config.RouteMetric = 20;
-      dhcpV6Config.RouteMetric = 20;
-    };
+    networks = {inherit (config.systemd.network.networks) "10-wan";};
   };
 
-  systemd.network.netdevs."10-wan" = {
+  systemd.network.netdevs."10-lan-self" = {
     netdevConfig = {
-      Name = "wan";
+      Name = "lan-self";
       Kind = "macvtap";
     };
     extraConfig = ''
@@ -41,23 +29,13 @@ in {
 
   systemd.network.networks = {
     "10-lan" = {
-      address = [net.lan.ipv4cidr net.lan.ipv6cidr];
       matchConfig.MACAddress = nodeSecrets.networking.interfaces.lan.mac;
-      networkConfig = {
-        IPForward = "yes";
-        IPv6PrivacyExtensions = "kernel";
-      };
-      dhcpV4Config.RouteMetric = 10;
-      dhcpV6Config.RouteMetric = 10;
-    };
-    "10-wan-nic" = {
-      matchConfig.MACAddress = nodeSecrets.networking.interfaces."wan-nic".mac;
       extraConfig = ''
         [Network]
-        MACVTAP=wan
+        MACVTAP=lan-self
       '';
     };
-    "11-wan" = {
+    "10-wan" = {
       DHCP = "yes";
       #address = [
       #  "192.168.178.2/24"
@@ -65,10 +43,21 @@ in {
       #];
       #gateway = [
       #];
-      matchConfig.Name = "wan";
+      matchConfig.MACAddress = nodeSecrets.networking.interfaces.wan.mac;
       networkConfig.IPv6PrivacyExtensions = "kernel";
       dhcpV4Config.RouteMetric = 20;
       dhcpV6Config.RouteMetric = 20;
+    };
+    "11-lan-self" = {
+      address = [net.lan.ipv4cidr net.lan.ipv6cidr];
+      matchConfig.Name = "lan-self";
+      networkConfig = {
+        IPForward = "yes";
+        IPv6PrivacyExtensions = "kernel";
+        ConfigureWithoutCarrier = true;
+      };
+      dhcpV4Config.RouteMetric = 10;
+      dhcpV6Config.RouteMetric = 10;
     };
   };
 

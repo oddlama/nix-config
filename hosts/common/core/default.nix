@@ -10,8 +10,9 @@
     ./system.nix
     ./xdg.nix
 
-    ../../../modules/wireguard.nix
+    ../../../modules/interface-naming.nix
     ../../../modules/microvms.nix
+    ../../../modules/wireguard.nix
   ];
 
   home-manager = {

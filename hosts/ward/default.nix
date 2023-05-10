@@ -27,12 +27,12 @@
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" "r8169"];
 
   extra.microvms = let
-    macOffset = config.lib.net.mac.addPrivate nodeSecrets.networking.interfaces."wan-nic".mac;
+    macOffset = config.lib.net.mac.addPrivate nodeSecrets.networking.interfaces.lan.mac;
   in {
     test = {
       autostart = true;
-      mac = macOffset "00:00:00:00:00:01";
-      macvtap = "wan";
+      mac = macOffset "00:00:00:00:00:11";
+      macvtap = "lan";
       system = "x86_64-linux";
     };
   };

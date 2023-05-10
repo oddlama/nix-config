@@ -80,16 +80,5 @@ in {
   };
 
   # Rename known network interfaces
-  services.udev.packages =
-    lib.mkIf ((nodeSecrets.networking.interfaces or {}) != {})
-    (let
-      interfaceNamesUdevRules = pkgs.writeTextFile {
-        name = "interface-names-udev-rules";
-        text = concatStringsSep "\n" (mapAttrsToList (
-            interface: attrs: ''SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="${attrs.mac}", NAME:="${interface}"''
-          )
-          nodeSecrets.networking.interfaces);
-        destination = "/etc/udev/rules.d/01-interface-names.rules";
-      };
-    in [interfaceNamesUdevRules]);
+  extra.networking.renameInterfacesByMac = lib.mapAttrs (_: v: v.mac) (nodeSecrets.networking.interfaces or {});
 }

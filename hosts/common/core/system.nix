@@ -42,7 +42,7 @@
     # current system due to yubikey availability.
     forceRekeyOnSystem = builtins.extraBuiltins.unsafeCurrentSystem;
     hostPubkey = let
-      pubkeyPath = "${nodePath}/secrets/host.pub";
+      pubkeyPath = nodePath + "/secrets/host.pub";
     in
       lib.mkIf (lib.pathExists pubkeyPath || lib.trace "Missing pubkey for ${nodeName}: ${toString pubkeyPath} not found, using dummy replacement key for now." false)
       pubkeyPath;

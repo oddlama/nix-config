@@ -3,6 +3,7 @@
   inputs,
   lib,
   nixos-hardware,
+  nodeSecrets,
   pkgs,
   ...
 }: {
@@ -25,7 +26,16 @@
 
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" "r8169"];
 
-  extra.microvms.test.system = "x86_64-linux";
+  extra.microvms = let
+    macOffset = config.lib.net.mac.addPrivate nodeSecrets.networking.interfaces."wan-nic".mac;
+  in {
+    test = {
+      autostart = true;
+      mac = macOffset "00:00:00:00:00:01";
+      macvtap = "wan";
+      system = "x86_64-linux";
+    };
+  };
 
   #services.authelia.instances.main = {
   #  enable = true;

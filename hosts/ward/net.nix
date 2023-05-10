@@ -13,7 +13,30 @@ in {
 
   boot.initrd.systemd.network = {
     enable = true;
-    networks = {inherit (config.systemd.network.networks) "10-wan";};
+    networks."10-wan" = {
+      DHCP = "yes";
+      #address = [
+      #  "192.168.178.2/24"
+      #  "fd00::1/64"
+      #];
+      #gateway = [
+      #];
+      matchConfig.MACAddress = nodeSecrets.networking.interfaces."wan-nic".mac;
+      networkConfig.IPv6PrivacyExtensions = "kernel";
+      dhcpV4Config.RouteMetric = 20;
+      dhcpV6Config.RouteMetric = 20;
+    };
+  };
+
+  systemd.network.netdevs."10-wan" = {
+    netdevConfig = {
+      Name = "wan";
+      Kind = "macvtap";
+    };
+    extraConfig = ''
+      [MACVTAP]
+      Mode=bridge
+    '';
   };
 
   systemd.network.networks = {
@@ -27,7 +50,14 @@ in {
       dhcpV4Config.RouteMetric = 10;
       dhcpV6Config.RouteMetric = 10;
     };
-    "10-wan" = {
+    "10-wan-nic" = {
+      matchConfig.MACAddress = nodeSecrets.networking.interfaces."wan-nic".mac;
+      extraConfig = ''
+        [Network]
+        MACVTAP=wan
+      '';
+    };
+    "11-wan" = {
       DHCP = "yes";
       #address = [
       #  "192.168.178.2/24"
@@ -35,7 +65,7 @@ in {
       #];
       #gateway = [
       #];
-      matchConfig.MACAddress = nodeSecrets.networking.interfaces.wan.mac;
+      matchConfig.Name = "wan";
       networkConfig.IPv6PrivacyExtensions = "kernel";
       dhcpV4Config.RouteMetric = 20;
       dhcpV6Config.RouteMetric = 20;

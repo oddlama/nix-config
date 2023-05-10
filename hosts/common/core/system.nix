@@ -12,10 +12,21 @@
     libWithNet = (import "${inputs.lib-net}/net.nix" {inherit lib;}).lib;
   in
     lib.recursiveUpdate libWithNet {
-      net.cidr = rec {
-        hostCidr = n: x: "${libWithNet.net.cidr.host n x}/${libWithNet.net.cidr.length x}";
-        ip = x: lib.head (lib.splitString "/" x);
-        canonicalize = x: libWithNet.net.cidr.make (libWithNet.net.cidr.length x) (ip x);
+      net = {
+        cidr = rec {
+          hostCidr = n: x: "${libWithNet.net.cidr.host n x}/${libWithNet.net.cidr.length x}";
+          ip = x: lib.head (lib.splitString "/" x);
+          canonicalize = x: libWithNet.net.cidr.make (libWithNet.net.cidr.length x) (ip x);
+        };
+        mac = {
+          # Adds offset to the given base address and ensures the result is in
+          # a locally administered range by replacing the second nibble with a 2.
+          addPrivate = base: offset: let
+            added = libWithNet.net.mac.add base offset;
+            pre = lib.substring 0 1 added;
+            suf = lib.substring 2 (-1) added;
+          in "${pre}2${suf}";
+        };
       };
     };
 

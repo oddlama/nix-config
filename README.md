@@ -67,6 +67,7 @@ This is my personal nix config.
 - (Optional) ssh into the target (keys are already set up)
 - Run `install-system` and reboot
 - Retrieve the new host identity by using `ssh-keyscan <host/ip> | grep -o 'ed25519.*' > host/<host>/secrets/host.pub`
+- (If the host has microvms, also retrieve their identities!)
 - Rekey the secrets for the new identity `nix run .#rekey`
 - Deploy again remotely via colmena
 

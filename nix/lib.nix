@@ -37,7 +37,7 @@ in rec {
   in
     foldl' addOrUpdate {} xs;
 
-  # Returns all elements in xs that occur at least once
+  # Returns all elements in xs that occur at least twice
   duplicates = xs: let
     occurrences = countOccurrences xs;
   in

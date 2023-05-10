@@ -1,16 +1,21 @@
 {
-  inputs,
   config,
+  extraLib,
+  inputs,
   lib,
+  microvm,
   nodeName,
   nodePath,
-  microvm,
   pkgs,
   ...
 }: let
   inherit
     (lib)
+    attrNames
+    concatStringsSep
+    filterAttrs
     mapAttrs
+    mapAttrsToList
     mdDoc
     mkDefault
     mkForce
@@ -40,9 +45,9 @@
         interfaces = [
           {
             type = "macvtap";
-            id = "macvtap1";
+            id = "vm-${vmName}";
             macvtap = {
-              link = "wan0";
+              link = vmCfg.macvtap;
               mode = "bridge";
             };
             inherit (vmCfg) mac;
@@ -79,37 +84,46 @@ in {
     description = "Provides a base configuration for MicroVMs.";
     type = types.attrsOf (types.submodule {
       options = {
-        system = mkOption {
-          type = types.str;
-          description = mdDoc "The system that this microvm should use";
+        autostart = mkOption {
+          type = types.bool;
+          default = false;
+          description = mdDoc "Whether this VM should be started automatically with the host";
         };
 
         mac = mkOption {
-          type = types.mac;
+          type = config.lib.net.types.mac;
           description = mdDoc "The MAC address to assign to this VM";
+        };
+
+        macvtap = mkOption {
+          type = types.str;
+          description = mdDoc "The macvtap interface to attach to";
+        };
+
+        system = mkOption {
+          type = types.str;
+          description = mdDoc "The system that this microvm should use";
         };
       };
     });
   };
 
   config = {
+    assertions = let
+      duplicateMacs = extraLib.duplicates (mapAttrsToList (_: vmCfg: vmCfg.mac) cfg);
+    in [
+      {
+        assertion = duplicateMacs == [];
+        message = "Duplicate MicroVM MAC addresses: ${concatStringsSep ", " duplicateMacs}";
+      }
+    ];
+
     microvm = {
       host.enable = cfg != {};
       declarativeUpdates = true;
       restartIfChanged = true;
       vms = mkIf (cfg != {}) (mapAttrs defineMicrovm cfg);
+      autostart = mkIf (cfg != {}) (attrNames (filterAttrs (_: v: v.autostart) cfg));
     };
-
-    #systemd.network.netdevs.jrsptap = {
-    #  netdevConfig = {
-    #    Name = "jrsptap";
-    #    Kind = "macvtap";
-    #    MACAddress = "...";
-    #  };
-    #};
-    #systemd.network.networks.vms = {
-    #  matchConfig.Name = "vms";
-    #  networkConfig.MACVTAP = "jrsptap";
-    #};
   };
 }

@@ -69,11 +69,17 @@ in rec {
           randomEncryption = true;
         };
       };
-      partZfs = name: start: end: {
-        inherit name start end;
+      partLuksZfs = name: start: end: {
+        inherit start end;
+        name = "enc-${name}";
         content = {
-          type = "zfs";
-          pool = name;
+          type = "luks";
+          name = "enc-${name}";
+          extraOpenArgs = ["--allow-discards"];
+          content = {
+            type = "zfs";
+            pool = name;
+          };
         };
       };
     };
@@ -90,9 +96,6 @@ in rec {
           mountpoint = "none";
           canmount = "off";
           devices = "off";
-          encryption = "aes-256-gcm";
-          keyformat = "passphrase";
-          keylocation = "prompt";
         };
         options.ashift = "12";
       };

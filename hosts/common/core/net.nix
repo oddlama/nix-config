@@ -57,9 +57,9 @@ in {
           from = "all";
           to = ["local"];
           extraLines = [
-            "ip6 nexthdr icmpv6 icmpv6 type { echo-request, nd-router-advert, nd-neighbor-solicit, nd-neighbor-advert } accept"
-            "ip protocol icmp icmp type { echo-request, router-advertisement } accept"
-            #"ip6 saddr fe80::/10 ip6 daddr fe80::/10 udp dport 546 accept"
+            "ip6 nexthdr icmpv6 icmpv6 type { echo-request, destination-unreachable, packet-too-big, time-exceeded, parameter-problem, nd-router-advert, nd-neighbor-solicit, nd-neighbor-advert } accept"
+            "ip protocol icmp icmp type { echo-request, destination-unreachable, router-advertisement, time-exceeded, parameter-problem } accept"
+            #"ip6 saddr fe80::/10 ip6 daddr fe80::/10 udp dport 546 accept" # (dhcpv6)
           ];
         };
 
@@ -74,10 +74,7 @@ in {
     };
   };
 
-  systemd.network = {
-    enable = true;
-    wait-online.anyInterface = true;
-  };
+  systemd.network.enable = true;
 
   # Rename known network interfaces
   extra.networking.renameInterfacesByMac = lib.mapAttrs (_: v: v.mac) (nodeSecrets.networking.interfaces or {});

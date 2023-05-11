@@ -72,6 +72,15 @@
         ];
       };
 
+      # Add a writable store overlay, but since this is always ephemeral
+      # disable any store optimization from nix.
+      microvm.writableStoreOverlay = "/nix/.rw-store";
+      nix = {
+        settings.auto-optimise-store = mkForce false;
+        optimise.automatic = mkForce false;
+        gc.automatic = mkForce false;
+      };
+
       extra.networking.renameInterfacesByMac.${vmCfg.linkName} = vmCfg.mac;
 
       systemd.network.networks = {

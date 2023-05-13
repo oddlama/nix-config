@@ -30,6 +30,12 @@
     macOffset = config.lib.net.mac.addPrivate nodeSecrets.networking.interfaces.lan.mac;
   in {
     test = {
+      zfs = {
+        enable = true;
+        pool = "rpool";
+        dataset = "safe/vms/test";
+        mountpoint = "/persist/vms/test";
+      };
       autostart = true;
       mac = macOffset "00:00:00:00:00:11";
       macvtap = "lan";

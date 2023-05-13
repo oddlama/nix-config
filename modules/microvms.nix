@@ -13,100 +13,174 @@
     (lib)
     attrNames
     concatStringsSep
+    escapeShellArg
     filterAttrs
-    mapAttrs
+    foldl'
     mapAttrsToList
     mdDoc
     mkDefault
+    mkEnableOption
     mkForce
     mkIf
+    mkMerge
     mkOption
+    optionalAttrs
+    recursiveUpdate
     types
     ;
 
   cfg = config.extra.microvms;
 
-  defineMicrovm = vmName: vmCfg: let
-    node =
-      (import ../nix/generate-node.nix inputs)
-      "${nodeName}-microvm-${vmName}" {
-        inherit (vmCfg) system;
-        config = nodePath + "/microvms/${vmName}";
-      };
-  in {
-    inherit (node) pkgs specialArgs;
-    config = {
-      imports = [microvm.microvm] ++ node.imports;
+  # Base configuration required for the host
+  hostConfig = {
+    assertions = let
+      duplicateMacs = extraLib.duplicates (mapAttrsToList (_: vmCfg: vmCfg.mac) cfg);
+    in [
+      {
+        assertion = duplicateMacs == [];
+        message = "Duplicate MicroVM MAC addresses: ${concatStringsSep ", " duplicateMacs}";
+      }
+    ];
 
-      microvm = {
-        hypervisor = mkDefault "cloud-hypervisor";
+    microvm = {
+      declarativeUpdates = true;
+      restartIfChanged = true;
+    };
+  };
 
-        # MACVTAP bridge to the host's network
-        interfaces = [
-          {
-            type = "macvtap";
-            id = "vm-${vmName}";
-            macvtap = {
-              link = vmCfg.macvtap;
-              mode = "bridge";
-            };
-            inherit (vmCfg) mac;
-          }
-        ];
+  # Configuration for each microvm
+  microvmConfig = vmName: vmCfg: {
+    # Add the required datasets to the disko configuration of the machine
+    disko.devices.zpool = mkIf (vmCfg.zfs.enable && vmCfg.zfs.disko) {
+      ${vmCfg.zfs.pool}.datasets."${vmCfg.zfs.dataset}" =
+        extraLib.disko.zfs.filesystem "${vmCfg.zfs.mountpoint}";
+    };
 
-        shares = [
-          # Share the nix-store of the host
-          {
-            source = "/nix/store";
-            mountPoint = "/nix/.ro-store";
-            tag = "ro-store";
-            proto = "virtiofs";
-          }
-          # Mount persistent data from the host
-          #{
-          #  source = "/persist/vms/${vmName}";
-          #  mountPoint = "/persist";
-          #  tag = "persist";
-          #  proto = "virtiofs";
-          #}
-        ];
-      };
+    # When installing a microvm, make sure that its persitent zfs dataset exists
+    systemd.services."install-microvm-${vmName}".preStart = let
+      poolDataset = "${vmCfg.zfs.pool}/${vmCfg.zfs.dataset}";
+    in
+      mkIf vmCfg.zfs.enable ''
+        if ! ${pkgs.zfs}/bin/zfs list -H -o type ${escapeShellArg poolDataset} &>/dev/null ; then
+          ${pkgs.zfs}/bin/zfs create -o canmount=on -o mountpoint=${escapeShellArg vmCfg.zfs.mountpoint} ${escapeShellArg poolDataset}
+        fi
+      '';
 
-      # Add a writable store overlay, but since this is always ephemeral
-      # disable any store optimization from nix.
-      microvm.writableStoreOverlay = "/nix/.rw-store";
-      nix = {
-        settings.auto-optimise-store = mkForce false;
-        optimise.automatic = mkForce false;
-        gc.automatic = mkForce false;
-      };
-
-      extra.networking.renameInterfacesByMac.${vmCfg.linkName} = vmCfg.mac;
-
-      systemd.network.networks = {
-        "10-${vmCfg.linkName}" = {
-          matchConfig.Name = vmCfg.linkName;
-          DHCP = "yes";
-          networkConfig = {
-            IPv6PrivacyExtensions = "yes";
-            IPv6AcceptRA = true;
-          };
-          linkConfig.RequiredForOnline = "routable";
+    microvm.autostart = mkIf vmCfg.autostart [vmName];
+    microvm.vms.${vmName} = let
+      node =
+        (import ../nix/generate-node.nix inputs)
+        "${nodeName}-microvm-${vmName}" {
+          inherit (vmCfg) system;
+          config = nodePath + "/microvms/${vmName}";
         };
-      };
+    in {
+      inherit (node) pkgs specialArgs;
+      config = {
+        imports = [microvm.microvm] ++ node.imports;
 
-      # TODO change once microvms are compatible with stage-1 systemd
-      boot.initrd.systemd.enable = mkForce false;
+        microvm = {
+          hypervisor = mkDefault "cloud-hypervisor";
+
+          # MACVTAP bridge to the host's network
+          interfaces = [
+            {
+              type = "macvtap";
+              id = "vm-${vmName}";
+              macvtap = {
+                link = vmCfg.macvtap;
+                mode = "bridge";
+              };
+              inherit (vmCfg) mac;
+            }
+          ];
+
+          shares =
+            [
+              # Share the nix-store of the host
+              {
+                source = "/nix/store";
+                mountPoint = "/nix/.ro-store";
+                tag = "ro-store";
+                proto = "virtiofs";
+              }
+            ]
+            # Mount persistent data from the host
+            ++ optionalAttrs vmCfg.zfs.enable {
+              source = vmCfg.zfs.mountpoint;
+              mountPoint = "/persist";
+              tag = "persist";
+              proto = "virtiofs";
+            };
+        };
+
+        fileSystems."/persist".neededForBoot = true;
+
+        # Add a writable store overlay, but since this is always ephemeral
+        # disable any store optimization from nix.
+        microvm.writableStoreOverlay = "/nix/.rw-store";
+        nix = {
+          settings.auto-optimise-store = mkForce false;
+          optimise.automatic = mkForce false;
+          gc.automatic = mkForce false;
+        };
+
+        extra.networking.renameInterfacesByMac.${vmCfg.linkName} = vmCfg.mac;
+
+        systemd.network.networks = {
+          "10-${vmCfg.linkName}" = {
+            matchConfig.Name = vmCfg.linkName;
+            DHCP = "yes";
+            networkConfig = {
+              IPv6PrivacyExtensions = "yes";
+              IPv6AcceptRA = true;
+            };
+            linkConfig.RequiredForOnline = "routable";
+          };
+        };
+
+        # TODO change once microvms are compatible with stage-1 systemd
+        boot.initrd.systemd.enable = mkForce false;
+      };
     };
   };
 in {
-  imports = [microvm.host];
+  imports = [
+    # Add the host module, but only enable if it necessary
+    microvm.host
+    {microvm.host.enable = cfg != {};}
+  ];
 
   options.extra.microvms = mkOption {
     default = {};
-    description = "Provides a base configuration for MicroVMs.";
+    description = "Handles the necessary base setup for MicroVMs.";
     type = types.attrsOf (types.submodule {
       options = {
+        zfs = {
+          enable = mkEnableOption (mdDoc "Enable persistent data on separate zfs dataset");
+
+          pool = mkOption {
+            type = types.str;
+            description = mdDoc "The host's zfs pool on which the dataset resides";
+          };
+
+          dataset = mkOption {
+            type = types.str;
+            description = mdDoc "The host's dataset that should be used for this vm's state (will automatically be created, parent dataset must exist)";
+          };
+
+          mountpoint = mkOption {
+            type = types.str;
+            description = mdDoc "The host's mountpoint for the vm's dataset (will be shared via virtofs as /persist in the vm)";
+          };
+
+          disko = mkOption {
+            type = types.bool;
+            default = true;
+            description = mdDoc "Add this dataset to the host's disko configuration";
+          };
+        };
+
         autostart = mkOption {
           type = types.bool;
           default = false;
@@ -137,22 +211,8 @@ in {
     });
   };
 
-  config = {
-    assertions = let
-      duplicateMacs = extraLib.duplicates (mapAttrsToList (_: vmCfg: vmCfg.mac) cfg);
-    in [
-      {
-        assertion = duplicateMacs == [];
-        message = "Duplicate MicroVM MAC addresses: ${concatStringsSep ", " duplicateMacs}";
-      }
-    ];
-
-    microvm = {
-      host.enable = cfg != {};
-      declarativeUpdates = true;
-      restartIfChanged = true;
-      vms = mkIf (cfg != {}) (mapAttrs defineMicrovm cfg);
-      autostart = mkIf (cfg != {}) (attrNames (filterAttrs (_: v: v.autostart) cfg));
-    };
-  };
+  config =
+    mkIf (cfg != {})
+    (extraLib.mkMergeTopLevel ["assertions" "disko" "systemd" "microvm"]
+      ([hostConfig] ++ mapAttrsToList microvmConfig cfg));
 }

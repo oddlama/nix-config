@@ -13,11 +13,15 @@
     escapeShellArg
     filter
     flatten
+    foldAttrs
     foldl'
     genAttrs
+    getAttrs
     head
+    mapAttrs
     mapAttrs'
     mergeAttrs
+    mkMerge
     nameValuePair
     optionalAttrs
     partition
@@ -48,6 +52,13 @@ in rec {
 
   # True if the path or string starts with /
   isAbsolutePath = x: substring 0 1 x == "/";
+
+  # Used to merge multiple toplevel configuration entries
+  # https://gist.github.com/udf/4d9301bdc02ab38439fd64fbda06ea43
+  mkMergeTopLevel = names: attrs:
+    getAttrs names (
+      mapAttrs (_: mkMerge) (foldAttrs (n: a: [n] ++ a) [] attrs)
+    );
 
   disko = {
     gpt = {

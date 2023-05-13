@@ -24,29 +24,12 @@
     mkIf
     mkMerge
     mkOption
-    optionalAttrs
+    optional
     recursiveUpdate
     types
     ;
 
   cfg = config.extra.microvms;
-
-  # Base configuration required for the host
-  hostConfig = {
-    assertions = let
-      duplicateMacs = extraLib.duplicates (mapAttrsToList (_: vmCfg: vmCfg.mac) cfg);
-    in [
-      {
-        assertion = duplicateMacs == [];
-        message = "Duplicate MicroVM MAC addresses: ${concatStringsSep ", " duplicateMacs}";
-      }
-    ];
-
-    microvm = {
-      declarativeUpdates = true;
-      restartIfChanged = true;
-    };
-  };
 
   # Configuration for each microvm
   microvmConfig = vmName: vmCfg: {
@@ -55,6 +38,11 @@
       ${vmCfg.zfs.pool}.datasets."${vmCfg.zfs.dataset}" =
         extraLib.disko.zfs.filesystem "${vmCfg.zfs.mountpoint}";
     };
+
+    # TODO not cool, this might change or require more creation options.
+    # TODO better to only add disko and a mount point requirement.
+    # TODO the user can do the rest if required.
+    # TODO needed for boot false
 
     # When installing a microvm, make sure that its persitent zfs dataset exists
     systemd.services."install-microvm-${vmName}".preStart = let
@@ -106,7 +94,7 @@
               }
             ]
             # Mount persistent data from the host
-            ++ optionalAttrs vmCfg.zfs.enable {
+            ++ optional vmCfg.zfs.enable {
               source = vmCfg.zfs.mountpoint;
               mountPoint = "/persist";
               tag = "persist";
@@ -114,7 +102,8 @@
             };
         };
 
-        fileSystems."/persist".neededForBoot = true;
+        # FIXME this should be changed in microvm.nix to mkDefault instead of mkForce here
+        fileSystems."/persist".neededForBoot = mkForce true;
 
         # Add a writable store overlay, but since this is always ephemeral
         # disable any store optimization from nix.
@@ -148,7 +137,15 @@ in {
   imports = [
     # Add the host module, but only enable if it necessary
     microvm.host
+    # This is opt-out, so we can't put this into the mkIf below
     {microvm.host.enable = cfg != {};}
+    # This module requires declarativeUpdates and restartIfChanged.
+    {
+      microvm = mkIf (cfg != {}) {
+        declarativeUpdates = true;
+        restartIfChanged = true;
+      };
+    }
   ];
 
   options.extra.microvms = mkOption {
@@ -211,8 +208,21 @@ in {
     });
   };
 
-  config =
-    mkIf (cfg != {})
-    (extraLib.mkMergeTopLevel ["assertions" "disko" "systemd" "microvm"]
-      ([hostConfig] ++ mapAttrsToList microvmConfig cfg));
+  config = mkIf (cfg != {}) (
+    {
+      assertions = let
+        duplicateMacs = extraLib.duplicates (mapAttrsToList (_: vmCfg: vmCfg.mac) cfg);
+      in [
+        {
+          assertion = duplicateMacs == [];
+          message = "Duplicate MicroVM MAC addresses: ${concatStringsSep ", " duplicateMacs}";
+        }
+      ];
+    }
+    // lib.genAttrs ["disko" "microvm" "systemd"]
+    (attr:
+      mkMerge (map
+        (c: c.${attr})
+        (mapAttrsToList microvmConfig cfg)))
+  );
 }

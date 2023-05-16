@@ -34,9 +34,9 @@
   # Configuration for each microvm
   microvmConfig = vmName: vmCfg: {
     # Add the required datasets to the disko configuration of the machine
-    disko.devices.zpool = mkIf (vmCfg.zfs.enable && vmCfg.zfs.disko) {
+    disko.devices.zpool = mkIf vmCfg.zfs.enable {
       ${vmCfg.zfs.pool}.datasets."${vmCfg.zfs.dataset}" =
-        extraLib.disko.zfs.filesystem "${vmCfg.zfs.mountpoint}";
+        extraLib.disko.zfs.filesystem vmCfg.zfs.mountpoint;
     };
 
     # TODO not cool, this might change or require more creation options.
@@ -50,11 +50,10 @@
     in
       mkIf vmCfg.zfs.enable ''
         if ! ${pkgs.zfs}/bin/zfs list -H -o type ${escapeShellArg poolDataset} &>/dev/null ; then
-          ${pkgs.zfs}/bin/zfs create -o canmount=on -o mountpoint=${escapeShellArg vmCfg.zfs.mountpoint} ${escapeShellArg poolDataset}
+          ${config.disko.devices.zpool.${vmCfg.zfs.pool}.datasets.${vmCfg.zfs.dataset}._create {zpool = vmCfg.zfs.pool;}}
         fi
       '';
 
-    microvm.autostart = mkIf vmCfg.autostart [vmName];
     microvm.vms.${vmName} = let
       node =
         (import ../nix/generate-node.nix inputs)
@@ -64,6 +63,7 @@
         };
     in {
       inherit (node) pkgs specialArgs;
+      inherit (vmCfg) autostart;
       config = {
         imports = [microvm.microvm] ++ node.imports;
 
@@ -139,13 +139,6 @@ in {
     microvm.host
     # This is opt-out, so we can't put this into the mkIf below
     {microvm.host.enable = cfg != {};}
-    # This module requires declarativeUpdates and restartIfChanged.
-    {
-      microvm = mkIf (cfg != {}) {
-        declarativeUpdates = true;
-        restartIfChanged = true;
-      };
-    }
   ];
 
   options.extra.microvms = mkOption {
@@ -169,12 +162,6 @@ in {
           mountpoint = mkOption {
             type = types.str;
             description = mdDoc "The host's mountpoint for the vm's dataset (will be shared via virtofs as /persist in the vm)";
-          };
-
-          disko = mkOption {
-            type = types.bool;
-            default = true;
-            description = mdDoc "Add this dataset to the host's disko configuration";
           };
         };
 

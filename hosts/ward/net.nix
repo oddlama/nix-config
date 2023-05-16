@@ -86,6 +86,7 @@ in {
       matchConfig.Kind = "macvtap";
       networkConfig.LinkLocalAddressing = "no";
       linkConfig.ActivationPolicy = "manual";
+      linkConfig.Unmanaged = "yes";
     };
   };
 

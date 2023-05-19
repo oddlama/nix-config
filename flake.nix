@@ -3,7 +3,7 @@
 
   inputs = {
     colmena = {
-      url = "github:zhaofengli/colmena";
+      url = "github:oddlama/colmena";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
@@ -53,6 +53,7 @@
 
     agenix = {
       url = "github:ryantm/agenix";
+      inputs.home-manager.follows = "home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     agenix-rekey = {

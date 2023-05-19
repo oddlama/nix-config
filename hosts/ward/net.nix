@@ -4,7 +4,7 @@
   nodeSecrets,
   ...
 }: let
-  inherit (config.lib.net) cidr;
+  inherit (config.lib.net) ip cidr;
 
   net.lan.ipv4cidr = "192.168.100.1/24";
   net.lan.ipv6cidr = "fd00::1/64";
@@ -94,6 +94,7 @@ in {
     zones = lib.mkForce {
       lan.interfaces = ["lan-self"];
       wan.interfaces = ["wan"];
+      "local-vms".interfaces = ["wg-local-vms"];
     };
 
     rules = lib.mkForce {
@@ -133,7 +134,6 @@ in {
     };
   };
 
-  # TODO to microvm!
   services.kea = {
     dhcp4 = {
       enable = true;
@@ -153,7 +153,7 @@ in {
         option-data = [
           {
             name = "domain-name-servers";
-            # TODO pihole self
+            # TODO pihole via self
             data = "1.1.1.1, 8.8.8.8";
           }
         ];
@@ -161,10 +161,8 @@ in {
           {
             interface = "lan-self";
             subnet = cidr.canonicalize net.lan.ipv4cidr;
-            # TODO calculate this automatically, start at 40 or so
-            # to have enough for reservations
             pools = [
-              {pool = "192.168.100.20 - 192.168.100.250";}
+              {pool = "${cidr.host 20 net.lan.ipv4cidr} - ${cidr.host (-6) net.lan.ipv4cidr}";}
             ];
             option-data = [
               {
@@ -172,13 +170,6 @@ in {
                 data = cidr.ip net.lan.ipv4cidr;
               }
             ];
-            # TODO reserve addresses for each VM
-            #reservations = [
-            #  {
-            #    duid = "aa:bb:cc:dd:ee:ff";
-            #    ip-address = cidr.ip net.lan.ipv4cidr;
-            #  }
-            #];
           }
         ];
       };
@@ -187,13 +178,9 @@ in {
 
   systemd.services.kea-dhcp4-server.after = ["sys-subsystem-net-devices-lan.device"];
 
-  #extra.wireguard.vms = {
-  #  server = {
-  #    enable = true;
-  #    host = "192.168.1.231";
-  #    port = 51822;
-  #    openFirewall = true;
-  #  };
-  #  addresses = ["10.0.0.1/24"];
-  #};
+  extra.microvms.networking = {
+    baseMac = nodeSecrets.networking.interfaces.lan.mac;
+    host = cidr.ip net.lan.ipv4cidr;
+    macvtapInterface = "lan";
+  };
 }

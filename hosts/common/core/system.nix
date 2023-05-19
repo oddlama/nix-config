@@ -14,7 +14,12 @@
     lib.recursiveUpdate libWithNet {
       net = {
         cidr = rec {
-          hostCidr = n: x: "${libWithNet.net.cidr.host n x}/${libWithNet.net.cidr.length x}";
+          host = i: n: let
+            cap = libWithNet.net.cidr.capacity n;
+          in
+            assert lib.assertMsg (i >= (-cap) && i < cap) "The host ${toString i} lies outside of ${n}";
+              libWithNet.net.cidr.host i n;
+          hostCidr = n: x: "${libWithNet.net.cidr.host n x}/${toString (libWithNet.net.cidr.length x)}";
           ip = x: lib.head (lib.splitString "/" x);
           canonicalize = x: libWithNet.net.cidr.make (libWithNet.net.cidr.length x) (ip x);
         };
@@ -50,6 +55,7 @@
 
   boot = {
     initrd.systemd.enable = true;
+    # Add "rd.systemd.unit=rescue.target" to debug initrd
     kernelParams = ["log_buf_len=10M"];
     tmp.useTmpfs = true;
   };

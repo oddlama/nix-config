@@ -19,6 +19,7 @@
     head
     mapAttrs'
     mergeAttrs
+    mkMerge
     nameValuePair
     optionalAttrs
     partition
@@ -49,6 +50,11 @@ in rec {
 
   # True if the path or string starts with /
   isAbsolutePath = x: substring 0 1 x == "/";
+
+  # Merges all given attributes from the given attrsets using mkMerge.
+  # Useful to merge several top-level configs in a module.
+  mergeToplevelConfigs = keys: attrs:
+    genAttrs keys (attr: mkMerge (map (x: x.${attr} or {}) attrs));
 
   disko = {
     gpt = {
@@ -85,7 +91,7 @@ in rec {
       };
     };
     zfs = {
-      encryptedZpool = {
+      defaultZpoolOptions = {
         type = "zpool";
         mountRoot = "/mnt";
         rootFsOptions = {
@@ -164,7 +170,7 @@ in rec {
     # Partition nodes by whether they are servers
     _associatedNodes_isServerPartition =
       partition
-      (n: self.nodes.${n}.config.extra.wireguard.${wgName}.server.enable)
+      (n: self.nodes.${n}.config.extra.wireguard.${wgName}.server.host != null)
       associatedNodes;
 
     associatedServerNodes = _associatedNodes_isServerPartition.right;

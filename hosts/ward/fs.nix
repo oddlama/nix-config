@@ -23,7 +23,7 @@
     };
     zpool = with extraLib.disko.zfs; {
       rpool =
-        encryptedZpool
+        defaultZpoolOptions
         // {
           datasets = {
             "local" = unmountable;

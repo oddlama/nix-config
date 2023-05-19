@@ -10,7 +10,7 @@
 #     plugin-files = ${pkgs.nix-plugins}/lib/nix/plugins
 #     # Please adjust path accordingly, or leave this out and alternativaly
 #     # pass `--option extra-builtins-file ./extra-builtins.nix` to each invocation
-#     extra-builtins-file = ./extra-builtins.nix
+#     extra-builtins-file = ${./extra-builtins.nix}
 #   '';
 # }
 # ```

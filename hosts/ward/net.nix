@@ -6,8 +6,8 @@
 }: let
   inherit (config.lib.net) ip cidr;
 
-  net.lan.ipv4cidr = "192.168.100.1/24";
-  net.lan.ipv6cidr = "fd00::1/64";
+  lanCidrv4 = "192.168.100.0/24";
+  lanCidrv6 = "fd00::/64";
 in {
   networking.hostId = nodeSecrets.networking.hostId;
 
@@ -55,7 +55,10 @@ in {
       linkConfig.RequiredForOnline = "routable";
     };
     "20-lan-self" = {
-      address = [net.lan.ipv4cidr net.lan.ipv6cidr];
+      address = [
+        (cidr.hostCidr 1 lanCidrv4)
+        (cidr.hostCidr 1 lanCidrv6)
+      ];
       matchConfig.Name = "lan-self";
       networkConfig = {
         IPForward = "yes";
@@ -64,7 +67,7 @@ in {
       };
       # Announce a static prefix
       ipv6Prefixes = [
-        {ipv6PrefixConfig.Prefix = cidr.canonicalize net.lan.ipv6cidr;}
+        {ipv6PrefixConfig.Prefix = lanCidrv6;}
       ];
       # Delegate prefix from wan
       #dhcpPrefixDelegationConfig = {
@@ -76,7 +79,7 @@ in {
       ipv6SendRAConfig = {
         EmitDNS = true;
         # TODO change to self later
-        #DNS = cidr.ip net.lan.ipv6cidr;
+        #DNS = cidr.host 1 net.lan.ipv6cidr;
         DNS = ["2606:4700:4700::1111" "2001:4860:4860::8888"];
       };
       linkConfig.RequiredForOnline = "routable";
@@ -160,14 +163,14 @@ in {
         subnet4 = [
           {
             interface = "lan-self";
-            subnet = cidr.canonicalize net.lan.ipv4cidr;
+            subnet = lanCidrv4;
             pools = [
-              {pool = "${cidr.host 20 net.lan.ipv4cidr} - ${cidr.host (-6) net.lan.ipv4cidr}";}
+              {pool = "${cidr.host 20 lanCidrv4} - ${cidr.host (-6) lanCidrv4}";}
             ];
             option-data = [
               {
                 name = "routers";
-                data = cidr.ip net.lan.ipv4cidr;
+                data = cidr.host 1 lanCidrv4;
               }
             ];
           }
@@ -180,7 +183,10 @@ in {
 
   extra.microvms.networking = {
     baseMac = nodeSecrets.networking.interfaces.lan.mac;
-    host = cidr.ip net.lan.ipv4cidr;
     macvtapInterface = "lan";
+    static = {
+      baseCidrv4 = lanCidrv4;
+      baseCidrv6 = lanCidrv6;
+    };
   };
 }

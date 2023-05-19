@@ -32,6 +32,7 @@
 
   cfg = config.extra.microvms;
   inherit (config.extra.microvms) vms;
+  inherit (config.lib) net;
 
   # Configuration for each microvm
   microvmConfig = vmName: vmCfg: {
@@ -63,7 +64,7 @@
           inherit (vmCfg) system;
           config = nodePath + "/microvms/${vmName}";
         };
-      mac = config.lib.net.mac.addPrivate vmCfg.id cfg.networking.baseMac;
+      mac = net.mac.addPrivate vmCfg.id cfg.networking.baseMac;
     in {
       # Allow children microvms to know which node is their parent
       specialArgs =
@@ -87,7 +88,7 @@
               id = "vm-${vmName}";
               inherit mac;
               macvtap = {
-                link = cfg.macvtapInterface;
+                link = cfg.networking.macvtapInterface;
                 mode = "bridge";
               };
             }
@@ -124,19 +125,37 @@
           gc.automatic = mkForce false;
         };
 
-        extra.networking.renameInterfacesByMac.${vmCfg.linkName} = mac;
+        extra.networking.renameInterfacesByMac.${vmCfg.networking.mainLinkName} = mac;
 
-        systemd.network.networks = {
-          "10-${vmCfg.linkName}" = {
-            matchConfig.Name = vmCfg.linkName;
-            DHCP = "yes";
-            networkConfig = {
-              IPv6PrivacyExtensions = "yes";
-              IPv6AcceptRA = true;
+        systemd.network.networks."10-${vmCfg.networking.mainLinkName}" =
+          {
+            manual = {};
+            dhcp = {
+              matchConfig.Name = vmCfg.networking.mainLinkName;
+              DHCP = "yes";
+              networkConfig = {
+                IPv6PrivacyExtensions = "yes";
+                IPv6AcceptRA = true;
+              };
+              linkConfig.RequiredForOnline = "routable";
             };
-            linkConfig.RequiredForOnline = "routable";
-          };
-        };
+            static = {
+              matchConfig.Name = vmCfg.networking.mainLinkName;
+              address = [
+                vmCfg.networking.static.ipv4
+                vmCfg.networking.static.ipv6
+              ];
+              gateway = [
+                cfg.networking.host
+              ];
+              networkConfig = {
+                IPv6PrivacyExtensions = "yes";
+                IPv6AcceptRA = true;
+              };
+              linkConfig.RequiredForOnline = "routable";
+            };
+          }
+          .${vmCfg.networking.mode};
 
         # TODO change once microvms are compatible with stage-1 systemd
         boot.initrd.systemd.enable = mkForce false;
@@ -144,13 +163,13 @@
         # Create a firewall zone for the bridged traffic and secure vm traffic
         networking.nftables.firewall = {
           zones = lib.mkForce {
-            "${vmCfg.linkName}".interfaces = [vmCfg.linkName];
+            "${vmCfg.networking.mainLinkName}".interfaces = [vmCfg.networking.mainLinkName];
             "local-vms".interfaces = ["wg-local-vms"];
           };
 
           rules = lib.mkForce {
-            "${vmCfg.linkName}-to-local" = {
-              from = [vmCfg.linkName];
+            "${vmCfg.networking.mainLinkName}-to-local" = {
+              from = [vmCfg.networking.mainLinkName];
               to = ["local"];
             };
 
@@ -161,24 +180,21 @@
           };
         };
 
-        extra.wireguard."local-vms" = {
+        extra.wireguard."${nodeName}-local-vms" = {
           # We have a resolvable hostname / static ip, so all peers can directly communicate with us
           server = optionalAttrs (cfg.networking.host != null) {
-            inherit (vmCfg) host;
+            inherit (vmCfg.networking) host;
             port = 51829;
-            openFirewallInRules = ["${vmCfg.linkName}-to-local"];
+            openFirewallInRules = ["${vmCfg.networking.mainLinkName}-to-local"];
           };
-          # We have no static hostname, so we must use a client-server architecture.
+          # If We don't have such guarantees, so we must use a client-server architecture.
           client = optionalAttrs (cfg.networking.host == null) {
             via = nodeName;
             keepalive = false;
           };
+          cidrv4 = "${net.cidr.host vmCfg.id cfg.networking.wireguard.cidrv4}/32";
+          cidrv6 = "${net.cidr.host vmCfg.id cfg.networking.wireguard.cidrv6}/128";
           # TODO check error: addresses = ["10.22.22.2/30"];
-          # TODO switch wg module to explicit v4 and v6
-          addresses = [
-            "${config.lib.net.cidr.host vmCfg.id cfg.networking.wireguard.netv4}/32"
-            "${config.lib.net.cidr.host vmCfg.id cfg.networking.wireguard.netv6}/128"
-          ];
         };
       };
     };
@@ -194,18 +210,38 @@ in {
   options.extra.microvms = {
     networking = {
       baseMac = mkOption {
-        type = config.lib.net.types.mac;
+        type = net.types.mac;
         description = mdDoc ''
           This MAC address will be used as a base address to derive all MicroVM MAC addresses from.
           A good practise is to use the physical address of the macvtap interface.
         '';
       };
 
+      static = {
+        baseCidrv4 = mkOption {
+          type = net.types.cidrv4;
+          description = mdDoc ''
+            If a MicroVM is using static networking, and it hasn't defined a specific
+            address to use, its ipv4 address will be derived from this base address and its `id`.
+          '';
+        };
+
+        baseCidrv6 = mkOption {
+          type = net.types.cidrv6;
+          description = mdDoc ''
+            If a MicroVM is using static networking, and it hasn't defined a specific
+            address to use, its ipv6 address will be derived from this base address and its `id`.
+          '';
+        };
+      };
+
       host = mkOption {
         type = types.str;
+        default = net.cidr.host 1 cfg.networking.static.baseCidrv4;
         description = mdDoc ''
-          The host as which this machine can be reached from other participants of the bridged macvtap network.
-          This can either be a resolvable hostname or an IP address.
+          The ip or resolveable hostname under which this machine can be reached from other
+          participants of the bridged macvtap network. Defaults to the first host
+          in the given static base ipv4 address range.
         '';
       };
 
@@ -215,25 +251,24 @@ in {
       };
 
       wireguard = {
-        netv4 = mkOption {
-          type = config.lib.net.types.cidrv4;
+        cidrv4 = mkOption {
+          type = net.types.cidrv4;
           description = mdDoc "The ipv4 network address range to use for internal vm traffic.";
           default = "172.31.0.0/24";
         };
 
-        netv6 = mkOption {
-          type = config.lib.net.types.cidrv6;
+        cidrv6 = mkOption {
+          type = net.types.cidrv6;
           description = mdDoc "The ipv6 network address range to use for internal vm traffic.";
           default = "fddd::/64";
         };
       };
-      # TODO check plus no overflow
     };
 
     vms = mkOption {
       default = {};
       description = "Defines the actual vms and handles the necessary base setup for them.";
-      type = types.attrsOf (types.submodule {
+      type = types.attrsOf (types.submodule ({config, ...}: {
         options = {
           id = mkOption {
             type =
@@ -252,6 +287,55 @@ in {
               why id 1 is reserved for the host. While this is usually checked to be in-range,
               it might still be a good idea to assign greater ids with care.
             '';
+          };
+
+          networking = {
+            mode = mkOption {
+              type = types.enum ["dhcp" "static" "manual"];
+              default = "static";
+              description = "Determines how the main macvtap bridged network interface is configured this MicroVM.";
+            };
+
+            mainLinkName = mkOption {
+              type = types.str;
+              default = "wan";
+              description = mdDoc "The main ethernet link name inside of the VM";
+            };
+
+            static = {
+              ipv4 = mkOption {
+                type = net.types.ipv4-in cfg.networking.static.baseCidrv4;
+                default = net.cidr.host config.id cfg.networking.static.baseCidrv4;
+                description = mdDoc ''
+                  The static ipv4 for this MicroVM. Only used if mode is static.
+                  Defaults to the id-th host in the configured network range.
+                '';
+              };
+
+              ipv6 = mkOption {
+                type = net.types.ipv6-in cfg.networking.static.baseCidrv6;
+                default = net.cidr.host config.id cfg.networking.static.baseCidrv6;
+                description = mdDoc ''
+                  The static ipv6 for this MicroVM. Only used if mode is static.
+                  Defaults to the id-th host in the configured network range.
+                '';
+              };
+            };
+
+            host = mkOption {
+              type = types.nullOr types.str;
+              default =
+                if config.networking.mode == "static"
+                then config.networking.static.ipv4
+                else null;
+              description = mdDoc ''
+                The host as which this VM can be reached from other participants of the bridged macvtap network.
+                If this is null, the wireguard connection will use a client-server architecture with the host as the server.
+                Otherwise, all clients will communicate directly, meaning the host cannot listen to traffic.
+
+                This can either be a resolvable hostname or an IP address. Defaults to the static ipv4 if given, else null.
+              '';
+            };
           };
 
           zfs = {
@@ -279,33 +363,12 @@ in {
             description = mdDoc "Whether this VM should be started automatically with the host";
           };
 
-          # TODO allow configuring static ipv4 and ipv6 instead of dhcp?
-          # maybe create networking. namespace and have options = dhcpwithRA and static.
-
-          linkName = mkOption {
-            type = types.str;
-            default = "wan";
-            description = mdDoc "The main ethernet link name inside of the VM";
-          };
-
-          host = mkOption {
-            type = types.nullOr types.str;
-            default = null;
-            description = mdDoc ''
-              The host as which this VM can be reached from other participants of the bridged macvtap network.
-              If this is unset, the wireguard connection will use a client-server architecture with the host as the server.
-              Otherwise, all clients will communicate directly, meaning the host cannot listen to traffic.
-
-              This can either be a resolvable hostname or an IP address.
-            '';
-          };
-
           system = mkOption {
             type = types.str;
             description = mdDoc "The system that this microvm should use";
           };
         };
-      });
+      }));
     };
   };
 
@@ -321,16 +384,14 @@ in {
       ];
 
       # Define a local wireguard server to communicate with vms securely
-      extra.wireguard."local-vms" = {
+      extra.wireguard."${nodeName}-local-vms" = {
         server = {
           inherit (cfg.networking) host;
           port = 51829;
           openFirewallInRules = ["lan-to-local"];
         };
-        addresses = [
-          (config.lib.net.cidr.hostCidr 1 cfg.networking.wireguard.netv4)
-          (config.lib.net.cidr.hostCidr 1 cfg.networking.wireguard.netv6)
-        ];
+        cidrv4 = net.cidr.hostCidr 1 cfg.networking.wireguard.cidrv4;
+        cidrv6 = net.cidr.hostCidr 1 cfg.networking.wireguard.cidrv6;
       };
     }
     // extraLib.mergeToplevelConfigs ["disko" "microvm" "systemd"] (mapAttrsToList microvmConfig vms)

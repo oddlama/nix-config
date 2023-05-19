@@ -177,7 +177,7 @@
           })
           wgCfg.server.externalPeers
           # All client nodes that have their via set to us.
-          ++ mapAttrsToList (clientNode: let
+          ++ map (clientNode: let
             clientCfg = wgCfgOf clientNode;
           in {
             wireguardPeerConfig =
@@ -293,15 +293,43 @@ in {
           description = mdDoc "The order priority used when creating systemd netdev and network files.";
         };
 
+        cidrv4 = mkOption {
+          type =
+            if config.client.via != null
+            then net.types.cidrv4-in nodes.${config.client.via}.config.extra.wireguard.${name}.cidrv4
+            else net.types.cidrv4;
+          description = mdDoc ''
+            The ipv4 host address (with cidr mask) to configure for this interface.
+            The cidr mask determines this peers allowed address range as configured on other peers.
+            The mask should usually be fully restricted (/32) when no external clients are configured
+            and no other node uses this as a via.
+          '';
+        };
+
+        cidrv6 = mkOption {
+          type =
+            if config.client.via != null
+            then net.types.cidrv6-in nodes.${config.client.via}.config.extra.wireguard.${name}.cidrv6
+            else net.types.cidrv6;
+          description = mdDoc ''
+            The ipv6 host address (with cidr mask) to configure for this interface.
+            The cidr mask determines this peers allowed address range as configured on other peers.
+            The mask should usually be fully restricted (/128) when no external clients are configured
+            and no other node uses this as a via.
+          '';
+        };
+
         addresses = mkOption {
           type = types.listOf (
             if config.client.via != null
             then net.types.cidr-in nodes.${config.client.via}.config.extra.wireguard.${name}.addresses
             else net.types.cidr
           );
+          default = [config.cidrv4 config.cidrv6];
           description = mdDoc ''
-            The addresses to configure for this interface. Will automatically be added
-            as this peer's allowed addresses on all other peers.
+            The addresses (with cidr mask) to configure for this interface.
+            The cidr mask determines this peers allowed address range as configured on other peers.
+            By default this will just include {option}`cidrv4` and {option}`cidrv6` as configured.
           '';
         };
       };

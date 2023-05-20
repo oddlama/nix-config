@@ -31,11 +31,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1683715679,
-        "narHash": "sha256-Zq2liHoVTNYql94XPTpEInQq5yY0NjRa9ZLYJv55dgE=",
+        "lastModified": 1684539260,
+        "narHash": "sha256-lF3+vp2UZwBjzF4pnOKYZrQOCFdnOdtvGmaFIzsaMN4=",
         "owner": "oddlama",
         "repo": "agenix-rekey",
-        "rev": "e5e84230bfa071685a05acdc11a94e3be672e541",
+        "rev": "e9a2bad33b7b1634af65cbc809fc31776df41fe5",
         "type": "github"
       },
       "original": {

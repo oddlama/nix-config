@@ -142,8 +142,8 @@
             static = {
               matchConfig.Name = vmCfg.networking.mainLinkName;
               address = [
-                vmCfg.networking.static.ipv4
-                vmCfg.networking.static.ipv6
+                "${vmCfg.networking.static.ipv4}/${toString (net.cidr.length cfg.networking.static.baseCidrv4)}"
+                "${vmCfg.networking.static.ipv6}/${toString (net.cidr.length cfg.networking.static.baseCidrv6)}"
               ];
               gateway = [
                 cfg.networking.host
@@ -161,13 +161,14 @@
         boot.initrd.systemd.enable = mkForce false;
 
         # Create a firewall zone for the bridged traffic and secure vm traffic
+        # TODO mkForce nftables
         networking.nftables.firewall = {
-          zones = lib.mkForce {
+          zones = mkForce {
             "${vmCfg.networking.mainLinkName}".interfaces = [vmCfg.networking.mainLinkName];
             "local-vms".interfaces = ["wg-local-vms"];
           };
 
-          rules = lib.mkForce {
+          rules = mkForce {
             "${vmCfg.networking.mainLinkName}-to-local" = {
               from = [vmCfg.networking.mainLinkName];
               to = ["local"];
@@ -184,8 +185,8 @@
           # We have a resolvable hostname / static ip, so all peers can directly communicate with us
           server = optionalAttrs (cfg.networking.host != null) {
             inherit (vmCfg.networking) host;
-            port = 51829;
-            openFirewallInRules = ["${vmCfg.networking.mainLinkName}-to-local"];
+            inherit (cfg.networking.wireguard) port;
+            openFirewallRules = ["${vmCfg.networking.mainLinkName}-to-local"];
           };
           # If We don't have such guarantees, so we must use a client-server architecture.
           client = optionalAttrs (cfg.networking.host == null) {
@@ -261,6 +262,18 @@ in {
           type = net.types.cidrv6;
           description = mdDoc "The ipv6 network address range to use for internal vm traffic.";
           default = "fddd::/64";
+        };
+
+        port = mkOption {
+          default = 51829;
+          type = types.port;
+          description = mdDoc "The port to listen on.";
+        };
+
+        openFirewallRules = mkOption {
+          default = [];
+          type = types.listOf types.str;
+          description = mdDoc "The {option}`port` will be opened for all of the given rules in the nftable-firewall.";
         };
       };
     };
@@ -387,8 +400,7 @@ in {
       extra.wireguard."${nodeName}-local-vms" = {
         server = {
           inherit (cfg.networking) host;
-          port = 51829;
-          openFirewallInRules = ["lan-to-local"];
+          inherit (cfg.networking.wireguard) openFirewallRules port;
         };
         cidrv4 = net.cidr.hostCidr 1 cfg.networking.wireguard.cidrv4;
         cidrv6 = net.cidr.hostCidr 1 cfg.networking.wireguard.cidrv6;

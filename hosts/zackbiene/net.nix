@@ -30,6 +30,7 @@ in {
     };
   };
 
+  # TODO mkForce nftables
   networking.nftables.firewall = {
     zones = lib.mkForce {
       lan.interfaces = ["lan1"];

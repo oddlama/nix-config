@@ -93,6 +93,7 @@ in {
     };
   };
 
+  # TODO mkForce nftables
   networking.nftables.firewall = {
     zones = lib.mkForce {
       lan.interfaces = ["lan-self"];
@@ -188,5 +189,6 @@ in {
       baseCidrv4 = lanCidrv4;
       baseCidrv6 = lanCidrv6;
     };
+    wireguard.openFirewallRules = ["lan-to-local"];
   };
 }

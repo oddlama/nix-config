@@ -25,7 +25,6 @@
     partition
     recursiveUpdate
     removeSuffix
-    splitString
     substring
     unique
     ;
@@ -135,6 +134,10 @@ in rec {
 
   # Wireguard related functions that are reused in several files of this flake
   wireguard = wgName: rec {
+    # Get access to the networking lib by referring to one of the associated nodes.
+    # Not ideal, but ok.
+    inherit (self.nodes.${head associatedNodes}.config.lib) net;
+
     sortedPeers = peerA: peerB:
       if peerA < peerB
       then {
@@ -199,7 +202,19 @@ in rec {
     # A list of all occurring addresses.
     usedAddresses =
       concatMap (n: self.nodes.${n}.config.extra.wireguard.${wgName}.addresses) associatedNodes
-      ++ flatten (concatMap (n: attrValues self.nodes.${n}.config.extra.wireguard.${wgName}.server.externalPeers) associatedNodes);
+      ++ flatten (concatMap (n: map (net.cidr.make 128) (attrValues self.nodes.${n}.config.extra.wireguard.${wgName}.server.externalPeers)) associatedNodes);
+
+    # The cidrv4 and cidrv6 of the network spanned by all participating peer addresses.
+    networkAddresses = net.cidr.coerce usedAddresses;
+
+    # Appends / replaces the correct cidr length to the argument,
+    # so that the resulting address is in the cidr.
+    toNetworkAddr = addr: let
+      relevantNetworkAddr =
+        if net.ip.isv6 addr
+        then networkAddresses.cidrv6
+        else networkAddresses.cidrv4;
+    in "${net.cidr.ip addr}/${toString (net.cidr.length relevantNetworkAddr)}";
 
     # Creates a script that when executed outputs a wg-quick compatible configuration
     # file for use with external peers. This is a script so we can access secrets without
@@ -208,6 +223,7 @@ in rec {
       pkgs = self.pkgs.${system};
       snCfg = self.nodes.${serverNode}.config.extra.wireguard.${wgName};
       peerName = externalPeerName extPeer;
+      addresses = map toNetworkAddr snCfg.server.externalPeers.${extPeer};
     in
       pkgs.writeShellScript "create-wg-conf-${wgName}-${serverNode}-${extPeer}" ''
         privKey=$(${pkgs.rage}/bin/rage -d ${rageDecryptArgs} ${escapeShellArg (peerPrivateKeyPath peerName)}) \
@@ -217,7 +233,7 @@ in rec {
 
         cat <<EOF
         [Interface]
-        Address = ${concatStringsSep ", " snCfg.server.externalPeers.${extPeer}}
+        Address = ${concatStringsSep ", " addresses}
         PrivateKey = $privKey
 
         [Peer]

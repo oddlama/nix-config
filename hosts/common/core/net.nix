@@ -45,6 +45,7 @@ in {
       '';
     };
 
+    # TODO mkForce nftables
     nftables.firewall = {
       zones = lib.mkForce {
         local.localZone = true;

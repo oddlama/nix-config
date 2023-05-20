@@ -26,7 +26,6 @@
     mkOption
     optionalAttrs
     optionals
-    splitString
     types
     ;
 
@@ -54,6 +53,7 @@
       peerPrivateKeySecret
       peerPublicKeyPath
       usedAddresses
+      toNetworkAddr
       ;
 
     isServer = wgCfg.server.host != null;
@@ -82,7 +82,7 @@
     # Figure out if there are duplicate peers or addresses so we can
     # make an assertion later.
     duplicatePeers = duplicates externalPeerNamesRaw;
-    duplicateAddrs = duplicates (map (x: head (splitString "/" x)) usedAddresses);
+    duplicateAddrs = duplicates (map net.cidr.ip usedAddresses);
 
     # Adds context information to the assertions for this network
     assertionPrefix = "Wireguard network '${wgName}' on '${nodeName}'";
@@ -118,16 +118,27 @@
       (isServer && wgCfg.server.openFirewall)
       [wgCfg.server.port];
 
+    # TODO mkForce nftables
     networking.nftables.firewall.rules =
       mkIf
-      (isServer && wgCfg.server.openFirewallInRules != [])
-      (genAttrs wgCfg.server.openFirewallInRules (_: {allowedUDPPorts = [wgCfg.server.port];}));
+      (isServer && wgCfg.server.openFirewallRules != [])
+      (lib.mkForce (genAttrs wgCfg.server.openFirewallRules (_: {allowedUDPPorts = [wgCfg.server.port];})));
 
     rekey.secrets =
       concatAttrs (map
-        (other: {${peerPresharedKeySecret nodeName other}.file = peerPresharedKeyPath nodeName other;})
+        (other: {
+          ${peerPresharedKeySecret nodeName other} = {
+            file = peerPresharedKeyPath nodeName other;
+            owner = "systemd-network";
+          };
+        })
         neededPeers)
-      // {${peerPrivateKeySecret nodeName}.file = peerPrivateKeyPath nodeName;};
+      // {
+        ${peerPrivateKeySecret nodeName} = {
+          file = peerPrivateKeyPath nodeName;
+          owner = "systemd-network";
+        };
+      };
 
     systemd.network.netdevs."${toString wgCfg.priority}-${wgName}" = {
       netdevConfig = {
@@ -156,21 +167,18 @@
               # plus each external peer's addresses,
               # plus each client's addresses that is connected via that node.
               AllowedIPs = snCfg.addresses;
-              # TODO this needed? or even wanted at all?
-              # ++ attrValues snCfg.server.externalPeers;
-              # ++ map (n: (wgCfgOf n).addresses) snCfg.ourClientNodes;
               Endpoint = "${snCfg.server.host}:${toString snCfg.server.port}";
             };
           })
           (filterSelf associatedServerNodes)
           # All our external peers
-          ++ mapAttrsToList (extPeer: allowedIPs: let
+          ++ mapAttrsToList (extPeer: ips: let
             peerName = externalPeerName extPeer;
           in {
             wireguardPeerConfig = {
               PublicKey = builtins.readFile (peerPublicKeyPath peerName);
               PresharedKeyFile = config.rekey.secrets.${peerPresharedKeySecret nodeName peerName}.path;
-              AllowedIPs = allowedIPs;
+              AllowedIPs = map (net.cidr.make 128) ips;
               # Connections to external peers should always be kept alive
               PersistentKeepalive = 25;
             };
@@ -207,7 +215,7 @@
 
     systemd.network.networks."${toString wgCfg.priority}-${wgName}" = {
       matchConfig.Name = wgName;
-      networkConfig.Address = wgCfg.addresses;
+      address = map toNetworkAddr wgCfg.addresses;
     };
   };
 in {
@@ -239,16 +247,16 @@ in {
             description = mdDoc "Whether to open the firewall for the specified {option}`port`.";
           };
 
-          openFirewallInRules = mkOption {
+          openFirewallRules = mkOption {
             default = [];
             type = types.listOf types.str;
             description = mdDoc "The {option}`port` will be opened for all of the given rules in the nftable-firewall.";
           };
 
           externalPeers = mkOption {
-            type = types.attrsOf (types.listOf (net.types.cidr-in config.addresses));
+            type = types.attrsOf (types.listOf (net.types.ip-in config.addresses));
             default = {};
-            example = {my-android-phone = ["10.0.0.97/32"];};
+            example = {my-android-phone = ["10.0.0.97"];};
             description = mdDoc ''
               Allows defining an extra set of peers that should be added to this wireguard network,
               but will not be managed by this flake. (e.g. phones)
@@ -329,6 +337,7 @@ in {
           description = mdDoc ''
             The addresses (with cidr mask) to configure for this interface.
             The cidr mask determines this peers allowed address range as configured on other peers.
+            The actual network cidr will automatically be derived from all network participants.
             By default this will just include {option}`cidrv4` and {option}`cidrv6` as configured.
           '';
         };

@@ -165,7 +165,7 @@
         networking.nftables.firewall = {
           zones = mkForce {
             "${vmCfg.networking.mainLinkName}".interfaces = [vmCfg.networking.mainLinkName];
-            "local-vms".interfaces = ["wg-local-vms"];
+            local-vms.interfaces = ["local-vms"];
           };
 
           rules = mkForce {
@@ -175,7 +175,7 @@
             };
 
             local-vms-to-local = {
-              from = ["wg-local-vms"];
+              from = ["local-vms"];
               to = ["local"];
             };
           };
@@ -193,6 +193,7 @@
             via = nodeName;
             keepalive = false;
           };
+          linkName = "local-vms";
           ipv4 = net.cidr.host vmCfg.id cfg.networking.wireguard.cidrv4;
           ipv6 = net.cidr.host vmCfg.id cfg.networking.wireguard.cidrv6;
         };
@@ -401,8 +402,24 @@ in {
           inherit (cfg.networking) host;
           inherit (cfg.networking.wireguard) openFirewallRules port;
         };
+        linkName = "local-vms";
         ipv4 = net.cidr.host 1 cfg.networking.wireguard.cidrv4;
         ipv6 = net.cidr.host 1 cfg.networking.wireguard.cidrv6;
+      };
+
+      # Create a firewall zone for the secure vm traffic
+      # TODO mkForce nftables
+      networking.nftables.firewall = {
+        zones = mkForce {
+          local-vms.interfaces = ["local-vms"];
+        };
+
+        rules = mkForce {
+          local-vms-to-local = {
+            from = ["local-vms"];
+            to = ["local"];
+          };
+        };
       };
     }
     // extraLib.mergeToplevelConfigs ["disko" "microvm" "systemd"] (mapAttrsToList microvmConfig vms)

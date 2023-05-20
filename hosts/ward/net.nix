@@ -98,7 +98,7 @@ in {
     zones = lib.mkForce {
       lan.interfaces = ["lan-self"];
       wan.interfaces = ["wan"];
-      "local-vms".interfaces = ["wg-local-vms"];
+      local-vms.interfaces = ["local-vms"];
     };
 
     rules = lib.mkForce {

@@ -87,11 +87,12 @@
     # Adds context information to the assertions for this network
     assertionPrefix = "Wireguard network '${wgName}' on '${nodeName}'";
 
-    # Calculates which traffic should be routed to a given server node
+    # Calculates the allowed ips for another server from our perspective.
     # Usually we just want to allow other peers to route traffic
     # for our "children" through us, additional to traffic to us of course.
     # If a server exposes additional network access (global, lan, ...),
-    # these can be added aswell. TODO (do that)
+    # these can be added aswell.
+    # TODO (do that)
     serverAllowedIPs = serverNode: let
       snCfg = wgCfgOf serverNode;
     in
@@ -160,7 +161,7 @@
     systemd.network.netdevs."${toString wgCfg.priority}-${wgName}" = {
       netdevConfig = {
         Kind = "wireguard";
-        Name = "${wgName}";
+        Name = wgCfg.linkName;
         Description = "Wireguard network ${wgName}";
       };
       wireguardConfig =
@@ -228,7 +229,7 @@
     };
 
     systemd.network.networks."${toString wgCfg.priority}-${wgName}" = {
-      matchConfig.Name = wgName;
+      matchConfig.Name = wgCfg.linkName;
       address = map toNetworkAddr wgCfg.addresses;
     };
   };
@@ -313,6 +314,12 @@ in {
           default = 40;
           type = types.int;
           description = mdDoc "The order priority used when creating systemd netdev and network files.";
+        };
+
+        linkName = mkOption {
+          default = "wg-${name}";
+          type = types.str;
+          description = mdDoc "The name for the created network interface.";
         };
 
         ipv4 = mkOption {

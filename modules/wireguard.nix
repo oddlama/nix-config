@@ -3,7 +3,6 @@
   lib,
   extraLib,
   pkgs,
-  nodes,
   nodeName,
   ...
 }: let
@@ -42,9 +41,9 @@
   configForNetwork = wgName: wgCfg: let
     inherit
       (extraLib.wireguard wgName)
+      associatedClientNodes
       associatedNodes
       associatedServerNodes
-      associatedClientNodes
       externalPeerName
       externalPeerNamesRaw
       peerPresharedKeyPath
@@ -52,15 +51,14 @@
       peerPrivateKeyPath
       peerPrivateKeySecret
       peerPublicKeyPath
-      usedAddresses
       toNetworkAddr
+      usedAddresses
+      wgCfgOf
       ;
 
     isServer = wgCfg.server.host != null;
     isClient = wgCfg.client.via != null;
-
     filterSelf = filter (x: x != nodeName);
-    wgCfgOf = node: nodes.${node}.config.extra.wireguard.${wgName};
 
     # All nodes that use our node as the via into the wireguard network
     ourClientNodes =
@@ -82,7 +80,7 @@
     # Figure out if there are duplicate peers or addresses so we can
     # make an assertion later.
     duplicatePeers = duplicates externalPeerNamesRaw;
-    duplicateAddrs = duplicates (map net.cidr.ip usedAddresses);
+    duplicateAddrs = duplicates usedAddresses;
 
     # Adds context information to the assertions for this network
     assertionPrefix = "Wireguard network '${wgName}' on '${nodeName}'";
@@ -281,6 +279,22 @@ in {
               this node to act as a server.
             '';
           };
+
+          reservedAddresses = mkOption {
+            type = types.listOf net.types.cidr;
+            default = [];
+            example = ["10.0.0.1/24" "fd00:cafe::/64"];
+            description = mdDoc ''
+              Allows defining extra cidr network ranges that shall be reserved for this machine
+              and its children (i.e. external peers or via clients). Reservation means that those
+              address spaces will be guaranteed to be included in the spanned network.
+
+              By default, this module will try to allocate the smallest address space that includes
+              all network peers. If you know that there might be additional external peers added later,
+              it may be beneficial to reserve a bigger address space from the start to avoid having
+              to update existing external peers when the generated address space expands.
+            '';
+          };
         };
 
         client = {
@@ -339,6 +353,25 @@ in {
             The ip addresses (v4 and/or v6) to use for this machine.
             The actual network cidr will automatically be derived from all network participants.
             By default this will just include {option}`ipv4` and {option}`ipv6` as configured.
+          '';
+        };
+
+        # TODO this needs to be implemented.
+        # - is 0.0.0.0/0 also for valid for routing global ipv6?
+        # - is 0.0.0.0/0 routing private spaces such as 192.168.1 ? that'd be baaad
+        # - force nodes to opt-in or allow nodes to opt-out? sometimes a node want's
+        #   to use the network without routing additional stuff.
+        # - allow specifying the route metric.
+        routedAddresses = mkOption {
+          type = types.listOf net.types.cidr;
+          default = [];
+          example = ["0.0.0.0/0"];
+          description = mdDoc ''
+            Additional networks that are accessible through this machine. This will allow
+            other participants of the network to access these networks through the tunnel.
+
+            Make sure to configure a NAT on the created interface (or that the proper routes
+            are generated) to allow inter-network communication.
           '';
         };
       };

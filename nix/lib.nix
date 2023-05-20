@@ -138,6 +138,9 @@ in rec {
     # Not ideal, but ok.
     inherit (self.nodes.${head associatedNodes}.config.lib) net;
 
+    # Returns the given node's wireguard configuration of this network
+    wgCfgOf = node: self.nodes.${node}.config.extra.wireguard.${wgName};
+
     sortedPeers = peerA: peerB:
       if peerA < peerB
       then {
@@ -173,21 +176,21 @@ in rec {
     # Partition nodes by whether they are servers
     _associatedNodes_isServerPartition =
       partition
-      (n: self.nodes.${n}.config.extra.wireguard.${wgName}.server.host != null)
+      (n: (wgCfgOf n).server.host != null)
       associatedNodes;
 
     associatedServerNodes = _associatedNodes_isServerPartition.right;
     associatedClientNodes = _associatedNodes_isServerPartition.wrong;
 
     # Maps all nodes that are part of this network to their addresses
-    nodePeers = genAttrs associatedNodes (n: self.nodes.${n}.config.extra.wireguard.${wgName}.addresses);
+    nodePeers = genAttrs associatedNodes (n: (wgCfgOf n).addresses);
 
     externalPeerName = p: "external-${p}";
 
     # Only peers that are defined as externalPeers on the given node.
     # Prepends "external-" to their name.
     externalPeersForNode = node:
-      mapAttrs' (p: nameValuePair (externalPeerName p)) self.nodes.${node}.config.extra.wireguard.${wgName}.server.externalPeers;
+      mapAttrs' (p: nameValuePair (externalPeerName p)) (wgCfgOf node).server.externalPeers;
 
     # All peers that are defined as externalPeers on any node.
     # Prepends "external-" to their name.
@@ -197,15 +200,18 @@ in rec {
     allPeers = nodePeers // allExternalPeers;
 
     # Concatenation of all external peer names names without any transformations.
-    externalPeerNamesRaw = concatMap (n: attrNames self.nodes.${n}.config.extra.wireguard.${wgName}.server.externalPeers) associatedNodes;
+    externalPeerNamesRaw = concatMap (n: attrNames (wgCfgOf n).server.externalPeers) associatedNodes;
 
     # A list of all occurring addresses.
     usedAddresses =
-      concatMap (n: self.nodes.${n}.config.extra.wireguard.${wgName}.addresses) associatedNodes
-      ++ flatten (concatMap (n: map (net.cidr.make 128) (attrValues self.nodes.${n}.config.extra.wireguard.${wgName}.server.externalPeers)) associatedNodes);
+      concatMap (n: (wgCfgOf n).addresses) associatedNodes
+      ++ flatten (concatMap (n: attrValues (wgCfgOf n).server.externalPeers) associatedNodes);
 
     # The cidrv4 and cidrv6 of the network spanned by all participating peer addresses.
-    networkAddresses = net.cidr.coerce usedAddresses;
+    # This also takes into account any reserved address ranges that should be part of the network.
+    networkAddresses =
+      net.cidr.merge (usedAddresses
+        ++ concatMap (n: (wgCfgOf n).server.reservedAddresses) associatedServerNodes);
 
     # Appends / replaces the correct cidr length to the argument,
     # so that the resulting address is in the cidr.
@@ -221,7 +227,7 @@ in rec {
     # storing them in the nix-store.
     wgQuickConfigScript = system: serverNode: extPeer: let
       pkgs = self.pkgs.${system};
-      snCfg = self.nodes.${serverNode}.config.extra.wireguard.${wgName};
+      snCfg = wgCfgOf serverNode;
       peerName = externalPeerName extPeer;
       addresses = map toNetworkAddr snCfg.server.externalPeers.${extPeer};
     in

@@ -187,6 +187,7 @@
             inherit (vmCfg.networking) host;
             inherit (cfg.networking.wireguard) port;
             openFirewallRules = ["${vmCfg.networking.mainLinkName}-to-local"];
+            reservedAddresses = [cfg.networking.wireguard.cidrv4 cfg.networking.wireguard.cidrv6];
           };
           # If We don't have such guarantees, so we must use a client-server architecture.
           client = optionalAttrs (cfg.networking.host == null) {

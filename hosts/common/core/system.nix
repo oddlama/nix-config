@@ -67,16 +67,16 @@
           # > net.cidr.canonicalize "192.168.1.100/24"
           # "192.168.1.0/24"
           canonicalize = x: libWithNet.net.cidr.make (libWithNet.net.cidr.length x) (ip x);
-          # coercev4 :: [cidr4 | ipv4] -> (cidr4 | null)
+          # mergev4 :: [cidr4 | ipv4] -> (cidr4 | null)
           #
-          # Returns the smallest cidr network that includes all given addresses.
+          # Returns the smallest cidr network that includes all given networks.
           # If no cidr mask is given, /32 is assumed.
           #
           # Examples:
           #
-          # > net.cidr.coercev4 ["192.168.1.1/24" "192.168.6.1/32"]
+          # > net.cidr.mergev4 ["192.168.1.1/24" "192.168.6.1/32"]
           # "192.168.0.0/21"
-          coercev4 = addrs_: let
+          mergev4 = addrs_: let
             # Append /32 if necessary
             addrs = map (x:
               if lib.hasInfix "/" x
@@ -104,20 +104,20 @@
                 addrs)
               possibleLengths);
           in
-            assert lib.assertMsg (!lib.any (lib.hasInfix ":") addrs) "coercev4 cannot operate on ipv6 addresses";
+            assert lib.assertMsg (!lib.any (lib.hasInfix ":") addrs) "mergev4 cannot operate on ipv6 addresses";
               if addrs == []
               then null
               else libWithNet.net.cidr.make bestLength firstIp;
-          # coercev6 :: [cidr6 | ipv6] -> (cidr6 | null)
+          # mergev6 :: [cidr6 | ipv6] -> (cidr6 | null)
           #
-          # Returns the smallest cidr network that includes all given addresses.
+          # Returns the smallest cidr network that includes all given networks.
           # If no cidr mask is given, /128 is assumed.
           #
           # Examples:
           #
-          # > net.cidr.coercev6 ["fd00:dead:cafe::/64" "fd00:fd12:3456:7890::/56"]
+          # > net.cidr.mergev6 ["fd00:dead:cafe::/64" "fd00:fd12:3456:7890::/56"]
           # "fd00:c000::/18"
-          coercev6 = addrs_: let
+          mergev6 = addrs_: let
             # Append /128 if necessary
             addrs = map (x:
               if lib.hasInfix "/" x
@@ -145,20 +145,20 @@
                 addrs)
               possibleLengths);
           in
-            assert lib.assertMsg (lib.all (lib.hasInfix ":") addrs) "coercev6 cannot operate on ipv4 addresses";
+            assert lib.assertMsg (lib.all (lib.hasInfix ":") addrs) "mergev6 cannot operate on ipv4 addresses";
               if addrs == []
               then null
               else libWithNet.net.cidr.make bestLength firstIp;
-          # coerce :: [cidr] -> { cidrv4 = (cidr4 | null); cidrv6 = (cidr4 | null); }
+          # merge :: [cidr] -> { cidrv4 = (cidr4 | null); cidrv6 = (cidr4 | null); }
           #
-          # Returns the smallest cidr network that includes all given addresses,
+          # Returns the smallest cidr network that includes all given networks,
           # but yields two separate result for all given ipv4 and ipv6 addresses.
-          # Equivalent to calling coercev4 and coercev6 on a partition individually.
-          coerce = addrs: let
+          # Equivalent to calling mergev4 and mergev6 on a partition individually.
+          merge = addrs: let
             v4_and_v6 = lib.partition (lib.hasInfix ":") addrs;
           in {
-            cidrv4 = coercev4 v4_and_v6.wrong;
-            cidrv6 = coercev6 v4_and_v6.right;
+            cidrv4 = mergev4 v4_and_v6.wrong;
+            cidrv6 = mergev6 v4_and_v6.right;
           };
         };
         ip = {

@@ -213,6 +213,10 @@ in rec {
       net.cidr.merge (usedAddresses
         ++ concatMap (n: (wgCfgOf n).server.reservedAddresses) associatedServerNodes);
 
+    # The network spanning cidr addresses. The respective cidrv4 and cirdv6 are only
+    # included if they exist.
+    networkCidrs = filter (x: x != null) (attrValues networkAddresses);
+
     # Appends / replaces the correct cidr length to the argument,
     # so that the resulting address is in the cidr.
     toNetworkAddr = addr: let
@@ -245,7 +249,7 @@ in rec {
         [Peer]
         PublicKey = ${removeSuffix "\n" (builtins.readFile (peerPublicKeyPath serverNode))}
         PresharedKey = $serverPsk
-        AllowedIPs = ${concatStringsSep ", " snCfg.addresses}
+        AllowedIPs = ${concatStringsSep ", " networkCidrs}
         Endpoint = ${snCfg.server.host}:${toString snCfg.server.port}
         EOF
       '';

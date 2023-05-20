@@ -219,8 +219,10 @@
               wireguardPeerConfig = {
                 PublicKey = builtins.readFile (peerPublicKeyPath wgCfg.client.via);
                 PresharedKeyFile = config.rekey.secrets.${peerPresharedKeySecret nodeName wgCfg.client.via}.path;
-                # TODO this should be 0.0.0.0 if the client wants to route all traffic
-                AllowedIPs = serverAllowedIPs wgCfg.client.via;
+                # Access to the whole network is routed through our entry node.
+                # TODO this should add any routedAddresses on ANY server in the network, right?
+                # if A entries via B and only C can route 0.0.0.0/0, does that work?
+                AllowedIPs = networkCidrs;
               };
             }
           ];

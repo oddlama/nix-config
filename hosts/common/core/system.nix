@@ -67,15 +67,22 @@
           # > net.cidr.canonicalize "192.168.1.100/24"
           # "192.168.1.0/24"
           canonicalize = x: libWithNet.net.cidr.make (libWithNet.net.cidr.length x) (ip x);
-          # coercev4 :: [cidr4] -> (cidr4 | null)
+          # coercev4 :: [cidr4 | ipv4] -> (cidr4 | null)
           #
-          # Returns the smallest cidr network that includes all given addresses
+          # Returns the smallest cidr network that includes all given addresses.
+          # If no cidr mask is given, /32 is assumed.
           #
           # Examples:
           #
           # > net.cidr.coercev4 ["192.168.1.1/24" "192.168.6.1/32"]
           # "192.168.0.0/21"
-          coercev4 = addrs: let
+          coercev4 = addrs_: let
+            # Append /32 if necessary
+            addrs = map (x:
+              if lib.hasInfix "/" x
+              then x
+              else "${x}/32")
+            addrs_;
             # The smallest occurring length is the first we need to start checking, since
             # any greater cidr length represents a smaller address range which
             # wouldn't contain all of the original addresses.
@@ -101,15 +108,22 @@
               if addrs == []
               then null
               else libWithNet.net.cidr.make bestLength firstIp;
-          # coercev6 :: [cidr6] -> (cidr6 | null)
+          # coercev6 :: [cidr6 | ipv6] -> (cidr6 | null)
           #
-          # Returns the smallest cidr network that includes all given addresses
+          # Returns the smallest cidr network that includes all given addresses.
+          # If no cidr mask is given, /128 is assumed.
           #
           # Examples:
           #
           # > net.cidr.coercev6 ["fd00:dead:cafe::/64" "fd00:fd12:3456:7890::/56"]
           # "fd00:c000::/18"
-          coercev6 = addrs: let
+          coercev6 = addrs_: let
+            # Append /128 if necessary
+            addrs = map (x:
+              if lib.hasInfix "/" x
+              then x
+              else "${x}/128")
+            addrs_;
             # The smallest occurring length is the first we need to start checking, since
             # any greater cidr length represents a smaller address range which
             # wouldn't contain all of the original addresses.

@@ -86,6 +86,23 @@
 
     # Adds context information to the assertions for this network
     assertionPrefix = "Wireguard network '${wgName}' on '${nodeName}'";
+
+    # Calculates which traffic should be routed to a given server node
+    # Usually we just want to allow other peers to route traffic
+    # for our "children" through us, additional to traffic to us of course.
+    # If a server exposes additional network access (global, lan, ...),
+    # these can be added aswell. TODO (do that)
+    serverAllowedIPs = serverNode: let
+      snCfg = wgCfgOf serverNode;
+    in
+      map (net.cidr.make 128) (
+        # The server accepts traffic to it's own address
+        snCfg.addresses
+        # plus traffic for any of its external peers
+        ++ attrValues snCfg.server.externalPeers
+        # plus traffic for any client that is connected via that server
+        ++ map (n: (wgCfgOf n).addresses) (filter (n: (wgCfgOf n).client.via == serverNode) associatedClientNodes)
+      );
   in {
     assertions = [
       {
@@ -157,16 +174,13 @@
         if isServer
         then
           # Always include all other server nodes.
-          map (serverNode: {
-            wireguardPeerConfig = let
-              snCfg = wgCfgOf serverNode;
-            in {
+          map (serverNode: let
+            snCfg = wgCfgOf serverNode;
+          in {
+            wireguardPeerConfig = {
               PublicKey = builtins.readFile (peerPublicKeyPath serverNode);
               PresharedKeyFile = config.rekey.secrets.${peerPresharedKeySecret nodeName serverNode}.path;
-              # The allowed ips of a server node are it's own addreses,
-              # plus each external peer's addresses,
-              # plus each client's addresses that is connected via that node.
-              AllowedIPs = snCfg.addresses;
+              AllowedIPs = serverAllowedIPs serverNode;
               Endpoint = "${snCfg.server.host}:${toString snCfg.server.port}";
             };
           })
@@ -192,7 +206,7 @@
               {
                 PublicKey = builtins.readFile (peerPublicKeyPath clientNode);
                 PresharedKeyFile = config.rekey.secrets.${peerPresharedKeySecret nodeName clientNode}.path;
-                AllowedIPs = clientCfg.addresses;
+                AllowedIPs = map (net.cidr.make 128) clientCfg.addresses;
               }
               // optionalAttrs clientCfg.keepalive {
                 PersistentKeepalive = 25;
@@ -207,7 +221,7 @@
                 PublicKey = builtins.readFile (peerPublicKeyPath wgCfg.client.via);
                 PresharedKeyFile = config.rekey.secrets.${peerPresharedKeySecret nodeName wgCfg.client.via}.path;
                 # TODO this should be 0.0.0.0 if the client wants to route all traffic
-                AllowedIPs = (wgCfgOf wgCfg.client.via).addresses;
+                AllowedIPs = serverAllowedIPs wgCfg.client.via;
               };
             }
           ];
@@ -301,44 +315,23 @@ in {
           description = mdDoc "The order priority used when creating systemd netdev and network files.";
         };
 
-        cidrv4 = mkOption {
-          type =
-            if config.client.via != null
-            then net.types.cidrv4-in nodes.${config.client.via}.config.extra.wireguard.${name}.cidrv4
-            else net.types.cidrv4;
-          description = mdDoc ''
-            The ipv4 host address (with cidr mask) to configure for this interface.
-            The cidr mask determines this peers allowed address range as configured on other peers.
-            The mask should usually be fully restricted (/32) when no external clients are configured
-            and no other node uses this as a via.
-          '';
+        ipv4 = mkOption {
+          type = net.types.ipv4;
+          description = mdDoc "The ipv4 address for this machine.";
         };
 
-        cidrv6 = mkOption {
-          type =
-            if config.client.via != null
-            then net.types.cidrv6-in nodes.${config.client.via}.config.extra.wireguard.${name}.cidrv6
-            else net.types.cidrv6;
-          description = mdDoc ''
-            The ipv6 host address (with cidr mask) to configure for this interface.
-            The cidr mask determines this peers allowed address range as configured on other peers.
-            The mask should usually be fully restricted (/128) when no external clients are configured
-            and no other node uses this as a via.
-          '';
+        ipv6 = mkOption {
+          type = net.types.ipv6;
+          description = mdDoc "The ipv6 address for this machine.";
         };
 
         addresses = mkOption {
-          type = types.listOf (
-            if config.client.via != null
-            then net.types.cidr-in nodes.${config.client.via}.config.extra.wireguard.${name}.addresses
-            else net.types.cidr
-          );
-          default = [config.cidrv4 config.cidrv6];
+          type = types.listOf net.types.ip;
+          default = [config.ipv4 config.ipv6];
           description = mdDoc ''
-            The addresses (with cidr mask) to configure for this interface.
-            The cidr mask determines this peers allowed address range as configured on other peers.
+            The ip addresses (v4 and/or v6) to use for this machine.
             The actual network cidr will automatically be derived from all network participants.
-            By default this will just include {option}`cidrv4` and {option}`cidrv6` as configured.
+            By default this will just include {option}`ipv4` and {option}`ipv6` as configured.
           '';
         };
       };

@@ -23,7 +23,7 @@ This is my personal nix config.
   - `envoy/` - Hetzner Cloud server. Primarily used as my mailserver and VPN provider.
   - `zackbiene/` - ODROID N2+. Hosts IoT and Home Automation stuff and fully isolates that stuff from my internal network.
   - not yet ready to be publicized: my main development machine, the powerful home server, some services ... (still in transition from gentoo :/)
-- `modules/` additional NixOS modules that are not yet upstreamed.
+- `modules/` additional NixOS modules that are not yet upstreamed, or specific to this setup.
 - `nix/` library functions and plumbing
   - `apps/` Additional runnable actions for this flake
     - `default.nix` Collects all apps and generates a definition for a specified system

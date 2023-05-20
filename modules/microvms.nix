@@ -193,9 +193,8 @@
             via = nodeName;
             keepalive = false;
           };
-          cidrv4 = "${net.cidr.host vmCfg.id cfg.networking.wireguard.cidrv4}/32";
-          cidrv6 = "${net.cidr.host vmCfg.id cfg.networking.wireguard.cidrv6}/128";
-          # TODO check error: addresses = ["10.22.22.2/30"];
+          ipv4 = net.cidr.host vmCfg.id cfg.networking.wireguard.cidrv4;
+          ipv6 = net.cidr.host vmCfg.id cfg.networking.wireguard.cidrv6;
         };
       };
     };
@@ -402,8 +401,8 @@ in {
           inherit (cfg.networking) host;
           inherit (cfg.networking.wireguard) openFirewallRules port;
         };
-        cidrv4 = net.cidr.hostCidr 1 cfg.networking.wireguard.cidrv4;
-        cidrv6 = net.cidr.hostCidr 1 cfg.networking.wireguard.cidrv6;
+        ipv4 = net.cidr.host 1 cfg.networking.wireguard.cidrv4;
+        ipv6 = net.cidr.host 1 cfg.networking.wireguard.cidrv6;
       };
     }
     // extraLib.mergeToplevelConfigs ["disko" "microvm" "systemd"] (mapAttrsToList microvmConfig vms)

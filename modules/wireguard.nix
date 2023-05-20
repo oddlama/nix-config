@@ -46,6 +46,7 @@
       associatedServerNodes
       externalPeerName
       externalPeerNamesRaw
+      networkCidrs
       peerPresharedKeyPath
       peerPresharedKeySecret
       peerPrivateKeyPath
@@ -124,9 +125,7 @@
         assertion = isClient -> ((wgCfgOf wgCfg.client.via).server.host != null);
         message = "${assertionPrefix}: The specified via node '${wgCfg.client.via}' must be a wireguard server.";
       }
-      # TODO externalPeers != {} -> ip forwarding
-      # TODO no overlapping cidrs in (external peers + peers using via = this).
-      # TODO no overlapping cidrs between server nodes
+      # TODO at least 3 network participants and (externalPeers != {} or someone has via set to us) -> ip forwarding
     ];
 
     networking.firewall.allowedUDPPorts =
@@ -314,16 +313,6 @@ in {
             type = types.bool;
             description = mdDoc "Whether to keep this connection alive using PersistentKeepalive. Set to false only for networks where client and server IPs are stable.";
           };
-
-          # TODO one option for allowing it, but also one to allow defining two
-          # profiles / interfaces that can be activated manually.
-          #routeAllTraffic = mkOption {
-          #  default = false;
-          #  type = types.bool;
-          #  description = mdDoc ''
-          #    Whether to allow routing all traffic through the via server.
-          #  '';
-          #};
         };
 
         priority = mkOption {

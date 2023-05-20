@@ -25,17 +25,18 @@
 
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" "r8169"];
 
-  extra.microvms = {
-    vms.test = {
-      id = 11;
+  extra.microvms.vms = let
+    defineVm = id: {
+      inherit id;
       system = "x86_64-linux";
       autostart = true;
       zfs = {
         enable = true;
         pool = "rpool";
-        dataset = "safe/vms/test";
-        mountpoint = "/persist/vms/test";
       };
     };
+  in {
+    test = defineVm 11;
+    #hi = defineVm 12;
   };
 }

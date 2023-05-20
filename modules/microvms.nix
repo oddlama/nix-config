@@ -48,6 +48,7 @@
     # TODO needed for boot false
 
     # When installing a microvm, make sure that its persitent zfs dataset exists
+    # TODO make this an activation function before mounting stuff.
     systemd.services."install-microvm-${vmName}".preStart = let
       poolDataset = "${vmCfg.zfs.pool}/${vmCfg.zfs.dataset}";
     in
@@ -60,8 +61,11 @@
     microvm.vms.${vmName} = let
       node =
         (import ../nix/generate-node.nix inputs)
-        "${nodeName}-microvm-${vmName}" {
+        # TODO This is duplicated three times. This is microvm naming #1
+        "${nodeName}-${vmName}"
+        {
           inherit (vmCfg) system;
+          # TODO make this configurable (or even disableable)
           config = nodePath + "/microvms/${vmName}";
         };
       mac = net.mac.addPrivate vmCfg.id cfg.networking.baseMac;
@@ -282,7 +286,11 @@ in {
     vms = mkOption {
       default = {};
       description = "Defines the actual vms and handles the necessary base setup for them.";
-      type = types.attrsOf (types.submodule ({config, ...}: {
+      type = types.attrsOf (types.submodule ({
+        name,
+        config,
+        ...
+      }: {
         options = {
           id = mkOption {
             type =
@@ -362,11 +370,13 @@ in {
 
             dataset = mkOption {
               type = types.str;
+              default = "safe/vms/${name}";
               description = mdDoc "The host's dataset that should be used for this vm's state (will automatically be created, parent dataset must exist)";
             };
 
             mountpoint = mkOption {
               type = types.str;
+              default = "/persist/vms/${name}";
               description = mdDoc "The host's mountpoint for the vm's dataset (will be shared via virtofs as /persist in the vm)";
             };
           };

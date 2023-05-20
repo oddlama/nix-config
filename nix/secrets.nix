@@ -53,7 +53,8 @@
   # Returns all defined microvms with name and definition for a given node
   microvmDefsFor = nodeName:
     map
-    (microvmName: nameValuePair "${nodeName}-microvm-${microvmName}" ../hosts/${nodeName}/microvms/${microvmName})
+    # TODO This is duplicated three times. This is microvm naming #2
+    (microvmName: nameValuePair "${nodeName}-${microvmName}" ../hosts/${nodeName}/microvms/${microvmName})
     (microvmsFor nodeName);
   # A attrset mapping all microvm nodes to its definition folder
   microvms = listToAttrs (concatMap microvmDefsFor nodesWithMicrovms);

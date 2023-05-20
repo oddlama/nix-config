@@ -108,12 +108,12 @@
       colmena = import ./nix/colmena.nix inputs;
       colmenaNodes = ((colmena.lib.makeHive self.colmena).introspect (x: x)).nodes;
       microvmNodes =
-        nixpkgs.lib.concatMapAttrs (
-          nodeName: nodeAttrs:
-            nixpkgs.lib.mapAttrs'
-            (n: nixpkgs.lib.nameValuePair "${nodeName}-microvm-${n}")
-            (self.colmenaNodes.${nodeName}.config.microvm.vms or {})
-        )
+        nixpkgs.lib.concatMapAttrs
+        (nodeName: nodeAttrs:
+          nixpkgs.lib.mapAttrs'
+          # TODO This is duplicated three times. This is microvm naming #3
+          (n: nixpkgs.lib.nameValuePair "${nodeName}-${n}")
+          (self.colmenaNodes.${nodeName}.config.microvm.vms or {}))
         self.colmenaNodes;
       nodes = self.colmenaNodes // self.microvmNodes;
 

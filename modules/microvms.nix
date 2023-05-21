@@ -437,8 +437,8 @@ in {
 
             mountpoint = mkOption {
               type = types.str;
-              default = "/persist/vms/${name}";
-              description = mdDoc "The host's mountpoint for the vm's dataset (will be shared via virtofs as /persist in the vm)";
+              default = "/vms/${name}";
+              description = mdDoc "The host's mountpoint for the vm's dataset (will be shared via virtiofs as /persist in the vm)";
             };
           };
 

@@ -1,7 +1,5 @@
 {
   config,
-  inputs,
-  lib,
   nixos-hardware,
   pkgs,
   ...

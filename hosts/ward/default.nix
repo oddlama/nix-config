@@ -39,4 +39,14 @@
     test = defineVm 11;
     #hi = defineVm 12;
   };
+
+  microvm.vms.test.config = {
+    imports = [
+      ../common/core
+      ../../users/root
+    ];
+
+    home-manager.users.root.home.minimal = true;
+    rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBXXjI6uB26xOF0DPy/QyLladoGIKfAtofyqPgIkCH/g";
+  };
 }

@@ -3,6 +3,7 @@
   lib,
   nodeName,
   nodePath,
+  options,
   ...
 }: {
   # IP address math library
@@ -198,10 +199,12 @@
     # current system due to yubikey availability.
     forceRekeyOnSystem = builtins.extraBuiltins.unsafeCurrentSystem;
     hostPubkey = let
-      pubkeyPath = nodePath + "/secrets/host.pub";
+      pubkeyPath =
+        if nodePath == null
+        then null
+        else nodePath + "/secrets/host.pub";
     in
-      lib.mkIf (lib.pathExists pubkeyPath || lib.trace "Missing pubkey for ${nodeName}: ${toString pubkeyPath} not found, using dummy replacement key for now." false)
-      pubkeyPath;
+      lib.mkIf (pubkeyPath != null && lib.pathExists pubkeyPath) pubkeyPath;
   };
 
   boot = {

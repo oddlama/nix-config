@@ -12,18 +12,22 @@ This is my personal nix config.
     - `hardware/` configuration for various hardware components
     - `<something>.nix` commonly required configuration for `<something>`
   - `<hostname>/` configuration for `<hostname>`
-	- `secrets/` Local secrets for this host. Still theoretically accessible by other hosts, but owned by this one.
-	  - `secrets.nix.age` Repository-wide local secrets. Decrypted on import via `builtins.extraBuiltins.rageImportEncrypted`.
-	  - `host.pub` This host's public key. Used for agenix rekeying.
-	- `default.nix` The actual system definition. Follow the imports from there to see what it entails.
-	- `fs.nix` Filesystem setup.
-	- `net.nix` Networking setup.
+    - `secrets/` Local secrets for this host. Still theoretically accessible by other hosts, but owned by this one.
+      - `local.nix.age` Repository-wide local secrets. Decrypted on import via `builtins.extraBuiltins.rageImportEncrypted`.
+      - `[host.pub]` This host's public key. Used for agenix rekeying if it exists.
+    - `default.nix` The actual system definition. Follow the imports from there to see what it entails.
+    - `fs.nix` Filesystem setup.
+    - `net.nix` Networking setup.
   - `nom/` - My laptop and main development machine
   - `ward/` - ODROID H3, energy efficient SBC. Used as a firewall betwenn my ISP and internal home network. Hosts some lightweight services using full KVM virtual machines.
   - `envoy/` - Hetzner Cloud server. Primarily used as my mailserver and VPN provider.
   - `zackbiene/` - ODROID N2+. Hosts IoT and Home Automation stuff and fully isolates that stuff from my internal network.
   - not yet ready to be publicized: my main development machine, the powerful home server, some services ... (still in transition from gentoo :/)
 - `modules/` additional NixOS modules that are not yet upstreamed, or specific to this setup.
+  - `interface-naming.nix` Provides an option to rename interfaces based on their MAC address
+  - `microvms.nix` Used to define microvms including all of the boilerplate setup (networking, shares, local wireguard)
+  - `repo.nix` Provides options to define and access repository-wide secrets
+  - `wireguard.nix` A meta module that allows defining wireguard networks that automatically collects network participants across nodes
 - `nix/` library functions and plumbing
   - `apps/` Additional runnable actions for this flake
     - `default.nix` Collects all apps and generates a definition for a specified system
@@ -36,12 +40,12 @@ This is my personal nix config.
   - `colmena.nix` Setup for distributed deployment using colmena (actually defines all NixOS hosts)
   - `dev-shell.nix` Environment setup for `nix develop` for using this flake
   - `extra-builtins.nix` Extra builtins via nix-plugins to support transparent repository-wide secrets
-  - `hosts.nix` Wrapper that extracts all defined hosts from `hosts/`
+  - `generate-installer.nix` Helper functions to generate a iso image for any host for simple deployment from scratch. The iso will contain an executable `install-system` that will do a full install including partitioning.
+  - `generate-node.nix` Helper function that outputs everything that is necessary to define a new node in a predictable format. Used to define colmena nodes and microvms.
   - `lib.nix` Commonly used functionality or helpers that weren't available in the standard library
-  - `rage-decrypt.sh` Auxiliary script for repository-wide secrets
-  - `secrets.nix` Helper to access repository-wide secrets, used by colmena.nix
+  - `rage-decrypt-and-cache.sh` Auxiliary script for repository-wide secrets that decrypts a file and caches the output in /tmp
 - `secrets/` Global secrets and age identities
-  - `secrets.nix.age` Repository-wide global secrets. Decrypted on import via `builtins.extraBuiltins.rageImportEncrypted`.
+  - `global.nix.age` Repository-wide global secrets. Available on nodes via the repo module as `config.repo.secrets.global`.
   - `backup.pub` Backup age-identity in case I ever lose my YubiKey or it breaks.
   - `yk1-nix-rage.pub` Master YubiKey split-identity. Used as a key-grab.
 - `pkgs/` Custom packages and scripts

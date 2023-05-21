@@ -171,35 +171,46 @@
 
         extra.networking.renameInterfacesByMac.${vmCfg.networking.mainLinkName} = mac;
 
-        systemd.network.networks."10-${vmCfg.networking.mainLinkName}" =
-          {
-            manual = {};
-            dhcp = {
-              matchConfig.Name = vmCfg.networking.mainLinkName;
-              DHCP = "yes";
-              networkConfig = {
-                IPv6PrivacyExtensions = "yes";
-                IPv6AcceptRA = true;
+        systemd.network.networks = let
+          wgConfig = config.extra.wireguard."${nodeName}-local-vms".unitConfName;
+        in {
+          # Remove requirement for the wireguard interface to come online,
+          # to allow microvms to be deployed more easily (otherwise they
+          # would not come online if the private key wasn't rekeyed yet).
+          # FIXME ideally this would be conditional at runtime if the
+          # agenix activation had an error, but this is not trivial.
+          ${wgConfig}.linkConfig.RequiredForOnline = "no";
+
+          "10-${vmCfg.networking.mainLinkName}" =
+            {
+              manual = {};
+              dhcp = {
+                matchConfig.Name = vmCfg.networking.mainLinkName;
+                DHCP = "yes";
+                networkConfig = {
+                  IPv6PrivacyExtensions = "yes";
+                  IPv6AcceptRA = true;
+                };
+                linkConfig.RequiredForOnline = "routable";
               };
-              linkConfig.RequiredForOnline = "routable";
-            };
-            static = {
-              matchConfig.Name = vmCfg.networking.mainLinkName;
-              address = [
-                "${vmCfg.networking.static.ipv4}/${toString (net.cidr.length cfg.networking.static.baseCidrv4)}"
-                "${vmCfg.networking.static.ipv6}/${toString (net.cidr.length cfg.networking.static.baseCidrv6)}"
-              ];
-              gateway = [
-                cfg.networking.host
-              ];
-              networkConfig = {
-                IPv6PrivacyExtensions = "yes";
-                IPv6AcceptRA = true;
+              static = {
+                matchConfig.Name = vmCfg.networking.mainLinkName;
+                address = [
+                  "${vmCfg.networking.static.ipv4}/${toString (net.cidr.length cfg.networking.static.baseCidrv4)}"
+                  "${vmCfg.networking.static.ipv6}/${toString (net.cidr.length cfg.networking.static.baseCidrv6)}"
+                ];
+                gateway = [
+                  cfg.networking.host
+                ];
+                networkConfig = {
+                  IPv6PrivacyExtensions = "yes";
+                  IPv6AcceptRA = true;
+                };
+                linkConfig.RequiredForOnline = "routable";
               };
-              linkConfig.RequiredForOnline = "routable";
-            };
-          }
-          .${vmCfg.networking.mode};
+            }
+            .${vmCfg.networking.mode};
+        };
 
         # TODO change once microvms are compatible with stage-1 systemd
         boot.initrd.systemd.enable = mkForce false;

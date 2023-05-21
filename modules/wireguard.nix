@@ -155,7 +155,7 @@
         };
       };
 
-    systemd.network.netdevs."${toString wgCfg.priority}-${wgName}" = {
+    systemd.network.netdevs."${wgCfg.unitConfName}" = {
       netdevConfig = {
         Kind = "wireguard";
         Name = wgCfg.linkName;
@@ -227,7 +227,7 @@
           ];
     };
 
-    systemd.network.networks."${toString wgCfg.priority}-${wgName}" = {
+    systemd.network.networks."${wgCfg.unitConfName}" = {
       matchConfig.Name = wgCfg.linkName;
       address = map toNetworkAddr wgCfg.addresses;
     };
@@ -325,6 +325,16 @@ in {
           default = "wg-${name}";
           type = types.str;
           description = mdDoc "The name for the created network interface.";
+        };
+
+        unitConfName = mkOption {
+          default = "${toString config.priority}-${config.linkName}";
+          readOnly = true;
+          type = types.str;
+          description = mdDoc ''
+            The name used for unit configuration files. This is a read-only option.
+            Access this if you want to add additional settings to the generated systemd units.
+          '';
         };
 
         ipv4 = mkOption {

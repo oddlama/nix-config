@@ -119,7 +119,7 @@ in rec {
     };
   };
 
-  rageMasterIdentityArgs = concatMapStrings (x: ''-i ${escapeShellArg x} '') self.secrets.masterIdentities;
+  rageMasterIdentityArgs = concatMapStrings (x: ''-i ${escapeShellArg x} '') self.secretsConfig.masterIdentities;
   rageExtraEncryptionPubkeys =
     concatMapStrings (
       x:
@@ -127,7 +127,7 @@ in rec {
         then ''-R ${escapeShellArg x} ''
         else ''-r ${escapeShellArg x} ''
     )
-    self.secrets.extraEncryptionPubkeys;
+    self.secretsConfig.extraEncryptionPubkeys;
   # The arguments required to de-/encrypt a secret in this repository
   rageDecryptArgs = "${rageMasterIdentityArgs}";
   rageEncryptArgs = "${rageMasterIdentityArgs} ${rageExtraEncryptionPubkeys}";

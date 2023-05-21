@@ -7,6 +7,7 @@
   nodeName,
   nodePath,
   pkgs,
+  utils,
   ...
 }: let
   inherit
@@ -16,6 +17,7 @@
     escapeShellArg
     filterAttrs
     foldl'
+    makeBinPath
     mapAttrsToList
     mdDoc
     mkDefault
@@ -42,21 +44,49 @@
         extraLib.disko.zfs.filesystem vmCfg.zfs.mountpoint;
     };
 
-    # TODO not cool, this might change or require more creation options.
-    # TODO better to only add disko and a mount point requirement.
-    # TODO the user can do the rest if required.
-    # TODO needed for boot false
-
-    # When installing a microvm, make sure that its persitent zfs dataset exists
-    # TODO make this an activation function before mounting stuff.
-    systemd.services."install-microvm-${vmName}".preStart = let
+    # Ensure that the zfs dataset exists before it is mounted.
+    systemd.services = let
+      fsMountUnit = "${utils.escapeSystemdPath vmCfg.zfs.mountpoint}.mount";
       poolDataset = "${vmCfg.zfs.pool}/${vmCfg.zfs.dataset}";
-    in
-      mkIf vmCfg.zfs.enable ''
+      diskoDataset = config.disko.devices.zpool.${vmCfg.zfs.pool}.datasets.${vmCfg.zfs.dataset};
+      createDatasetScript = pkgs.writeShellScript "create-microvm-${vmName}-zfs-dataset" ''
+        export PATH=${makeBinPath (diskoDataset._pkgs pkgs)}":$PATH"
         if ! ${pkgs.zfs}/bin/zfs list -H -o type ${escapeShellArg poolDataset} &>/dev/null ; then
-          ${config.disko.devices.zpool.${vmCfg.zfs.pool}.datasets.${vmCfg.zfs.dataset}._create {zpool = vmCfg.zfs.pool;}}
+          ${diskoDataset._create {zpool = vmCfg.zfs.pool;}}
         fi
+        chmod 700 ${escapeShellArg vmCfg.zfs.mountpoint}
       '';
+    in
+      mkIf vmCfg.zfs.enable {
+        # Ensure that the zfs dataset exists before it is mounted.
+        "zfs-ensure-${utils.escapeSystemdPath vmCfg.zfs.mountpoint}" = let
+          fsMountUnit = "${utils.escapeSystemdPath vmCfg.zfs.mountpoint}.mount";
+          poolDataset = "${vmCfg.zfs.pool}/${vmCfg.zfs.dataset}";
+          diskoDataset = config.disko.devices.zpool.${vmCfg.zfs.pool}.datasets.${vmCfg.zfs.dataset};
+          createDatasetScript = pkgs.writeShellScript "create-microvm-${vmName}-zfs-dataset" ''
+            export PATH=${makeBinPath [pkgs.zfs]}":$PATH"
+            if ! zfs list -H -o type ${escapeShellArg poolDataset} &>/dev/null ; then
+              ${diskoDataset._create {zpool = vmCfg.zfs.pool;}}
+            fi
+            chmod 700 ${escapeShellArg vmCfg.zfs.mountpoint}
+          '';
+        in
+          mkIf vmCfg.zfs.enable {
+            wantedBy = [fsMountUnit];
+            before = [fsMountUnit];
+            after = ["zfs-import-${utils.escapeSystemdPath vmCfg.zfs.pool}.service"];
+            unitConfig.DefaultDependencies = "no";
+            serviceConfig = {
+              Type = "oneshot";
+              ExecStart = "${createDatasetScript}";
+            };
+          };
+
+        "microvm@${vmName}" = {
+          requires = [fsMountUnit];
+          after = [fsMountUnit];
+        };
+      };
 
     microvm.vms.${vmName} = let
       # Loads configuration from a subfolder of this nodes configuration, if it exists.

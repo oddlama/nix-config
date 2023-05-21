@@ -59,14 +59,24 @@
       '';
 
     microvm.vms.${vmName} = let
+      # Loads configuration from a subfolder of this nodes configuration, if it exists.
+      configPath =
+        if nodePath == null
+        then null
+        else nodePath + "/microvms/${vmName}";
+
       node =
         (import ../nix/generate-node.nix inputs)
-        # TODO This is duplicated three times. This is microvm naming #1
-        "${nodeName}-${vmName}"
+        vmCfg.nodeName
         {
           inherit (vmCfg) system;
-          # TODO make this configurable (or even disableable)
-          config = nodePath + "/microvms/${vmName}";
+          # Load configPath, if it exists.
+          ${
+            if configPath != null && builtins.pathExists configPath
+            then "config"
+            else null
+          } =
+            configPath;
         };
       mac = net.mac.addPrivate vmCfg.id cfg.networking.baseMac;
     in {
@@ -292,6 +302,16 @@ in {
         ...
       }: {
         options = {
+          nodeName = mkOption {
+            type = types.str;
+            default = "${nodeName}-${name}";
+            description = mdDoc ''
+              The name of the resulting node. By default this will be a compound name
+              of the host's name and the vm's name to avoid name clashes. Can be
+              overwritten to designate special names to specific vms.
+            '';
+          };
+
           id = mkOption {
             type =
               types.addCheck types.int (x: x > 1)

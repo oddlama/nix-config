@@ -11,6 +11,7 @@
     attrNames
     literalExpression
     mapAttrs
+    mdDoc
     mkIf
     mkOption
     types
@@ -43,7 +44,7 @@ in {
     defineNixExtraBuiltins = mkOption {
       default = false;
       type = types.bool;
-      description = ''
+      description = mdDoc ''
         Add nix-plugins and the correct extra-builtin-files definition to this host's
         nix configuration, so that it can be used to decrypt the secrets in this repository.
       '';
@@ -53,7 +54,7 @@ in {
       default = {};
       type = types.attrsOf types.path;
       example = literalExpression "{ local = ./secrets.nix.age; }";
-      description = ''
+      description = mdDoc ''
         This file manages the origin for this machine's repository-secrets. Anything that is
         technically not a secret in the classical sense (i.e. that it has to be protected
         after it has been deployed), but something you want to keep secret from the public;

@@ -106,15 +106,13 @@
 
       colmena = import ./nix/colmena.nix inputs;
       colmenaNodes = ((colmena.lib.makeHive self.colmena).introspect (x: x)).nodes;
-      microvmNodes =
-        nixpkgs.lib.concatMapAttrs
-        (nodeName: nodeAttrs:
-          nixpkgs.lib.mapAttrs'
-          # TODO This is duplicated three times. This is microvm naming #3
-          # TODO maybe use microvm.vms.<name>.compoundName
-          (n: nixpkgs.lib.nameValuePair "${nodeName}-${n}")
-          (self.colmenaNodes.${nodeName}.config.microvm.vms or {}))
-        self.colmenaNodes;
+      # Collect all defined microvm nodes from each colmena node
+      microvmNodes = nixpkgs.lib.concatMapAttrs (_: node:
+        nixpkgs.lib.mapAttrs'
+        (vm: def: nixpkgs.lib.nameValuePair def.nodeName node.config.microvm.vms.${vm})
+        (node.config.extra.microvms.vms or {}))
+      self.colmenaNodes;
+      # Expose all nodes in a single attribute
       nodes = self.colmenaNodes // self.microvmNodes;
 
       # Collect installer packages

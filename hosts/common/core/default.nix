@@ -13,6 +13,7 @@
     ../../../modules/interface-naming.nix
     ../../../modules/microvms.nix
     ../../../modules/wireguard.nix
+    ../../../modules/repo.nix
   ];
 
   home-manager = {

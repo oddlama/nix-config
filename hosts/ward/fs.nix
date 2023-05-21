@@ -1,7 +1,7 @@
 {
+  config,
   lib,
   extraLib,
-  nodeSecrets,
   pkgs,
   ...
 }: {
@@ -9,7 +9,7 @@
     disk = {
       m2-ssd = {
         type = "disk";
-        device = "/dev/disk/by-id/${nodeSecrets.disk.m2-ssd}";
+        device = "/dev/disk/by-id/${config.repo.secrets.local.disk.m2-ssd}";
         content = with extraLib.disko.gpt; {
           type = "table";
           format = "gpt";

@@ -2,7 +2,6 @@
   lib,
   config,
   pkgs,
-  nodeSecrets,
   ...
 }: {
   imports = [../../modules/hostapd.nix];
@@ -19,7 +18,7 @@
       channel = 13; # Automatic Channel Selection (ACS) is unfortunately not implemented for mt7612u.
       wifi4.capabilities = ["LDPC" "HT40+" "HT40-" "GF" "SHORT-GI-20" "SHORT-GI-40" "TX-STBC" "RX-STBC1"];
       networks.wlan1 = {
-        inherit (nodeSecrets.hostapd) ssid;
+        inherit (config.repo.secrets.local.hostapd) ssid;
         macAcl = "allow";
         apIsolate = true;
         authentication = {
@@ -30,7 +29,7 @@
         bssid = "00:c0:ca:b1:4f:9f";
       };
       #networks.wlan1-2 = {
-      #  inherit (nodeSecrets.hostapd) ssid;
+      #  inherit (config.repo.secrets.local.hostapd) ssid;
       #  authentication.mode = "none";
       #  bssid = "02:c0:ca:b1:4f:9f";
       #};

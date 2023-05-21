@@ -177,10 +177,19 @@
       };
     };
 
+  # Define local repo secrets
+  repo.secretFiles = let
+    local = nodePath + "/secrets/local.nix.age";
+  in
+    {
+      global = ../../../secrets/global.nix.age;
+    }
+    // lib.optionalAttrs (nodePath != null && lib.pathExists local) {inherit local;};
+
   # Setup secret rekeying parameters
   rekey = {
     inherit
-      (inputs.self.secrets)
+      (inputs.self.secretsConfig)
       masterIdentities
       extraEncryptionPubkeys
       ;

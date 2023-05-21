@@ -1,7 +1,6 @@
 {
   lib,
   config,
-  nodeSecrets,
   ...
 }: {
   rekey.secrets."mosquitto-pw-zigbee2mqtt.yaml" = {
@@ -39,7 +38,7 @@
         keepalive 2;
       '';
     };
-    virtualHosts."${nodeSecrets.zigbee2mqtt.domain}" = {
+    virtualHosts."${config.repo.secrets.local.zigbee2mqtt.domain}" = {
       forceSSL = true;
       #enableACME = true;
       sslCertificate = config.rekey.secrets."selfcert.crt".path;

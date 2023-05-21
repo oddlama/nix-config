@@ -3,7 +3,6 @@
   lib,
   pkgs,
   nodeName,
-  nodeSecrets,
   ...
 }: let
   inherit
@@ -78,5 +77,5 @@ in {
   systemd.network.enable = true;
 
   # Rename known network interfaces
-  extra.networking.renameInterfacesByMac = lib.mapAttrs (_: v: v.mac) (nodeSecrets.networking.interfaces or {});
+  extra.networking.renameInterfacesByMac = lib.mapAttrs (_: v: v.mac) (config.repo.secrets.local.networking.interfaces or {});
 }

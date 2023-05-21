@@ -1,7 +1,6 @@
 {
   lib,
   config,
-  nodeSecrets,
   ...
 }: {
   rekey.secrets."selfcert.crt" = {

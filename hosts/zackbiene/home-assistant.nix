@@ -1,7 +1,6 @@
 {
   lib,
   config,
-  nodeSecrets,
   ...
 }: let
   haPort = 8123;
@@ -115,7 +114,7 @@ in {
         keepalive 2;
       '';
     };
-    virtualHosts."${nodeSecrets.homeassistant.domain}" = {
+    virtualHosts."${config.repo.secrets.local.homeassistant.domain}" = {
       serverAliases = ["192.168.1.21"]; # TODO remove later
       forceSSL = true;
       #enableACME = true;

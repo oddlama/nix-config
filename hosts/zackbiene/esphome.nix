@@ -1,7 +1,6 @@
 {
   lib,
   config,
-  nodeSecrets,
   ...
 }: {
   services.esphome = {
@@ -24,7 +23,7 @@
         keepalive 2;
       '';
     };
-    virtualHosts."${nodeSecrets.esphome.domain}" = {
+    virtualHosts."${config.repo.secrets.local.esphome.domain}" = {
       forceSSL = true;
       #enableACME = true;
       sslCertificate = config.rekey.secrets."selfcert.crt".path;

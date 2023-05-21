@@ -1,7 +1,6 @@
 {
   lib,
   config,
-  nodeSecrets,
   ...
 }: let
   inherit (config.lib.net) cidr;
@@ -9,7 +8,7 @@
   net.iot.ipv4cidr = "10.90.0.1/24";
   net.iot.ipv6cidr = "fd90::1/64";
 in {
-  networking.hostId = nodeSecrets.networking.hostId;
+  networking.hostId = config.repo.secrets.local.networking.hostId;
 
   boot.initrd.systemd.network = {
     enable = true;
@@ -19,13 +18,13 @@ in {
   systemd.network.networks = {
     "10-lan1" = {
       DHCP = "yes";
-      matchConfig.MACAddress = nodeSecrets.networking.interfaces.lan1.mac;
+      matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.lan1.mac;
       networkConfig.IPv6PrivacyExtensions = "yes";
       linkConfig.RequiredForOnline = "routable";
     };
     "10-wlan1" = {
       address = [net.iot.ipv4cidr net.iot.ipv6cidr];
-      matchConfig.MACAddress = nodeSecrets.networking.interfaces.wlan1.mac;
+      matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.wlan1.mac;
       linkConfig.RequiredForOnline = "no";
     };
   };

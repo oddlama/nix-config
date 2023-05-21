@@ -82,10 +82,9 @@
 
       # The identities that are used to rekey agenix secrets and to
       # decrypt all repository-wide secrets.
-      secrets = {
+      secretsConfig = {
         masterIdentities = [./secrets/yk1-nix-rage.pub];
         extraEncryptionPubkeys = [./secrets/backup.pub];
-        content = import ./nix/secrets.nix inputs;
       };
 
       stateVersion = "23.05";
@@ -112,6 +111,7 @@
         (nodeName: nodeAttrs:
           nixpkgs.lib.mapAttrs'
           # TODO This is duplicated three times. This is microvm naming #3
+          # TODO maybe use microvm.vms.<name>.compoundName
           (n: nixpkgs.lib.nameValuePair "${nodeName}-${n}")
           (self.colmenaNodes.${nodeName}.config.microvm.vms or {}))
         self.colmenaNodes;

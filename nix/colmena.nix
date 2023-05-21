@@ -10,10 +10,10 @@
     ;
 
   nixosNodes = filterAttrs (_: x: x.type == "nixos") self.hosts;
-  nodes = mapAttrs (import ./generate-node.nix inputs) nixosNodes;
-  generateColmenaNode = nodeName: _: {
-    inherit (nodes.${nodeName}) imports;
-  };
+  nodes =
+    mapAttrs
+    (n: v: import ./generate-node.nix inputs n ({config = ../hosts/${n};} // v))
+    nixosNodes;
 in
   {
     meta = {
@@ -24,4 +24,4 @@ in
       nodeSpecialArgs = mapAttrs (_: node: node.specialArgs) nodes;
     };
   }
-  // mapAttrs generateColmenaNode nodes
+  // mapAttrs (_: node: {inherit (node) imports;}) nodes

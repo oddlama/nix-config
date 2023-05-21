@@ -1,8 +1,4 @@
-{
-  config,
-  nodeSecrets,
-  ...
-}: {
+{config, ...}: {
   services.vaultwarden = {
     enable = true;
     dbBackend = "sqlite";
@@ -22,7 +18,7 @@
       PASSWORD_ITERATIONS = 1000000;
       INVITATIONS_ALLOWED = true;
       INVITATION_ORG_NAME = "Vaultwarden";
-      DOMAIN = nodeSecrets.vaultwarden.domain;
+      DOMAIN = config.repo.secrets.local.vaultwarden.domain;
 
       SMTP_EMBED_IMAGES = true;
     };
@@ -59,7 +55,7 @@
         keepalive 2;
       '';
     };
-    virtualHosts."${nodeSecrets.vaultwarden.domain}" = {
+    virtualHosts."${config.repo.secrets.local.vaultwarden.domain}" = {
       forceSSL = true;
       #enableACME = true;
       sslCertificate = config.rekey.secrets."selfcert.crt".path;

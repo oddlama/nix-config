@@ -2,11 +2,10 @@
   config,
   lib,
   pkgs,
-  secrets,
   stateVersion,
   ...
 }: let
-  inherit (secrets) myuser;
+  inherit (config.repo.secrets.global) myuser;
 in {
   users.groups.${myuser}.gid = config.users.users.${myuser}.uid;
   users.users.${myuser} = {

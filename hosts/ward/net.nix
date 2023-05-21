@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  nodeSecrets,
   ...
 }: let
   inherit (config.lib.net) ip cidr;
@@ -9,7 +8,7 @@
   lanCidrv4 = "192.168.100.0/24";
   lanCidrv6 = "fd00::/64";
 in {
-  networking.hostId = nodeSecrets.networking.hostId;
+  networking.hostId = config.repo.secrets.local.networking.hostId;
 
   boot.initrd.systemd.network = {
     enable = true;
@@ -31,7 +30,7 @@ in {
 
   systemd.network.networks = {
     "10-lan" = {
-      matchConfig.MACAddress = nodeSecrets.networking.interfaces.lan.mac;
+      matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.lan.mac;
       # This interface should only be used from attached macvtaps.
       # So don't acquire a link local address and only wait for
       # this interface to gain a carrier.
@@ -50,7 +49,7 @@ in {
       #];
       #gateway = [
       #];
-      matchConfig.MACAddress = nodeSecrets.networking.interfaces.wan.mac;
+      matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.wan.mac;
       networkConfig.IPv6PrivacyExtensions = "yes";
       linkConfig.RequiredForOnline = "routable";
     };
@@ -183,7 +182,7 @@ in {
   systemd.services.kea-dhcp4-server.after = ["sys-subsystem-net-devices-lan.device"];
 
   extra.microvms.networking = {
-    baseMac = nodeSecrets.networking.interfaces.lan.mac;
+    baseMac = config.repo.secrets.local.networking.interfaces.lan.mac;
     macvtapInterface = "lan";
     static = {
       baseCidrv4 = lanCidrv4;

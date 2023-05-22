@@ -13,8 +13,6 @@
     #../common/initrd-ssh.nix
     ../common/zfs.nix
 
-    ../../users/root
-
     ./fs.nix
     ./net.nix
 

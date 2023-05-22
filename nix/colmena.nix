@@ -12,7 +12,7 @@
   nixosNodes = filterAttrs (_: x: x.type == "nixos") self.hosts;
   nodes =
     mapAttrs
-    (n: v: import ./generate-node.nix inputs n ({config = ../hosts/${n};} // v))
+    (n: v: import ./generate-node.nix inputs n ({configPath = ../hosts/${n};} // v))
     nixosNodes;
 in
   {

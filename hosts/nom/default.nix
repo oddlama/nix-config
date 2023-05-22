@@ -22,7 +22,6 @@
     ../common/yubikey.nix
     ../common/zfs.nix
 
-    ../../users/root
     ../../users/myuser
 
     ./fs.nix

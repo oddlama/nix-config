@@ -89,25 +89,9 @@
       };
 
     microvm.vms.${vmName} = let
-      # Loads configuration from a subfolder of this nodes configuration, if it exists.
-      configPath =
-        if nodePath == null
-        then null
-        else nodePath + "/microvms/${vmName}";
-
-      node =
-        (import ../nix/generate-node.nix inputs)
-        vmCfg.nodeName
-        {
-          inherit (vmCfg) system;
-          # Load configPath, if it exists.
-          ${
-            if configPath != null && builtins.pathExists configPath
-            then "config"
-            else null
-          } =
-            configPath;
-        };
+      node = import ../nix/generate-node.nix inputs vmCfg.nodeName {
+        inherit (vmCfg) system configPath;
+      };
       mac = net.mac.addPrivate vmCfg.id cfg.networking.baseMac;
     in {
       # Allow children microvms to know which node is their parent
@@ -265,6 +249,12 @@ in {
   ];
 
   options.extra.microvms = {
+    commonImports = mkOption {
+      type = types.listOf types.unspecified;
+      default = [];
+      description = mdDoc "Modules to import on all microvms.";
+    };
+
     networking = {
       baseMac = mkOption {
         type = net.types.mac;
@@ -350,6 +340,26 @@ in {
               The name of the resulting node. By default this will be a compound name
               of the host's name and the vm's name to avoid name clashes. Can be
               overwritten to designate special names to specific vms.
+            '';
+          };
+
+          configPath = mkOption {
+            type = types.nullOr types.path;
+            default =
+              if nodePath != null && builtins.pathExists (nodePath + "/microvms/${name}")
+              then nodePath + "/microvms/${name}"
+              else null;
+            description = mdDoc ''
+              The main configuration directory for this microvm. If not-null, the given
+              directory will automatically be imported as system configuration. It will
+              become the nodePath for the microvm meaning that some machine-specific files
+              may be referenced there automatically (for example host.pub).
+
+              This can also be set to a file, which will then simply be used as the main
+              import for configuration, without setting a nodePath.
+
+              By default this will be set to the current node's <nodePath>/microvms/<vmname>
+              if the current nodePath is non-null and the directory exists.
             '';
           };
 

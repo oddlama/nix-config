@@ -5,12 +5,12 @@
   stateVersion,
   ...
 }: let
-  inherit (config.repo.secrets.global) myuser;
+  myuser = config.repo.secrets.global.myuser.name;
 in {
   users.groups.${myuser}.gid = config.users.users.${myuser}.uid;
   users.users.${myuser} = {
     uid = 1000;
-    hashedPassword = "$6$YogAnKRz8qW2Gz.I$chgMKKrpPAfV0WuGN6ChOgUJistpCzFsHOT6mhHyj07mwI1kSfDJvnMB13frMvkpv2aGpXHVH.yxk5fYHeeET/";
+    inherit (config.repo.secrets.global.myuser) hashedPassword;
     createHome = true;
     group = myuser;
     extraGroups =

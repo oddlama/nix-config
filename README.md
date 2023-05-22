@@ -12,6 +12,7 @@ This is my personal nix config.
     - `hardware/` configuration for various hardware components
     - `<something>.nix` commonly required configuration for `<something>`
   - `<hostname>/` configuration for `<hostname>`
+    - `[microvms/]` configuration for microvms. This is optional even for existing microvms, since they can also be defined in-place.
     - `secrets/` Local secrets for this host. Still theoretically accessible by other hosts, but owned by this one.
       - `local.nix.age` Repository-wide local secrets. Decrypted on import via `builtins.extraBuiltins.rageImportEncrypted`.
       - `[host.pub]` This host's public key. Used for agenix rekeying if it exists.
@@ -102,10 +103,10 @@ all commands using these extra parameters, or permanently add the following the 
 2. Run all commands with `--option plugin-files "$NIX_PLUGINS"/lib/nix/plugins --option extra-builtins-file ./nix/extra-builtins.nix`
    or permantently
 
-	```ini
-	plugin-files = <copy path from $NIX_PLUGINS>/lib/nix/plugins
-	extra-builtins-file = /path/to/nix-config/nix/extra-builtins.nix
-	```
+  ```ini
+  plugin-files = <copy path from $NIX_PLUGINS>/lib/nix/plugins
+  extra-builtins-file = /path/to/nix-config/nix/extra-builtins.nix
+  ```
 
 ## Misc
 

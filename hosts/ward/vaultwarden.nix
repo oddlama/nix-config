@@ -42,14 +42,14 @@
 
   services.nginx = {
     upstreams."vaultwarden" = {
-      servers = {"localhost:8012" = {};};
+      servers."localhost:8012" = {};
       extraConfig = ''
         zone vaultwarden 64k;
         keepalive 2;
       '';
     };
     upstreams."vaultwarden-websocket" = {
-      servers = {"localhost:3012" = {};};
+      servers."localhost:3012" = {};
       extraConfig = ''
         zone vaultwarden-websocket 64k;
         keepalive 2;

@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  inherit (config.lib.net) ip cidr;
+  inherit (config.lib.net) cidr;
 
   lanCidrv4 = "192.168.100.0/24";
   lanCidrv6 = "fd00::/64";
@@ -165,7 +165,7 @@ in {
             interface = "lan-self";
             subnet = lanCidrv4;
             pools = [
-              {pool = "${cidr.host 20 lanCidrv4} - ${cidr.host (-6) lanCidrv4}";}
+              {pool = "${cidr.host 40 lanCidrv4} - ${cidr.host (-6) lanCidrv4}";}
             ];
             option-data = [
               {

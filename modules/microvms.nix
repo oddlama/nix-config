@@ -32,6 +32,7 @@
     types
     ;
 
+  parentConfig = config;
   cfg = config.extra.microvms;
   inherit (config.extra.microvms) vms;
   inherit (config.lib) net;
@@ -103,7 +104,7 @@
         // node.specialArgs;
       inherit (node) pkgs;
       inherit (vmCfg) autostart;
-      config = {
+      config = {config, ...}: {
         imports = [microvm.microvm] ++ cfg.commonImports ++ node.imports;
 
         microvm = {
@@ -156,7 +157,7 @@
         extra.networking.renameInterfacesByMac.${vmCfg.networking.mainLinkName} = mac;
 
         systemd.network.networks = let
-          wgConfig = config.extra.wireguard."${nodeName}-local-vms".unitConfName;
+          wgConfig = parentConfig.extra.wireguard."${nodeName}-local-vms".unitConfName;
         in {
           # Remove requirement for the wireguard interface to come online,
           # to allow microvms to be deployed more easily (otherwise they
@@ -204,13 +205,19 @@
         networking.nftables.firewall = {
           zones = mkForce {
             "${vmCfg.networking.mainLinkName}".interfaces = [vmCfg.networking.mainLinkName];
-            local-vms.interfaces = ["local-vms"];
+            local-vms.interfaces = [config.extra.wireguard."${nodeName}-local-vms".linkName];
           };
 
           rules = mkForce {
             "${vmCfg.networking.mainLinkName}-to-local" = {
               from = [vmCfg.networking.mainLinkName];
               to = ["local"];
+
+              inherit
+                (config.networking.firewall)
+                allowedTCPPorts
+                allowedUDPPorts
+                ;
             };
 
             local-vms-to-local = {

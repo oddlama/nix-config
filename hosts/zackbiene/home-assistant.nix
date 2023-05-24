@@ -108,7 +108,7 @@ in {
 
   services.nginx = {
     upstreams."homeassistant" = {
-      servers = {"localhost:${toString haPort}" = {};};
+      servers."localhost:${toString haPort}" = {};
       extraConfig = ''
         zone homeassistant 64k;
         keepalive 2;

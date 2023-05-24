@@ -32,7 +32,7 @@
 
   services.nginx = {
     upstreams."zigbee2mqtt" = {
-      servers = {"localhost:8072" = {};};
+      servers."localhost:8072" = {};
       extraConfig = ''
         zone zigbee2mqtt 64k;
         keepalive 2;

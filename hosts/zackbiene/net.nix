@@ -5,8 +5,8 @@
 }: let
   inherit (config.lib.net) cidr;
 
-  net.iot.ipv4cidr = "10.90.0.1/24";
-  net.iot.ipv6cidr = "fd90::1/64";
+  iotCidrv4 = "10.90.0.0/24";
+  iotCidrv6 = "fd90::/64";
 in {
   networking.hostId = config.repo.secrets.local.networking.hostId;
 
@@ -23,7 +23,10 @@ in {
       linkConfig.RequiredForOnline = "routable";
     };
     "10-wlan1" = {
-      address = [net.iot.ipv4cidr net.iot.ipv6cidr];
+      address = [
+        (cidr.hostCidr 1 iotCidrv4)
+        (cidr.hostCidr 1 iotCidrv6)
+      ];
       matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.wlan1.mac;
       linkConfig.RequiredForOnline = "no";
     };

@@ -93,7 +93,7 @@ then select the host in the fzf menu
 ## Stuff
 
 - Secrets can be created/edited by running `nix run .#edit-secret some/secret.age`
-- Secrets can be rekeyed by running `nix run .#rekey` (you will be prompted to do so in an error message if neccessary)
+- Secrets can be rekeyed by running `nix run .#rekey` (you will also be prompted to do so in an error message if neccessary)
 
 To be able to decrypt the repository-wide secrets transparently on a host that
 is _not_ managed by this config, you will need to <sub>(be me and)</sub> run
@@ -110,10 +110,10 @@ all commands using these extra parameters, or permanently add the following the 
 
 ## Misc
 
-Generate self-signed cert:
+Generate self-signed cert, e.g. for kanidm internal communication to proxy:
 
 ```bash
 openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
-  -keyout zackbiene-selfcert.key -out zackbiene-selfcert.crt -subj \
+  -keyout selfcert.key -out selfcert.crt -subj \
   "/CN=example.com" -addext "subjectAltName=DNS:example.com,DNS:sub1.example.com,DNS:sub2.example.com,IP:10.0.0.1"
 ```

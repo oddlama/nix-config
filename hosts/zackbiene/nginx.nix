@@ -34,6 +34,8 @@
     sslCiphers = "EECDH+AESGCM:EDH+AESGCM:!aNULL";
     sslDhparam = config.rekey.secrets."dhparams.pem".path;
     commonHttpConfig = ''
+      error_log syslog:server=unix:/dev/log;
+      access_log syslog:server=unix:/dev/log;
       ssl_ecdh_curve secp384r1;
     '';
   };

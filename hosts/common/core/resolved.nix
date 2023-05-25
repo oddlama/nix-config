@@ -13,7 +13,7 @@
       "8.8.8.8"
       "2001:4860:4860::8844"
     ];
-    llmnr = "true"; # Microsoft's version of mDNS
+    llmnr = "false";
     extraConfig = ''
       Domains=~.
       MulticastDNS=true

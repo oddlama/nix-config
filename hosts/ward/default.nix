@@ -83,27 +83,11 @@ in {
   }: {
     rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN2TxWynLb8V9SP45kFqsoCWhe/dG8N1xWNuJG5VQndq";
 
-    rekey.secrets."kanidm-self-signed.crt" = {
-      file = ./secrets/kanidm-self-signed.crt.age;
-      mode = "440";
-      owner = "nginx";
-      group = "kanidm";
-    };
-    rekey.secrets."kanidm-self-signed.key" = {
-      file = ./secrets/kanidm-self-signed.key.age;
-      mode = "440";
-      owner = "nginx";
-      group = "kanidm";
-    };
     rekey.secrets."dhparams.pem" = {
       # TODO make own?
       file = ../zackbiene/secrets/dhparams.pem.age;
       mode = "440";
       group = "nginx";
-    };
-
-    networking.hosts = {
-      "192.168.100.12" = [auth.domain];
     };
 
     rekey.secrets.acme-credentials = {
@@ -124,10 +108,6 @@ in {
       });
     };
     users.groups.acme.members = ["nginx"];
-
-    # TODO needed in my current testing network that has no ipv6 connectivity
-    # TODO but these should use fallback......... something's wrong
-    systemd.network.networks."10-wan".networkConfig.DNS = ["1.1.1.1" "8.8.8.8"];
 
     # TODO reload nginx when acme is renewed
 
@@ -195,18 +175,16 @@ in {
       local-vms-to-local.allowedTCPPorts = [8300];
     };
 
-    # systemd.services.kanidm = let
-    #   cfg = config.services.kanidm;
-    #   certName = config.services.nginx.virtualHosts.${cfg.serverSettings.domain}.useACMEHost;
-    # in {
-    #   requires = [ "acme-finished-${certName}.target" ];
-    #   serviceConfig.LoadCredential = let
-    #     certDir = config.security.acme.certs.${certName}.directory;
-    #   in [
-    #     "fullchain.pem:${certDir}/fullchain.pem"
-    #     "key.pem:${certDir}/key.pem"
-    #   ];
-    # };
+    rekey.secrets."kanidm-self-signed.crt" = {
+      file = ./secrets/kanidm-self-signed.crt.age;
+      mode = "440";
+      group = "kanidm";
+    };
+    rekey.secrets."kanidm-self-signed.key" = {
+      file = ./secrets/kanidm-self-signed.key.age;
+      mode = "440";
+      group = "kanidm";
+    };
 
     services.kanidm = {
       enableServer = true;
@@ -221,7 +199,11 @@ in {
         bindaddress = "${config.extra.wireguard."${parentNodeName}-local-vms".ipv4}:8300";
         trust_x_forward_for = true;
       };
+    };
 
+    environment.systemPackages = [pkgs.kanidm];
+
+    services.kanidm = {
       enableClient = true;
       clientSettings = {
         uri = config.services.kanidm.serverSettings.origin;
@@ -229,7 +211,5 @@ in {
         verify_hostnames = true;
       };
     };
-
-    environment.systemPackages = [pkgs.kanidm];
   };
 }

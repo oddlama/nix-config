@@ -61,22 +61,6 @@
           mode = "0700";
         }
       ]
-      ++ lib.optionals (config.services.kea.dhcp4.enable || config.services.kea.dhcp6.enable) [
-        {
-          directory = "/var/lib/kea";
-          user = "kea";
-          group = "kea";
-          mode = "0755";
-        }
-      ]
-      ++ lib.optionals config.services.gitea.enable [
-        {
-          directory = "/var/lib/gitea";
-          user = "gitea";
-          group = "gitea";
-          mode = "0755";
-        }
-      ]
       ++ lib.optionals config.security.acme.acceptTerms [
         {
           directory = "/var/lib/acme";
@@ -101,11 +85,27 @@
           mode = "0750";
         }
       ]
-      ++ lib.optionals config.services.opendkim.enable [
+      ++ lib.optionals config.services.postgresql.enable [
         {
           directory = "/var/lib/postgresql";
           user = "postgres";
           group = "postgres";
+          mode = "0755";
+        }
+      ]
+      ++ lib.optionals config.services.gitea.enable [
+        {
+          directory = "/var/lib/gitea";
+          user = "gitea";
+          group = "gitea";
+          mode = "0755";
+        }
+      ]
+      ++ lib.optionals config.services.kanidm.enableServer [
+        {
+          directory = "/var/lib/kanidm";
+          user = "kanidm";
+          group = "kanidm";
           mode = "0755";
         }
       ];

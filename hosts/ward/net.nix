@@ -6,7 +6,7 @@
   inherit (config.lib.net) cidr;
 
   lanCidrv4 = "192.168.100.0/24";
-  lanCidrv6 = "fd00::/64";
+  lanCidrv6 = "fd10::/64";
 in {
   networking.hostId = config.repo.secrets.local.networking.hostId;
 
@@ -63,6 +63,7 @@ in {
         IPForward = "yes";
         IPv6PrivacyExtensions = "yes";
         IPv6SendRA = true;
+        MulticastDNS = true;
       };
       # Announce a static prefix
       ipv6Prefixes = [
@@ -82,13 +83,6 @@ in {
         DNS = ["2606:4700:4700::1111" "2001:4860:4860::8888"];
       };
       linkConfig.RequiredForOnline = "routable";
-    };
-    # Remaining macvtap interfaces should not be touched.
-    "90-macvtap-no-ll" = {
-      matchConfig.Kind = "macvtap";
-      networkConfig.LinkLocalAddressing = "no";
-      linkConfig.ActivationPolicy = "manual";
-      linkConfig.Unmanaged = "yes";
     };
   };
 
@@ -165,7 +159,7 @@ in {
             interface = "lan-self";
             subnet = lanCidrv4;
             pools = [
-              {pool = "${cidr.host 40 lanCidrv4} - ${cidr.host (-6) lanCidrv4}";}
+              {pool = "${cidr.host 20 lanCidrv4} - ${cidr.host (-6) lanCidrv4}";}
             ];
             option-data = [
               {
@@ -184,10 +178,6 @@ in {
   extra.microvms.networking = {
     baseMac = config.repo.secrets.local.networking.interfaces.lan.mac;
     macvtapInterface = "lan";
-    static = {
-      baseCidrv4 = lanCidrv4;
-      baseCidrv6 = lanCidrv6;
-    };
     wireguard.openFirewallRules = ["lan-to-local"];
   };
 }

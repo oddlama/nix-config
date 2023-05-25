@@ -19,7 +19,10 @@ in {
     "10-lan1" = {
       DHCP = "yes";
       matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.lan1.mac;
-      networkConfig.IPv6PrivacyExtensions = "yes";
+      networkConfig = {
+        IPv6PrivacyExtensions = "yes";
+        MulticastDNS = true;
+      };
       linkConfig.RequiredForOnline = "routable";
     };
     "10-wlan1" = {

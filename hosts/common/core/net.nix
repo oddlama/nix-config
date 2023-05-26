@@ -70,6 +70,17 @@ in {
           to = ["local"];
           allowedTCPPorts = config.services.openssh.ports;
         };
+
+        untrusted-to-local = {
+          from = ["untrusted"];
+          to = ["local"];
+
+          inherit
+            (config.networking.firewall)
+            allowedTCPPorts
+            allowedUDPPorts
+            ;
+        };
       };
     };
   };

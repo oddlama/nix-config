@@ -117,3 +117,31 @@ openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
   -keyout selfcert.key -out selfcert.crt -subj \
   "/CN=example.com" -addext "subjectAltName=DNS:example.com,DNS:sub1.example.com,DNS:sub2.example.com,IP:10.0.0.1"
 ```
+
+
+
+
+
+
+
+
+
+
+```bash
+# Recover admin account (server must not be running)
+> systemctl stop kanidmd
+> kanidmd recover_account -c server.toml admin
+qU6UUdN5PbaetgtjKDttQx6D7XQwa0bBef5N5N0sjchg8gNz
+> systemctl start kanidmd
+# Login with recovered root account
+> kanidm login -D admin
+# Generate new credentials for idm_admin account
+> kanidm service-account credential generate -D admin idm_admin
+xbwa3tbUefdRBxKqbDYQfW2StqjZYa0zwp6FQRyWXy0dCYUb
+
+
+```
+
+
+
+

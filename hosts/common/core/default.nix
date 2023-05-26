@@ -12,6 +12,7 @@
 
     ../../../users/root
 
+    ../../../modules/extra.nix
     ../../../modules/interface-naming.nix
     ../../../modules/microvms.nix
     ../../../modules/wireguard.nix

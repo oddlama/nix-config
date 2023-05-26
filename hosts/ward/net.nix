@@ -89,9 +89,8 @@ in {
   # TODO mkForce nftables
   networking.nftables.firewall = {
     zones = lib.mkForce {
+      untrusted.interfaces = ["wan"];
       lan.interfaces = ["lan-self"];
-      wan.interfaces = ["wan"];
-      local-vms.interfaces = ["local-vms"];
     };
 
     rules = lib.mkForce {
@@ -100,33 +99,23 @@ in {
         extraLines = ["ip6 nexthdr icmpv6 icmpv6 type { mld-listener-query, nd-router-solicit } accept"];
       };
 
-      masquerade-wan = {
+      masquerade = {
         from = ["lan"];
-        to = ["wan"];
+        to = ["untrusted"];
         masquerade = true;
+      };
+
+      # Rule needed to allow local-vms wireguard traffic
+      lan-to-local = {
+        from = ["lan"];
+        to = ["local"];
       };
 
       outbound = {
         from = ["lan"];
-        to = ["lan" "wan"];
+        to = ["lan" "untrusted"];
         late = true; # Only accept after any rejects have been processed
         verdict = "accept";
-      };
-
-      wan-to-local = {
-        from = ["wan"];
-        to = ["local"];
-      };
-
-      lan-to-local = {
-        from = ["lan"];
-        to = ["local"];
-
-        inherit
-          (config.networking.firewall)
-          allowedTCPPorts
-          allowedUDPPorts
-          ;
       };
     };
   };

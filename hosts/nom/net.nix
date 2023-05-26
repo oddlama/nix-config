@@ -1,4 +1,8 @@
-{config, ...}: {
+{
+  config,
+  lib,
+  ...
+}: {
   networking = {
     inherit (config.repo.secrets.local.networking) hostId;
     wireless.iwd.enable = true;
@@ -29,6 +33,12 @@
       };
       dhcpV4Config.RouteMetric = 40;
       dhcpV6Config.RouteMetric = 40;
+    };
+  };
+
+  networking.nftables.firewall = {
+    zones = lib.mkForce {
+      untrusted.interfaces = ["lan1" "wlan1"];
     };
   };
 }

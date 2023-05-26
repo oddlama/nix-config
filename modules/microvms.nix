@@ -75,7 +75,10 @@
           mkIf vmCfg.zfs.enable {
             wantedBy = [fsMountUnit];
             before = [fsMountUnit];
-            after = ["zfs-import-${utils.escapeSystemdPath vmCfg.zfs.pool}.service"];
+            after = [
+              "zfs-import-${utils.escapeSystemdPath vmCfg.zfs.pool}.service"
+              "zfs-mount.target"
+            ];
             unitConfig.DefaultDependencies = "no";
             serviceConfig = {
               Type = "oneshot";
@@ -181,30 +184,10 @@
         # TODO change once microvms are compatible with stage-1 systemd
         boot.initrd.systemd.enable = mkForce false;
 
-        # Create a firewall zone for the bridged traffic and secure vm traffic
         # TODO mkForce nftables
         networking.nftables.firewall = {
           zones = mkForce {
-            "${vmCfg.networking.mainLinkName}".interfaces = [vmCfg.networking.mainLinkName];
-            local-vms.interfaces = [config.extra.wireguard."${nodeName}-local-vms".linkName];
-          };
-
-          rules = mkForce {
-            "${vmCfg.networking.mainLinkName}-to-local" = {
-              from = [vmCfg.networking.mainLinkName];
-              to = ["local"];
-
-              inherit
-                (config.networking.firewall)
-                allowedTCPPorts
-                allowedUDPPorts
-                ;
-            };
-
-            local-vms-to-local = {
-              from = ["local-vms"];
-              to = ["local"];
-            };
+            untrusted.interfaces = [vmCfg.networking.mainLinkName];
           };
         };
 
@@ -215,7 +198,7 @@
               then "${config.networking.hostName}.local"
               else config.networking.fqdn;
             inherit (cfg.networking.wireguard) port;
-            openFirewallRules = ["${vmCfg.networking.mainLinkName}-to-local"];
+            openFirewallRules = ["untrusted"];
           };
           linkName = "local-vms";
           ipv4 = net.cidr.host vmCfg.id cfg.networking.wireguard.cidrv4;
@@ -401,21 +384,6 @@ in {
         linkName = "local-vms";
         ipv4 = net.cidr.host 1 cfg.networking.wireguard.cidrv4;
         ipv6 = net.cidr.host 1 cfg.networking.wireguard.cidrv6;
-      };
-
-      # Create a firewall zone for the secure vm traffic
-      # TODO mkForce nftables
-      networking.nftables.firewall = {
-        zones = mkForce {
-          local-vms.interfaces = ["local-vms"];
-        };
-
-        rules = mkForce {
-          local-vms-to-local = {
-            from = ["local-vms"];
-            to = ["local"];
-          };
-        };
       };
     }
     // extraLib.mergeToplevelConfigs ["disko" "microvm" "systemd"] (mapAttrsToList microvmConfig vms)

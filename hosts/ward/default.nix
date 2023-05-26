@@ -65,10 +65,6 @@ in {
 
     #automatic1111 = defineVm 19;
     #invokeai = defineVm 19;
-
-    #kanidm = defineVm 12 // {
-    #  configPath = ./vm-test.nix;
-    #};
   };
 
   microvm.vms.test.config = {
@@ -95,61 +91,22 @@ in {
       mode = "440";
       group = "acme";
     };
+
     security.acme = {
       acceptTerms = true;
       defaults = {
         inherit (acme) email;
-        dnsProvider = "cloudflare";
         credentialsFile = config.rekey.secrets.acme-credentials.path;
+        dnsProvider = "cloudflare";
         dnsPropagationCheck = true;
+        reloadServices = ["nginx"];
       };
-      certs = lib.genAttrs acme.domains (domain: {
-        extraDomainNames = ["*.${domain}"];
-      });
     };
+    extra.acme.wildcardDomains = acme.domains;
     users.groups.acme.members = ["nginx"];
+    services.nginx.enable = true;
 
-    # TODO reload nginx when acme is renewed
-
-    # TODO make default nginx config in core to reduce boilerplate?
-    services.nginx = let
-      # TODO not implemented well
-      # TODO not implemented well
-      # TODO not implemented well
-      # TODO not implemented well
-      # TODO not implemented well
-      # TODO not implemented well
-      # TODO not implemented well
-      # TODO not implemented well
-      # TODO (acme.domains is very specific)
-      # TODO (security.acme causes recursion)
-      matchingWildcardCert = domain: let
-        # Filter all certs that are wildcard certs and which match the given domain
-        matchingCerts =
-          lib.filter
-          (x: !lib.hasInfix "." (lib.removeSuffix ".${x}" domain))
-          acme.domains;
-      in
-        assert lib.assertMsg (matchingCerts != []) "No wildcard certificate was defined that matches ${domain}";
-          lib.head matchingCerts;
-    in {
-      enable = true;
-
-      recommendedBrotliSettings = true;
-      recommendedGzipSettings = true;
-      recommendedOptimisation = true;
-      recommendedProxySettings = true;
-      recommendedTlsSettings = true;
-
-      # SSL config
-      sslCiphers = "EECDH+AESGCM:EDH+AESGCM:!aNULL";
-      sslDhparam = config.rekey.secrets."dhparams.pem".path;
-      commonHttpConfig = ''
-        error_log syslog:server=unix:/dev/log;
-        access_log syslog:server=unix:/dev/log;
-        ssl_ecdh_curve secp384r1;
-      '';
-
+    services.nginx = {
       upstreams."kanidm" = {
         servers."${config.extra.wireguard."${parentNodeName}-local-vms".ipv4}:8300" = {};
         extraConfig = ''
@@ -159,7 +116,7 @@ in {
       };
       virtualHosts.${auth.domain} = {
         forceSSL = true;
-        useACMEHost = matchingWildcardCert auth.domain;
+        useACMEHost = config.lib.matchingWildcardCert auth.domain;
         locations."/".proxyPass = "https://kanidm";
         # Allow using self-signed certs to satisfy kanidm's requirement
         # for TLS connections. (This is over wireguard anyway)
@@ -169,10 +126,18 @@ in {
       };
     };
 
-    networking.firewall.allowedTCPPorts = [80 443];
+    networking.nftables.firewall = {
+      zones = lib.mkForce {
+        local-vms.interfaces = ["local-vms"];
+      };
 
-    networking.nftables.firewall.rules = lib.mkForce {
-      local-vms-to-local.allowedTCPPorts = [8300];
+      rules = lib.mkForce {
+        local-vms-to-local = {
+          from = ["local-vms"];
+          to = ["local"];
+          allowedTCPPorts = [8300];
+        };
+      };
     };
 
     rekey.secrets."kanidm-self-signed.crt" = {

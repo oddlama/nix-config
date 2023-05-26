@@ -38,20 +38,7 @@ in {
   # TODO mkForce nftables
   networking.nftables.firewall = {
     zones = lib.mkForce {
-      lan.interfaces = ["lan1"];
-    };
-
-    rules = lib.mkForce {
-      int-to-local = {
-        from = ["lan"];
-        to = ["local"];
-
-        inherit
-          (config.networking.firewall)
-          allowedTCPPorts
-          allowedUDPPorts
-          ;
-      };
+      untrusted.interfaces = ["lan1"];
     };
   };
 }

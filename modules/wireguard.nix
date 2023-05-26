@@ -21,6 +21,7 @@
     mapAttrsToList
     mdDoc
     mergeAttrs
+    mkForce
     mkIf
     mkOption
     optionalAttrs
@@ -133,11 +134,12 @@
       (isServer && wgCfg.server.openFirewall)
       [wgCfg.server.port];
 
+    # Open the port in the given nftables rule if specified
     # TODO mkForce nftables
-    networking.nftables.firewall.rules =
-      mkIf
-      (isServer && wgCfg.server.openFirewallRules != [])
-      (lib.mkForce (genAttrs wgCfg.server.openFirewallRules (_: {allowedUDPPorts = [wgCfg.server.port];})));
+    networking.nftables.firewall.rules = mkForce (
+      optionalAttrs (isServer && wgCfg.server.openFirewallRules != [])
+      (genAttrs wgCfg.server.openFirewallRules (_: {allowedUDPPorts = [wgCfg.server.port];}))
+    );
 
     rekey.secrets =
       concatAttrs (map

@@ -5,6 +5,8 @@
 }: {
   # State that should be kept across reboots, but is otherwise
   # NOT important information in any way that needs to be backed up.
+  #environment.persistence."/local" = {
+  # with new dataset   --> ^-- , or without v--
   #environment.persistence."/nix/state" = {
   #  hideMounts = true;
   #  files = [
@@ -32,12 +34,14 @@
           group = "root";
           mode = "0755";
         }
+        # TODO only persist across reboots, don't backup, once loki is used
         {
           directory = "/var/lib/systemd";
           user = "root";
           group = "root";
           mode = "0755";
         }
+        # TODO only persist across reboots, don't backup, once loki is used
         {
           directory = "/var/log";
           user = "root";
@@ -46,6 +50,7 @@
         }
         #{ directory = "/tmp"; user = "root"; group = "root"; mode = "1777"; }
         #{ directory = "/var/tmp"; user = "root"; group = "root"; mode = "1777"; }
+        # TODO only persist across reboots, don't backup, once loki is used
         {
           directory = "/var/spool";
           user = "root";

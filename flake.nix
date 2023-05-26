@@ -89,19 +89,16 @@
 
       stateVersion = "23.05";
 
-      hosts = {
-        nom = {
+      hosts = let
+        nixos = system: {
           type = "nixos";
-          system = "x86_64-linux";
+          inherit system;
         };
-        ward = {
-          type = "nixos";
-          system = "x86_64-linux";
-        };
-        zackbiene = {
-          type = "nixos";
-          system = "aarch64-linux";
-        };
+      in {
+        nom = nixos "x86_64-linux";
+        #sentinel = nixos "x86_64-linux";
+        ward = nixos "x86_64-linux";
+        zackbiene = nixos "aarch64-linux";
       };
 
       colmena = import ./nix/colmena.nix inputs;

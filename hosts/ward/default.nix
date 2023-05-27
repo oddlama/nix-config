@@ -1,20 +1,12 @@
 {
   config,
+  nodes,
   nixos-hardware,
   pkgs,
   ...
 }: let
-  # TODO byebyebye
-  # TODO byebyebye
-  # TODO byebyebye
-  # TODO byebyebye
-  # TODO byebyebye
-  # TODO byebyebye
-  # TODO byebyebye
-  # TODO byebyebye
-  # TODO byebyebye
-  inherit (config.repo.secrets.local) acme;
-  auth.domain = config.repo.secrets.local.auth.domain;
+  inherit (nodes.sentinel.config.repo.secrets.local) personalDomain;
+  authDomain = "auth.${personalDomain}";
 in {
   imports = [
     nixos-hardware.common-cpu-intel
@@ -79,51 +71,8 @@ in {
   }: {
     rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN2TxWynLb8V9SP45kFqsoCWhe/dG8N1xWNuJG5VQndq";
 
-    rekey.secrets."dhparams.pem" = {
-      # TODO make own?
-      file = ../zackbiene/secrets/dhparams.pem.age;
-      mode = "440";
-      group = "nginx";
-    };
-
-    rekey.secrets.acme-credentials = {
-      file = ./secrets/acme-credentials.age;
-      mode = "440";
-      group = "acme";
-    };
-
-    security.acme = {
-      acceptTerms = true;
-      defaults = {
-        inherit (acme) email;
-        credentialsFile = config.rekey.secrets.acme-credentials.path;
-        dnsProvider = "cloudflare";
-        dnsPropagationCheck = true;
-        reloadServices = ["nginx"];
-      };
-    };
-    extra.acme.wildcardDomains = acme.domains;
-    users.groups.acme.members = ["nginx"];
-    services.nginx.enable = true;
-
-    services.nginx = {
-      upstreams."kanidm" = {
-        servers."${config.extra.wireguard."${parentNodeName}-local-vms".ipv4}:8300" = {};
-        extraConfig = ''
-          zone kanidm 64k;
-          keepalive 2;
-        '';
-      };
-      virtualHosts.${auth.domain} = {
-        forceSSL = true;
-        useACMEHost = config.lib.extra.matchingWildcardCert auth.domain;
-        locations."/".proxyPass = "https://kanidm";
-        # Allow using self-signed certs to satisfy kanidm's requirement
-        # for TLS connections. (This is over wireguard anyway)
-        extraConfig = ''
-          proxy_ssl_verify off;
-        '';
-      };
+    extra.wireguard.proxy-sentinel = {
+      client.via = "sentinel";
     };
 
     networking.nftables.firewall = {
@@ -155,7 +104,7 @@ in {
       enableServer = true;
       # enablePAM = true;
       serverSettings = {
-        inherit (auth) domain;
+        domain = authDomain;
         origin = "https://${config.services.kanidm.serverSettings.domain}";
         #tls_chain = "/run/credentials/kanidm.service/fullchain.pem";
         #tls_key = "/run/credentials/kanidm.service/key.pem";

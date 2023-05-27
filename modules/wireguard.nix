@@ -288,9 +288,9 @@ in {
             default = [];
             example = ["10.0.0.1/24" "fd00:cafe::/64"];
             description = mdDoc ''
-              Allows defining extra cidr network ranges that shall be reserved for this machine
-              and its children (i.e. external peers or via clients). Reservation means that those
-              address spaces will be guaranteed to be included in the spanned network.
+              Allows defining extra cidr network ranges that shall be reserved for this network.
+              Reservation means that those address spaces will be guaranteed to be included in
+              the spanned network, but no rules will be enforced as to who in the network may use them.
 
               By default, this module will try to allocate the smallest address space that includes
               all network peers. If you know that there might be additional external peers added later,
@@ -341,12 +341,26 @@ in {
 
         ipv4 = mkOption {
           type = net.types.ipv4;
-          description = mdDoc "The ipv4 address for this machine.";
+          default = spannedReservedNetwork.cidrv4;
+          description = mdDoc ''
+            The ipv4 address for this machine. If you do not set this explicitly,
+            a semi-stable ipv4 address will be derived automatically based on the
+            hostname of this machine. At least one participating server must reserve
+            a big-enough space of addresses by setting `reservedAddresses`.
+            See `net.cidr.assignIps` for more information on the algorithm.
+          '';
         };
 
         ipv6 = mkOption {
           type = net.types.ipv6;
-          description = mdDoc "The ipv6 address for this machine.";
+          default = ;
+          description = mdDoc ''
+            The ipv6 address for this machine. If you do not set this explicitly,
+            a semi-stable ipv6 address will be derived automatically based on the
+            hostname of this machine. At least one participating server must reserve
+            a big-enough space of addresses by setting `reservedAddresses`.
+            See `net.cidr.assignIps` for more information on the algorithm.
+          '';
         };
 
         addresses = mkOption {

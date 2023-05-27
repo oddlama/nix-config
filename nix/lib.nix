@@ -31,7 +31,6 @@
     stringToCharacters
     substring
     unique
-    warnIf
     ;
 in rec {
   # Counts how often each element occurrs in xs
@@ -244,6 +243,11 @@ in rec {
     usedAddresses =
       concatMap (n: (wgCfgOf n).addresses) associatedNodes
       ++ flatten (concatMap (n: attrValues (wgCfgOf n).server.externalPeers) associatedNodes);
+
+    # The cidrv4 and cidrv6 of the network spanned by all reserved addresses only.
+    # Used to determine automatically assigned addresses first.
+    spannedReservedNetwork =
+      net.cidr.merge (concatMap (n: (wgCfgOf n).server.reservedAddresses) associatedServerNodes);
 
     # The cidrv4 and cidrv6 of the network spanned by all participating peer addresses.
     # This also takes into account any reserved address ranges that should be part of the network.

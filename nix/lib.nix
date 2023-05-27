@@ -5,17 +5,20 @@
 }: let
   inherit
     (nixpkgs.lib)
+    assertMsg
     attrNames
     attrValues
     concatMap
     concatMapStrings
     concatStringsSep
+    elem
     escapeShellArg
     filter
     flatten
     foldAttrs
     foldl'
     genAttrs
+    genList
     head
     mapAttrs'
     mergeAttrs
@@ -25,18 +28,20 @@
     partition
     recursiveUpdate
     removeSuffix
+    stringToCharacters
     substring
     unique
+    warnIf
     ;
 in rec {
   # Counts how often each element occurrs in xs
-  countOccurrences = xs: let
+  countOccurrences = let
     addOrUpdate = acc: x:
       if builtins.hasAttr x acc
       then acc // {${x} = acc.${x} + 1;}
       else acc // {${x} = 1;};
   in
-    foldl' addOrUpdate {} xs;
+    foldl' addOrUpdate {};
 
   # Returns all elements in xs that occur at least twice
   duplicates = xs: let
@@ -54,6 +59,90 @@ in rec {
   # Useful to merge several top-level configs in a module.
   mergeToplevelConfigs = keys: attrs:
     genAttrs keys (attr: mkMerge (map (x: x.${attr} or {}) attrs));
+
+  # Calculates base^exp, but careful, this overflows for results > 2^62
+  pow = base: exp: foldl' (a: x: x * a) 1 (genList (_: base) exp);
+
+  # Converts the given hex string to an integer. Only reliable for inputs in [0, 2^63),
+  # after that the sign bit will overflow.
+  hexToDec = v: let
+    literalValues = {
+      "0" = 0;
+      "1" = 1;
+      "2" = 2;
+      "3" = 3;
+      "4" = 4;
+      "5" = 5;
+      "6" = 6;
+      "7" = 7;
+      "8" = 8;
+      "9" = 9;
+      "a" = 10;
+      "b" = 11;
+      "c" = 12;
+      "d" = 13;
+      "e" = 14;
+      "f" = 15;
+      "A" = 10;
+      "B" = 11;
+      "C" = 12;
+      "D" = 13;
+      "E" = 14;
+      "F" = 15;
+    };
+  in
+    foldl' (acc: x: acc * 16 + literalValues.${x}) 0 (stringToCharacters v);
+
+  # Generates a number in [2, 2^bits - 1) for each given hostname to be used
+  # as an ip address offset into an arbirary cidr with at least size=bits.
+  # This function tries to generate offsets as stable as possible to
+  # avoid changing existing hosts' ip addresses as best as possible when other
+  # hosts are added or removed. Although of course no actual guarantee can be
+  # given that this will be the case. The algorithm uses hashing with linear probing,
+  # xs will be sorted automatically.
+  assignIps = subnetLength: hosts: let
+    nHosts = builtins.length hosts;
+    nInit = builtins.length (attrNames init);
+    # Pre-sort all hosts, to ensure ordering invariance
+    sortedHosts =
+      warnIf
+      ((nInit + nHosts) > 0.3 * pow 2 subnetLength)
+      "assignIps: hash stability may be degraded since utilization is >30%"
+      (builtins.sort (a: b: a < b) hosts);
+    # The capacity of the subnet
+    capacity = pow 2 subnetLength;
+    # Generates a hash (i.e. offset value) for a given hostname
+    hashElem = x:
+      builtins.bitAnd (capacity - 1)
+      (hexToDec (substring 0 16 (builtins.hashString "sha256" x)));
+    # Do linear probing. Returns the first unused value at or after the given value.
+    probe = avoid: value:
+      if elem value avoid
+      # Poor man's modulo, because nix has no modulo. Luckily we operate on a residue
+      # class of x modulo 2^n, so we can use bitAnd instead.
+      then probe avoid (builtins.bitAnd (capacity - 1) (value + 1))
+      else value;
+    # Hash a new element and avoid assigning any existing values.
+    hashElem = accum: x:
+      accum
+      // {
+        ${x} = probe (attrValues accum) (hashElem x);
+      };
+    # Reserve some values for the network, host and broadcast address.
+    # The network and broadcast address should never be used, and we
+    # want to reserve the host address for the host.
+    init = {
+      _network = 0;
+      _host = 1;
+      _broadcast = capacity - 1;
+    };
+  in
+    assert assertMsg (subnetLength >= 2 && subnetLength <= 62)
+    "assignIps: subnetLength=${subnetLength} is not in [2, 62].";
+    assert assertMsg (nHosts <= capacity - nInit)
+    "assignIps: number of hosts (${toString nHosts}) must be <= capacity (${toString capacity}) - reserved (${toString nInit})";
+    # Assign an ip (in the subnet) to each element in order
+      foldl' hashElem init sortedHosts;
 
   disko = {
     gpt = {

@@ -30,7 +30,7 @@ in {
   };
 
   config = {
-    lib = {
+    lib.extra = {
       # For a given domain, this searches for a matching wildcard acme domain that
       # would include the given domain. If no such domain is defined in
       # extra.acme.wildcardDomains, an assertion is triggered.

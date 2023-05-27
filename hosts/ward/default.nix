@@ -116,7 +116,7 @@ in {
       };
       virtualHosts.${auth.domain} = {
         forceSSL = true;
-        useACMEHost = config.lib.matchingWildcardCert auth.domain;
+        useACMEHost = config.lib.extra.matchingWildcardCert auth.domain;
         locations."/".proxyPass = "https://kanidm";
         # Allow using self-signed certs to satisfy kanidm's requirement
         # for TLS connections. (This is over wireguard anyway)

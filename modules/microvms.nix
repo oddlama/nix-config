@@ -198,7 +198,7 @@
               then "${config.networking.hostName}.local"
               else config.networking.fqdn;
             inherit (cfg.networking.wireguard) port;
-            openFirewallRules = ["untrusted"];
+            openFirewallRules = ["untrusted-to-local"];
           };
           linkName = "local-vms";
           ipv4 = net.cidr.host vmCfg.id cfg.networking.wireguard.cidrv4;

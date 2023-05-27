@@ -1,4 +1,5 @@
 {
+  extraLib,
   inputs,
   lib,
   nodeName,
@@ -68,7 +69,7 @@
           # > net.cidr.canonicalize "192.168.1.100/24"
           # "192.168.1.0/24"
           canonicalize = x: libWithNet.net.cidr.make (libWithNet.net.cidr.length x) (ip x);
-          # mergev4 :: [cidr4 | ipv4] -> (cidr4 | null)
+          # mergev4 :: [cidrv4 | ipv4] -> (cidrv4 | null)
           #
           # Returns the smallest cidr network that includes all given networks.
           # If no cidr mask is given, /32 is assumed.
@@ -109,7 +110,7 @@
               if addrs == []
               then null
               else libWithNet.net.cidr.make bestLength firstIp;
-          # mergev6 :: [cidr6 | ipv6] -> (cidr6 | null)
+          # mergev6 :: [cidrv6 | ipv6] -> (cidrv6 | null)
           #
           # Returns the smallest cidr network that includes all given networks.
           # If no cidr mask is given, /128 is assumed.
@@ -150,7 +151,7 @@
               if addrs == []
               then null
               else libWithNet.net.cidr.make bestLength firstIp;
-          # merge :: [cidr] -> { cidrv4 = (cidr4 | null); cidrv6 = (cidr4 | null); }
+          # merge :: [cidr] -> { cidrv4 = (cidrv4 | null); cidrv6 = (cidrv4 | null); }
           #
           # Returns the smallest cidr network that includes all given networks,
           # but yields two separate result for all given ipv4 and ipv6 addresses.
@@ -161,6 +162,85 @@
             cidrv4 = mergev4 v4_and_v6.wrong;
             cidrv6 = mergev6 v4_and_v6.right;
           };
+          # assignIps :: cidr -> [int | ip] -> [string] -> [ip]
+          #
+          # Assigns a semi-stable ip address from the given cidr network to each hostname.
+          # The algorithm is based on hashing (abusing sha256) with linear probing.
+          # The order of hosts doesn't matter. No ip (or offset) from the reserved list
+          # will be assigned. The network address and broadcast address will always be reserved
+          # automatically.
+          #
+          # Examples:
+          #
+          # > net.cidr.assignIps "192.168.100.1/24" [] ["a" "b" "c"]
+          # { a = "192.168.100.202"; b = "192.168.100.74"; c = "192.168.100.226"; }
+          #
+          # > net.cidr.assignIps "192.168.100.1/24" [] ["a" "b" "c" "a-new-elem"]
+          # { a = "192.168.100.202"; a-new-elem = "192.168.100.88"; b = "192.168.100.74"; c = "192.168.100.226"; }
+          #
+          # > net.cidr.assignIps "192.168.100.1/24" [202 "192.168.100.74"] ["a" "b" "c"]
+          # { a = "192.168.100.203"; b = "192.168.100.75"; c = "192.168.100.226"; }
+          assignIps = net: reserved: hosts: let
+            cidrSize = libWithNet.net.cidr.size net;
+            capacity = libWithNet.net.cidr.capacity net;
+            # The base address of the network. Used to convert ip-based reservations to offsets
+            baseAddr = host 0 net;
+            # Reserve some values for the network, host and broadcast address.
+            # The network and broadcast address should never be used, and we
+            # want to reserve the host address for the host. We also convert
+            # any ips to offsets here.
+            init = lib.unique (
+              [0 (capacity - 1)]
+              ++ lib.flip map reserved (x:
+                if builtins.typeOf x == "int"
+                then x
+                else -(libWithNet.net.ip.diff baseAddr x))
+            );
+            nHosts = builtins.length hosts;
+            nInit = builtins.length init;
+            # Pre-sort all hosts, to ensure ordering invariance
+            sortedHosts =
+              lib.warnIf
+              ((nInit + nHosts) > 0.3 * capacity)
+              "assignIps: hash stability may be degraded since utilization is >30%"
+              (builtins.sort (a: b: a < b) hosts);
+            # Generates a hash (i.e. offset value) for a given hostname
+            hashElem = x:
+              builtins.bitAnd (capacity - 1)
+              (extraLib.hexToDec (builtins.substring 0 16 (builtins.hashString "sha256" x)));
+            # Do linear probing. Returns the first unused value at or after the given value.
+            probe = avoid: value:
+              if lib.elem value avoid
+              # Poor man's modulo, because nix has no modulo. Luckily we operate on a residue
+              # class of x modulo 2^n, so we can use bitAnd instead.
+              then probe avoid (builtins.bitAnd (capacity - 1) (value + 1))
+              else value;
+            # Hash a new element and avoid assigning any existing values.
+            assignOne = {
+              assigned,
+              used,
+            }: x: let
+              value = probe used (hashElem x);
+            in {
+              assigned =
+                assigned
+                // {
+                  ${x} = host value net;
+                };
+              used = [value] ++ used;
+            };
+          in
+            assert lib.assertMsg (cidrSize >= 2 && cidrSize <= 62)
+            "assignIps: cidrSize=${cidrSize} is not in [2, 62].";
+            assert lib.assertMsg (nHosts <= capacity - nInit)
+            "assignIps: number of hosts (${toString nHosts}) must be <= capacity (${toString capacity}) - reserved (${toString nInit})";
+            # Assign an ip in the subnet to each element, in order
+              (lib.foldl' assignOne {
+                  assigned = {};
+                  used = init;
+                }
+                sortedHosts)
+              .assigned;
         };
         ip = {
           # Checks whether the given address (with or without cidr notation) is an ipv6 address.

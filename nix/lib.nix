@@ -93,57 +93,6 @@ in rec {
   in
     foldl' (acc: x: acc * 16 + literalValues.${x}) 0 (stringToCharacters v);
 
-  # Generates a number in [2, 2^bits - 1) for each given hostname to be used
-  # as an ip address offset into an arbirary cidr with at least size=bits.
-  # This function tries to generate offsets as stable as possible to
-  # avoid changing existing hosts' ip addresses as best as possible when other
-  # hosts are added or removed. Although of course no actual guarantee can be
-  # given that this will be the case. The algorithm uses hashing with linear probing,
-  # xs will be sorted automatically.
-  assignIps = subnetLength: hosts: let
-    nHosts = builtins.length hosts;
-    nInit = builtins.length (attrNames init);
-    # Pre-sort all hosts, to ensure ordering invariance
-    sortedHosts =
-      warnIf
-      ((nInit + nHosts) > 0.3 * pow 2 subnetLength)
-      "assignIps: hash stability may be degraded since utilization is >30%"
-      (builtins.sort (a: b: a < b) hosts);
-    # The capacity of the subnet
-    capacity = pow 2 subnetLength;
-    # Generates a hash (i.e. offset value) for a given hostname
-    hashElem = x:
-      builtins.bitAnd (capacity - 1)
-      (hexToDec (substring 0 16 (builtins.hashString "sha256" x)));
-    # Do linear probing. Returns the first unused value at or after the given value.
-    probe = avoid: value:
-      if elem value avoid
-      # Poor man's modulo, because nix has no modulo. Luckily we operate on a residue
-      # class of x modulo 2^n, so we can use bitAnd instead.
-      then probe avoid (builtins.bitAnd (capacity - 1) (value + 1))
-      else value;
-    # Hash a new element and avoid assigning any existing values.
-    hashElem = accum: x:
-      accum
-      // {
-        ${x} = probe (attrValues accum) (hashElem x);
-      };
-    # Reserve some values for the network, host and broadcast address.
-    # The network and broadcast address should never be used, and we
-    # want to reserve the host address for the host.
-    init = {
-      _network = 0;
-      _host = 1;
-      _broadcast = capacity - 1;
-    };
-  in
-    assert assertMsg (subnetLength >= 2 && subnetLength <= 62)
-    "assignIps: subnetLength=${subnetLength} is not in [2, 62].";
-    assert assertMsg (nHosts <= capacity - nInit)
-    "assignIps: number of hosts (${toString nHosts}) must be <= capacity (${toString capacity}) - reserved (${toString nInit})";
-    # Assign an ip (in the subnet) to each element in order
-      foldl' hashElem init sortedHosts;
-
   disko = {
     gpt = {
       partEfi = name: start: end: {

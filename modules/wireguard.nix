@@ -36,18 +36,24 @@
     mergeToplevelConfigs
     ;
 
+  inherit
+    (extraLib.types)
+    lazyOf
+    lazyValue
+    ;
+
   inherit (config.lib) net;
   cfg = config.extra.wireguard;
 
   configForNetwork = wgName: wgCfg: let
     inherit
       (extraLib.wireguard wgName)
-      associatedClientNodes
-      associatedNodes
-      associatedServerNodes
       externalPeerName
       externalPeerNamesRaw
       networkCidrs
+      participatingClientNodes
+      participatingNodes
+      participatingServerNodes
       peerPresharedKeyPath
       peerPresharedKeySecret
       peerPrivateKeyPath
@@ -65,14 +71,14 @@
     # All nodes that use our node as the via into the wireguard network
     ourClientNodes =
       optionals isServer
-      (filter (n: (wgCfgOf n).client.via == nodeName) associatedClientNodes);
+      (filter (n: (wgCfgOf n).client.via == nodeName) participatingClientNodes);
 
     # The list of peers for which we have to know the psk.
     neededPeers =
       if isServer
       then
         # Other servers in the same network
-        filterSelf associatedServerNodes
+        filterSelf participatingServerNodes
         # Our external peers
         ++ map externalPeerName (attrNames wgCfg.server.externalPeers)
         # Our clients
@@ -102,12 +108,12 @@
         # plus traffic for any of its external peers
         ++ attrValues snCfg.server.externalPeers
         # plus traffic for any client that is connected via that server
-        ++ map (n: (wgCfgOf n).addresses) (filter (n: (wgCfgOf n).client.via == serverNode) associatedClientNodes)
+        ++ map (n: (wgCfgOf n).addresses) (filter (n: (wgCfgOf n).client.via == serverNode) participatingClientNodes)
       );
   in {
     assertions = [
       {
-        assertion = any (n: (wgCfgOf n).server.host != null) associatedNodes;
+        assertion = any (n: (wgCfgOf n).server.host != null) participatingNodes;
         message = "${assertionPrefix}: At least one node in a network must be a server.";
       }
       {
@@ -184,7 +190,7 @@
               Endpoint = "${snCfg.server.host}:${toString snCfg.server.port}";
             };
           })
-          (filterSelf associatedServerNodes)
+          (filterSelf participatingServerNodes)
           # All our external peers
           ++ mapAttrsToList (extPeer: ips: let
             peerName = externalPeerName extPeer;
@@ -241,6 +247,7 @@ in {
     type = types.lazyAttrsOf (types.submodule ({
       config,
       name,
+      options,
       ...
     }: {
       options = {
@@ -340,8 +347,8 @@ in {
         };
 
         ipv4 = mkOption {
-          type = net.types.ipv4;
-          default = spannedReservedNetwork.cidrv4;
+          type = lazyOf net.types.ipv4;
+          default = lazyValue (extraLib.wireguard name).assignedIpv4Addresses.${nodeName};
           description = mdDoc ''
             The ipv4 address for this machine. If you do not set this explicitly,
             a semi-stable ipv4 address will be derived automatically based on the
@@ -352,8 +359,8 @@ in {
         };
 
         ipv6 = mkOption {
-          type = net.types.ipv6;
-          default = ;
+          type = lazyOf net.types.ipv6;
+          default = lazyValue (extraLib.wireguard name).assignedIpv6Addresses.${nodeName};
           description = mdDoc ''
             The ipv6 address for this machine. If you do not set this explicitly,
             a semi-stable ipv6 address will be derived automatically based on the
@@ -364,8 +371,11 @@ in {
         };
 
         addresses = mkOption {
-          type = types.listOf net.types.ip;
-          default = [config.ipv4 config.ipv6];
+          type = types.listOf (lazyOf net.types.ip);
+          default = [
+            (head options.ipv4.definitions)
+            (head options.ipv6.definitions)
+          ];
           description = mdDoc ''
             The ip addresses (v4 and/or v6) to use for this machine.
             The actual network cidr will automatically be derived from all network participants.
@@ -373,7 +383,7 @@ in {
           '';
         };
 
-        # TODO this needs to be implemented.
+        # TODO this is not yet implemented.
         # - is 0.0.0.0/0 also for valid for routing global ipv6?
         # - is 0.0.0.0/0 routing private spaces such as 192.168.1 ? that'd be baaad
         # - force nodes to opt-in or allow nodes to opt-out? sometimes a node want's

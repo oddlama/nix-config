@@ -25,6 +25,13 @@ in {
 
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" "r8169"];
 
+  extra.wireguard.proxy-sentinel.server = {
+    host = "TODO REMOVE";
+    port = 51443;
+    reservedAddresses = ["10.0.43.0/24" "fd43::/120"];
+    openFirewallRules = ["untrusted-to-local"];
+  };
+
   extra.microvms.vms = let
     defineVm = id: {
       inherit id;

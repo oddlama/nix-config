@@ -5,9 +5,11 @@
 }: let
   inherit
     (nixpkgs.lib)
+    all
     assertMsg
     attrNames
     attrValues
+    concatLists
     concatMap
     concatMapStrings
     concatStringsSep
@@ -15,24 +17,59 @@
     escapeShellArg
     filter
     flatten
+    flip
     foldAttrs
     foldl'
     genAttrs
     genList
     head
+    isAttrs
     mapAttrs'
     mergeAttrs
     mkMerge
+    mkOptionType
     nameValuePair
     optionalAttrs
     partition
     recursiveUpdate
     removeSuffix
+    showOption
     stringToCharacters
     substring
     unique
     ;
 in rec {
+  types = rec {
+    # Checks whether the value is a lazy value without causing
+    # it's value to be evaluated
+    isLazyValue = x: isAttrs x && x ? _lazyValue;
+    # Constructs a lazy value holding the given value.
+    lazyValue = value: {_lazyValue = value;};
+
+    # Represents a lazy value of the given type, which
+    # holds the actual value as an attrset like { _lazyValue = <actual value>; }.
+    # This allows the option to be defined and filtered from a defintion
+    # list without evaluating the value.
+    lazyValueOf = type:
+      mkOptionType rec {
+        name = "lazyValueOf ${type.name}";
+        inherit (type) description descriptionClass emptyValue getSubOptions getSubModules;
+        check = isLazyValue;
+        merge = loc: defs:
+          assert assertMsg
+          (all (x: type.check x._lazyValue) defs)
+          "The option `${showOption loc}` is defined with a lazy value holding an invalid type";
+            nixpkgs.lib.types.mergeOneOption loc defs;
+        substSubModules = m: nixpkgs.lib.types.uniq (type.substSubModules m);
+        functor = (nixpkgs.lib.types.defaultFunctor name) // {wrapped = type;};
+        nestedTypes.elemType = type;
+      };
+
+    # Represents a value or lazy value of the given type that will
+    # automatically be coerced to the given type when merged.
+    lazyOf = type: nixpkgs.lib.types.coercedTo (lazyValueOf type) (x: x._lazyValue) type;
+  };
+
   # Counts how often each element occurrs in xs
   countOccurrences = let
     addOrUpdate = acc: x:
@@ -169,11 +206,12 @@ in rec {
   rageDecryptArgs = "${rageMasterIdentityArgs}";
   rageEncryptArgs = "${rageMasterIdentityArgs} ${rageExtraEncryptionPubkeys}";
 
+  # TODO merge this into a _meta readonly option in the wireguard module
   # Wireguard related functions that are reused in several files of this flake
   wireguard = wgName: rec {
-    # Get access to the networking lib by referring to one of the associated nodes.
+    # Get access to the networking lib by referring to one of the participating nodes.
     # Not ideal, but ok.
-    inherit (self.nodes.${head associatedNodes}.config.lib) net;
+    inherit (self.nodes.${head participatingNodes}.config.lib) net;
 
     # Returns the given node's wireguard configuration of this network
     wgCfgOf = node: self.nodes.${node}.config.extra.wireguard.${wgName};
@@ -205,22 +243,22 @@ in rec {
     in "wireguard-${wgName}-psks-${peer1}+${peer2}";
 
     # All nodes that are part of this network
-    associatedNodes =
+    participatingNodes =
       filter
       (n: builtins.hasAttr wgName self.nodes.${n}.config.extra.wireguard)
       (attrNames self.nodes);
 
     # Partition nodes by whether they are servers
-    _associatedNodes_isServerPartition =
+    _participatingNodes_isServerPartition =
       partition
       (n: (wgCfgOf n).server.host != null)
-      associatedNodes;
+      participatingNodes;
 
-    associatedServerNodes = _associatedNodes_isServerPartition.right;
-    associatedClientNodes = _associatedNodes_isServerPartition.wrong;
+    participatingServerNodes = _participatingNodes_isServerPartition.right;
+    participatingClientNodes = _participatingNodes_isServerPartition.wrong;
 
     # Maps all nodes that are part of this network to their addresses
-    nodePeers = genAttrs associatedNodes (n: (wgCfgOf n).addresses);
+    nodePeers = genAttrs participatingNodes (n: (wgCfgOf n).addresses);
 
     externalPeerName = p: "external-${p}";
 
@@ -231,33 +269,65 @@ in rec {
 
     # All peers that are defined as externalPeers on any node.
     # Prepends "external-" to their name.
-    allExternalPeers = concatAttrs (map externalPeersForNode associatedNodes);
+    allExternalPeers = concatAttrs (map externalPeersForNode participatingNodes);
 
     # All peers that are part of this network
     allPeers = nodePeers // allExternalPeers;
 
     # Concatenation of all external peer names names without any transformations.
-    externalPeerNamesRaw = concatMap (n: attrNames (wgCfgOf n).server.externalPeers) associatedNodes;
+    externalPeerNamesRaw = concatMap (n: attrNames (wgCfgOf n).server.externalPeers) participatingNodes;
 
     # A list of all occurring addresses.
     usedAddresses =
-      concatMap (n: (wgCfgOf n).addresses) associatedNodes
-      ++ flatten (concatMap (n: attrValues (wgCfgOf n).server.externalPeers) associatedNodes);
+      concatMap (n: (wgCfgOf n).addresses) participatingNodes
+      ++ flatten (concatMap (n: attrValues (wgCfgOf n).server.externalPeers) participatingNodes);
 
-    # The cidrv4 and cidrv6 of the network spanned by all reserved addresses only.
-    # Used to determine automatically assigned addresses first.
-    spannedReservedNetwork =
-      net.cidr.merge (concatMap (n: (wgCfgOf n).server.reservedAddresses) associatedServerNodes);
+    # A list of all occurring addresses, but only includes addresses that
+    # are not assigned automatically.
+    explicitlyUsedAddresses =
+      flip concatMap participatingNodes
+      (n:
+        filter (x: !types.isLazyValue x)
+        (concatLists
+          (self.nodes.${n}.options.extra.wireguard.type.functor.wrapped.getSubOptions (wgCfgOf n)).addresses.definitions))
+      ++ flatten (concatMap (n: attrValues (wgCfgOf n).server.externalPeers) participatingNodes);
 
     # The cidrv4 and cidrv6 of the network spanned by all participating peer addresses.
     # This also takes into account any reserved address ranges that should be part of the network.
     networkAddresses =
       net.cidr.merge (usedAddresses
-        ++ concatMap (n: (wgCfgOf n).server.reservedAddresses) associatedServerNodes);
+        ++ concatMap (n: (wgCfgOf n).server.reservedAddresses) participatingServerNodes);
 
     # The network spanning cidr addresses. The respective cidrv4 and cirdv6 are only
     # included if they exist.
     networkCidrs = filter (x: x != null) (attrValues networkAddresses);
+
+    # The cidrv4 and cidrv6 of the network spanned by all reserved addresses only.
+    # Used to determine automatically assigned addresses first.
+    spannedReservedNetwork =
+      net.cidr.merge (concatMap (n: (wgCfgOf n).server.reservedAddresses) participatingServerNodes);
+
+    # Assigns an ipv4 address from spannedReservedNetwork.cidrv4
+    # to each participant that has not explicitly specified an ipv4 address.
+    assignedIpv4Addresses = assert assertMsg
+    (spannedReservedNetwork.cidrv4 != null)
+    "Wireguard network '${wgName}': At least one participating node must reserve a cidrv4 address via `reservedAddresses` so that ipv4 addresses can be assigned automatically from that network.";
+      net.cidr.assignIps
+      spannedReservedNetwork.cidrv4
+      # Don't assign any addresses that are explicitly configured on other hosts
+      (filter (x: net.cidr.contains x spannedReservedNetwork.cidrv4) (filter net.ip.isv4 explicitlyUsedAddresses))
+      participatingNodes;
+
+    # Assigns an ipv4 address from spannedReservedNetwork.cidrv4
+    # to each participant that has not explicitly specified an ipv4 address.
+    assignedIpv6Addresses = assert assertMsg
+    (spannedReservedNetwork.cidrv6 != null)
+    "Wireguard network '${wgName}': At least one participating node must reserve a cidrv6 address via `reservedAddresses` so that ipv4 addresses can be assigned automatically from that network.";
+      net.cidr.assignIps
+      spannedReservedNetwork.cidrv6
+      # Don't assign any addresses that are explicitly configured on other hosts
+      (filter (x: net.cidr.contains x spannedReservedNetwork.cidrv6) (filter net.ip.isv6 explicitlyUsedAddresses))
+      participatingNodes;
 
     # Appends / replaces the correct cidr length to the argument,
     # so that the resulting address is in the cidr.

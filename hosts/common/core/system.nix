@@ -231,7 +231,7 @@
             };
           in
             assert lib.assertMsg (cidrSize >= 2 && cidrSize <= 62)
-            "assignIps: cidrSize=${cidrSize} is not in [2, 62].";
+            "assignIps: cidrSize=${toString cidrSize} is not in [2, 62].";
             assert lib.assertMsg (nHosts <= capacity - nInit)
             "assignIps: number of hosts (${toString nHosts}) must be <= capacity (${toString capacity}) - reserved (${toString nInit})";
             # Assign an ip in the subnet to each element, in order
@@ -242,7 +242,9 @@
                 sortedHosts)
               .assigned;
         };
-        ip = {
+        ip = rec {
+          # Checks whether the given address (with or without cidr notation) is an ipv4 address.
+          isv4 = x: !isv6 x;
           # Checks whether the given address (with or without cidr notation) is an ipv6 address.
           isv6 = lib.hasInfix ":";
         };

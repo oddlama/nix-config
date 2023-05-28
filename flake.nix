@@ -106,7 +106,7 @@
       # Collect all defined microvm nodes from each colmena node
       microvmNodes = nixpkgs.lib.concatMapAttrs (_: node:
         nixpkgs.lib.mapAttrs'
-        (vm: def: nixpkgs.lib.nameValuePair def.nodeName node.config.microvm.vms.${vm})
+        (vm: def: nixpkgs.lib.nameValuePair def.nodeName node.config.microvm.vms.${vm}.config)
         (node.config.extra.microvms.vms or {}))
       self.colmenaNodes;
       # Expose all nodes in a single attribute

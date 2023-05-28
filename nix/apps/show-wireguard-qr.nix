@@ -20,7 +20,7 @@
       map
       (peer: {inherit wgName serverNode peer;})
       (attrNames self.nodes.${serverNode}.config.extra.wireguard.${wgName}.server.externalPeers))
-    (self.extraLib.wireguard wgName).associatedServerNodes;
+    (self.extraLib.wireguard wgName).participatingServerNodes;
   allExternalPeers = concatMap externalPeersForNet wireguardNetworks;
 in
   pkgs.writeShellScript "show-wireguard-qr" ''

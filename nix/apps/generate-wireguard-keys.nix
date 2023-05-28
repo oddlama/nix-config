@@ -26,10 +26,10 @@
     inherit
       (self.extraLib.wireguard wgName)
       allPeers
-      associatedNodes
-      associatedServerNodes
-      associatedClientNodes
       externalPeersForNode
+      participatingClientNodes
+      participatingNodes
+      participatingServerNodes
       peerPresharedKeyFile
       peerPrivateKeyFile
       peerPublicKeyFile
@@ -76,11 +76,11 @@
     ["echo ==== ${wgName} ===="]
     ++ map generatePeerKeys (attrNames allPeers)
     # All server-nodes need a psk for each other, but not reflexive.
-    ++ psksForPeerCombinations associatedServerNodes (n: filter (x: x != n) associatedServerNodes)
+    ++ psksForPeerCombinations participatingServerNodes (n: filter (x: x != n) participatingServerNodes)
     # Each server-node need a psk for all client nodes
-    ++ psksForPeerCombinations associatedServerNodes (_: associatedClientNodes)
+    ++ psksForPeerCombinations participatingServerNodes (_: participatingClientNodes)
     # Each server-node need a psk for all their external peers
-    ++ psksForPeerCombinations associatedServerNodes (n: attrNames (externalPeersForNode n));
+    ++ psksForPeerCombinations participatingServerNodes (n: attrNames (externalPeersForNode n));
 in
   pkgs.writeShellScript "generate-wireguard-keys" ''
     set -euo pipefail

@@ -210,11 +210,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1685019994,
-        "narHash": "sha256-81o6SKZPALvib21hIOMx2lIhFSs0mRy0PfPvg0zsfTk=",
+        "lastModified": 1685189510,
+        "narHash": "sha256-Hq5WF7zIixojPgvhgcd6MBvywwycVZ9wpK/8ogOyoaA=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "d1f04b0f365a34896a37d9015637796537ec88a3",
+        "rev": "2d963854ae2499193c0c72fd67435fee34d3e4fd",
         "type": "github"
       },
       "original": {
@@ -260,8 +260,8 @@
         ]
       },
       "locked": {
-        "lastModified": 1685048145,
-        "narHash": "sha256-IGvX/JZReujsF8dLJUr0+DdjplR5qeSOWKQbpXc9j9E=",
+        "lastModified": 1685202716,
+        "narHash": "sha256-1+YC2fjzYI0XKmKIC0jswSYYWCPx2gOAf4/6FgcP+9Q=",
         "type": "git",
         "url": "file:///root/projects/microvm.nix"
       },

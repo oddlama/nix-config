@@ -59,17 +59,18 @@
       # name to the link name.
       ++ mapNetworks (x: config.systemd.network.networks.${x}.matchConfig.Name or null)
     );
-  in {
-    zones = lib.mkForce {
-      mdns.interfaces = mdnsInterfaces;
-    };
+  in
+    lib.mkIf (mdnsInterfaces != []) {
+      zones = lib.mkForce {
+        mdns.interfaces = mdnsInterfaces;
+      };
 
-    rules = lib.mkForce {
-      mdns-to-local = {
-        from = ["mdns"];
-        to = ["local"];
-        allowedUDPPorts = [5353];
+      rules = lib.mkForce {
+        mdns-to-local = {
+          from = ["mdns"];
+          to = ["local"];
+          allowedUDPPorts = [5353];
+        };
       };
     };
-  };
 }

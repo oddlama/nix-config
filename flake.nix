@@ -96,7 +96,7 @@
         };
       in {
         nom = nixos "x86_64-linux";
-        #sentinel = nixos "x86_64-linux";
+        sentinel = nixos "x86_64-linux";
         ward = nixos "x86_64-linux";
         zackbiene = nixos "aarch64-linux";
       };

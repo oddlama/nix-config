@@ -49,6 +49,6 @@
   boot.kernelParams = ["console=ttyAML0,115200n8" "console=tty0"];
   console.earlySetup = true;
 
-  # Fails if there are not SMART devices
+  # Fails if there are no SMART devices
   services.smartd.enable = lib.mkForce false;
 }

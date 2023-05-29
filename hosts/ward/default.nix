@@ -28,7 +28,7 @@ in {
   extra.wireguard.proxy-sentinel.server = {
     host = "TODO REMOVE";
     port = 51443;
-    reservedAddresses = ["10.0.43.0/24" "fd43::/120"];
+    reservedAddresses = ["10.43.0.0/24" "fd00:43::/120"];
     openFirewallRules = ["untrusted-to-local"];
   };
 

@@ -6,7 +6,7 @@
   inherit (config.lib.net) cidr;
 
   iotCidrv4 = "10.90.0.0/24";
-  iotCidrv6 = "fd90::/64";
+  iotCidrv6 = "fd00:90::/64";
 in {
   networking.hostId = config.repo.secrets.local.networking.hostId;
 

@@ -201,8 +201,6 @@
             openFirewallRules = ["untrusted-to-local"];
           };
           linkName = "local-vms";
-          ipv4 = net.cidr.host vmCfg.id cfg.networking.wireguard.cidrv4;
-          ipv6 = net.cidr.host vmCfg.id cfg.networking.wireguard.cidrv6;
         };
       };
     };
@@ -246,7 +244,7 @@ in {
         cidrv6 = mkOption {
           type = net.types.cidrv6;
           description = mdDoc "The ipv6 network address range to use for internal vm traffic.";
-          default = "fddd::/64";
+          default = "fd00:172:31::/120";
         };
 
         port = mkOption {

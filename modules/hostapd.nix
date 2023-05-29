@@ -706,7 +706,7 @@ in {
                   };
 
                   macAcl = mkOption {
-                    default = "allow";
+                    default = "deny";
                     type = types.enum ["deny" "allow" "radius"];
                     apply = x:
                       getAttr x {

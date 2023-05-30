@@ -49,6 +49,8 @@
         echo "$privkey" | ${pkgs.wireguard-tools}/bin/wg pubkey > ${pubkeyFile}
         ${pkgs.rage}/bin/rage -e ${rageEncryptArgs} <<< "$privkey" > ${privkeyFile} \
           || { echo "[1;31merror:[m Failed to encrypt wireguard private key for peer ${peerName} on network ${wgName}!" >&2; exit 1; }
+      else
+        echo "[90mSkipping existing "${keyBasename}".{age,pub}[m"
       fi
     '';
 
@@ -65,6 +67,8 @@
         psk=$(${pkgs.wireguard-tools}/bin/wg genpsk)
         ${pkgs.rage}/bin/rage -e ${rageEncryptArgs} <<< "$psk" > ${pskFile} \
           || { echo "[1;31merror:[m Failed to encrypt wireguard psk for peers ${peer1} and ${peer2} on network ${wgName}!" >&2; exit 1; }
+      else
+        echo "[90mSkipping existing "${pskFile}"[m"
       fi
     '';
 

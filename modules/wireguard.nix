@@ -214,7 +214,7 @@
                 PresharedKeyFile = config.rekey.secrets.${peerPresharedKeySecret nodeName clientNode}.path;
                 AllowedIPs = map (net.cidr.make 128) clientCfg.addresses;
               }
-              // optionalAttrs clientCfg.keepalive {
+              // optionalAttrs clientCfg.client.keepalive {
                 PersistentKeepalive = 25;
               };
           })

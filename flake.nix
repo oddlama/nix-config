@@ -117,7 +117,7 @@
         (recursiveMergeAttrs
           (nixpkgs.lib.mapAttrsToList
             (import ./nix/generate-installer.nix inputs)
-            self.nodes))
+            self.colmenaNodes))
         packages
         ;
     }

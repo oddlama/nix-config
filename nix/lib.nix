@@ -131,6 +131,11 @@ in rec {
 
   disko = {
     gpt = {
+      partGrub = name: start: end: {
+        inherit name start end;
+        part-type = "primary";
+        flags = ["bios_grub"];
+      };
       partEfi = name: start: end: {
         inherit name start end;
         fs-type = "fat32";

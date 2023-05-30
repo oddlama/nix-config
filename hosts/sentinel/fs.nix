@@ -14,7 +14,8 @@
           type = "table";
           format = "gpt";
           partitions = [
-            (partEfi "efi" "0%" "512MiB")
+            (partGrub "grub" "0%" "1MiB")
+            (partEfi "bios" "1MiB" "512MiB")
             (partLuksZfs "rpool" "512MiB" "100%")
           ];
         };

@@ -34,7 +34,6 @@ This is my personal nix config.
     - `default.nix` Collects all apps and generates a definition for a specified system
     - `draw-graph.nix` (**WIP:** infrastructure graph renderer)
     - `format-secrets.nix` Runs the code formatter on the secret .nix files
-    - `generate-initrd-keys.nix` Generates initrd hostkeys for each host if they don't exist yet (for setup)
     - `generate-wireguard-keys.nix` Generates wireguard keys for each server-and-peer pair
     - `show-wireguard-qr.nix` Generates a QR code for external wireguard participants
   - `checks.nix` pre-commit-hooks for this repository
@@ -62,14 +61,24 @@ This is my personal nix config.
 - create hosts/<name>
 - fill net.nix
 - fill fs.nix (you need to know the device by-id paths in advance for formatting to work!)
-- generate-initrd-keys
-- generate-wireguard-keys
+- generate an initrd hostkey if necessary `ssh-keygen -t ed25519 -N "" -f /tmp/key; rage ...`
+- run generate-wireguard-keys
 
 #### Initial deploy
+
+A. Fresh pre-made installer ISO
 
 - Create a iso disk image for the system with `nix build --print-out-paths --no-link .#installer-image-<host>`
 - dd the resulting image to a stick and boot from it on the target
 - (Optional) ssh into the target (keys are already set up)
+
+B. Reusing any nixos-live iso
+
+- Boot from live-iso and setup ssh access by writing your key to `/root/.ssh/authorized_keys`
+- Copy installer package with `nix copy --to <target> .#installer-package-<host>`
+
+Afterwards:
+
 - Run `install-system` and reboot
 - Retrieve the new host identity by using `ssh-keyscan <host/ip> | grep -o 'ed25519.*' > host/<host>/secrets/host.pub`
 - (If the host has microvms, also retrieve their identities!)

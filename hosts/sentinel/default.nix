@@ -14,6 +14,4 @@
     ./net.nix
     ./nginx.nix
   ];
-
-  boot.loader.grub.devices = ["/dev/disk/by-id/${config.repo.secrets.local.disk.main}"];
 }

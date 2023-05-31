@@ -139,6 +139,7 @@ in {
         renew-timer = 1000;
         rebind-timer = 2000;
         interfaces-config = {
+          # TODO why does this bind other macvtaps?
           interfaces = ["lan-self"];
           service-sockets-max-retries = -1;
         };

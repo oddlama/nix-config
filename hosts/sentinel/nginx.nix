@@ -49,6 +49,7 @@ in {
       locations."/".proxyPass = "https://kanidm";
       # Allow using self-signed certs to satisfy kanidm's requirement
       # for TLS connections. (This is over wireguard anyway)
+      # TODO can we get rid of this?
       extraConfig = ''
         proxy_ssl_verify off;
       '';

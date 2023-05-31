@@ -76,12 +76,26 @@ in {
 
     networking.nftables.firewall = {
       zones = lib.mkForce {
-        local-vms.interfaces = ["local-vms"];
+        #local-vms.interfaces = ["local-vms"];
+        proxy-sentinel.interfaces = ["proxy-sentinel"];
+        sentinel = {
+          parent = "proxy-sentinel";
+          ipv4Addresses = [nodes.sentinel.config.extra.wireguard.proxy-sentinel.ipv4];
+          ipv6Addresses = [nodes.sentinel.config.extra.wireguard.proxy-sentinel.ipv6];
+        };
       };
 
+      #rules = lib.mkForce {
+      #  local-vms-to-local = {
+      #    from = ["local-vms"];
+      #    to = ["local"];
+      #    allowedTCPPorts = [8300];
+      #  };
+      #};
+
       rules = lib.mkForce {
-        local-vms-to-local = {
-          from = ["local-vms"];
+        sentinel-to-local = {
+          from = ["sentinel"];
           to = ["local"];
           allowedTCPPorts = [8300];
         };

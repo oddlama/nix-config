@@ -39,6 +39,7 @@
     };
   };
 
+  boot.loader.grub.devices = ["/dev/disk/by-id/${config.repo.secrets.local.disk.main}"];
   boot.initrd.luks.devices.enc-rpool.allowDiscards = true;
   fileSystems."/persist".neededForBoot = true;
 

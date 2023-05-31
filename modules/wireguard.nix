@@ -109,7 +109,7 @@
         # plus traffic for any of its external peers
         ++ attrValues snCfg.server.externalPeers
         # plus traffic for any client that is connected via that server
-        ++ map (n: (wgCfgOf n).addresses) (filter (n: (wgCfgOf n).client.via == serverNode) participatingClientNodes)
+        ++ concatMap (n: (wgCfgOf n).addresses) (filter (n: (wgCfgOf n).client.via == serverNode) participatingClientNodes)
       );
   in {
     assertions = [

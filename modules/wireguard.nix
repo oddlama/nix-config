@@ -228,9 +228,12 @@
           # We are a client node, so only include our via server.
           [
             {
-              wireguardPeerConfig = {
+              wireguardPeerConfig = let
+                snCfg = wgCfgOf wgCfg.client.via;
+              in {
                 PublicKey = builtins.readFile (peerPublicKeyPath wgCfg.client.via);
                 PresharedKeyFile = config.rekey.secrets.${peerPresharedKeySecret nodeName wgCfg.client.via}.path;
+                Endpoint = "${snCfg.server.host}:${toString snCfg.server.port}";
                 # Access to the whole network is routed through our entry node.
                 # TODO this should add any routedAddresses on ANY server in the network, right?
                 # if A entries via B and only C can route 0.0.0.0/0, does that work?

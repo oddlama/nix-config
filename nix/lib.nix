@@ -368,6 +368,7 @@ in rec {
         PresharedKey = $serverPsk
         AllowedIPs = ${concatStringsSep ", " networkCidrs}
         Endpoint = ${snCfg.server.host}:${toString snCfg.server.port}
+        PersistentKeepalive = 25
         EOF
       '';
   };

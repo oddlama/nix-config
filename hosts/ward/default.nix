@@ -25,13 +25,6 @@ in {
 
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" "r8169"];
 
-  extra.wireguard.proxy-sentinel.server = {
-    host = "TODO REMOVE";
-    port = 51443;
-    reservedAddresses = ["10.43.0.0/24" "fd00:43::/120"];
-    openFirewallRules = ["untrusted-to-local"];
-  };
-
   extra.microvms.vms = let
     defineVm = id: {
       inherit id;
@@ -73,7 +66,6 @@ in {
   microvm.vms.nginx.config = {
     lib,
     config,
-    parentNodeName,
     ...
   }: {
     rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN2TxWynLb8V9SP45kFqsoCWhe/dG8N1xWNuJG5VQndq";
@@ -113,11 +105,9 @@ in {
       serverSettings = {
         domain = authDomain;
         origin = "https://${config.services.kanidm.serverSettings.domain}";
-        #tls_chain = "/run/credentials/kanidm.service/fullchain.pem";
-        #tls_key = "/run/credentials/kanidm.service/key.pem";
         tls_chain = config.rekey.secrets."kanidm-self-signed.crt".path;
         tls_key = config.rekey.secrets."kanidm-self-signed.key".path;
-        bindaddress = "${config.extra.wireguard."${parentNodeName}-local-vms".ipv4}:8300";
+        bindaddress = "${config.extra.wireguard.proxy-sentinel.ipv4}:8300";
         trust_x_forward_for = true;
       };
     };

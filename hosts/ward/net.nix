@@ -84,6 +84,12 @@ in {
       };
       linkConfig.RequiredForOnline = "routable";
     };
+    # Remaining macvtap interfaces should not be touched.
+    "90-macvtap-ignore" = {
+      matchConfig.Kind = "macvtap";
+      linkConfig.ActivationPolicy = "manual";
+      linkConfig.Unmanaged = "yes";
+    };
   };
 
   # TODO mkForce nftables

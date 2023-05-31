@@ -32,7 +32,7 @@ in {
     type = types.attrsOf types.str;
   };
 
-  config = {
+  config = lib.mkIf (cfg != {}) {
     assertions = let
       duplicateMacs = extraLib.duplicates (attrValues cfg);
     in [
@@ -42,6 +42,7 @@ in {
       }
     ];
 
-    services.udev.packages = lib.mkIf (cfg != {}) [interfaceNamesUdevRules];
+    services.udev.packages = [interfaceNamesUdevRules];
+    boot.initrd.services.udev.packages = [interfaceNamesUdevRules];
   };
 }

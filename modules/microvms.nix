@@ -108,7 +108,7 @@
       inherit (node) pkgs;
       inherit (vmCfg) autostart;
       config = {config, ...}: {
-        imports = [microvm.microvm] ++ cfg.commonImports ++ node.imports;
+        imports = cfg.commonImports ++ node.imports;
 
         microvm = {
           hypervisor = mkDefault "cloud-hypervisor";

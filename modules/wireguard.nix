@@ -26,6 +26,7 @@
     mkOption
     optionalAttrs
     optionals
+    stringLength
     types
     ;
 
@@ -131,6 +132,10 @@
       {
         assertion = isClient -> ((wgCfgOf wgCfg.client.via).server.host != null);
         message = "${assertionPrefix}: The specified via node '${wgCfg.client.via}' must be a wireguard server.";
+      }
+      {
+        assertion = stringLength wgCfg.linkName < 16;
+        message = "${assertionPrefix}: The specified linkName '${wgCfg.linkName}' is too long (must be max 15 characters).";
       }
       # TODO at least 3 network participants and (externalPeers != {} or someone has via set to us) -> ip forwarding
     ];
@@ -331,7 +336,7 @@ in {
         };
 
         linkName = mkOption {
-          default = "wg-${name}";
+          default = name;
           type = types.str;
           description = mdDoc "The name for the created network interface.";
         };

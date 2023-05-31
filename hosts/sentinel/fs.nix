@@ -1,6 +1,5 @@
 {
   config,
-  lib,
   extraLib,
   pkgs,
   ...
@@ -40,6 +39,7 @@
     };
   };
 
+  boot.initrd.luks.devices.enc-rpool.allowDiscards = true;
   fileSystems."/persist".neededForBoot = true;
 
   # After importing the rpool, rollback the root system to be empty.

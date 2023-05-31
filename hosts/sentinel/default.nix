@@ -5,6 +5,8 @@
 }: {
   imports = [
     ../common/core
+    ../common/hardware/hetzner-cloud.nix
+    ../common/bios-boot.nix
     ../common/initrd-ssh.nix
     ../common/zfs.nix
 
@@ -13,11 +15,5 @@
     ./nginx.nix
   ];
 
-  boot.loader.timeout = lib.mkDefault 2;
-  boot.loader.grub = {
-    enable = true;
-    efiSupport = false;
-    devices = ["/dev/disk/by-id/${config.repo.secrets.local.disk.main}"];
-  };
-  console.earlySetup = true;
+  boot.loader.grub.devices = ["/dev/disk/by-id/${config.repo.secrets.local.disk.main}"];
 }

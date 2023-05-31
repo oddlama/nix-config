@@ -1,10 +1,10 @@
 {
+  config,
   extraLib,
   inputs,
   lib,
-  nodeName,
   nodePath,
-  options,
+  pkgs,
   ...
 }: {
   # IP address math library
@@ -290,7 +290,14 @@
   };
 
   boot = {
-    initrd.systemd.enable = true;
+    initrd.systemd = {
+      enable = true;
+      emergencyAccess = config.repo.secrets.global.root.hashedPassword;
+      # TODO good idea? targets.emergency.wants = ["network.target" "sshd.service"];
+      extraBin = with pkgs; {
+        ip = "${iproute2}/bin/ip";
+      };
+    };
 
     # Add "rd.systemd.unit=rescue.target" to debug initrd
     kernelParams = ["log_buf_len=10M"];

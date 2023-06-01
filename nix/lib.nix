@@ -189,7 +189,7 @@ in rec {
       filesystem = mountpoint: {
         type = "zfs_fs";
         options = {
-          canmount = "on";
+          canmount = "noauto";
           inherit mountpoint;
         };
         # Required to add dependencies for initrd

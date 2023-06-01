@@ -48,47 +48,42 @@
     # Ensure that the zfs dataset exists before it is mounted.
     systemd.services = let
       fsMountUnit = "${utils.escapeSystemdPath vmCfg.zfs.mountpoint}.mount";
-      poolDataset = "${vmCfg.zfs.pool}/${vmCfg.zfs.dataset}";
-      diskoDataset = config.disko.devices.zpool.${vmCfg.zfs.pool}.datasets.${vmCfg.zfs.dataset};
-      createDatasetScript = pkgs.writeShellScript "create-microvm-${vmName}-zfs-dataset" ''
-        export PATH=${makeBinPath (diskoDataset._pkgs pkgs)}":$PATH"
-        if ! ${pkgs.zfs}/bin/zfs list -H -o type ${escapeShellArg poolDataset} &>/dev/null ; then
-          ${diskoDataset._create {zpool = vmCfg.zfs.pool;}}
-        fi
-        chmod 700 ${escapeShellArg vmCfg.zfs.mountpoint}
-      '';
     in
       mkIf vmCfg.zfs.enable {
         # Ensure that the zfs dataset exists before it is mounted.
-        "zfs-ensure-${utils.escapeSystemdPath vmCfg.zfs.mountpoint}" = let
-          fsMountUnit = "${utils.escapeSystemdPath vmCfg.zfs.mountpoint}.mount";
-          poolDataset = "${vmCfg.zfs.pool}/${vmCfg.zfs.dataset}";
-          diskoDataset = config.disko.devices.zpool.${vmCfg.zfs.pool}.datasets.${vmCfg.zfs.dataset};
-          createDatasetScript = pkgs.writeShellScript "create-microvm-${vmName}-zfs-dataset" ''
+        "zfs-ensure-${utils.escapeSystemdPath vmCfg.zfs.mountpoint}" = {
+          wantedBy = [fsMountUnit];
+          before = [fsMountUnit];
+          after = [
+            "zfs-import-${utils.escapeSystemdPath vmCfg.zfs.pool}.service"
+            "zfs-mount.target"
+          ];
+          unitConfig.DefaultDependencies = "no";
+          serviceConfig.Type = "oneshot";
+          script = let
+            poolDataset = "${vmCfg.zfs.pool}/${vmCfg.zfs.dataset}";
+            diskoDataset = config.disko.devices.zpool.${vmCfg.zfs.pool}.datasets.${vmCfg.zfs.dataset};
+          in ''
             export PATH=${makeBinPath [pkgs.zfs]}":$PATH"
             if ! zfs list -H -o type ${escapeShellArg poolDataset} &>/dev/null ; then
               ${diskoDataset._create {zpool = vmCfg.zfs.pool;}}
             fi
+          '';
+        };
+
+        # Ensure that the zfs dataset has the correct permissions when mounted
+        "zfs-chown-${utils.escapeSystemdPath vmCfg.zfs.mountpoint}" = {
+          after = [fsMountUnit];
+          unitConfig.DefaultDependencies = "no";
+          serviceConfig.Type = "oneshot";
+          script = ''
             chmod 700 ${escapeShellArg vmCfg.zfs.mountpoint}
           '';
-        in
-          mkIf vmCfg.zfs.enable {
-            wantedBy = [fsMountUnit];
-            before = [fsMountUnit];
-            after = [
-              "zfs-import-${utils.escapeSystemdPath vmCfg.zfs.pool}.service"
-              "zfs-mount.target"
-            ];
-            unitConfig.DefaultDependencies = "no";
-            serviceConfig = {
-              Type = "oneshot";
-              ExecStart = "${createDatasetScript}";
-            };
-          };
+        };
 
         "microvm@${vmName}" = {
-          requires = [fsMountUnit];
-          after = [fsMountUnit];
+          requires = [fsMountUnit "zfs-chown-${utils.escapeSystemdPath vmCfg.zfs.mountpoint}.service"];
+          after = [fsMountUnit "zfs-chown-${utils.escapeSystemdPath vmCfg.zfs.mountpoint}.service"];
         };
       };
 

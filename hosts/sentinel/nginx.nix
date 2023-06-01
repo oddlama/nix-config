@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   nodes,
   ...
 }: let
@@ -34,10 +35,13 @@ in {
 
   services.nginx = let
     authDomain = nodes.ward-nginx.config.services.kanidm.serverSettings.domain;
+    authPort = lib.last (lib.splitString ":" nodes.ward-nginx.config.services.kanidm.serverSettings.bindaddress);
+    grafanaDomain = nodes.ward-test.config.services.grafana.settings.server.domain;
+    grafanaPort = toString nodes.ward-test.config.services.grafana.settings.server.http_port;
   in {
     enable = true;
-    upstreams."kanidm" = {
-      servers."${nodes.ward-nginx.config.extra.wireguard.proxy-sentinel.ipv4}:8300" = {};
+    upstreams.kanidm = {
+      servers."${nodes.ward-nginx.config.extra.wireguard.proxy-sentinel.ipv4}:${authPort}" = {};
       extraConfig = ''
         zone kanidm 64k;
         keepalive 2;
@@ -53,6 +57,19 @@ in {
       extraConfig = ''
         proxy_ssl_verify off;
       '';
+    };
+
+    upstreams.grafana = {
+      servers."${nodes.ward-test.config.extra.wireguard.proxy-sentinel.ipv4}:${grafanaPort}" = {};
+      extraConfig = ''
+        zone grafana 64k;
+        keepalive 2;
+      '';
+    };
+    virtualHosts.${grafanaDomain} = {
+      forceSSL = true;
+      useACMEHost = config.lib.extra.matchingWildcardCert grafanaDomain;
+      locations."/".proxyPass = "http://grafana";
     };
   };
 }

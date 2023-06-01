@@ -79,7 +79,7 @@
           directory = "/var/lib/cups";
           user = "root";
           group = "root";
-          mode = "0755";
+          mode = "0700";
         }
       ]
       ++ lib.optionals config.services.fail2ban.enable [
@@ -95,7 +95,7 @@
           directory = "/var/lib/postgresql";
           user = "postgres";
           group = "postgres";
-          mode = "0755";
+          mode = "0700";
         }
       ]
       ++ lib.optionals config.services.gitea.enable [
@@ -103,7 +103,15 @@
           directory = "/var/lib/gitea";
           user = "gitea";
           group = "gitea";
-          mode = "0755";
+          mode = "0700";
+        }
+      ]
+      ++ lib.optionals config.services.grafana.enable [
+        {
+          directory = config.services.grafana.dataDir;
+          user = "grafana";
+          group = "grafana";
+          mode = "0700";
         }
       ]
       ++ lib.optionals config.services.kanidm.enableServer [
@@ -111,7 +119,7 @@
           directory = "/var/lib/kanidm";
           user = "kanidm";
           group = "kanidm";
-          mode = "0755";
+          mode = "0700";
         }
       ];
   };

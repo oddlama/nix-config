@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  utils,
   ...
 }: let
   inherit (config.lib.net) cidr;
@@ -169,7 +170,7 @@ in {
     };
   };
 
-  systemd.services.kea-dhcp4-server.after = ["sys-subsystem-net-devices-lan.device"];
+  systemd.services.kea-dhcp4-server.after = ["sys-subsystem-net-devices-${utils.escapeSystemdPath "lan-self"}.device"];
 
   extra.microvms.networking = {
     baseMac = config.repo.secrets.local.networking.interfaces.lan.mac;

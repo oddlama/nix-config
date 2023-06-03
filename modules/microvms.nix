@@ -130,6 +130,12 @@
                 tag = "ro-store";
                 proto = "virtiofs";
               }
+              {
+                source = "/state/vms/${vmName}";
+                mountPoint = "/state";
+                tag = "state";
+                proto = "virtiofs";
+              }
             ]
             # Mount persistent data from the host
             ++ optional vmCfg.zfs.enable {
@@ -140,7 +146,8 @@
             };
         };
 
-        # FIXME this should be changed in microvm.nix to mkDefault instead of mkForce here
+        # FIXME this should be changed in microvm.nix to mkDefault in oder to not require mkForce here
+        fileSystems."/state".neededForBoot = mkForce true;
         fileSystems."/persist".neededForBoot = mkForce true;
 
         # Add a writable store overlay, but since this is always ephemeral
@@ -175,9 +182,6 @@
             linkConfig.RequiredForOnline = "routable";
           };
         };
-
-        # TODO change once microvms are compatible with stage-1 systemd
-        boot.initrd.systemd.enable = mkForce false;
 
         # TODO mkForce nftables
         networking.nftables.firewall = {

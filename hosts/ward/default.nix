@@ -8,6 +8,7 @@
   inherit (nodes.sentinel.config.repo.secrets.local) personalDomain;
   authDomain = "auth.${personalDomain}";
   grafanaDomain = "grafana.${personalDomain}";
+  lokiDir = "/var/lib/loki";
 in {
   imports = [
     nixos-hardware.common-cpu-intel
@@ -27,8 +28,7 @@ in {
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" "r8169"];
 
   extra.microvms.vms = let
-    defineVm = id: {
-      inherit id;
+    defineVm = {
       system = "x86_64-linux";
       autostart = true;
       zfs = {
@@ -37,27 +37,28 @@ in {
       };
     };
   in {
-    test = defineVm 11;
-    #ddclient = defineVm 11;
-    nginx = defineVm 12;
-    #kanidm = defineVm 13;
-    #gitea = defineVm 14;
-    #vaultwarden = defineVm 15;
-    #samba+wsdd = defineVm 16;
-    #fasten-health = defineVm 17;
-    #immich = defineVm 18;
-    #paperless = defineVm 19;
-    #radicale = defineVm 20;
-    #minecraft = defineVm 21;
+    test = defineVm;
+    #ddclient = defineVm;
+    nginx = defineVm;
+    loki = defineVm;
+    #kanidm = defineVm;
+    #gitea/forgejo = defineVm;
+    #vaultwarden = defineVm;
+    #samba+wsdd = defineVm;
+    #fasten-health = defineVm;
+    #immich = defineVm;
+    #paperless = defineVm;
+    #radicale = defineVm;
+    #minecraft = defineVm;
 
     #grafana
     #loki
 
-    #maddy = defineVm 19;
-    #anonaddy = defineVm 19;
+    #maddy = defineVm;
+    #anonaddy = defineVm;
 
-    #automatic1111 = defineVm 19;
-    #invokeai = defineVm 19;
+    #automatic1111 = defineVm;
+    #invokeai = defineVm;
   };
 
   microvm.vms.test.config = {
@@ -121,19 +122,16 @@ in {
           hide_version = true;
         };
 
-        auth = {
-          signout_redirect_url = "https://sso.nycode.dev/if/session-end/grafana/";
-          disable_login_form = true;
-        };
-
+        auth.disable_login_form = true;
         "auth.generic_oauth" = {
           enabled = true;
           name = "Kanidm";
           icon = "signin";
           allow_sign_up = true;
-          auto_login = false;
+          auto_login = true;
           client_id = "grafana";
-          client_secret = "$__file{${config.rekey.secrets.grafana-oauth-client-secret.path}}";
+          #client_secret = "$__file{${config.rekey.secrets.grafana-oauth-client-secret.path}}";
+          client_secret = "r6Yk5PPSXFfYDPpK6TRCzXK8y1rTrfcb8F7wvNC5rZpyHTMF"; # TODO temporary test not a real secret
           scopes = "openid profile email";
           login_attribute_path = "prefered_username";
           auth_url = "https://${authDomain}/ui/oauth2";
@@ -143,7 +141,32 @@ in {
           allow_assign_grafana_admin = true;
         };
 
-        # TODO provision
+        provision = {
+          enable = true;
+          datasources.settings = {
+            datasources = [
+              #{
+              #  name = "Prometheus";
+              #  type = "prometheus";
+              #  url = "http://127.0.0.1:9090";
+              #  orgId = 1;
+              #}
+              {
+                name = "Loki";
+                type = "loki";
+                url = "http://${nodes.ward-loki.config.extra.wireguard.proxy-sentinel.ipv4}:3100";
+                orgId = 1;
+              }
+            ];
+            # TODO necessary, wanted or trash?
+            # deleteDatasources = [
+            #   {
+            #     name = "Loki";
+            #     orgId = 1;
+            #   }
+            # ];
+          };
+        };
       };
     };
   };
@@ -217,6 +240,104 @@ in {
         uri = config.services.kanidm.serverSettings.origin;
         verify_ca = true;
         verify_hostnames = true;
+      };
+    };
+  };
+
+  microvm.vms.loki.config = {
+    lib,
+    config,
+    ...
+  }: {
+    rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN2TxWynLb8V9SP45kFqsoCWhe/dG8N1xWNuJG5VQndq";
+
+    extra.wireguard.proxy-sentinel.client.via = "sentinel";
+
+    networking.nftables.firewall = {
+      zones = lib.mkForce {
+        #local-vms.interfaces = ["local-vms"];
+        proxy-sentinel.interfaces = ["proxy-sentinel"];
+        sentinel = {
+          parent = "proxy-sentinel";
+          ipv4Addresses = [nodes.sentinel.config.extra.wireguard.proxy-sentinel.ipv4];
+          ipv6Addresses = [nodes.sentinel.config.extra.wireguard.proxy-sentinel.ipv6];
+        };
+      };
+
+      rules = lib.mkForce {
+        sentinel-to-local = {
+          from = ["sentinel"];
+          to = ["local"];
+          allowedTCPPorts = [3100];
+        };
+      };
+    };
+
+    services.loki = {
+      enable = true;
+      configuration = {
+        analytics.reporting_enabled = false;
+        auth_enabled = false;
+
+        server = {
+          http_listen_address = config.extra.wireguard.proxy-sentinel.ipv4;
+          http_listen_port = 3100;
+          log_level = "warn";
+        };
+
+        ingester = {
+          lifecycler = {
+            address = "127.0.0.1";
+            ring = {
+              kvstore.store = "inmemory";
+              replication_factor = 1;
+            };
+            final_sleep = "0s";
+          };
+          chunk_idle_period = "5m";
+          chunk_retain_period = "30s";
+        };
+
+        schema_config.configs = [
+          {
+            from = "2023-06-01";
+            store = "tsdb";
+            object_store = "filesystem";
+            schema = "v12";
+            index = {
+              prefix = "index_";
+              period = "24h";
+            };
+          }
+        ];
+
+        storage_config = {
+          tsdb_shipper = {
+            active_index_directory = "${lokiDir}/tsdb-index";
+            cache_location = "${lokiDir}/tsdb-cache";
+            cache_ttl = "24h";
+            shared_store = "filesystem";
+          };
+          filesystem.directory = "${lokiDir}/chunks";
+        };
+
+        # Do not accept new logs that are ingressed when they are actually already old.
+        limits_config = {
+          reject_old_samples = true;
+          reject_old_samples_max_age = "168h";
+        };
+
+        # Do not delete old logs automatically
+        table_manager = {
+          retention_deletes_enabled = false;
+          retention_period = "0s";
+        };
+
+        compactor = {
+          working_directory = lokiDir;
+          shared_store = "filesystem";
+          compactor_ring.kvstore.store = "inmemory";
+        };
       };
     };
   };

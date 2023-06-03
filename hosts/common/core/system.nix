@@ -256,6 +256,79 @@
             pre = lib.substring 0 1 added;
             suf = lib.substring 2 (-1) added;
           in "${pre}2${suf}";
+          # assignMacs :: mac (base) -> int (size) -> [int | mac] (reserved) -> [string] (hosts) -> [mac]
+          #
+          # Assigns a semi-stable MAC address starting in [base, base + 2^size) to each hostname.
+          # The algorithm is based on hashing (abusing sha256) with linear probing.
+          # The order of hosts doesn't matter. No mac (or offset) from the reserved list
+          # will be assigned.
+          #
+          # Examples:
+          #
+          # > net.mac.assignMacs "11:22:33:00:00:00" 24 [] ["a" "b" "c"]
+          # { a = "11:22:33:1b:bd:ca"; b = "11:22:33:39:59:4a"; c = "11:22:33:50:7a:e2"; }
+          #
+          # > net.mac.assignMacs "11:22:33:00:00:00" 24 [] ["a" "b" "c" "a-new-elem"]
+          # { a = "11:22:33:1b:bd:ca"; a-new-elem = "11:22:33:d6:5d:58"; b = "11:22:33:39:59:4a"; c = "11:22:33:50:7a:e2"; }
+          #
+          # > net.mac.assignMacs "11:22:33:00:00:00" 24 ["11:22:33:1b:bd:ca"] ["a" "b" "c"]
+          # { a = "11:22:33:1b:bd:cb"; b = "11:22:33:39:59:4a"; c = "11:22:33:50:7a:e2"; }
+          assignMacs = base: size: reserved: hosts: let
+            capacity = extraLib.pow 2 size;
+            baseAsInt = libWithNet.net.mac.diff base "00:00:00:00:00:00";
+            init = lib.unique (
+              lib.flip map reserved (x:
+                if builtins.typeOf x == "int"
+                then x
+                else libWithNet.net.mac.diff x base)
+            );
+            nHosts = builtins.length hosts;
+            nInit = builtins.length init;
+            # Pre-sort all hosts, to ensure ordering invariance
+            sortedHosts =
+              lib.warnIf
+              ((nInit + nHosts) > 0.3 * capacity)
+              "assignMacs: hash stability may be degraded since utilization is >30%"
+              (builtins.sort (a: b: a < b) hosts);
+            # Generates a hash (i.e. offset value) for a given hostname
+            hashElem = x:
+              builtins.bitAnd (capacity - 1)
+              (extraLib.hexToDec (builtins.substring 0 16 (builtins.hashString "sha256" x)));
+            # Do linear probing. Returns the first unused value at or after the given value.
+            probe = avoid: value:
+              if lib.elem value avoid
+              # Poor man's modulo, because nix has no modulo. Luckily we operate on a residue
+              # class of x modulo 2^n, so we can use bitAnd instead.
+              then probe avoid (builtins.bitAnd (capacity - 1) (value + 1))
+              else value;
+            # Hash a new element and avoid assigning any existing values.
+            assignOne = {
+              assigned,
+              used,
+            }: x: let
+              value = probe used (hashElem x);
+            in {
+              assigned =
+                assigned
+                // {
+                  ${x} = libWithNet.net.mac.add value base;
+                };
+              used = [value] ++ used;
+            };
+          in
+            assert lib.assertMsg (size >= 2 && size <= 62)
+            "assignMacs: size=${toString size} is not in [2, 62].";
+            assert lib.assertMsg (builtins.bitAnd (capacity - 1) baseAsInt == 0)
+            "assignMacs: the size=${toString size} least significant bits of the base mac address must be 0.";
+            assert lib.assertMsg (nHosts <= capacity - nInit)
+            "assignMacs: number of hosts (${toString nHosts}) must be <= capacity (${toString capacity}) - reserved (${toString nInit})";
+            # Assign an ip in the subnet to each element, in order
+              (lib.foldl' assignOne {
+                  assigned = {};
+                  used = init;
+                }
+                sortedHosts)
+              .assigned;
         };
       };
     };

@@ -91,7 +91,7 @@
       node = import ../nix/generate-node.nix inputs vmCfg.nodeName {
         inherit (vmCfg) system configPath;
       };
-      mac = net.mac.addPrivate vmCfg.id cfg.networking.baseMac;
+      mac = (net.mac.assignMacs "02:01:27:00:00:00" 24 [] (attrNames vms)).${vmName};
     in {
       # Allow children microvms to know which node is their parent
       specialArgs =
@@ -295,20 +295,6 @@ in {
             '';
           };
 
-          id = mkOption {
-            type =
-              types.addCheck types.int (x: x > 1)
-              // {
-                name = "positiveInt1";
-                description = "positive integer greater than 1";
-              };
-            description = mdDoc ''
-              A unique id for this VM. It will be used to derive a MAC address from the host's
-              base MAC, and may be used as a stable id by your MicroVM config if necessary.
-              Ids don't need to be contiguous.
-            '';
-          };
-
           networking = {
             mainLinkName = mkOption {
               type = types.str;
@@ -355,15 +341,6 @@ in {
 
   config = mkIf (vms != {}) (
     {
-      assertions = let
-        duplicateIds = extraLib.duplicates (mapAttrsToList (_: vmCfg: toString vmCfg.id) vms);
-      in [
-        {
-          assertion = duplicateIds == [];
-          message = "Duplicate MicroVM ids: ${concatStringsSep ", " duplicateIds}";
-        }
-      ];
-
       # Define a local wireguard server to communicate with vms securely
       extra.wireguard."${nodeName}-local-vms" = {
         server = {

@@ -32,6 +32,7 @@
                 postCreateHook = "zfs snapshot rpool/local/root@blank";
               };
             "local/nix" = filesystem "/nix";
+            "local/state" = filesystem "/state";
             "safe" = unmountable;
             "safe/persist" = filesystem "/persist";
           };
@@ -41,6 +42,9 @@
 
   boot.loader.grub.devices = ["/dev/disk/by-id/${config.repo.secrets.local.disk.main}"];
   boot.initrd.luks.devices.enc-rpool.allowDiscards = true;
+  # TODO remove once this is upstreamed
+  boot.initrd.systemd.services."zfs-import-rpool".after = ["cryptsetup.target"];
+  fileSystems."/state".neededForBoot = true;
   fileSystems."/persist".neededForBoot = true;
 
   # After importing the rpool, rollback the root system to be empty.

@@ -3,20 +3,45 @@
   lib,
   ...
 }: {
-  # State that should be kept across reboots, but is otherwise
-  # NOT important information in any way that needs to be backed up.
-  #environment.persistence."/local" = {
-  # with new dataset   --> ^-- , or without v--
-  #environment.persistence."/nix/state" = {
-  #  hideMounts = true;
-  #  files = [
-  #  ];
-  #  directories = [
-  #  ];
-  #};
-
   # Give agenix access to the hostkey independent of impermanence activation
   age.identityPaths = ["/persist/etc/ssh/ssh_host_ed25519_key"];
+
+  # State that should be kept across reboots, but is otherwise
+  # NOT important information in any way that needs to be backed up.
+  environment.persistence."/state" = {
+    hideMounts = true;
+    directories =
+      [
+        {
+          directory = "/var/lib/systemd";
+          user = "root";
+          group = "root";
+          mode = "0755";
+        }
+        {
+          directory = "/var/log";
+          user = "root";
+          group = "root";
+          mode = "0755";
+        }
+        #{ directory = "/tmp"; user = "root"; group = "root"; mode = "1777"; }
+        #{ directory = "/var/tmp"; user = "root"; group = "root"; mode = "1777"; }
+        {
+          directory = "/var/spool";
+          user = "root";
+          group = "root";
+          mode = "0755";
+        }
+      ]
+      ++ lib.optionals config.networking.wireless.iwd.enable [
+        {
+          directory = "/var/lib/iwd";
+          user = "root";
+          group = "root";
+          mode = "0700";
+        }
+      ];
+  };
 
   # State that should be kept forever, and backed up accordingly.
   environment.persistence."/persist" = {
@@ -33,37 +58,6 @@
           user = "root";
           group = "root";
           mode = "0755";
-        }
-        # TODO only persist across reboots, don't backup, once loki is used
-        {
-          directory = "/var/lib/systemd";
-          user = "root";
-          group = "root";
-          mode = "0755";
-        }
-        # TODO only persist across reboots, don't backup, once loki is used
-        {
-          directory = "/var/log";
-          user = "root";
-          group = "root";
-          mode = "0755";
-        }
-        #{ directory = "/tmp"; user = "root"; group = "root"; mode = "1777"; }
-        #{ directory = "/var/tmp"; user = "root"; group = "root"; mode = "1777"; }
-        # TODO only persist across reboots, don't backup, once loki is used
-        {
-          directory = "/var/spool";
-          user = "root";
-          group = "root";
-          mode = "0777";
-        }
-      ]
-      ++ lib.optionals config.networking.wireless.iwd.enable [
-        {
-          directory = "/var/lib/iwd";
-          user = "root";
-          group = "root";
-          mode = "0700";
         }
       ]
       ++ lib.optionals config.security.acme.acceptTerms [
@@ -100,9 +94,17 @@
       ]
       ++ lib.optionals config.services.gitea.enable [
         {
-          directory = "/var/lib/gitea";
+          directory = config.services.gitea.stateDir;
           user = "gitea";
           group = "gitea";
+          mode = "0700";
+        }
+      ]
+      ++ lib.optionals config.services.loki.enable [
+        {
+          directory = "/var/lib/loki";
+          user = "loki";
+          group = "loki";
           mode = "0700";
         }
       ]

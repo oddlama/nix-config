@@ -66,6 +66,9 @@ in {
       '';
     };
 
-    networking.firewall.allowedTCPPorts = optionals config.services.nginx.enable [80 443];
+    networking.firewall.allowedTCPPorts =
+      optionals
+      (config.services.caddy.enable || config.services.nginx.enable)
+      [80 443];
   };
 }

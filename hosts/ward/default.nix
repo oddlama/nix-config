@@ -157,6 +157,7 @@ in {
             name = "Loki";
             type = "loki";
             access = "proxy";
+            # TODO use public endpoint, and enable oauth token passing
             url = "http://${nodes."${parentNodeName}-loki".config.extra.wireguard."${parentNodeName}-local-vms".ipv4}:3100";
             orgId = 1;
           }
@@ -238,6 +239,8 @@ in {
     ...
   }: {
     rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICDDvvF3+KwfoZrPAUAt2HS7y5FM9S5Mr1iRkBUqoXno";
+
+    extra.wireguard.proxy-sentinel.client.via = "sentinel";
 
     networking.nftables.firewall = {
       zones = lib.mkForce {

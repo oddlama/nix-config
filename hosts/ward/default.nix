@@ -64,6 +64,7 @@ in {
   microvm.vms.test.config = {
     lib,
     config,
+    parentNodeName,
     ...
   }: {
     rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBXXjI6uB26xOF0DPy/QyLladoGIKfAtofyqPgIkCH/g";
@@ -138,35 +139,29 @@ in {
           token_url = "https://${authDomain}/oauth2/token";
           api_url = "https://${authDomain}/oauth2/openid/grafana/userinfo";
           use_pkce = true;
+          # Allow mapping oauth2 roles to server admin
           allow_assign_grafana_admin = true;
+          role_attribute_path = "contains(scopes[*], 'server_admin') && 'GrafanaAdmin' || contains(scopes[*], 'admin') && 'Admin' || contains(scopes[*], 'editor') && 'Editor' || 'Viewer'";
         };
+      };
 
-        provision = {
-          enable = true;
-          datasources.settings = {
-            datasources = [
-              #{
-              #  name = "Prometheus";
-              #  type = "prometheus";
-              #  url = "http://127.0.0.1:9090";
-              #  orgId = 1;
-              #}
-              {
-                name = "Loki";
-                type = "loki";
-                url = "http://${nodes.ward-loki.config.extra.wireguard.proxy-sentinel.ipv4}:3100";
-                orgId = 1;
-              }
-            ];
-            # TODO necessary, wanted or trash?
-            # deleteDatasources = [
-            #   {
-            #     name = "Loki";
-            #     orgId = 1;
-            #   }
-            # ];
-          };
-        };
+      provision = {
+        enable = true;
+        datasources.settings.datasources = [
+          #{
+          #  name = "Prometheus";
+          #  type = "prometheus";
+          #  url = "http://127.0.0.1:9090";
+          #  orgId = 1;
+          #}
+          {
+            name = "Loki";
+            type = "loki";
+            access = "proxy";
+            url = "http://${nodes."${parentNodeName}-loki".config.extra.wireguard."${parentNodeName}-local-vms".ipv4}:3100";
+            orgId = 1;
+          }
+        ];
       };
     };
   };
@@ -190,14 +185,6 @@ in {
           ipv6Addresses = [nodes.sentinel.config.extra.wireguard.proxy-sentinel.ipv6];
         };
       };
-
-      #rules = lib.mkForce {
-      #  local-vms-to-local = {
-      #    from = ["local-vms"];
-      #    to = ["local"];
-      #    allowedTCPPorts = [8300];
-      #  };
-      #};
 
       rules = lib.mkForce {
         sentinel-to-local = {
@@ -247,26 +234,24 @@ in {
   microvm.vms.loki.config = {
     lib,
     config,
+    parentNodeName,
     ...
   }: {
-    rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN2TxWynLb8V9SP45kFqsoCWhe/dG8N1xWNuJG5VQndq";
-
-    extra.wireguard.proxy-sentinel.client.via = "sentinel";
+    rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICDDvvF3+KwfoZrPAUAt2HS7y5FM9S5Mr1iRkBUqoXno";
 
     networking.nftables.firewall = {
       zones = lib.mkForce {
-        #local-vms.interfaces = ["local-vms"];
-        proxy-sentinel.interfaces = ["proxy-sentinel"];
-        sentinel = {
-          parent = "proxy-sentinel";
-          ipv4Addresses = [nodes.sentinel.config.extra.wireguard.proxy-sentinel.ipv4];
-          ipv6Addresses = [nodes.sentinel.config.extra.wireguard.proxy-sentinel.ipv6];
+        local-vms.interfaces = ["local-vms"];
+        grafana = {
+          parent = "local-vms";
+          ipv4Addresses = [nodes."${parentNodeName}-test".config.extra.wireguard."${parentNodeName}-local-vms".ipv4];
+          ipv6Addresses = [nodes."${parentNodeName}-test".config.extra.wireguard."${parentNodeName}-local-vms".ipv6];
         };
       };
 
       rules = lib.mkForce {
-        sentinel-to-local = {
-          from = ["sentinel"];
+        local-vms-to-local = {
+          from = ["grafana"];
           to = ["local"];
           allowedTCPPorts = [3100];
         };
@@ -280,7 +265,7 @@ in {
         auth_enabled = false;
 
         server = {
-          http_listen_address = config.extra.wireguard.proxy-sentinel.ipv4;
+          http_listen_address = config.extra.wireguard."${parentNodeName}-local-vms".ipv4;
           http_listen_port = 3100;
           log_level = "warn";
         };
@@ -340,5 +325,8 @@ in {
         };
       };
     };
+
+    # TODO this for other vms and services too?
+    systemd.services.loki.after = ["sys-subsystem-net-devices-${utils.escapeSystemdPath "local-vms"}.device"];
   };
 }

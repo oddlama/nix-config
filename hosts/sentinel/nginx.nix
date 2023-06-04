@@ -38,8 +38,14 @@ in {
     authPort = lib.last (lib.splitString ":" nodes.ward-nginx.config.services.kanidm.serverSettings.bindaddress);
     grafanaDomain = nodes.ward-test.config.services.grafana.settings.server.domain;
     grafanaPort = toString nodes.ward-test.config.services.grafana.settings.server.http_port;
+    lokiDomain = "loki.${personalDomain}";
+    lokiPort = toString nodes.ward-loki.config.services.loki.settings.server.http_port;
   in {
     enable = true;
+
+    # TODO move subconfigs to the relevant hosts instead.
+    # -> have something like merged config nodes.<name>....
+
     upstreams.kanidm = {
       servers."${nodes.ward-nginx.config.extra.wireguard.proxy-sentinel.ipv4}:${authPort}" = {};
       extraConfig = ''
@@ -70,6 +76,33 @@ in {
       forceSSL = true;
       useACMEHost = config.lib.extra.matchingWildcardCert grafanaDomain;
       locations."/".proxyPass = "http://grafana";
+    };
+
+    upstreams.loki = {
+      servers."${nodes.ward-loki.config.extra.wireguard.proxy-sentinel.ipv4}:${lokiPort}" = {};
+      extraConfig = ''
+        zone loki 64k;
+        keepalive 2;
+      '';
+    };
+    virtualHosts.${lokiDomain} = {
+      forceSSL = true;
+      useACMEHost = config.lib.extra.matchingWildcardCert lokiDomain;
+      locations."/" = {
+        proxyPass = "http://loki";
+        proxyWebsockets = true;
+        extraConfig = ''
+          access_log off;
+        '';
+      };
+      locations."/ready" = {
+        proxyPass = "http://loki";
+        proxyWebsockets = true;
+        extraConfig = ''
+          auth_request off;
+          access_log off;
+        '';
+      };
     };
   };
 }

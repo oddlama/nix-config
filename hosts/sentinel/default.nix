@@ -12,6 +12,7 @@
 
     ./fs.nix
     ./net.nix
-    ./nginx.nix
+    #./nginx.nix
+    ./caddy.nix
   ];
 }

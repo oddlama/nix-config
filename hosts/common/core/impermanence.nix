@@ -100,6 +100,14 @@
           mode = "0700";
         }
       ]
+      ++ lib.optionals config.services.caddy.enable [
+        {
+          directory = config.services.caddy.dataDir;
+          user = "caddy";
+          group = "caddy";
+          mode = "0700";
+        }
+      ]
       ++ lib.optionals config.services.loki.enable [
         {
           directory = "/var/lib/loki";

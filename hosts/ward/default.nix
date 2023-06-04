@@ -73,7 +73,6 @@ in {
 
     networking.nftables.firewall = {
       zones = lib.mkForce {
-        #local-vms.interfaces = ["local-vms"];
         proxy-sentinel.interfaces = ["proxy-sentinel"];
         sentinel = {
           parent = "proxy-sentinel";
@@ -241,17 +240,18 @@ in {
 
     networking.nftables.firewall = {
       zones = lib.mkForce {
-        local-vms.interfaces = ["local-vms"];
-        grafana = {
-          parent = "local-vms";
-          ipv4Addresses = [nodes."${parentNodeName}-test".config.extra.wireguard."${parentNodeName}-local-vms".ipv4];
-          ipv6Addresses = [nodes."${parentNodeName}-test".config.extra.wireguard."${parentNodeName}-local-vms".ipv6];
+        #local-vms.interfaces = ["local-vms"];
+        proxy-sentinel.interfaces = ["proxy-sentinel"];
+        sentinel = {
+          parent = "proxy-sentinel";
+          ipv4Addresses = [nodes.sentinel.config.extra.wireguard.proxy-sentinel.ipv4];
+          ipv6Addresses = [nodes.sentinel.config.extra.wireguard.proxy-sentinel.ipv6];
         };
       };
 
       rules = lib.mkForce {
-        local-vms-to-local = {
-          from = ["grafana"];
+        sentinel-to-local = {
+          from = ["sentinel"];
           to = ["local"];
           allowedTCPPorts = [3100];
         };
@@ -272,7 +272,7 @@ in {
 
         ingester = {
           lifecycler = {
-            address = "127.0.0.1";
+            interface_names = ["proxy-sentinel"];
             ring = {
               kvstore.store = "inmemory";
               replication_factor = 1;

@@ -34,6 +34,9 @@ in {
       }
     '';
 
+    # TODO move subconfigs to the relevant hosts instead.
+    # -> have something like merged config nodes.<name>....
+
     virtualHosts.${authDomain} = {
       useACMEHost = config.lib.extra.matchingWildcardCert authDomain;
       extraConfig = ''

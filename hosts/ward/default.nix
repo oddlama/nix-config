@@ -234,6 +234,7 @@ in {
     lib,
     config,
     parentNodeName,
+    utils,
     ...
   }: {
     rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICDDvvF3+KwfoZrPAUAt2HS7y5FM9S5Mr1iRkBUqoXno";

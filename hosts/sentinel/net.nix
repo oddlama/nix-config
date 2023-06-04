@@ -5,6 +5,7 @@
   ...
 }: {
   networking.hostId = config.repo.secrets.local.networking.hostId;
+  networking.domain = config.repo.secrets.local.personalDomain;
 
   boot.initrd.systemd.network = {
     enable = true;

@@ -6,8 +6,6 @@
 }: let
   inherit (config.repo.secrets.local) acme personalDomain;
 in {
-  networking.domain = personalDomain;
-
   rekey.secrets.acme-credentials = {
     file = ./secrets/acme-credentials.age;
     mode = "440";

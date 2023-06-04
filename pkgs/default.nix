@@ -1,0 +1,3 @@
+[
+  (import ./caddy.nix)
+]

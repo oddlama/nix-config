@@ -2,30 +2,12 @@
   config,
   lib,
   nodes,
+  pkgs,
   ...
 }: let
   inherit (config.repo.secrets.local) acme personalDomain;
 in {
-  networking.domain = personalDomain;
-
-  rekey.secrets.acme-credentials = {
-    file = ./secrets/acme-credentials.age;
-    mode = "440";
-    group = "acme";
-  };
-
-  security.acme = {
-    acceptTerms = true;
-    defaults = {
-      inherit (acme) email;
-      credentialsFile = config.rekey.secrets.acme-credentials.path;
-      dnsProvider = "cloudflare";
-      dnsPropagationCheck = true;
-      reloadServices = ["nginx"];
-    };
-  };
-  extra.acme.wildcardDomains = acme.domains;
-  users.groups.acme.members = ["nginx"];
+  users.groups.acme.members = ["caddy"];
 
   rekey.secrets."dhparams.pem" = {
     file = ./secrets/dhparams.pem.age;
@@ -41,5 +23,15 @@ in {
     lokiDomain = "loki.${personalDomain}";
     lokiPort = toString nodes.ward-loki.config.services.loki.settings.server.http_port;
   in {
+    enable = true;
+    package = pkgs.caddy.withPackages {
+      plugins = [
+        {
+          name = "github.com/greenpau/caddy-security";
+          version = "v1.1.18";
+        }
+      ];
+      vendorHash = "sha256-RqSXQihtY5+ACaMo7bLdhu1A+qcraexb1W/Ia+aUF1k";
+    };
   };
 }

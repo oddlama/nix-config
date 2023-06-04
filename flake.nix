@@ -125,9 +125,7 @@
       pkgs = import nixpkgs {
         localSystem = system;
         config.allowUnfree = true;
-        overlays = [
-          microvm.overlay
-        ];
+        overlays = [microvm.overlay] ++ import ./pkgs/default.nix;
       };
 
       apps =

@@ -8,6 +8,7 @@
   inherit (nodes.sentinel.config.repo.secrets.local) personalDomain;
   authDomain = "auth.${personalDomain}";
   grafanaDomain = "grafana.${personalDomain}";
+  lokiDomain = "loki.${personalDomain}";
   lokiDir = "/var/lib/loki";
 in {
   imports = [
@@ -96,6 +97,12 @@ in {
       group = "grafana";
     };
 
+    rekey.secrets.loki-basic-auth-password-grafana = {
+      file = ./secrets/loki-basic-auth-password-grafana.age;
+      mode = "440";
+      group = "grafana";
+    };
+
     services.grafana = {
       enable = true;
       settings = {
@@ -132,7 +139,7 @@ in {
           client_id = "grafana";
           #client_secret = "$__file{${config.rekey.secrets.grafana-oauth-client-secret.path}}";
           client_secret = "r6Yk5PPSXFfYDPpK6TRCzXK8y1rTrfcb8F7wvNC5rZpyHTMF"; # TODO temporary test not a real secret
-          scopes = "openid profile email";
+          scopes = "openid email profile";
           login_attribute_path = "prefered_username";
           auth_url = "https://${authDomain}/ui/oauth2";
           token_url = "https://${authDomain}/oauth2/token";
@@ -157,9 +164,11 @@ in {
             name = "Loki";
             type = "loki";
             access = "proxy";
-            # TODO use public endpoint, and enable oauth token passing
-            url = "http://${nodes."${parentNodeName}-loki".config.extra.wireguard."${parentNodeName}-local-vms".ipv4}:3100";
+            url = "https://${lokiDomain}";
             orgId = 1;
+            basicAuth = true;
+            basicAuthUser = "grafana";
+            secureJsonData.basicAuthPassword = "$__file{${config.rekey.secrets.loki-basic-auth-password-grafana.path}}";
           }
         ];
       };

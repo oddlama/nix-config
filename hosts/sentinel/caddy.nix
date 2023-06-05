@@ -9,6 +9,18 @@
 in {
   users.groups.acme.members = ["caddy"];
 
+  # TODO assertions = lib.flip lib.mapAttrsToList config.users.users
+  # TODO   (name: user: {
+  # TODO     assertion = user.uid != null;
+  # TODO     message = "non-deterministic uid detected for: ${name}";
+  # TODO   });
+
+  rekey.secrets.loki-basic-auth = {
+    file = ./secrets/loki-basic-auth.age;
+    mode = "440";
+    group = "caddy";
+  };
+
   services.caddy = let
     authDomain = nodes.ward-nginx.config.services.kanidm.serverSettings.domain;
     authPort = lib.last (lib.splitString ":" nodes.ward-nginx.config.services.kanidm.serverSettings.bindaddress);
@@ -28,11 +40,58 @@ in {
       vendorHash = "sha256-RqSXQihtY5+ACaMo7bLdhu1A+qcraexb1W/Ia+aUF1k";
     };
 
-    globalConfig = ''
-      servers {
-        metrics
-      }
-    '';
+    # globalConfig = ''
+    #   # servers {
+    #   #   metrics
+    #   # }
+
+    #   order authenticate before respond
+    #   order authorize before basicauth
+
+    #   security {
+    #     oauth identity provider generic {
+    #       realm generic
+    #       driver generic
+    #       client_id {env.GENERIC_CLIENT_ID}
+    #       client_secret {env.GENERIC_CLIENT_SECRET}
+    #       scopes openid email profile
+    #       base_auth_url https://${authDomain}/ui/oauth2
+    #       metadata_url https://${authDomain}/oauth2/openid/{env.GENERIC_CLIENT_ID}/.well-known/openid-configuration
+    #     }
+
+    #     authentication portal myportal {
+    #       crypto default token lifetime 3600
+    #       crypto key sign-verify {env.JWT_SHARED_KEY}
+    #       enable identity provider generic
+    #       cookie domain myfiosgateway.com
+    #       ui {
+    #         links {
+    #           "My Identity" "/whoami" icon "las la-user"
+    #         }
+    #       }
+
+    #       transform user {
+    #         match realm generic
+    #         action add role authp/user
+    #         ui link "File Server" https://assetq.myfiosgateway.com:8443/ icon "las la-star"
+    #       }
+
+    #       transform user {
+    #         match realm generic
+    #         match email greenpau@contoso.com
+    #         action add role authp/admin
+    #       }
+    #     }
+
+    #     authorization policy mypolicy {
+    #       set auth url https://auth.myfiosgateway.com:8443/oauth2/generic
+    #       crypto key verify {env.JWT_SHARED_KEY}
+    #       allow roles authp/admin authp/user
+    #       validate bearer header
+    #       inject headers with claims
+    #     }
+    #   }
+    # '';
 
     # TODO move subconfigs to the relevant hosts instead.
     # -> have something like merged config nodes.<name>....
@@ -41,7 +100,7 @@ in {
       useACMEHost = config.lib.extra.matchingWildcardCert authDomain;
       extraConfig = ''
         encode zstd gzip
-        reverse_proxy * {
+        reverse_proxy {
           to https://${nodes.ward-nginx.config.extra.wireguard.proxy-sentinel.ipv4}:${authPort}
           transport http {
             tls_insecure_skip_verify
@@ -54,7 +113,7 @@ in {
       useACMEHost = config.lib.extra.matchingWildcardCert grafanaDomain;
       extraConfig = ''
         encode zstd gzip
-        reverse_proxy * {
+        reverse_proxy {
           to http://${nodes.ward-test.config.extra.wireguard.proxy-sentinel.ipv4}:${grafanaPort}
         }
       '';
@@ -62,14 +121,14 @@ in {
 
     virtualHosts.${lokiDomain} = {
       useACMEHost = config.lib.extra.matchingWildcardCert lokiDomain;
-      # TODO disable access log
-      # TODO auth
-      # TODO no auth for /ready
       extraConfig = ''
         encode zstd gzip
-        reverse_proxy * {
+        skip_log
+        basicauth {
+          import ${config.rekey.secrets.loki-basic-auth.path}
+        }
+        reverse_proxy {
           to http://${nodes.ward-loki.config.extra.wireguard.proxy-sentinel.ipv4}:${lokiPort}
-          websocket
         }
       '';
     };

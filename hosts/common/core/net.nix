@@ -14,6 +14,9 @@
     mkForce
     ;
 in {
+  # TODO needed until https://github.com/NixOS/nixpkgs/issues/236146 is resolved
+  boot.initrd.network.flushBeforeStage2 = true;
+
   networking = {
     hostName = nodeName;
     useDHCP = mkForce false;

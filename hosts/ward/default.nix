@@ -253,7 +253,6 @@ in {
 
     networking.nftables.firewall = {
       zones = lib.mkForce {
-        #local-vms.interfaces = ["local-vms"];
         proxy-sentinel.interfaces = ["proxy-sentinel"];
         sentinel = {
           parent = "proxy-sentinel";
@@ -278,7 +277,7 @@ in {
         auth_enabled = false;
 
         server = {
-          http_listen_address = config.extra.wireguard."${parentNodeName}-local-vms".ipv4;
+          http_listen_address = config.extra.wireguard.proxy-sentinel.ipv4;
           http_listen_port = 3100;
           log_level = "warn";
         };
@@ -340,6 +339,6 @@ in {
     };
 
     # TODO this for other vms and services too?
-    systemd.services.loki.after = ["sys-subsystem-net-devices-${utils.escapeSystemdPath "local-vms"}.device"];
+    systemd.services.loki.after = ["sys-subsystem-net-devices-${utils.escapeSystemdPath "proxy-sentinel"}.device"];
   };
 }

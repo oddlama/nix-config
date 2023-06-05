@@ -37,7 +37,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nixpkgs.url = "github:NixOS/nixpkgs?rev=4e37b4e55b60fb7d43d2b62deb51032a489bcbe8";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     microvm = {
       url = "github:astro/microvm.nix";

@@ -3,18 +3,18 @@
   config,
   ...
 }: {
-  rekey.secrets."selfcert.crt" = {
-    file = ./secrets/selfcert.crt.age;
+  age.secrets."selfcert.crt" = {
+    rekeyFile = ./secrets/selfcert.crt.age;
     mode = "440";
     group = "nginx";
   };
-  rekey.secrets."selfcert.key" = {
-    file = ./secrets/selfcert.key.age;
+  age.secrets."selfcert.key" = {
+    rekeyFile = ./secrets/selfcert.key.age;
     mode = "440";
     group = "nginx";
   };
-  rekey.secrets."dhparams.pem" = {
-    file = ./secrets/dhparams.pem.age;
+  age.secrets."dhparams.pem" = {
+    rekeyFile = ./secrets/dhparams.pem.age;
     mode = "440";
     group = "nginx";
   };

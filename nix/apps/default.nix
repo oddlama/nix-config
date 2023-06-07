@@ -13,6 +13,7 @@
   apps = [
     ./draw-graph.nix
     ./format-secrets.nix
+    ./generate-secrets.nix
     ./generate-wireguard-keys.nix
     ./show-wireguard-qr.nix
   ];

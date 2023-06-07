@@ -33,7 +33,7 @@
     #SMTP_SECURITY = "force_tls";
     #SMTP_USERNAME={{ vaultwarden_smtp_username }};
     #SMTP_PASSWORD={{ vaultwarden_smtp_password }};
-    #environmentFile = config.rekey.secrets.vaultwarden-env.path;
+    #environmentFile = config.age.secrets.vaultwarden-env.path;
   };
 
   # Replace uses of old name
@@ -58,8 +58,8 @@
     virtualHosts."${config.repo.secrets.local.vaultwarden.domain}" = {
       forceSSL = true;
       #enableACME = true;
-      sslCertificate = config.rekey.secrets."selfcert.crt".path;
-      sslCertificateKey = config.rekey.secrets."selfcert.key".path;
+      sslCertificate = config.age.secrets."selfcert.crt".path;
+      sslCertificateKey = config.age.secrets."selfcert.key".path;
       locations."/" = {
         proxyPass = "http://vaultwarden";
         proxyWebsockets = true;

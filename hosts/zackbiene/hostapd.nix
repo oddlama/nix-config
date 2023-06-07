@@ -8,7 +8,7 @@
   disabledModules = ["services/networking/hostapd.nix"];
 
   # Associates each known client to a unique password
-  rekey.secrets.wifi-clients.file = ./secrets/wifi-clients.age;
+  age.secrets.wifi-clients.rekeyFile = ./secrets/wifi-clients.age;
 
   services.hostapd = {
     enable = true;
@@ -22,7 +22,7 @@
         macAcl = "allow";
         apIsolate = true;
         authentication = {
-          saePasswordsFile = config.rekey.secrets.wifi-clients.path;
+          saePasswordsFile = config.age.secrets.wifi-clients.path;
           saeAddToMacAllow = true;
           enableRecommendedPairwiseCiphers = true;
         };

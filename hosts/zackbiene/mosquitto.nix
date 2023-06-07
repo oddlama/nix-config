@@ -3,14 +3,14 @@
   config,
   ...
 }: {
-  rekey.secrets.mosquitto-pw-zigbee2mqtt = {
-    file = ./secrets/mosquitto-pw-zigbee2mqtt.age;
+  age.secrets.mosquitto-pw-zigbee2mqtt = {
+    rekeyFile = ./secrets/mosquitto-pw-zigbee2mqtt.age;
     mode = "440";
     owner = "zigbee2mqtt";
     group = "mosquitto";
   };
-  rekey.secrets.mosquitto-pw-home_assistant = {
-    file = ./secrets/mosquitto-pw-home_assistant.age;
+  age.secrets.mosquitto-pw-home_assistant = {
+    rekeyFile = ./secrets/mosquitto-pw-home_assistant.age;
     mode = "440";
     owner = "hass";
     group = "mosquitto";
@@ -24,11 +24,11 @@
         acl = ["pattern readwrite #"];
         users = {
           zigbee2mqtt = {
-            passwordFile = config.rekey.secrets.mosquitto-pw-zigbee2mqtt.path;
+            passwordFile = config.age.secrets.mosquitto-pw-zigbee2mqtt.path;
             acl = ["readwrite #"];
           };
           home_assistant = {
-            passwordFile = config.rekey.secrets.mosquitto-pw-home_assistant.path;
+            passwordFile = config.age.secrets.mosquitto-pw-home_assistant.path;
             acl = ["readwrite #"];
           };
         };

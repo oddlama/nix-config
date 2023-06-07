@@ -89,14 +89,14 @@ in {
     extraPackages = python3Packages: with python3Packages; [psycopg2];
   };
 
-  rekey.secrets."home-assistant-secrets.yaml" = {
-    file = ./secrets/home-assistant-secrets.yaml.age;
+  age.secrets."home-assistant-secrets.yaml" = {
+    rekeyFile = ./secrets/home-assistant-secrets.yaml.age;
     owner = "hass";
   };
 
   systemd.services.home-assistant = {
     preStart = lib.mkBefore ''
-      ln -sf ${config.rekey.secrets."home-assistant-secrets.yaml".path} ${config.services.home-assistant.configDir}/secrets.yaml
+      ln -sf ${config.age.secrets."home-assistant-secrets.yaml".path} ${config.services.home-assistant.configDir}/secrets.yaml
       touch -a ${config.services.home-assistant.configDir}/{automations,scenes,scripts,manual}.yaml
     '';
   };
@@ -118,8 +118,8 @@ in {
       serverAliases = ["192.168.1.21"]; # TODO remove later
       forceSSL = true;
       #enableACME = true;
-      sslCertificate = config.rekey.secrets."selfcert.crt".path;
-      sslCertificateKey = config.rekey.secrets."selfcert.key".path;
+      sslCertificate = config.age.secrets."selfcert.crt".path;
+      sslCertificateKey = config.age.secrets."selfcert.key".path;
       locations."/" = {
         proxyPass = "http://homeassistant";
         proxyWebsockets = true;

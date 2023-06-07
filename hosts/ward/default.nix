@@ -24,6 +24,7 @@ in {
 
     ./fs.nix
     ./net.nix
+    ./promtail.nix
   ];
 
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" "r8169"];
@@ -68,7 +69,7 @@ in {
     parentNodeName,
     ...
   }: {
-    rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBXXjI6uB26xOF0DPy/QyLladoGIKfAtofyqPgIkCH/g";
+    age.rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBXXjI6uB26xOF0DPy/QyLladoGIKfAtofyqPgIkCH/g";
 
     extra.wireguard.proxy-sentinel.client.via = "sentinel";
 
@@ -91,14 +92,14 @@ in {
       };
     };
 
-    rekey.secrets.grafana-secret-key = {
-      file = ./secrets/grafana-secret-key.age;
+    age.secrets.grafana-secret-key = {
+      rekeyFile = ./secrets/grafana-secret-key.age;
       mode = "440";
       group = "grafana";
     };
 
-    rekey.secrets.loki-basic-auth-password-grafana = {
-      file = ./secrets/loki-basic-auth-password-grafana.age;
+    age.secrets.loki-basic-auth-password = {
+      rekeyFile = ./secrets/loki-basic-auth-password.age;
       mode = "440";
       group = "grafana";
     };
@@ -116,14 +117,11 @@ in {
           enable_gzip = true;
           http_addr = config.extra.wireguard.proxy-sentinel.ipv4;
           http_port = 3001;
-          # cert_key = /etc/grafana/grafana.key;
-          # cert_file = /etc/grafana/grafana.crt;
-          # protocol = "https"
         };
 
         security = {
           disable_initial_admin_creation = true;
-          secret_key = "$__file{${config.rekey.secrets.grafana-secret-key.path}}";
+          secret_key = "$__file{${config.age.secrets.grafana-secret-key.path}}";
           cookie_secure = true;
           disable_gravatar = true;
           hide_version = true;
@@ -137,7 +135,7 @@ in {
           allow_sign_up = true;
           auto_login = true;
           client_id = "grafana";
-          #client_secret = "$__file{${config.rekey.secrets.grafana-oauth-client-secret.path}}";
+          #client_secret = "$__file{${config.age.secrets.grafana-oauth-client-secret.path}}";
           client_secret = "r6Yk5PPSXFfYDPpK6TRCzXK8y1rTrfcb8F7wvNC5rZpyHTMF"; # TODO temporary test not a real secret
           scopes = "openid email profile";
           login_attribute_path = "prefered_username";
@@ -167,8 +165,8 @@ in {
             url = "https://${lokiDomain}";
             orgId = 1;
             basicAuth = true;
-            basicAuthUser = "grafana";
-            secureJsonData.basicAuthPassword = "$__file{${config.rekey.secrets.loki-basic-auth-password-grafana.path}}";
+            basicAuthUser = "iB6UEjt4so4xWqei";
+            secureJsonData.basicAuthPassword = "$__file{${config.age.secrets.loki-basic-auth-password.path}}";
           }
         ];
       };
@@ -180,13 +178,12 @@ in {
     config,
     ...
   }: {
-    rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN2TxWynLb8V9SP45kFqsoCWhe/dG8N1xWNuJG5VQndq";
+    age.rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN2TxWynLb8V9SP45kFqsoCWhe/dG8N1xWNuJG5VQndq";
 
     extra.wireguard.proxy-sentinel.client.via = "sentinel";
 
     networking.nftables.firewall = {
       zones = lib.mkForce {
-        #local-vms.interfaces = ["local-vms"];
         proxy-sentinel.interfaces = ["proxy-sentinel"];
         sentinel = {
           parent = "proxy-sentinel";
@@ -204,13 +201,13 @@ in {
       };
     };
 
-    rekey.secrets."kanidm-self-signed.crt" = {
-      file = ./secrets/kanidm-self-signed.crt.age;
+    age.secrets."kanidm-self-signed.crt" = {
+      rekeyFile = ./secrets/kanidm-self-signed.crt.age;
       mode = "440";
       group = "kanidm";
     };
-    rekey.secrets."kanidm-self-signed.key" = {
-      file = ./secrets/kanidm-self-signed.key.age;
+    age.secrets."kanidm-self-signed.key" = {
+      rekeyFile = ./secrets/kanidm-self-signed.key.age;
       mode = "440";
       group = "kanidm";
     };
@@ -221,8 +218,8 @@ in {
       serverSettings = {
         domain = authDomain;
         origin = "https://${config.services.kanidm.serverSettings.domain}";
-        tls_chain = config.rekey.secrets."kanidm-self-signed.crt".path;
-        tls_key = config.rekey.secrets."kanidm-self-signed.key".path;
+        tls_chain = config.age.secrets."kanidm-self-signed.crt".path;
+        tls_key = config.age.secrets."kanidm-self-signed.key".path;
         bindaddress = "${config.extra.wireguard.proxy-sentinel.ipv4}:8300";
         trust_x_forward_for = true;
       };
@@ -247,7 +244,7 @@ in {
     utils,
     ...
   }: {
-    rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICDDvvF3+KwfoZrPAUAt2HS7y5FM9S5Mr1iRkBUqoXno";
+    age.rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICDDvvF3+KwfoZrPAUAt2HS7y5FM9S5Mr1iRkBUqoXno";
 
     extra.wireguard.proxy-sentinel.client.via = "sentinel";
 

@@ -26,8 +26,8 @@
     virtualHosts."${config.repo.secrets.local.esphome.domain}" = {
       forceSSL = true;
       #enableACME = true;
-      sslCertificate = config.rekey.secrets."selfcert.crt".path;
-      sslCertificateKey = config.rekey.secrets."selfcert.key".path;
+      sslCertificate = config.age.secrets."selfcert.crt".path;
+      sslCertificateKey = config.age.secrets."selfcert.key".path;
       locations."/" = {
         proxyPass = "http://esphome";
         proxyWebsockets = true;

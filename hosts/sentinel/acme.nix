@@ -1,8 +1,8 @@
 {config, ...}: let
   inherit (config.repo.secrets.local) acme;
 in {
-  rekey.secrets.acme-credentials = {
-    file = ./secrets/acme-credentials.age;
+  age.secrets.acme-credentials = {
+    rekeyFile = ./secrets/acme-credentials.age;
     mode = "440";
     group = "acme";
   };
@@ -11,7 +11,7 @@ in {
     acceptTerms = true;
     defaults = {
       inherit (acme) email;
-      credentialsFile = config.rekey.secrets.acme-credentials.path;
+      credentialsFile = config.age.secrets.acme-credentials.path;
       dnsProvider = "cloudflare";
       dnsPropagationCheck = true;
       reloadServices = ["nginx"];

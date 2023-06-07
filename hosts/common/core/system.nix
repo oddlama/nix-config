@@ -343,7 +343,7 @@
     // lib.optionalAttrs (nodePath != null && lib.pathExists local) {inherit local;};
 
   # Setup secret rekeying parameters
-  rekey = {
+  age.rekey = {
     inherit
       (inputs.self.secretsConfig)
       masterIdentities

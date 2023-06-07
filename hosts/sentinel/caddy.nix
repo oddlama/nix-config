@@ -15,8 +15,8 @@ in {
   # TODO     message = "non-deterministic uid detected for: ${name}";
   # TODO   });
 
-  rekey.secrets.loki-basic-auth = {
-    file = ./secrets/loki-basic-auth.age;
+  age.secrets.loki-basic-auth = {
+    rekeyFile = ./secrets/loki-basic-auth.age;
     mode = "440";
     group = "caddy";
   };
@@ -125,7 +125,7 @@ in {
         encode zstd gzip
         skip_log
         basicauth {
-          import ${config.rekey.secrets.loki-basic-auth.path}
+          import ${config.age.secrets.loki-basic-auth.path}
         }
         reverse_proxy {
           to http://${nodes.ward-loki.config.extra.wireguard.proxy-sentinel.ipv4}:${lokiPort}

@@ -152,19 +152,21 @@
       (genAttrs wgCfg.server.openFirewallRules (_: {allowedUDPPorts = [wgCfg.server.port];}))
     );
 
-    rekey.secrets =
+    age.secrets =
       concatAttrs (map
         (other: {
           ${peerPresharedKeySecret nodeName other} = {
-            file = peerPresharedKeyPath nodeName other;
+            rekeyFile = peerPresharedKeyPath nodeName other;
             owner = "systemd-network";
+            # TODO gen func
           };
         })
         neededPeers)
       // {
         ${peerPrivateKeySecret nodeName} = {
-          file = peerPrivateKeyPath nodeName;
+          rekeyFile = peerPrivateKeyPath nodeName;
           owner = "systemd-network";
+          # TODO gen func
         };
       };
 
@@ -176,7 +178,7 @@
       };
       wireguardConfig =
         {
-          PrivateKeyFile = config.rekey.secrets.${peerPrivateKeySecret nodeName}.path;
+          PrivateKeyFile = config.age.secrets.${peerPrivateKeySecret nodeName}.path;
         }
         // optionalAttrs isServer {
           ListenPort = wgCfg.server.port;
@@ -190,7 +192,7 @@
           in {
             wireguardPeerConfig = {
               PublicKey = builtins.readFile (peerPublicKeyPath serverNode);
-              PresharedKeyFile = config.rekey.secrets.${peerPresharedKeySecret nodeName serverNode}.path;
+              PresharedKeyFile = config.age.secrets.${peerPresharedKeySecret nodeName serverNode}.path;
               AllowedIPs = serverAllowedIPs serverNode;
               Endpoint = "${snCfg.server.host}:${toString snCfg.server.port}";
             };
@@ -202,7 +204,7 @@
           in {
             wireguardPeerConfig = {
               PublicKey = builtins.readFile (peerPublicKeyPath peerName);
-              PresharedKeyFile = config.rekey.secrets.${peerPresharedKeySecret nodeName peerName}.path;
+              PresharedKeyFile = config.age.secrets.${peerPresharedKeySecret nodeName peerName}.path;
               AllowedIPs = map (net.cidr.make 128) ips;
               # Connections to external peers should always be kept alive
               PersistentKeepalive = 25;
@@ -215,7 +217,7 @@
           in {
             wireguardPeerConfig = {
               PublicKey = builtins.readFile (peerPublicKeyPath clientNode);
-              PresharedKeyFile = config.rekey.secrets.${peerPresharedKeySecret nodeName clientNode}.path;
+              PresharedKeyFile = config.age.secrets.${peerPresharedKeySecret nodeName clientNode}.path;
               AllowedIPs = map (net.cidr.make 128) clientCfg.addresses;
             };
           })
@@ -229,7 +231,7 @@
               in
                 {
                   PublicKey = builtins.readFile (peerPublicKeyPath wgCfg.client.via);
-                  PresharedKeyFile = config.rekey.secrets.${peerPresharedKeySecret nodeName wgCfg.client.via}.path;
+                  PresharedKeyFile = config.age.secrets.${peerPresharedKeySecret nodeName wgCfg.client.via}.path;
                   Endpoint = "${snCfg.server.host}:${toString snCfg.server.port}";
                   # Access to the whole network is routed through our entry node.
                   # TODO this should add any routedAddresses on ANY server in the network, right?
@@ -414,6 +416,6 @@ in {
   };
 
   config = mkIf (cfg != {}) (mergeToplevelConfigs
-    ["assertions" "rekey" "networking" "systemd"]
+    ["assertions" "age" "networking" "systemd"]
     (mapAttrsToList configForNetwork cfg));
 }

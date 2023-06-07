@@ -4,13 +4,14 @@
   nodePath,
   ...
 }: {
-  rekey.secrets.initrd_host_ed25519_key.file = nodePath + "/secrets/initrd_host_ed25519_key.age";
+  # TODO generate script
+  age.secrets.initrd_host_ed25519_key.file = nodePath + "/secrets/initrd_host_ed25519_key.age";
 
   boot.initrd.network.enable = true;
   boot.initrd.network.ssh = {
     enable = true;
     port = 4;
-    hostKeys = [config.rekey.secrets.initrd_host_ed25519_key.path];
+    hostKeys = [config.age.secrets.initrd_host_ed25519_key.path];
   };
 
   # Make sure that there is always a valid initrd hostkey available that can be installed into
@@ -21,8 +22,8 @@
   # for the first time, and the secrets were rekeyed for the the new host identity.
   system.activationScripts.agenixEnsureInitrdHostkey = {
     text = ''
-      [[ -e ${config.rekey.secrets.initrd_host_ed25519_key.path} ]] \
-        || ${pkgs.openssh}/bin/ssh-keygen -t ed25519 -N "" -f ${config.rekey.secrets.initrd_host_ed25519_key.path}
+      [[ -e ${config.age.secrets.initrd_host_ed25519_key.path} ]] \
+        || ${pkgs.openssh}/bin/ssh-keygen -t ed25519 -N "" -f ${config.age.secrets.initrd_host_ed25519_key.path}
     '';
     deps = ["agenixInstall"];
   };

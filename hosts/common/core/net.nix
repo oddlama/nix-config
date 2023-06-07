@@ -15,7 +15,16 @@
     ;
 in {
   # TODO needed until https://github.com/NixOS/nixpkgs/issues/236146 is resolved
-  boot.initrd.network.flushBeforeStage2 = true;
+  boot.initrd.systemd = {
+    services.systemd-networkd = {
+      before = ["initrd-switch-root.target"];
+      conflicts = ["initrd-switch-root.target"];
+    };
+    sockets.systemd-networkd = {
+      before = ["initrd-switch-root.target"];
+      conflicts = ["initrd-switch-root.target"];
+    };
+  };
 
   networking = {
     hostName = nodeName;

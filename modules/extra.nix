@@ -58,7 +58,7 @@ in {
 
       # SSL config
       sslCiphers = "EECDH+AESGCM:EDH+AESGCM:!aNULL";
-      sslDhparam = config.rekey.secrets."dhparams.pem".path;
+      sslDhparam = config.age.secrets."dhparams.pem".path;
       commonHttpConfig = ''
         error_log syslog:server=unix:/dev/log;
         access_log syslog:server=unix:/dev/log;

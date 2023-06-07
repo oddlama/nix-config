@@ -3,8 +3,8 @@
   config,
   ...
 }: {
-  rekey.secrets."mosquitto-pw-zigbee2mqtt.yaml" = {
-    file = ./secrets/mosquitto-pw-zigbee2mqtt.yaml.age;
+  age.secrets."mosquitto-pw-zigbee2mqtt.yaml" = {
+    rekeyFile = ./secrets/mosquitto-pw-zigbee2mqtt.yaml.age;
     mode = "440";
     owner = "zigbee2mqtt";
     group = "mosquitto";
@@ -22,7 +22,7 @@
       mqtt = {
         server = "mqtt://localhost:1883";
         user = "zigbee2mqtt";
-        password = "!${config.rekey.secrets."mosquitto-pw-zigbee2mqtt.yaml".path} password";
+        password = "!${config.age.secrets."mosquitto-pw-zigbee2mqtt.yaml".path} password";
       };
       # TODO once 1.30.3 is out
       # frontend.host = "/run/zigbee2mqtt/zigbee2mqtt.sock";
@@ -41,8 +41,8 @@
     virtualHosts."${config.repo.secrets.local.zigbee2mqtt.domain}" = {
       forceSSL = true;
       #enableACME = true;
-      sslCertificate = config.rekey.secrets."selfcert.crt".path;
-      sslCertificateKey = config.rekey.secrets."selfcert.key".path;
+      sslCertificate = config.age.secrets."selfcert.crt".path;
+      sslCertificateKey = config.age.secrets."selfcert.key".path;
       locations."/".proxyPass = "http://zigbee2mqtt";
       # TODO dynamic definitions for the "local" network, IPv6
       extraConfig = ''

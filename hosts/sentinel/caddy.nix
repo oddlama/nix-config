@@ -15,8 +15,33 @@ in {
   # TODO     message = "non-deterministic uid detected for: ${name}";
   # TODO   });
 
-  age.secrets.loki-basic-auth = {
-    rekeyFile = ./secrets/loki-basic-auth.age;
+  age.secrets.loki-basic-auth-hashes = {
+    rekeyFile = ./secrets/loki-basic-auth-hashes.age;
+    generator = {
+      dependencies = [
+        # TODO allow defining these from other nodes like nodes.sentinel.age.secrets....dependenices = [];
+        nodes.ward.config.age.secrets.loki-basic-auth-password
+        nodes.ward-test.config.age.secrets.loki-basic-auth-password
+      ];
+      script = {
+        pkgs,
+        lib,
+        decrypt,
+        deps,
+        ...
+      }:
+        lib.flip lib.concatMapStrings deps ({
+          name,
+          host,
+          file,
+        }: ''
+          echo " -> Aggregating [32m"${lib.escapeShellArg host}":[m[33m"${lib.escapeShellArg name}"[m" >&2
+          echo -n ${lib.escapeShellArg host}" "
+          ${decrypt} ${lib.escapeShellArg file} \
+            | ${pkgs.caddy}/bin/caddy hash-password --algorithm bcrypt \
+            || die "Failure while aggregating caddy basic auth hashes"
+        '');
+    };
     mode = "440";
     group = "caddy";
   };
@@ -125,7 +150,7 @@ in {
         encode zstd gzip
         skip_log
         basicauth {
-          import ${config.age.secrets.loki-basic-auth.path}
+          import ${config.age.secrets.loki-basic-auth-hashes.path}
         }
         reverse_proxy {
           to http://${nodes.ward-loki.config.extra.wireguard.proxy-sentinel.ipv4}:${lokiPort}

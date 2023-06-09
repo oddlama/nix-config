@@ -11,9 +11,7 @@
 in {
   age.secrets.loki-basic-auth-password = {
     rekeyFile = ./secrets/loki-basic-auth-password.age;
-    file = ./aaa;
-    #file = ./aaa;
-    #generate = "alnum48";
+    generator = "alnum";
     mode = "440";
     group = "promtail";
   };
@@ -35,9 +33,7 @@ in {
 
       clients = [
         {
-          #basic_auth.username = nodeName;
-          #basic_auth.password_file = config.age.random-secrets.loki-basic-auth-password.path;
-          basic_auth.username = "iB6UEjt4so4xWqei";
+          basicAuthUser = nodeName;
           basic_auth.password_file = config.age.secrets.loki-basic-auth-password.path;
           url = "https://${lokiDomain}/loki/api/v1/push";
         }

@@ -2,6 +2,7 @@
   config,
   nodes,
   nixos-hardware,
+  nodeName,
   pkgs,
   ...
 }: let
@@ -100,6 +101,7 @@ in {
 
     age.secrets.loki-basic-auth-password = {
       rekeyFile = ./secrets/loki-basic-auth-password.age;
+      generator = "alnum";
       mode = "440";
       group = "grafana";
     };
@@ -165,7 +167,7 @@ in {
             url = "https://${lokiDomain}";
             orgId = 1;
             basicAuth = true;
-            basicAuthUser = "iB6UEjt4so4xWqei";
+            basicAuthUser = nodeName;
             secureJsonData.basicAuthPassword = "$__file{${config.age.secrets.loki-basic-auth-password.path}}";
           }
         ];

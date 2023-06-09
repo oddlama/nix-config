@@ -2,6 +2,7 @@
   pkgs = self.pkgs.${system};
   inherit
     (pkgs.lib)
+    flip
     nameValuePair
     removeSuffix
     ;
@@ -13,9 +14,12 @@
   apps = [
     ./draw-graph.nix
     ./format-secrets.nix
-    ./generate-secrets.nix
-    ./generate-wireguard-keys.nix
     ./show-wireguard-qr.nix
   ];
 in
-  builtins.listToAttrs (map (appPath: nameValuePair (removeSuffix ".nix" (builtins.baseNameOf appPath)) (mkApp (import appPath args))) apps)
+  builtins.listToAttrs (flip map apps (
+    appPath:
+      nameValuePair
+      (removeSuffix ".nix" (builtins.baseNameOf appPath))
+      (mkApp (import appPath args))
+  ))

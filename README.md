@@ -34,7 +34,6 @@ This is my personal nix config.
     - `default.nix` Collects all apps and generates a definition for a specified system
     - `draw-graph.nix` (**WIP:** infrastructure graph renderer)
     - `format-secrets.nix` Runs the code formatter on the secret .nix files
-    - `generate-wireguard-keys.nix` Generates wireguard keys for each server-and-peer pair
     - `show-wireguard-qr.nix` Generates a QR code for external wireguard participants
   - `checks.nix` pre-commit-hooks for this repository
   - `colmena.nix` Setup for distributed deployment using colmena (actually defines all NixOS hosts)
@@ -62,7 +61,7 @@ This is my personal nix config.
 - fill net.nix
 - fill fs.nix (you need to know the device by-id paths in advance for formatting to work!)
 - generate an initrd hostkey if necessary `ssh-keygen -t ed25519 -N "" -f /tmp/key; rage ...`
-- run generate-wireguard-keys
+- run generate-secrets
 
 #### Initial deploy
 
@@ -140,13 +139,30 @@ openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
 # Recover admin account (server must not be running)
 > systemctl stop kanidmd
 > kanidmd recover_account -c server.toml admin
-qU6UUdN5PbaetgtjKDttQx6D7XQwa0bBef5N5N0sjchg8gNz
+aM4Fk1dvM8AjyYzuVsFuxGkY4PqcVJaZwaHSfvFQGvFkH2Ez
 > systemctl start kanidmd
 # Login with recovered root account
-> kanidm login -D admin
+> kanidm login --name admin
 # Generate new credentials for idm_admin account
 > kanidm service-account credential generate -D admin idm_admin
-xbwa3tbUefdRBxKqbDYQfW2StqjZYa0zwp6FQRyWXy0dCYUb
+cVXKuT9LGpCN0RTjgjEG52bPFANxbPKbT9LjSb3H4K2NeW2g
+# Generate new oauth2 app for grafana
+> kanidm group create grafana-access
+> kanidm group create grafana-server-admins
+> kanidm group create grafana-admins
+> kanidm group create grafana-editors
+> kanidm system oauth2 create grafana "Grafana" https://grafana.${personalDomain}
+> kanidm system oauth2 update-scope-map grafana grafana-access openid profile email
+> kanidm system oauth2 update-sup-scope-map grafana grafana-server-admins server_admin
+> kanidm system oauth2 update-sup-scope-map grafana grafana-admins admin
+> kanidm system oauth2 update-sup-scope-map grafana grafana-editors editor
+> kanidm system oauth2 show-basic-secret grafana
+# Add new user
+> kanidm login --name idm_admin
+> kanidm person create myuser "My User"
+> kanidm person update myuser --legalname "Full Name" --mail "myuser@example.com"
+> kanidm group add_members grafana-access myuser
+> kanidm group add_members grafana-server-admins myuser
 
 
 ```

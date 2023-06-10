@@ -347,8 +347,8 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1685290091,
-        "narHash": "sha256-Shhg4EstYivzF10RuNDUKw3KGQOS5e7S7yHFnWuJQSI=",
+        "lastModified": 1686226982,
+        "narHash": "sha256-jsVFb4XxVdHvCA/OAuJA8tdPVf+jvm/eZLUZS4FoBGY=",
         "type": "git",
         "url": "file:///root/projects/nixpkgs-test"
       },

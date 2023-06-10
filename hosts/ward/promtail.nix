@@ -16,12 +16,6 @@ in {
     group = "promtail";
   };
 
-  #age.secrets.loki-basic-auth-password = {
-  #  generate = "alnum48";
-  #  mode = "440";
-  #  group = "promtail";
-  #};
-
   services.promtail = {
     enable = true;
     configuration = {

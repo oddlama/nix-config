@@ -171,9 +171,9 @@
             file,
             ...
           }: ''
-            ${pkgs.wireguard-tools}/bin/wg genkey \
-              | tee /dev/stdout \
-              | ${pkgs.wireguard-tools}/bin/wg pubkey > ${lib.escapeShellArg (lib.removeSuffix ".age" file + ".pub")}
+            priv=$(${pkgs.wireguard-tools}/bin/wg genkey)
+            ${pkgs.wireguard-tools}/bin/wg pubkey <<< "$priv" > ${lib.escapeShellArg (lib.removeSuffix ".age" file + ".pub")}
+            echo "$priv"
           '';
         };
       };

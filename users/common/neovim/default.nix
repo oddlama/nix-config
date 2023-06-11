@@ -4,19 +4,20 @@
   pkgs,
   ...
 }: {
-  programs.neovim = {
-    enable = true;
-    viAlias = true;
-    vimAlias = true;
-    vimdiffAlias = true;
-    withPython3 = true;
-    extraPython3Packages = pyPkgs: with pyPkgs; [openai];
-    withNodeJs = true;
-    defaultEditor = true;
+  imports = [
+    ./minimal.nix
+  ];
+
+  config = lib.mkIf (!config.home.minimal) {
+    programs.neovim = {
+      withPython3 = true;
+      extraPython3Packages = pyPkgs: with pyPkgs; [openai];
+      withNodeJs = true;
+    };
+    xdg.configFile = {
+      "nvim/lua".source = ./lua;
+      "nvim/init.lua".source = ./init.lua;
+    };
+    home.packages = with pkgs; [gcc shellcheck stylua];
   };
-  xdg.configFile = lib.mkIf (!config.home.minimal) {
-    "nvim/lua".source = ./lua;
-    "nvim/init.lua".source = ./init.lua;
-  };
-  home.packages = with pkgs; [gcc shellcheck stylua];
 }

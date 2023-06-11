@@ -36,8 +36,8 @@
     };
   in {
     kanidm = defaults;
-    grafana = defaultsa;
-    loki = defaults
+    grafana = defaults;
+    loki = defaults;
   };
 
   #ddclient = defineVm;

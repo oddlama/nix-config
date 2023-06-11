@@ -203,7 +203,7 @@
               lib.warnIf
               ((nInit + nHosts) > 0.3 * capacity)
               "assignIps: hash stability may be degraded since utilization is >30%"
-              (builtins.sort (a: b: a < b) hosts);
+              (builtins.sort builtins.lessThan hosts);
             # Generates a hash (i.e. offset value) for a given hostname
             hashElem = x:
               builtins.bitAnd (capacity - 1)
@@ -289,7 +289,7 @@
               lib.warnIf
               ((nInit + nHosts) > 0.3 * capacity)
               "assignMacs: hash stability may be degraded since utilization is >30%"
-              (builtins.sort (a: b: a < b) hosts);
+              (builtins.sort builtins.lessThan hosts);
             # Generates a hash (i.e. offset value) for a given hostname
             hashElem = x:
               builtins.bitAnd (capacity - 1)

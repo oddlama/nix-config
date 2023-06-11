@@ -31,11 +31,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1686343990,
-        "narHash": "sha256-/XkX73eAccg0l+2plLpDQHX4bl4sk2enSRwxUzuCcsc=",
+        "lastModified": 1686423850,
+        "narHash": "sha256-gssXzuMTkGxIcRnkri676GiOURsiBQ2eqLw7RX0kKmA=",
         "owner": "oddlama",
         "repo": "agenix-rekey",
-        "rev": "1dd5cf245e842c4b698b537a7097c417f2912efe",
+        "rev": "4c01269e9177e71f536dfe95a0cf21bedc58f797",
         "type": "github"
       },
       "original": {
@@ -210,11 +210,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1686342731,
-        "narHash": "sha256-GwCwviXcc5nrewuFwtsrxys8srrZcI+m8hdIGOt+fHY=",
+        "lastModified": 1686391840,
+        "narHash": "sha256-5S0APl6Mfm6a37taHwvuf11UHnAX0+PnoWQbsYbMUnc=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "0945875a2a20de314093b0f9d4d5448e9b4fdccb",
+        "rev": "0144ac418ef633bfc9dbd89b8c199ad3a617c59f",
         "type": "github"
       },
       "original": {
@@ -260,11 +260,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1686244773,
-        "narHash": "sha256-AtS5u3Qfrvtd1OiaRugEWKymbm6kwd7DGYiCiV8x3/U=",
+        "lastModified": 1686444102,
+        "narHash": "sha256-6J+pkUauanh6qfvyD80ngYZSyUmdmngMaO4TFY2Z0OA=",
         "owner": "astro",
         "repo": "microvm.nix",
-        "rev": "8f759ded0bbc7728738b064516a879b36ee115b9",
+        "rev": "551239936a1c86479f6026658c4d1f1a3635d286",
         "type": "github"
       },
       "original": {
@@ -311,11 +311,11 @@
     },
     "nixos-hardware": {
       "locked": {
-        "lastModified": 1686217350,
-        "narHash": "sha256-Nb9b3m/GEK8jyFsYfUkXGsqj6rH05GgJ2QWcNNbK7dw=",
+        "lastModified": 1686452266,
+        "narHash": "sha256-zLKiX0iu6jZFeZDpR1gE6fNyMr8eiM8GLnj9SoUCjFs=",
         "owner": "NixOS",
         "repo": "nixos-hardware",
-        "rev": "e4b34b90f27696ec3965fa15dcbacc351293dc67",
+        "rev": "2a807ad6e8dc458db08588b78cc3c0f0ec4ff321",
         "type": "github"
       },
       "original": {
@@ -347,8 +347,8 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1686226982,
-        "narHash": "sha256-jsVFb4XxVdHvCA/OAuJA8tdPVf+jvm/eZLUZS4FoBGY=",
+        "lastModified": 1686319658,
+        "narHash": "sha256-Xb+zN3LkyOEKH9ydJEy3h0ch0MNEf0G7tmPbhy6r080=",
         "type": "git",
         "url": "file:///root/projects/nixpkgs-test"
       },

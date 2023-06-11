@@ -15,8 +15,8 @@
     ../../../modules/extra.nix
     ../../../modules/interface-naming.nix
     ../../../modules/microvms.nix
-    ../../../modules/wireguard.nix
     ../../../modules/repo.nix
+    ../../../modules/wireguard.nix
   ];
 
   home-manager = {

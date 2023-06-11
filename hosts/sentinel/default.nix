@@ -14,6 +14,5 @@
     ./net.nix
     ./acme.nix
     ./caddy.nix
-    #./nginx.nix
   ];
 }

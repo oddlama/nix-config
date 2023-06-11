@@ -21,7 +21,7 @@ in {
       dependencies = [
         # TODO allow defining these from other nodes like nodes.sentinel.age.secrets....dependenices = [];
         nodes.ward.config.age.secrets.loki-basic-auth-password
-        nodes.ward-test.config.age.secrets.loki-basic-auth-password
+        nodes.ward-grafana.config.age.secrets.loki-basic-auth-password
       ];
       script = {
         pkgs,
@@ -47,10 +47,10 @@ in {
   };
 
   services.caddy = let
-    authDomain = nodes.ward-nginx.config.services.kanidm.serverSettings.domain;
-    authPort = lib.last (lib.splitString ":" nodes.ward-nginx.config.services.kanidm.serverSettings.bindaddress);
-    grafanaDomain = nodes.ward-test.config.services.grafana.settings.server.domain;
-    grafanaPort = toString nodes.ward-test.config.services.grafana.settings.server.http_port;
+    authDomain = nodes.ward-kanidm.config.services.kanidm.serverSettings.domain;
+    authPort = lib.last (lib.splitString ":" nodes.ward-kanidm.config.services.kanidm.serverSettings.bindaddress);
+    grafanaDomain = nodes.ward-grafana.config.services.grafana.settings.server.domain;
+    grafanaPort = toString nodes.ward-grafana.config.services.grafana.settings.server.http_port;
     lokiDomain = "loki.${personalDomain}";
     lokiPort = toString nodes.ward-loki.config.services.loki.configuration.server.http_listen_port;
   in {
@@ -120,13 +120,14 @@ in {
 
     # TODO move subconfigs to the relevant hosts instead.
     # -> have something like merged config nodes.<name>....
+    # -> needs to be in a way that doesn't trigger infinite recursion
 
     virtualHosts.${authDomain} = {
       useACMEHost = config.lib.extra.matchingWildcardCert authDomain;
       extraConfig = ''
         encode zstd gzip
         reverse_proxy {
-          to https://${nodes.ward-nginx.config.extra.wireguard.proxy-sentinel.ipv4}:${authPort}
+          to https://${nodes.ward-kanidm.config.extra.wireguard.proxy-sentinel.ipv4}:${authPort}
           transport http {
             tls_insecure_skip_verify
           }
@@ -139,7 +140,7 @@ in {
       extraConfig = ''
         encode zstd gzip
         reverse_proxy {
-          to http://${nodes.ward-test.config.extra.wireguard.proxy-sentinel.ipv4}:${grafanaPort}
+          to http://${nodes.ward-grafana.config.extra.wireguard.proxy-sentinel.ipv4}:${grafanaPort}
         }
       '';
     };

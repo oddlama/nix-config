@@ -12,9 +12,11 @@
 
     ../../../users/root
 
+    ../../../modules/distributed-config.nix
     ../../../modules/extra.nix
     ../../../modules/interface-naming.nix
     ../../../modules/microvms.nix
+    ../../../modules/promtail.nix
     ../../../modules/repo.nix
     ../../../modules/wireguard.nix
   ];

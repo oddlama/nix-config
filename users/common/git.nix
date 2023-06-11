@@ -20,6 +20,7 @@
       t = "tag -s -m ''";
       ci = "commit -v -S";
       cam = "commit -v -S --amend";
+      fixup = ''!f() { TARGET=$(git rev-parse \"$1\"); git commit --fixup=$TARGET ''${@:2} && EDITOR=true git rebase -i --gpg-sign --autostash --autosquash $TARGET^; }; f'';
     };
   };
 

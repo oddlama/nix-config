@@ -34,6 +34,7 @@ in {
     foreignConfigs = map (n: colmenaNodes.${n}.config.nodes.${nodeName} or {}) otherNodes;
     toplevelAttrs = ["age" "networking" "systemd" "services"];
   in
+    todo wrong, currently extension FROM microvms is not possible
     {
       assertions =
         map (n: {

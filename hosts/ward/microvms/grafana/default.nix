@@ -6,25 +6,12 @@
   utils,
   ...
 }: {
-  extra.wireguard.proxy-sentinel.client.via = "sentinel";
+  imports = [
+    ../../../../modules/proxy-via-sentinel.nix
+  ];
 
-  networking.nftables.firewall = {
-    zones = lib.mkForce {
-      proxy-sentinel.interfaces = ["proxy-sentinel"];
-      sentinel = {
-        parent = "proxy-sentinel";
-        ipv4Addresses = [nodes.sentinel.config.extra.wireguard.proxy-sentinel.ipv4];
-        ipv6Addresses = [nodes.sentinel.config.extra.wireguard.proxy-sentinel.ipv6];
-      };
-    };
-
-    rules = lib.mkForce {
-      sentinel-to-local = {
-        from = ["sentinel"];
-        to = ["local"];
-        allowedTCPPorts = [3001];
-      };
-    };
+  networking.nftables.firewall.rules = lib.mkForce {
+    sentinel-to-local.allowedTCPPorts = [3001];
   };
 
   age.secrets.grafana-secret-key = {
@@ -40,7 +27,10 @@
     group = "grafana";
   };
 
-  nodes.sentinel.age.secrets.loki-basic-auth-hashes.generator.dependencies = [config.age.secrets.grafana-loki-basic-auth-password];
+  nodes.sentinel.age.secrets.loki-basic-auth-hashes.generator.dependencies = [
+  aaa not wokring
+    config.age.secrets.grafana-loki-basic-auth-password
+  ];
 
   services.grafana = {
     enable = true;
@@ -104,7 +94,7 @@
           orgId = 1;
           basicAuth = true;
           basicAuthUser = nodeName;
-          secureJsonData.basicAuthPassword = "$__file{${config.age.secrets.loki-basic-auth-password.path}}";
+          secureJsonData.basicAuthPassword = "$__file{${config.age.secrets.grafana-loki-basic-auth-password.path}}";
         }
       ];
     };

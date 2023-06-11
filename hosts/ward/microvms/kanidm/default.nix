@@ -56,8 +56,8 @@
       enableServer = true;
       # enablePAM = true;
       serverSettings = {
-        domain = "auth.${nodes.sentinel.config.repo.secrets.local.personalDomain}";
-        origin = "https://${config.services.kanidm.serverSettings.domain}";
+        domain = nodes.sentinel.config.proxiedDomains.kanidm;
+        origin = "https://${nodes.sentinel.config.proxiedDomains.kanidm}";
         tls_chain = config.age.secrets."kanidm-self-signed.crt".path;
         tls_key = config.age.secrets."kanidm-self-signed.key".path;
         bindaddress = "${config.extra.wireguard.proxy-sentinel.ipv4}:8300";

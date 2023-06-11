@@ -16,14 +16,29 @@
 
     ./fs.nix
     ./net.nix
-    ./promtail.nix
-
-    ./kanidm.nix
-    ./grafana.nix
-    ./loki.nix
   ];
 
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" "r8169"];
+
+  extra.promtail = {
+    enable = true;
+    proxy = "sentinel";
+  };
+
+  extra.microvms.vms = let
+    defaults = {
+      system = "x86_64-linux";
+      autostart = true;
+      zfs = {
+        enable = true;
+        pool = "rpool";
+      };
+    };
+  in {
+    kanidm = defaults;
+    grafana = defaultsa;
+    loki = defaults
+  };
 
   #ddclient = defineVm;
   #kanidm = defineVm;
@@ -35,6 +50,8 @@
   #paperless = defineVm;
   #radicale = defineVm;
   #minecraft = defineVm;
+  #firefly
+  #adguardhome
 
   #prometheus
   #influxdb

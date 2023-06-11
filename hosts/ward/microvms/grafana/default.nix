@@ -59,8 +59,8 @@
         users.allow_sign_up = false;
 
         server = {
-          domain = "grafana.${nodes.sentinel.config.repo.secrets.local.personalDomain}";
-          root_url = "https://${config.services.grafana.settings.server.domain}";
+          domain = nodes.sentinel.config.proxiedDomains.grafana;
+          root_url = "https://${nodes.sentinel.config.proxiedDomains.grafana}";
           enforce_domain = true;
           enable_gzip = true;
           http_addr = config.extra.wireguard.proxy-sentinel.ipv4;
@@ -76,9 +76,7 @@
         };
 
         auth.disable_login_form = true;
-        "auth.generic_oauth" = let
-          authDomain = nodes.ward-kanidm.config.services.kanidm.serverSettings.domain;
-        in {
+        "auth.generic_oauth" = {
           enabled = true;
           name = "Kanidm";
           icon = "signin";
@@ -89,9 +87,9 @@
           client_secret = "r6Yk5PPSXFfYDPpK6TRCzXK8y1rTrfcb8F7wvNC5rZpyHTMF"; # TODO temporary test not a real secret
           scopes = "openid email profile";
           login_attribute_path = "prefered_username";
-          auth_url = "https://${authDomain}/ui/oauth2";
-          token_url = "https://${authDomain}/oauth2/token";
-          api_url = "https://${authDomain}/oauth2/openid/grafana/userinfo";
+          auth_url = "https://${nodes.sentinel.config.proxiedDomains.kanidm}/ui/oauth2";
+          token_url = "https://${nodes.sentinel.config.proxiedDomains.kanidm}/oauth2/token";
+          api_url = "https://${nodes.sentinel.config.proxiedDomains.kanidm}/oauth2/openid/grafana/userinfo";
           use_pkce = true;
           # Allow mapping oauth2 roles to server admin
           allow_assign_grafana_admin = true;
@@ -112,7 +110,7 @@
             name = "Loki";
             type = "loki";
             access = "proxy";
-            url = "https://loki.${nodes.sentinel.config.repo.secrets.local.personalDomain}";
+            url = "https://${nodes.sentinel.config.proxiedDomains.loki}";
             orgId = 1;
             basicAuth = true;
             basicAuthUser = nodeName;

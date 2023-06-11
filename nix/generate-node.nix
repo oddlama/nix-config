@@ -18,7 +18,7 @@ in {
   pkgs = self.pkgs.${nodeMeta.system};
   specialArgs = {
     inherit (nixpkgs) lib;
-    inherit (self) extraLib nodes stateVersion;
+    inherit (self) extraLib nodes stateVersion colmenaNodes;
     inherit inputs nodeName;
     # Only set the nodePath if it is an actual directory
     nodePath =

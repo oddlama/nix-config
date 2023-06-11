@@ -6,8 +6,6 @@
   utils,
   ...
 }: {
-  age.rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBXXjI6uB26xOF0DPy/QyLladoGIKfAtofyqPgIkCH/g";
-
   extra.wireguard.proxy-sentinel.client.via = "sentinel";
 
   networking.nftables.firewall = {
@@ -35,12 +33,14 @@
     group = "grafana";
   };
 
-  age.secrets.loki-basic-auth-password = {
-    rekeyFile = ./secrets/loki-basic-auth-password.age;
+  age.secrets.grafana-loki-basic-auth-password = {
+    rekeyFile = ./secrets/grafana-loki-basic-auth-password.age;
     generator = "alnum";
     mode = "440";
     group = "grafana";
   };
+
+  nodes.sentinel.age.secrets.loki-basic-auth-hashes.generator.dependencies = [config.age.secrets.grafana-loki-basic-auth-password];
 
   services.grafana = {
     enable = true;

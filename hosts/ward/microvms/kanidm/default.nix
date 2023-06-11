@@ -6,8 +6,6 @@
   utils,
   ...
 }: {
-  age.rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN2TxWynLb8V9SP45kFqsoCWhe/dG8N1xWNuJG5VQndq";
-
   extra.wireguard.proxy-sentinel.client.via = "sentinel";
 
   # TODO this as includable module?

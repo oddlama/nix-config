@@ -12,6 +12,8 @@
 
     ./fs.nix
     ./net.nix
+    ./proxied-domains.nix
+
     ./acme.nix
     ./caddy.nix
   ];

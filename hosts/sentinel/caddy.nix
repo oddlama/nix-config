@@ -2,11 +2,10 @@
   config,
   lib,
   nodes,
+  nodeName,
   pkgs,
   ...
-}: let
-  inherit (config.repo.secrets.local) acme personalDomain;
-in {
+}: {
   users.groups.acme.members = ["caddy"];
 
   # TODO assertions = lib.flip lib.mapAttrsToList config.users.users
@@ -18,11 +17,8 @@ in {
   age.secrets.loki-basic-auth-hashes = {
     rekeyFile = ./secrets/loki-basic-auth-hashes.age;
     generator = {
-      dependencies = [
-        # TODO allow defining these from other nodes like nodes.sentinel.age.secrets....dependenices = [];
-        nodes.ward.config.age.secrets.loki-basic-auth-password
-        nodes.ward-grafana.config.age.secrets.loki-basic-auth-password
-      ];
+      # Dependencies are added by the nodes that define passwords using
+      # distributed-config.
       script = {
         pkgs,
         lib,
@@ -46,14 +42,7 @@ in {
     group = "caddy";
   };
 
-  services.caddy = let
-    authDomain = nodes.ward-kanidm.config.services.kanidm.serverSettings.domain;
-    authPort = lib.last (lib.splitString ":" nodes.ward-kanidm.config.services.kanidm.serverSettings.bindaddress);
-    grafanaDomain = nodes.ward-grafana.config.services.grafana.settings.server.domain;
-    grafanaPort = toString nodes.ward-grafana.config.services.grafana.settings.server.http_port;
-    lokiDomain = "loki.${personalDomain}";
-    lokiPort = toString nodes.ward-loki.config.services.loki.configuration.server.http_listen_port;
-  in {
+  services.caddy = {
     enable = true;
     package = pkgs.caddy.withPackages {
       plugins = [
@@ -122,12 +111,12 @@ in {
     # -> have something like merged config nodes.<name>....
     # -> needs to be in a way that doesn't trigger infinite recursion
 
-    virtualHosts.${authDomain} = {
-      useACMEHost = config.lib.extra.matchingWildcardCert authDomain;
+    virtualHosts.${config.proxyDomains.kanidm} = {
+      useACMEHost = config.lib.extra.matchingWildcardCert config.proxyDomains.kanidm;
       extraConfig = ''
         encode zstd gzip
         reverse_proxy {
-          to https://${nodes.ward-kanidm.config.extra.wireguard.proxy-sentinel.ipv4}:${authPort}
+          to https://${nodes.ward-kanidm.config.extra.wireguard.proxy-sentinel.ipv4}:${lib.last (lib.splitString ":" nodes.ward-kanidm.config.services.kanidm.serverSettings.bindaddress)}
           transport http {
             tls_insecure_skip_verify
           }
@@ -135,18 +124,18 @@ in {
       '';
     };
 
-    virtualHosts.${grafanaDomain} = {
-      useACMEHost = config.lib.extra.matchingWildcardCert grafanaDomain;
+    virtualHosts.${config.proxyDomains.grafana} = {
+      useACMEHost = config.lib.extra.matchingWildcardCert config.proxyDomains.grafana;
       extraConfig = ''
         encode zstd gzip
         reverse_proxy {
-          to http://${nodes.ward-grafana.config.extra.wireguard.proxy-sentinel.ipv4}:${grafanaPort}
+          to http://${nodes.ward-grafana.config.extra.wireguard.proxy-sentinel.ipv4}:${toString nodes.ward-grafana.config.services.grafana.settings.server.http_port}
         }
       '';
     };
 
-    virtualHosts.${lokiDomain} = {
-      useACMEHost = config.lib.extra.matchingWildcardCert lokiDomain;
+    virtualHosts.${config.proxyDomains.loki} = {
+      useACMEHost = config.lib.extra.matchingWildcardCert config.proxyDomains.loki;
       extraConfig = ''
         encode zstd gzip
         skip_log
@@ -154,7 +143,7 @@ in {
           import ${config.age.secrets.loki-basic-auth-hashes.path}
         }
         reverse_proxy {
-          to http://${nodes.ward-loki.config.extra.wireguard.proxy-sentinel.ipv4}:${lokiPort}
+          to http://${nodes.ward-loki.config.extra.wireguard.proxy-sentinel.ipv4}:${toString nodes.ward-loki.config.services.loki.configuration.server.http_listen_port}
         }
       '';
     };

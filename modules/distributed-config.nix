@@ -10,12 +10,13 @@
     (lib)
     attrNames
     concatMap
+    elem
     filter
     mdDoc
     mkOption
+    mkOptionType
+    optionalAttrs
     types
-    unique
-    subtractLists
     ;
 
   inherit
@@ -24,24 +25,24 @@
     ;
 in {
   options.nodes = mkOption {
-    type = types.attrsOf types.unspecified;
+    type = types.attrsOf (mkOptionType {
+      name = "Toplevel NixOS config";
+      merge = loc: map (x: x.value);
+    });
     default = {};
     description = mdDoc "Allows extending the configuration of other machines.";
   };
 
   config = let
+    isColmenaNode = elem nodeName (attrNames colmenaNodes);
     otherNodes = filter (n: n != nodeName) (attrNames colmenaNodes);
-    foreignConfigs = map (n: colmenaNodes.${n}.config.nodes.${nodeName} or {}) otherNodes;
+    foreignConfigs = concatMap (n: colmenaNodes.${n}.config.nodes.${nodeName} or []) otherNodes;
     toplevelAttrs = ["age" "networking" "systemd" "services"];
   in
-    todo wrong, currently extension FROM microvms is not possible
-    {
-      assertions =
-        map (n: {
-          assertion = false;
-          message = "Cannot extend configuration using nodes.${n} because the given node is not a registered or not a first-class nixos node (microvm's can't be extended right now).";
-        })
-        (subtractLists (attrNames colmenaNodes) (attrNames config.nodes));
-    }
-    // mergeToplevelConfigs toplevelAttrs foreignConfigs;
+    optionalAttrs isColmenaNode (mergeToplevelConfigs toplevelAttrs (
+      foreignConfigs
+      # Also allow extending ourselves, in case some attributes from depenent
+      # configurations such as containers or microvms are merged to the host
+      ++ [config.nodes.${nodeName} or {}]
+    ));
 }

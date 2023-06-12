@@ -87,6 +87,10 @@
         };
       };
 
+    # Propagate node expansions, since doing this directly in the
+    # distributed-config module would cause infinite recursion.
+    nodes = mkMerge config.microvm.vms.${vmName}.config.options.nodes.definitions;
+
     microvm.vms.${vmName} = let
       node = import ../nix/generate-node.nix inputs vmCfg.nodeName {
         inherit (vmCfg) system configPath;
@@ -360,6 +364,6 @@ in {
         ipv6 = net.cidr.host 1 cfg.networking.wireguard.cidrv6;
       };
     }
-    // extraLib.mergeToplevelConfigs ["disko" "microvm" "systemd"] (mapAttrsToList microvmConfig vms)
+    // extraLib.mergeToplevelConfigs ["nodes" "disko" "microvm" "systemd"] (mapAttrsToList microvmConfig vms)
   );
 }

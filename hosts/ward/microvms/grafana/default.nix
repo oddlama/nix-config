@@ -28,7 +28,6 @@
   };
 
   nodes.sentinel.age.secrets.loki-basic-auth-hashes.generator.dependencies = [
-  aaa not wokring
     config.age.secrets.grafana-loki-basic-auth-password
   ];
 

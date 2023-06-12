@@ -31,11 +31,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1686423850,
-        "narHash": "sha256-gssXzuMTkGxIcRnkri676GiOURsiBQ2eqLw7RX0kKmA=",
+        "lastModified": 1686610839,
+        "narHash": "sha256-rK3m7hth4Nc7Xmi83Mf4j53s1Ym9mJr312g7ct4i5Ck=",
         "owner": "oddlama",
         "repo": "agenix-rekey",
-        "rev": "4c01269e9177e71f536dfe95a0cf21bedc58f797",
+        "rev": "cd77cb3bd43ece5b5fb1517d4b32338ac3cc5798",
         "type": "github"
       },
       "original": {
@@ -119,11 +119,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1686222354,
-        "narHash": "sha256-dtqnAwzucKZv54dTrLetIXhOavUrCsdqOe+JtFH9riE=",
+        "lastModified": 1686545384,
+        "narHash": "sha256-XniReOaWLjubBAXk6Wx2Ny6/b9Xdsx3viLhhs7ycuWw=",
         "owner": "nix-community",
         "repo": "disko",
-        "rev": "5d9f362aecd7a4c2e8a3bf2afddb49051988cab9",
+        "rev": "55eea2030a42845102334eb29f054f0c6604a32c",
         "type": "github"
       },
       "original": {
@@ -210,11 +210,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1686391840,
-        "narHash": "sha256-5S0APl6Mfm6a37taHwvuf11UHnAX0+PnoWQbsYbMUnc=",
+        "lastModified": 1686604884,
+        "narHash": "sha256-AkfxSmGGvNMtyXt1us9Lm8cMeIwqxpkSTeNeBQ00SL8=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "0144ac418ef633bfc9dbd89b8c199ad3a617c59f",
+        "rev": "b01eb1eb3b579c74e6a4189ef33cc3fa24c40613",
         "type": "github"
       },
       "original": {

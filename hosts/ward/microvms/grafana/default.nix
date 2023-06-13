@@ -5,7 +5,10 @@
   nodes,
   utils,
   ...
-}: {
+}: let
+  sentinelCfg = nodes.sentinel.config;
+  grafanaDomain = "grafana.${sentinelCfg.repo.secrets.local.personalDomain}";
+in {
   imports = [
     ../../../../modules/proxy-via-sentinel.nix
   ];
@@ -27,9 +30,23 @@
     group = "grafana";
   };
 
-  nodes.sentinel.age.secrets.loki-basic-auth-hashes.generator.dependencies = [
-    config.age.secrets.grafana-loki-basic-auth-password
-  ];
+  nodes.sentinel = {
+    age.secrets.loki-basic-auth-hashes.generator.dependencies = [
+      config.age.secrets.grafana-loki-basic-auth-password
+    ];
+
+    proxiedDomains.grafana = grafanaDomain;
+
+    services.caddy.virtualHosts.${grafanaDomain} = {
+      useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert grafanaDomain;
+      extraConfig = ''
+        encode zstd gzip
+        reverse_proxy {
+          to http://${config.services.grafana.settings.server.http_addr}:${toString config.services.grafana.settings.server.http_port}
+        }
+      '';
+    };
+  };
 
   services.grafana = {
     enable = true;
@@ -38,8 +55,8 @@
       users.allow_sign_up = false;
 
       server = {
-        domain = nodes.sentinel.config.proxiedDomains.grafana;
-        root_url = "https://${nodes.sentinel.config.proxiedDomains.grafana}";
+        domain = grafanaDomain;
+        root_url = "https://${grafanaDomain}";
         enforce_domain = true;
         enable_gzip = true;
         http_addr = config.extra.wireguard.proxy-sentinel.ipv4;
@@ -66,9 +83,9 @@
         client_secret = "r6Yk5PPSXFfYDPpK6TRCzXK8y1rTrfcb8F7wvNC5rZpyHTMF"; # TODO temporary test not a real secret
         scopes = "openid email profile";
         login_attribute_path = "prefered_username";
-        auth_url = "https://${nodes.sentinel.config.proxiedDomains.kanidm}/ui/oauth2";
-        token_url = "https://${nodes.sentinel.config.proxiedDomains.kanidm}/oauth2/token";
-        api_url = "https://${nodes.sentinel.config.proxiedDomains.kanidm}/oauth2/openid/grafana/userinfo";
+        auth_url = "https://${sentinelCfg.proxiedDomains.kanidm}/ui/oauth2";
+        token_url = "https://${sentinelCfg.proxiedDomains.kanidm}/oauth2/token";
+        api_url = "https://${sentinelCfg.proxiedDomains.kanidm}/oauth2/openid/grafana/userinfo";
         use_pkce = true;
         # Allow mapping oauth2 roles to server admin
         allow_assign_grafana_admin = true;
@@ -89,7 +106,7 @@
           name = "Loki";
           type = "loki";
           access = "proxy";
-          url = "https://${nodes.sentinel.config.proxiedDomains.loki}";
+          url = "https://${sentinelCfg.proxiedDomains.loki}";
           orgId = 1;
           basicAuth = true;
           basicAuthUser = nodeName;

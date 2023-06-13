@@ -17,6 +17,7 @@
     ../../../modules/interface-naming.nix
     ../../../modules/microvms.nix
     ../../../modules/promtail.nix
+    ../../../modules/proxied-domains.nix
     ../../../modules/repo.nix
     ../../../modules/wireguard.nix
   ];

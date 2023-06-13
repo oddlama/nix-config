@@ -37,7 +37,7 @@ in {
     isColmenaNode = elem nodeName (attrNames colmenaNodes);
     otherNodes = filter (n: n != nodeName) (attrNames colmenaNodes);
     foreignConfigs = concatMap (n: colmenaNodes.${n}.config.nodes.${nodeName} or []) otherNodes;
-    toplevelAttrs = ["age" "networking" "systemd" "services"];
+    toplevelAttrs = ["age" "proxiedDomains" "networking" "systemd" "services"];
   in
     optionalAttrs isColmenaNode (mergeToplevelConfigs toplevelAttrs (
       foreignConfigs

@@ -4,13 +4,62 @@
   nodes,
   utils,
   ...
-}: {
+}: let
+  sentinelCfg = nodes.sentinel.config;
+  lokiDomain = "loki.${sentinelCfg.repo.secrets.local.personalDomain}";
+in {
   imports = [
     ../../../../modules/proxy-via-sentinel.nix
   ];
 
   networking.nftables.firewall.rules = lib.mkForce {
     sentinel-to-local.allowedTCPPorts = [3100];
+  };
+
+  nodes.sentinel = {
+    proxiedDomains.loki = lokiDomain;
+
+    age.secrets.loki-basic-auth-hashes = {
+      rekeyFile = ./secrets/loki-basic-auth-hashes.age;
+      generator = {
+        # Dependencies are added by the nodes that define passwords using
+        # distributed-config.
+        script = {
+          pkgs,
+          lib,
+          decrypt,
+          deps,
+          ...
+        }:
+          lib.flip lib.concatMapStrings deps ({
+            name,
+            host,
+            file,
+          }: ''
+            echo " -> Aggregating [32m"${lib.escapeShellArg host}":[m[33m"${lib.escapeShellArg name}"[m" >&2
+            echo -n ${lib.escapeShellArg host}" "
+            ${decrypt} ${lib.escapeShellArg file} \
+              | ${pkgs.caddy}/bin/caddy hash-password --algorithm bcrypt \
+              || die "Failure while aggregating caddy basic auth hashes"
+          '');
+      };
+      mode = "440";
+      group = "caddy";
+    };
+
+    services.caddy.virtualHosts.${lokiDomain} = {
+      useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert lokiDomain;
+      extraConfig = ''
+        encode zstd gzip
+        skip_log
+        basicauth {
+          import ${sentinelCfg.age.secrets.loki-basic-auth-hashes.path}
+        }
+        reverse_proxy {
+          to http://${config.services.loki.configuration.server.http_listen_address}:${toString config.services.loki.configuration.server.http_listen_port}
+        }
+      '';
+    };
   };
 
   services.loki = let

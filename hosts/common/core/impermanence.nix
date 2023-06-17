@@ -131,6 +131,14 @@
           group = "kanidm";
           mode = "0700";
         }
+      ]
+      ++ lib.optionals config.services.vaultwarden.enable [
+        {
+          directory = "/var/lib/vaultwarden";
+          user = "vaultwarden";
+          group = "vaultwarden";
+          mode = "0700";
+        }
       ];
   };
 }

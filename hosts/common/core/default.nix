@@ -12,6 +12,7 @@
 
     ../../../users/root
 
+    ../../../modules/deteministic-ids.nix
     ../../../modules/distributed-config.nix
     ../../../modules/extra.nix
     ../../../modules/interface-naming.nix

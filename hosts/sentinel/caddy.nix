@@ -8,12 +8,6 @@
 }: {
   users.groups.acme.members = ["caddy"];
 
-  # TODO assertions = lib.flip lib.mapAttrsToList config.users.users
-  # TODO   (name: user: {
-  # TODO     assertion = user.uid != null;
-  # TODO     message = "non-deterministic uid detected for: ${name}";
-  # TODO   });
-
   services.caddy = {
     enable = true;
     package = pkgs.caddy.withPackages {

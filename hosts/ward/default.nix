@@ -38,6 +38,7 @@
     kanidm = defaults;
     grafana = defaults;
     loki = defaults;
+    vaultwarden = defaults;
   };
 
   #ddclient = defineVm;

@@ -412,5 +412,8 @@
     promtail = uidGid 993;
     grafana = uidGid 992;
     acme = uidGid 991;
+    kanidm = uidGid 990;
+    loki = uidGid 989;
+    vaultwarden = uidGid 988;
   };
 }

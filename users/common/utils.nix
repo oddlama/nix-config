@@ -5,14 +5,15 @@
       btop
       fd
       file
+      hexyl
       neofetch
+      rage
       rclone
       ripgrep
       rnr
       rsync
       sd
       tree
-      rage
     ];
   };
 

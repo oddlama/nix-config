@@ -48,6 +48,29 @@ in {
       extraDomainNames = ["*.${domain}"];
     });
 
+    # Sensible defaults for caddy
+    services.caddy = mkIf config.services.caddy.enable {
+      globalConfig = ''
+        (common) {
+          encode zstd gzip
+
+          header {
+            # Enable HTTP Strict Transport Security (HSTS)
+            Strict-Transport-Security "max-age=63072000; includeSubdomains; preload";
+
+            X-XSS-Protection "1; mode=block"
+            X-Frame-Options "DENY"
+            X-Content-Type-Options "nosniff"
+
+            # Remove unnecessary information and remove Last-Modified in favor of ETag
+            -Server
+            -X-Powered-By
+            -Last-Modified
+          }
+        }
+      '';
+    };
+
     # Sensible defaults for nginx
     services.nginx = mkIf config.services.nginx.enable {
       recommendedBrotliSettings = true;

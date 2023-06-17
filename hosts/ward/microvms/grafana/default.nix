@@ -14,7 +14,7 @@ in {
   ];
 
   networking.nftables.firewall.rules = lib.mkForce {
-    sentinel-to-local.allowedTCPPorts = [3001];
+    sentinel-to-local.allowedTCPPorts = [config.services.grafana.settings.server.http_port];
   };
 
   age.secrets.grafana-secret-key = {
@@ -40,9 +40,10 @@ in {
     services.caddy.virtualHosts.${grafanaDomain} = {
       useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert grafanaDomain;
       extraConfig = ''
-        encode zstd gzip
+        import common
         reverse_proxy {
           to http://${config.services.grafana.settings.server.http_addr}:${toString config.services.grafana.settings.server.http_port}
+          header_up X-Real-IP {remote_host}
         }
       '';
     };

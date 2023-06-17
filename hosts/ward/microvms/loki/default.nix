@@ -13,7 +13,7 @@ in {
   ];
 
   networking.nftables.firewall.rules = lib.mkForce {
-    sentinel-to-local.allowedTCPPorts = [3100];
+    sentinel-to-local.allowedTCPPorts = [config.services.loki.configuration.server.http_listen_port];
   };
 
   nodes.sentinel = {
@@ -22,8 +22,7 @@ in {
     age.secrets.loki-basic-auth-hashes = {
       rekeyFile = ./secrets/loki-basic-auth-hashes.age;
       generator = {
-        # Dependencies are added by the nodes that define passwords using
-        # distributed-config.
+        # Dependencies are added by the nodes that define passwords (using distributed-config).
         script = {
           pkgs,
           lib,
@@ -50,13 +49,14 @@ in {
     services.caddy.virtualHosts.${lokiDomain} = {
       useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert lokiDomain;
       extraConfig = ''
-        encode zstd gzip
+        import common
         skip_log
         basicauth {
           import ${sentinelCfg.age.secrets.loki-basic-auth-hashes.path}
         }
         reverse_proxy {
           to http://${config.services.loki.configuration.server.http_listen_address}:${toString config.services.loki.configuration.server.http_listen_port}
+          header_up X-Real-IP {remote_host}
         }
       '';
     };

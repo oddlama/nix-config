@@ -8,13 +8,14 @@
 }: let
   sentinelCfg = nodes.sentinel.config;
   kanidmDomain = "auth.${sentinelCfg.repo.secrets.local.personalDomain}";
+  kanidmPort = 8300;
 in {
   imports = [
     ../../../../modules/proxy-via-sentinel.nix
   ];
 
   networking.nftables.firewall.rules = lib.mkForce {
-    sentinel-to-local.allowedTCPPorts = [8300];
+    sentinel-to-local.allowedTCPPorts = [kanidmPort];
   };
 
   age.secrets."kanidm-self-signed.crt" = {
@@ -35,9 +36,10 @@ in {
     services.caddy.virtualHosts.${kanidmDomain} = {
       useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert kanidmDomain;
       extraConfig = ''
-        encode zstd gzip
+        import common
         reverse_proxy {
           to https://${config.services.kanidm.serverSettings.bindaddress}
+          header_up X-Real-IP {remote_host}
           transport http {
             tls_insecure_skip_verify
           }
@@ -54,7 +56,7 @@ in {
       origin = "https://${kanidmDomain}";
       tls_chain = config.age.secrets."kanidm-self-signed.crt".path;
       tls_key = config.age.secrets."kanidm-self-signed.key".path;
-      bindaddress = "${config.extra.wireguard.proxy-sentinel.ipv4}:8300";
+      bindaddress = "${config.extra.wireguard.proxy-sentinel.ipv4}:${toString kanidmPort}";
       trust_x_forward_for = true;
     };
   };

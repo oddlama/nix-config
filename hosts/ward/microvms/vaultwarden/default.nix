@@ -70,7 +70,7 @@ in {
       passwordIterations = 1000000;
       invitationsAllowed = true;
       invitationOrgName = "Vaultwarden";
-      domain = vaultwardenDomain;
+      domain = "https://${vaultwardenDomain}";
 
       smtpEmbedImages = true;
       smtpSecurity = "force_tls";

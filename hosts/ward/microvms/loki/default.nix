@@ -41,7 +41,7 @@ in {
             file,
           }: ''
             echo " -> Aggregating [32m"${lib.escapeShellArg host}":[m[33m"${lib.escapeShellArg name}"[m" >&2
-            echo -n ${lib.escapeShellArg host}":"${lib.escapeShellArg name}" "
+            echo -n ${lib.escapeShellArg host}"+"${lib.escapeShellArg name}" "
             ${decrypt} ${lib.escapeShellArg file} \
               | ${pkgs.caddy}/bin/caddy hash-password --algorithm bcrypt \
               || die "Failure while aggregating caddy basic auth hashes"
@@ -55,7 +55,6 @@ in {
       useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert lokiDomain;
       extraConfig = ''
         import common
-        skip_log
         basicauth {
           import ${sentinelCfg.age.secrets.loki-basic-auth-hashes.path}
         }

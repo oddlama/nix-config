@@ -115,7 +115,7 @@ in {
           url = "https://${sentinelCfg.proxiedDomains.loki}";
           orgId = 1;
           basicAuth = true;
-          basicAuthUser = "${nodeName}:grafana-loki-basic-auth-password";
+          basicAuthUser = "${nodeName}+grafana-loki-basic-auth-password";
           secureJsonData.basicAuthPassword = "$__file{${config.age.secrets.grafana-loki-basic-auth-password.path}}";
         }
       ];

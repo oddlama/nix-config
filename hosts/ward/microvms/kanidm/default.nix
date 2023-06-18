@@ -14,6 +14,11 @@ in {
     ../../../../modules/proxy-via-sentinel.nix
   ];
 
+  extra.promtail = {
+    enable = true;
+    proxy = "sentinel";
+  };
+
   networking.nftables.firewall.rules = lib.mkForce {
     sentinel-to-local.allowedTCPPorts = [kanidmPort];
   };

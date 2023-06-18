@@ -12,6 +12,11 @@ in {
     ../../../../modules/proxy-via-sentinel.nix
   ];
 
+  extra.promtail = {
+    enable = true;
+    proxy = "sentinel";
+  };
+
   networking.nftables.firewall.rules = lib.mkForce {
     sentinel-to-local.allowedTCPPorts = [config.services.loki.configuration.server.http_listen_port];
   };
@@ -36,7 +41,7 @@ in {
             file,
           }: ''
             echo " -> Aggregating [32m"${lib.escapeShellArg host}":[m[33m"${lib.escapeShellArg name}"[m" >&2
-            echo -n ${lib.escapeShellArg host}" "
+            echo -n ${lib.escapeShellArg host}":"${lib.escapeShellArg name}" "
             ${decrypt} ${lib.escapeShellArg file} \
               | ${pkgs.caddy}/bin/caddy hash-password --algorithm bcrypt \
               || die "Failure while aggregating caddy basic auth hashes"

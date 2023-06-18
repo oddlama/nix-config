@@ -136,15 +136,15 @@ openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
 
 ```bash
 # Recover admin account (server must not be running)
-> systemctl stop kanidmd
-> kanidmd recover_account -c server.toml admin
-aM4Fk1dvM8AjyYzuVsFuxGkY4PqcVJaZwaHSfvFQGvFkH2Ez
-> systemctl start kanidmd
+> systemctl stop kanidm
+> kanidmd recover-account -c server.toml admin
+AhNeQgKkwwEHZ85dxj1GPjx58vWsBU8QsvKSyYwUL7bz57bp
+> systemctl start kanidm
 # Login with recovered root account
 > kanidm login --name admin
 # Generate new credentials for idm_admin account
 > kanidm service-account credential generate -D admin idm_admin
-cVXKuT9LGpCN0RTjgjEG52bPFANxbPKbT9LjSb3H4K2NeW2g
+Yk0W24SQGzkLp97DNxxExCcryDLvA7Q2dR0A7ZuaVQevLR6B
 # Generate new oauth2 app for grafana
 > kanidm group create grafana-access
 > kanidm group create grafana-server-admins

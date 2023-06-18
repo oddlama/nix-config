@@ -13,6 +13,11 @@ in {
     ../../../../modules/proxy-via-sentinel.nix
   ];
 
+  extra.promtail = {
+    enable = true;
+    proxy = "sentinel";
+  };
+
   networking.nftables.firewall.rules = lib.mkForce {
     sentinel-to-local.allowedTCPPorts = [config.services.grafana.settings.server.http_port];
   };
@@ -81,7 +86,7 @@ in {
         auto_login = true;
         client_id = "grafana";
         #client_secret = "$__file{${config.age.secrets.grafana-oauth-client-secret.path}}";
-        client_secret = "r6Yk5PPSXFfYDPpK6TRCzXK8y1rTrfcb8F7wvNC5rZpyHTMF"; # TODO temporary test not a real secret
+        client_secret = "aZKNCM6KpjBy4RqwKJXMLXzyx9rKH6MZTFk4wYrKWuBqLj6t"; # TODO temporary test not a real secret
         scopes = "openid email profile";
         login_attribute_path = "prefered_username";
         auth_url = "https://${sentinelCfg.proxiedDomains.kanidm}/ui/oauth2";
@@ -110,7 +115,7 @@ in {
           url = "https://${sentinelCfg.proxiedDomains.loki}";
           orgId = 1;
           basicAuth = true;
-          basicAuthUser = nodeName;
+          basicAuthUser = "${nodeName}:grafana-loki-basic-auth-password";
           secureJsonData.basicAuthPassword = "$__file{${config.age.secrets.grafana-loki-basic-auth-password.path}}";
         }
       ];

@@ -12,6 +12,11 @@ in {
     ../../../../modules/proxy-via-sentinel.nix
   ];
 
+  extra.promtail = {
+    enable = true;
+    proxy = "sentinel";
+  };
+
   age.secrets.vaultwarden-env = {
     rekeyFile = ./secrets/vaultwarden-env.age;
     mode = "440";

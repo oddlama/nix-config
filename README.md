@@ -60,7 +60,6 @@ This is my personal nix config.
 - create hosts/<name>
 - fill net.nix
 - fill fs.nix (you need to know the device by-id paths in advance for formatting to work!)
-- generate an initrd hostkey if necessary `ssh-keygen -t ed25519 -N "" -f /tmp/key; rage ...`
 - run generate-secrets
 
 #### Initial deploy

@@ -4,8 +4,17 @@
   nodePath,
   ...
 }: {
-  # TODO generate script
-  age.secrets.initrd_host_ed25519_key.file = nodePath + "/secrets/initrd_host_ed25519_key.age";
+  age.secrets.initrd_host_ed25519_key = {
+    rekeyFile = nodePath + "/secrets/initrd_host_ed25519_key.age";
+    # Generate only an ssh-ed25519 private key
+    generator.script = {
+      pkgs,
+      lib,
+      ...
+    }: ''
+      (exec 3>&1; ${pkgs.openssh}/bin/ssh-keygen -q -t ed25519 -N "" -f /proc/self/fd/3 <<<y >/dev/null 2>&1)
+    '';
+  };
 
   boot.initrd.network.enable = true;
   boot.initrd.network.ssh = {

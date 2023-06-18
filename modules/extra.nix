@@ -50,7 +50,7 @@ in {
 
     # Sensible defaults for caddy
     services.caddy = mkIf config.services.caddy.enable {
-      globalConfig = ''
+      extraConfig = ''
         (common) {
           encode zstd gzip
 

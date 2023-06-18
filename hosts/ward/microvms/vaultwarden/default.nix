@@ -34,17 +34,17 @@ in {
         import common
 
         reverse_proxy {
-          to http://${config.services.vaultwarden.settings.ROCKET_ADDRESS}:${toString config.services.vaultwarden.settings.ROCKET_PORT}
+          to http://${config.services.vaultwarden.config.rocketAddress}:${toString config.services.vaultwarden.config.rocketPort}
           header_up X-Real-IP {remote_host}
         }
 
         reverse_proxy /notifications/hub {
-          to http://${config.services.vaultwarden.settings.WEBSOCKET_ADDRESS}:${toString config.services.vaultwarden.settings.WEBSOCKET_PORT}
+          to http://${config.services.vaultwarden.config.websocketAddress}:${toString config.services.vaultwarden.config.websocketPort}
           header_up X-Real-IP {remote_host}
         }
 
         reverse_proxy /notifications/hub/negotiate {
-          to http://${config.services.vaultwarden.settings.ROCKET_ADDRESS}:${toString config.services.vaultwarden.settings.ROCKET_PORT}
+          to http://${config.services.vaultwarden.config.rocketAddress}:${toString config.services.vaultwarden.config.rocketPort}
           header_up X-Real-IP {remote_host}
         }
       '';

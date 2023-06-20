@@ -167,29 +167,29 @@
 
         extra.networking.renameInterfacesByMac.${vmCfg.networking.mainLinkName} = mac;
 
-        systemd.network.networks = let
-          wgConfig = parentConfig.extra.wireguard."${nodeName}-local-vms".unitConfName;
-        in {
-          # Remove requirement for the wireguard interface to come online,
-          # to allow microvms to be deployed more easily (otherwise they
-          # would not come online if the private key wasn't rekeyed yet).
-          # FIXME ideally this would be conditional at runtime if the
-          # agenix activation had an error, but this is not trivial.
-          ${wgConfig} = mkIf vmCfg.localWireguard {
-            linkConfig.RequiredForOnline = "no";
-          };
-
-          "10-${vmCfg.networking.mainLinkName}" = {
-            matchConfig.MACAddress = mac;
-            DHCP = "yes";
-            networkConfig = {
-              IPv6PrivacyExtensions = "yes";
-              MulticastDNS = true;
-              IPv6AcceptRA = true;
+        systemd.network.networks =
+          {
+            "10-${vmCfg.networking.mainLinkName}" = {
+              matchConfig.MACAddress = mac;
+              DHCP = "yes";
+              networkConfig = {
+                IPv6PrivacyExtensions = "yes";
+                MulticastDNS = true;
+                IPv6AcceptRA = true;
+              };
+              linkConfig.RequiredForOnline = "routable";
             };
-            linkConfig.RequiredForOnline = "routable";
+          }
+          // optionalAttrs vmCfg.localWireguard {
+            # Remove requirement for the wireguard interface to come online,
+            # to allow microvms to be deployed more easily (otherwise they
+            # would not come online if the private key wasn't rekeyed yet).
+            # FIXME ideally this would be conditional at runtime if the
+            # agenix activation had an error, but this is not trivial.
+            ${parentConfig.extra.wireguard."${nodeName}-local-vms".unitConfName} = {
+              linkConfig.RequiredForOnline = "no";
+            };
           };
-        };
 
         # TODO mkForce nftables
         networking.nftables.firewall = {

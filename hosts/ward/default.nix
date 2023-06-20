@@ -39,12 +39,11 @@
     grafana = defaults;
     loki = defaults;
     vaultwarden = defaults;
+    adguardhome = defaults;
   };
 
   #ddclient = defineVm;
-  #kanidm = defineVm;
   #gitea/forgejo = defineVm;
-  #vaultwarden = defineVm;
   #samba+wsdd = defineVm;
   #fasten-health = defineVm;
   #immich = defineVm;
@@ -52,7 +51,6 @@
   #radicale = defineVm;
   #minecraft = defineVm;
   #firefly
-  #adguardhome
 
   #prometheus
   #influxdb

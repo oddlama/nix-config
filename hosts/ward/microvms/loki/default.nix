@@ -26,27 +26,9 @@ in {
 
     age.secrets.loki-basic-auth-hashes = {
       rekeyFile = ./secrets/loki-basic-auth-hashes.age;
-      generator = {
-        # Dependencies are added by the nodes that define passwords (using distributed-config).
-        script = {
-          pkgs,
-          lib,
-          decrypt,
-          deps,
-          ...
-        }:
-          lib.flip lib.concatMapStrings deps ({
-            name,
-            host,
-            file,
-          }: ''
-            echo " -> Aggregating [32m"${lib.escapeShellArg host}":[m[33m"${lib.escapeShellArg name}"[m" >&2
-            echo -n ${lib.escapeShellArg host}"+"${lib.escapeShellArg name}" "
-            ${decrypt} ${lib.escapeShellArg file} \
-              | ${pkgs.caddy}/bin/caddy hash-password --algorithm bcrypt \
-              || die "Failure while aggregating caddy basic auth hashes"
-          '');
-      };
+      # Copy only the script so the dependencies can be added by the nodes
+      # that define passwords (using distributed-config).
+      generator.script = config.age.generators.basic-auth.script;
       mode = "440";
       group = "caddy";
     };
@@ -55,6 +37,7 @@ in {
       useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert lokiDomain;
       extraConfig = ''
         import common
+        skip_log
         basicauth {
           import ${sentinelCfg.age.secrets.loki-basic-auth-hashes.path}
         }

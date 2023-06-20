@@ -16,4 +16,9 @@
     ./acme.nix
     ./caddy.nix
   ];
+
+  extra.promtail = {
+    enable = true;
+    proxy = "sentinel";
+  };
 }

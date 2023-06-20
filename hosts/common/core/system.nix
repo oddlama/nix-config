@@ -362,6 +362,25 @@
       lib.mkIf (pubkeyPath != null && lib.pathExists pubkeyPath) pubkeyPath;
   };
 
+  age.generators.basic-auth.script = {
+    pkgs,
+    lib,
+    decrypt,
+    deps,
+    ...
+  }:
+    lib.flip lib.concatMapStrings deps ({
+      name,
+      host,
+      file,
+    }: ''
+      echo " -> Aggregating [32m"${lib.escapeShellArg host}":[m[33m"${lib.escapeShellArg name}"[m" >&2
+      echo -n ${lib.escapeShellArg host}"+"${lib.escapeShellArg name}" "
+      ${decrypt} ${lib.escapeShellArg file} \
+        | ${pkgs.caddy}/bin/caddy hash-password --algorithm bcrypt \
+        || die "Failure while aggregating caddy basic auth hashes"
+    '');
+
   boot = {
     initrd.systemd = {
       enable = true;

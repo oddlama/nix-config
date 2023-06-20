@@ -136,32 +136,39 @@ openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
 
 ```bash
 # Recover admin account (server must not be running)
-> systemctl stop kanidm
-> kanidmd recover-account -c server.toml admin
-AhNeQgKkwwEHZ85dxj1GPjx58vWsBU8QsvKSyYwUL7bz57bp
-> systemctl start kanidm
+systemctl stop kanidm
+kanidmd recover-account -c server.toml admin
+> AhNeQgKkwwEHZ85dxj1GPjx58vWsBU8QsvKSyYwUL7bz57bp
+systemctl start kanidm
 # Login with recovered root account
-> kanidm login --name admin
+kanidm login --name admin
 # Generate new credentials for idm_admin account
-> kanidm service-account credential generate -D admin idm_admin
-Yk0W24SQGzkLp97DNxxExCcryDLvA7Q2dR0A7ZuaVQevLR6B
+kanidm service-account credential generate -D admin idm_admin
+> Yk0W24SQGzkLp97DNxxExCcryDLvA7Q2dR0A7ZuaVQevLR6B
 # Generate new oauth2 app for grafana
-> kanidm group create grafana-access
-> kanidm group create grafana-server-admins
-> kanidm group create grafana-admins
-> kanidm group create grafana-editors
-> kanidm system oauth2 create grafana "Grafana" https://grafana.${personalDomain}
-> kanidm system oauth2 update-scope-map grafana grafana-access openid profile email
-> kanidm system oauth2 update-sup-scope-map grafana grafana-server-admins server_admin
-> kanidm system oauth2 update-sup-scope-map grafana grafana-admins admin
-> kanidm system oauth2 update-sup-scope-map grafana grafana-editors editor
-> kanidm system oauth2 show-basic-secret grafana
+kanidm group create grafana-access
+kanidm group create grafana-server-admins
+kanidm group create grafana-admins
+kanidm group create grafana-editors
+kanidm system oauth2 create grafana "Grafana" https://grafana.${personalDomain}
+kanidm system oauth2 update-scope-map grafana grafana-access openid profile email
+kanidm system oauth2 update-sup-scope-map grafana grafana-server-admins server_admin
+kanidm system oauth2 update-sup-scope-map grafana grafana-admins admin
+kanidm system oauth2 update-sup-scope-map grafana grafana-editors editor
+kanidm system oauth2 show-basic-secret grafana
+# Generate new oauth2 app for proxied webapps
+kanidm group create web-sentinel-access
+kanidm group create web-sentinel-adguardhome-access
+kanidm system oauth2 create web-sentinel "Web services" https://sentinel.${personalDomain}
+kanidm system oauth2 update-scope-map web-sentinel web-sentinel-access openid profile email
+kanidm system oauth2 update-sup-scope-map web-sentinel web-sentinel-adguardhome-access access_adguardhome
+kanidm system oauth2 show-basic-secret web-sentinel
 # Add new user
-> kanidm login --name idm_admin
-> kanidm person create myuser "My User"
-> kanidm person update myuser --legalname "Full Name" --mail "myuser@example.com"
-> kanidm group add_members grafana-access myuser
-> kanidm group add_members grafana-server-admins myuser
+kanidm login --name idm_admin
+kanidm person create myuser "My User"
+kanidm person update myuser --legalname "Full Name" --mail "myuser@example.com"
+kanidm group add-members grafana-access myuser
+kanidm group add-members grafana-server-admins myuser
 
 
 ```

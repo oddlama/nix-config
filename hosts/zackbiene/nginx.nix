@@ -13,11 +13,6 @@
     mode = "440";
     group = "nginx";
   };
-  age.secrets."dhparams.pem" = {
-    rekeyFile = ./secrets/dhparams.pem.age;
-    mode = "440";
-    group = "nginx";
-  };
 
   #security.acme.acceptTerms = true;
   #security.acme.defaults.email = "admin+acme@example.com";

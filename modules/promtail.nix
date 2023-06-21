@@ -18,7 +18,7 @@
   cfg = config.extra.promtail;
 in {
   options.extra.promtail = {
-    enable = mkEnableOption (mdDoc "Enable promtail to push logs to a loki instance.");
+    enable = mkEnableOption (mdDoc "promtail to push logs to a loki instance.");
     proxy = mkOption {
       type = types.str;
       description = mdDoc "The node name of the proxy server which provides the https loki api endpoint.";

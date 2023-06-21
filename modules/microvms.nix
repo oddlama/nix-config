@@ -318,7 +318,7 @@ in {
           };
 
           zfs = {
-            enable = mkEnableOption (mdDoc "Enable persistent data on separate zfs dataset");
+            enable = mkEnableOption (mdDoc "persistent data on separate zfs dataset");
 
             pool = mkOption {
               type = types.str;

@@ -14,8 +14,11 @@
     ./net.nix
 
     ./acme.nix
-    ./caddy.nix
+    ./oauth2.nix
   ];
+
+  users.groups.acme.members = ["nginx"];
+  services.nginx.enable = true;
 
   extra.promtail = {
     enable = true;

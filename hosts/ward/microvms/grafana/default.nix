@@ -42,15 +42,22 @@ in {
 
     proxiedDomains.grafana = grafanaDomain;
 
-    services.caddy.virtualHosts.${grafanaDomain} = {
-      useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert grafanaDomain;
-      extraConfig = ''
-        import common
-        reverse_proxy {
-          to http://${config.services.grafana.settings.server.http_addr}:${toString config.services.grafana.settings.server.http_port}
-          header_up X-Real-IP {remote_host}
-        }
-      '';
+    services.nginx = {
+      upstreams.grafana = {
+        servers."${config.services.grafana.settings.server.http_addr}:${toString config.services.grafana.settings.server.http_port}" = {};
+        extraConfig = ''
+          zone grafana 64k;
+          keepalive 2;
+        '';
+      };
+      virtualHosts.${grafanaDomain} = {
+        forceSSL = true;
+        useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert grafanaDomain;
+        locations."/" = {
+          proxyPass = "https://grafana";
+          proxyWebsockets = true;
+        };
+      };
     };
   };
 

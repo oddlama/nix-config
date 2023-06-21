@@ -30,22 +30,41 @@ in {
       # that define passwords (using distributed-config).
       generator.script = config.age.generators.basic-auth.script;
       mode = "440";
-      group = "caddy";
+      group = "nginx";
     };
 
-    services.caddy.virtualHosts.${lokiDomain} = {
-      useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert lokiDomain;
-      extraConfig = ''
-        import common
-        skip_log
-        basicauth {
-          import ${sentinelCfg.age.secrets.loki-basic-auth-hashes.path}
-        }
-        reverse_proxy {
-          to http://${config.services.loki.configuration.server.http_listen_address}:${toString config.services.loki.configuration.server.http_listen_port}
-          header_up X-Real-IP {remote_host}
-        }
-      '';
+    services.nginx = {
+      upstreams.loki = {
+        servers."${config.services.loki.configuration.server.http_listen_address}:${toString config.services.loki.configuration.server.http_listen_port}" = {};
+        extraConfig = ''
+          zone loki 64k;
+          keepalive 2;
+        '';
+      };
+      virtualHosts.${lokiDomain} = {
+        forceSSL = true;
+        useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert lokiDomain;
+        locations."/" = {
+          proxyPass = "https://loki";
+          proxyWebsockets = true;
+          extraConfig = ''
+            auth_basic "Authentication required";
+            auth_basic_user_file ${sentinelCfg.age.secrets.loki-basic-auth-hashes.path};
+
+            proxy_read_timeout 1800s;
+            proxy_connect_timeout 1600s;
+
+            access_log off;
+          '';
+        };
+        locations."= /ready" = {
+          proxyPass = "https://loki";
+          extraConfig = ''
+            auth_basic off;
+            access_log off;
+          '';
+        };
+      };
     };
   };
 

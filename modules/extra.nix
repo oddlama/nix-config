@@ -35,36 +35,6 @@ in {
         individually for each cert by the user or via `security.acme.defaults`.
       '';
     };
-
-    nginx.proxiedDomains = mkOption {
-      default = {};
-      description = mdDoc "Simplified reverse proxy setup.";
-      type = types.attrsOf (types.submodule (submod: {
-        options = {
-          domain = mkOption {
-            type = types.str;
-            description = mdDoc "The public domain for the virtual host.";
-          };
-
-          upstream = mkOption {
-            type = types.str;
-            description = mdDoc "The upstream server to which requests are forwarded.";
-          };
-
-          scheme = mkOption {
-            type = types.str;
-            default = "http";
-            description = mdDoc "The scheme to use when connecting to upstream.";
-          };
-
-          useACMEHost = mkOption {
-            type = types.str;
-            default = config.lib.extra.matchingWildcardCert submod.config.domain;
-            description = mdDoc "The acme host certificate to use for the virtual host.";
-          };
-        };
-      }));
-    };
   };
 
   config = {
@@ -121,25 +91,6 @@ in {
         add_header X-Frame-Options "DENY";
         add_header X-Content-Type-Options "nosniff";
       '';
-
-      upstreams =
-        flip mapAttrs config.extra.nginx.proxiedDomains
-        (name: cfg: {
-          servers."${cfg.upstream}" = {};
-          extraConfig = ''
-            zone ${name} 64k;
-            keepalive 2;
-          '';
-        });
-
-      virtualHosts =
-        flip mapAttrs' config.extra.nginx.proxiedDomains
-        (name: cfg:
-          nameValuePair cfg.domain {
-            forceSSL = true;
-            inherit (cfg) useACMEHost;
-            locations."/".proxyPass = "${cfg.scheme}://${name}";
-          });
     };
 
     networking.firewall.allowedTCPPorts = optionals config.services.nginx.enable [80 443];

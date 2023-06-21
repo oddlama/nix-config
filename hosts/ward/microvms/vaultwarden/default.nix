@@ -33,26 +33,35 @@ in {
   nodes.sentinel = {
     proxiedDomains.vaultwarden = vaultwardenDomain;
 
-    services.caddy.virtualHosts.${vaultwardenDomain} = {
+    upstreams.vaultwarden = {
+      servers."${config.services.vaultwarden.config.rocketAddress}:${toString config.services.vaultwarden.config.rocketPort}" = {};
+      extraConfig = ''
+        zone vaultwarden 64k;
+        keepalive 2;
+      '';
+    };
+    upstreams.vaultwarden-websocket = {
+      servers."${config.services.vaultwarden.config.websocketAddress}:${toString config.services.vaultwarden.config.websocketPort}" = {};
+      extraConfig = ''
+        zone vaultwarden-websocket 64k;
+        keepalive 2;
+      '';
+    };
+    virtualHosts.${vaultwardenDomain} = {
+      forceSSL = true;
       useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert vaultwardenDomain;
       extraConfig = ''
-        import common
-
-        reverse_proxy {
-          to http://${config.services.vaultwarden.config.rocketAddress}:${toString config.services.vaultwarden.config.rocketPort}
-          header_up X-Real-IP {remote_host}
-        }
-
-        reverse_proxy /notifications/hub {
-          to http://${config.services.vaultwarden.config.websocketAddress}:${toString config.services.vaultwarden.config.websocketPort}
-          header_up X-Real-IP {remote_host}
-        }
-
-        reverse_proxy /notifications/hub/negotiate {
-          to http://${config.services.vaultwarden.config.rocketAddress}:${toString config.services.vaultwarden.config.rocketPort}
-          header_up X-Real-IP {remote_host}
-        }
+        client_max_body_size 256M;
       '';
+      locations."/".proxyPass = "http://vaultwarden";
+      locations."/notifications/hub" = {
+        proxyPass = "http://vaultwarden-websocket";
+        proxyWebsockets = true;
+      };
+      locations."/notifications/hub/negotiate" = {
+        proxyPass = "http://vaultwarden";
+        proxyWebsockets = true;
+      };
     };
   };
 

@@ -6,7 +6,7 @@
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
-  adguardDomain = "adguardhome.${sentinelCfg.repo.secrets.local.personalDomain}";
+  adguardhomeDomain = "adguardhome.${sentinelCfg.repo.secrets.local.personalDomain}";
 in {
   imports = [
     ../../../../modules/proxy-via-sentinel.nix
@@ -22,27 +22,25 @@ in {
   };
 
   nodes.sentinel = {
-    proxiedDomains.adguard = adguardDomain;
+    proxiedDomains.adguard = adguardhomeDomain;
 
-    globalConfig = ''
-      security {
-        authorization policy mypolicy {
-          set auth url https://auth.myfiosgateway.com:8443/
-          allow roles authp/user
-          crypto key verify {env.JWT_SHARED_KEY}
-        }
-      }
-    '';
-
-    services.caddy.virtualHosts.${adguardDomain} = {
-      useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert adguardDomain;
-      extraConfig = ''
-        import common
-        reverse_proxy {
-          to http://${config.services.adguardhome.settings.bind_host}:${toString config.services.adguardhome.settings.bind_port}
-          header_up X-Real-IP {remote_host}
-        }
-      '';
+    extra.oauth2_proxy.nginx.virtualHosts."${adguardhomeDomain}".allowedGroups = ["adguardhome"];
+    services.nginx = {
+      upstreams.adguardhome = {
+        servers."${config.services.adguardhome.settings.bind_host}:${toString config.services.adguardhome.settings.bind_port}" = {};
+        extraConfig = ''
+          zone adguardhome 64k;
+          keepalive 2;
+        '';
+      };
+      virtualHosts.${adguardhomeDomain} = {
+        forceSSL = true;
+        useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert adguardhomeDomain;
+        locations."/" = {
+          proxyPass = "https://adguardhome";
+          proxyWebsockets = true;
+        };
+      };
     };
   };
 

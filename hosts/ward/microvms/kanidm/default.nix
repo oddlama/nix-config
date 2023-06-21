@@ -38,18 +38,24 @@ in {
   nodes.sentinel = {
     proxiedDomains.kanidm = kanidmDomain;
 
-    services.caddy.virtualHosts.${kanidmDomain} = {
-      useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert kanidmDomain;
-      extraConfig = ''
-        import common
-        reverse_proxy {
-          to https://${config.services.kanidm.serverSettings.bindaddress}
-          header_up X-Real-IP {remote_host}
-          transport http {
-            tls_insecure_skip_verify
-          }
-        }
-      '';
+    services.nginx = {
+      upstreams.kanidm = {
+        servers."${config.services.kanidm.serverSettings.bindaddress}" = {};
+        extraConfig = ''
+          zone kanidm 64k;
+          keepalive 2;
+        '';
+      };
+      virtualHosts.${kanidmDomain} = {
+        forceSSL = true;
+        useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert kanidmDomain;
+        locations."/".proxyPass = "https://kanidm";
+        # Allow using self-signed certs to satisfy kanidm's requirement
+        # for TLS connections. (Although this is over wireguard anyway)
+        extraConfig = ''
+          proxy_ssl_verify off;
+        '';
+      };
     };
   };
 

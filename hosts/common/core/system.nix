@@ -376,9 +376,8 @@
       file,
     }: ''
       echo " -> Aggregating [32m"${lib.escapeShellArg host}":[m[33m"${lib.escapeShellArg name}"[m" >&2
-      echo -n ${lib.escapeShellArg host}"+"${lib.escapeShellArg name}" "
       ${decrypt} ${lib.escapeShellArg file} \
-        | ${pkgs.caddy}/bin/caddy hash-password --algorithm bcrypt \
+        | ${pkgs.apacheHttpd}/bin/htpasswd -niBC 12 ${lib.escapeShellArg host}"+"${lib.escapeShellArg name}" " \
         || die "Failure while aggregating caddy basic auth hashes"
     '');
 

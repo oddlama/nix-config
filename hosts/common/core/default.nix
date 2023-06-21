@@ -17,6 +17,7 @@
     ../../../modules/extra.nix
     ../../../modules/interface-naming.nix
     ../../../modules/microvms.nix
+    ../../../modules/oauth2-proxy.nix
     ../../../modules/promtail.nix
     ../../../modules/proxied-domains.nix
     ../../../modules/repo.nix

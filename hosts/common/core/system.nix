@@ -362,6 +362,7 @@
       lib.mkIf (pubkeyPath != null && lib.pathExists pubkeyPath) pubkeyPath;
   };
 
+  age.generators.dhparams.script = {pkgs, ...}: "${pkgs.openssl}/bin/openssl dhparam 4096";
   age.generators.basic-auth.script = {
     pkgs,
     lib,
@@ -434,5 +435,6 @@
     kanidm = uidGid 990;
     loki = uidGid 989;
     vaultwarden = uidGid 988;
+    oauth2_proxy = uidGid 987;
   };
 }

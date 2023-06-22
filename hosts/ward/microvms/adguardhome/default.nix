@@ -24,7 +24,6 @@ in {
   nodes.sentinel = {
     proxiedDomains.adguard = adguardhomeDomain;
 
-    extra.oauth2_proxy.nginx.virtualHosts."${adguardhomeDomain}".allowedGroups = ["adguardhome"];
     services.nginx = {
       upstreams.adguardhome = {
         servers."${config.services.adguardhome.settings.bind_host}:${toString config.services.adguardhome.settings.bind_port}" = {};
@@ -36,8 +35,10 @@ in {
       virtualHosts.${adguardhomeDomain} = {
         forceSSL = true;
         useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert adguardhomeDomain;
+        oauth2.enable = true;
+        oauth2.allowedGroups = ["adguardhome"];
         locations."/" = {
-          proxyPass = "https://adguardhome";
+          proxyPass = "http://adguardhome";
           proxyWebsockets = true;
         };
       };

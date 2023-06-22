@@ -17,7 +17,6 @@
   };
 
   services.oauth2_proxy = {
-    # TODO cookie refresh
     provider = "oidc";
     scope = "openid";
     loginURL = "https://${config.proxiedDomains.kanidm}/ui/oauth2";
@@ -25,9 +24,16 @@
     validateURL = "https://${config.proxiedDomains.kanidm}/oauth2/openid/web-sentinel/userinfo";
     clientID = "web-sentinel";
     keyFile = config.age.secrets.oauth2-proxy-secret.path;
-
     email.domains = ["*"];
 
-    extraConfig.skip-provider-button = true;
+    extraConfig = {
+      # TODO good idea? would fail when offline
+      # TODO autorestart after 30 minutes, infinite times.
+      oidc-issuer-url = "https://${config.proxiedDomains.kanidm}/oauth2/openid/web-sentinel";
+      skip-provider-button = true;
+
+      # TODO away
+      show-debug-on-error = true;
+    };
   };
 }

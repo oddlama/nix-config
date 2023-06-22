@@ -37,6 +37,29 @@ in {
     };
   };
 
+  options.services.nginx.virtualHosts = mkOption {
+    type = types.attrsOf (types.submodule ({config, ...}: {
+      options.recommendedSecurityHeaders = mkOption {
+        type = types.bool;
+        default = true;
+        description = mdDoc ''Whether to add additional security headers to the "/" location.'';
+      };
+      config = mkIf config.recommendedSecurityHeaders {
+        locations."/".extraConfig = ''
+          # Enable HTTP Strict Transport Security (HSTS)
+          add_header Strict-Transport-Security "max-age=63072000; includeSubdomains; preload";
+
+          # Minimize information leaked to other domains
+          add_header Referrer-Policy "origin-when-cross-origin";
+
+          add_header X-XSS-Protection "1; mode=block";
+          add_header X-Frame-Options "DENY";
+          add_header X-Content-Type-Options "nosniff";
+        '';
+      };
+    }));
+  };
+
   config = {
     lib.extra = {
       # For a given domain, this searches for a matching wildcard acme domain that
@@ -80,16 +103,6 @@ in {
         error_log syslog:server=unix:/dev/log;
         access_log syslog:server=unix:/dev/log;
         ssl_ecdh_curve secp384r1;
-
-        # Enable HTTP Strict Transport Security (HSTS)
-        add_header Strict-Transport-Security "max-age=63072000; includeSubdomains; preload";
-
-        # Minimize information leaked to other domains
-        add_header Referrer-Policy "origin-when-cross-origin";
-
-        add_header X-XSS-Protection "1; mode=block";
-        add_header X-Frame-Options "DENY";
-        add_header X-Content-Type-Options "nosniff";
       '';
     };
 

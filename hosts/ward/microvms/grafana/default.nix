@@ -54,7 +54,7 @@ in {
         forceSSL = true;
         useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert grafanaDomain;
         locations."/" = {
-          proxyPass = "https://grafana";
+          proxyPass = "http://grafana";
           proxyWebsockets = true;
         };
       };

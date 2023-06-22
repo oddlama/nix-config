@@ -45,7 +45,7 @@ in {
         forceSSL = true;
         useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert lokiDomain;
         locations."/" = {
-          proxyPass = "https://loki";
+          proxyPass = "http://loki";
           proxyWebsockets = true;
           extraConfig = ''
             auth_basic "Authentication required";
@@ -58,7 +58,7 @@ in {
           '';
         };
         locations."= /ready" = {
-          proxyPass = "https://loki";
+          proxyPass = "http://loki";
           extraConfig = ''
             auth_basic off;
             access_log off;

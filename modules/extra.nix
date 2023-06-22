@@ -100,8 +100,21 @@ in {
       sslCiphers = "EECDH+AESGCM:EDH+AESGCM:!aNULL";
       sslDhparam = config.age.secrets."dhparams.pem".path;
       commonHttpConfig = ''
-        error_log syslog:server=unix:/dev/log;
-        access_log syslog:server=unix:/dev/log;
+        log_format json_combined escape=json '{'
+          '"time": $msec,'
+          '"remote_addr":"$remote_addr",'
+          '"status":$status,'
+          '"method":"$request_method",'
+          '"host":"$host",'
+          '"uri":"$request_uri",'
+          '"request_size":$request_length,'
+          '"response_size":$body_bytes_sent,'
+          '"response_time":$request_time,'
+          '"referrer":"$http_referer",'
+          '"user_agent":"$http_user_agent"'
+        '}';
+        error_log syslog:server=unix:/dev/log,nohostname;
+        access_log syslog:server=unix:/dev/log,nohostname json_combined;
         ssl_ecdh_curve secp384r1;
       '';
     };

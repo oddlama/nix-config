@@ -7,7 +7,7 @@
   extra.oauth2_proxy = {
     enable = true;
     cookieDomain = config.repo.secrets.local.personalDomain;
-    authProxyDomain = "sentinel.${config.repo.secrets.local.personalDomain}";
+    portalDomain = "oauth2.${config.repo.secrets.local.personalDomain}";
   };
 
   age.secrets.oauth2-proxy-secret = {
@@ -18,7 +18,7 @@
 
   services.oauth2_proxy = {
     provider = "oidc";
-    scope = "openid";
+    scope = "openid email";
     loginURL = "https://${config.proxiedDomains.kanidm}/ui/oauth2";
     redeemURL = "https://${config.proxiedDomains.kanidm}/oauth2/token";
     validateURL = "https://${config.proxiedDomains.kanidm}/oauth2/openid/web-sentinel/userinfo";

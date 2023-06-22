@@ -159,7 +159,7 @@ kanidm system oauth2 show-basic-secret grafana
 # Generate new oauth2 app for proxied webapps
 kanidm group create web-sentinel-access
 kanidm group create web-sentinel-adguardhome-access
-kanidm system oauth2 create web-sentinel "Web services" https://sentinel.${personalDomain}
+kanidm system oauth2 create web-sentinel "Web services" https://oauth2.${personalDomain}
 kanidm system oauth2 update-scope-map web-sentinel web-sentinel-access openid profile email
 kanidm system oauth2 update-sup-scope-map web-sentinel web-sentinel-adguardhome-access access_adguardhome
 kanidm system oauth2 show-basic-secret web-sentinel

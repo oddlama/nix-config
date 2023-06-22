@@ -24,25 +24,12 @@ in {
 
     cookieDomain = mkOption {
       type = types.str;
-      description = mdDoc "The domain under which to store the credetial cookie.";
+      description = mdDoc "The domain under which to store the credential cookie, and to which redirects will be allowed.";
     };
 
-    authProxyDomain = mkOption {
+    portalDomain = mkOption {
       type = types.str;
-      description = mdDoc ''
-        The domain under which to expose the oauth2 proxy.
-        This must be a subdomain at or below the level of `cookieDomain`.
-      '';
-    };
-
-    nginx.virtualHosts = mkOption {
-      default = {};
-      description =
-        mdDoc ''
-        '';
-      type =
-        types.attrsOf (types.submodule {
-          });
+      description = mdDoc "A domain on which to setup the oauth2 callback.";
     };
   };
 
@@ -81,7 +68,7 @@ in {
         '';
 
         locations."/oauth2/" = {
-          proxyPass = "https://${cfg.authProxyDomain}";
+          proxyPass = "http://oauth2_proxy";
           extraConfig = ''
             proxy_set_header X-Scheme                $scheme;
             proxy_set_header X-Auth-Request-Redirect $scheme://$host$request_uri;
@@ -90,7 +77,7 @@ in {
 
         locations."= /oauth2/auth" = {
           proxyPass =
-            "https://${cfg.authProxyDomain}"
+            "http://oauth2_proxy/oauth2/auth"
             + optionalString (config.oauth2.allowedGroups != [])
             "?allowed_groups=${concatStringsSep "," config.oauth2.allowedGroups}";
           extraConfig = ''
@@ -121,8 +108,11 @@ in {
       setXauthrequest = true;
 
       extraConfig = {
+        # Enable PKCE
+        code-challenge-method = "S256";
         # Share the cookie with all subpages
         whitelist-domain = ".${cfg.cookieDomain}";
+        redirect-url = "https://${cfg.portalDomain}/oauth2/callback";
         set-authorization-header = true;
         pass-access-token = true;
         skip-jwt-bearer-tokens = true;
@@ -134,6 +124,7 @@ in {
     systemd.services.oauth2_proxy.serviceConfig = {
       RuntimeDirectory = "oauth2_proxy";
       RuntimeDirectoryMode = "0750";
+      UMask = "007"; # TODO remove once https://github.com/oauth2-proxy/oauth2-proxy/issues/2141 is fixed
     };
 
     users.groups.oauth2_proxy.members = ["nginx"];
@@ -147,32 +138,11 @@ in {
         '';
       };
 
-      virtualHosts.${cfg.authProxyDomain} = {
+      virtualHosts.${cfg.portalDomain} = {
         forceSSL = true;
-        useACMEHost = config.lib.extra.matchingWildcardCert cfg.authProxyDomain;
-
-        locations."/".extraConfig = ''
-          deny all;
-          return 404;
-        '';
-
-        locations."/oauth2/" = {
-          proxyPass = "http://oauth2_proxy";
-          extraConfig = ''
-            proxy_set_header X-Scheme                $scheme;
-            proxy_set_header X-Auth-Request-Redirect $scheme://$host$request_uri;
-          '';
-        };
-
-        locations."= /oauth2/auth" = {
-          proxyPass = "http://oauth2_proxy";
-          extraConfig = ''
-            proxy_set_header X-Scheme         $scheme;
-            # nginx auth_request includes headers but not body
-            proxy_set_header Content-Length   "";
-            proxy_pass_request_body           off;
-          '';
-        };
+        useACMEHost = config.lib.extra.matchingWildcardCert cfg.portalDomain;
+        oauth2.enable = true;
+        locations."/".proxyPass = "http://oauth2_proxy";
       };
     };
   };

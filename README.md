@@ -159,9 +159,11 @@ kanidm system oauth2 show-basic-secret grafana
 # Generate new oauth2 app for proxied webapps
 kanidm group create web-sentinel-access
 kanidm group create web-sentinel-adguardhome-access
+kanidm group create web-sentinel-influxdb-access
 kanidm system oauth2 create web-sentinel "Web services" https://oauth2.${personalDomain}
 kanidm system oauth2 update-scope-map web-sentinel web-sentinel-access openid email
 kanidm system oauth2 update-sup-scope-map web-sentinel web-sentinel-adguardhome-access access_adguardhome
+kanidm system oauth2 update-sup-scope-map web-sentinel web-sentinel-influxdb-access access_influxdb
 kanidm system oauth2 show-basic-secret web-sentinel
 # Add new user
 kanidm login --name idm_admin
@@ -170,8 +172,10 @@ kanidm person update myuser --legalname "Full Name" --mail "myuser@example.com"
 kanidm group add-members grafana-access myuser
 kanidm group add-members grafana-server-admins myuser
 kanidm group add-members web-sentinel-access myuser
+kanidm group add-members web-sentinel-adguardhome-access myuser
+kanidm group add-members web-sentinel-influxdb-access myuser
 
-
+# TODO influxdb temporary pw d0lRidLSqZ03W5BBjQ7Id3oM2zVE5jLrRUKcMXeYDk5WGabb
 ```
 
 

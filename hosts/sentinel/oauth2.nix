@@ -31,7 +31,8 @@
 
     extraConfig = {
       oidc-issuer-url = "https://${config.proxiedDomains.kanidm}/oauth2/openid/${clientId}";
-      skip-provider-button = true;
+      provider-display-name = "Kanidm";
+      #skip-provider-button = true;
     };
   };
 }

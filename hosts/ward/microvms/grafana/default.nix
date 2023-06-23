@@ -64,8 +64,6 @@ in {
       virtualHosts.${grafanaDomain} = {
         forceSSL = true;
         useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert grafanaDomain;
-        oauth2.enable = true;
-        oauth2.allowedGroups = ["access_grafana"];
         locations."/" = {
           proxyPass = "http://grafana";
           proxyWebsockets = true;
@@ -103,7 +101,7 @@ in {
         name = "Kanidm";
         icon = "signin";
         allow_sign_up = true;
-        auto_login = true;
+        #auto_login = true;
         client_id = "grafana";
         #client_secret = "$__file{${config.age.secrets.grafana-oauth-client-secret.path}}";
         client_secret = "aZKNCM6KpjBy4RqwKJXMLXzyx9rKH6MZTFk4wYrKWuBqLj6t"; # TODO temporary test not a real secret
@@ -122,12 +120,6 @@ in {
     provision = {
       enable = true;
       datasources.settings.datasources = [
-        #{
-        #  name = "Prometheus";
-        #  type = "prometheus";
-        #  url = "http://127.0.0.1:9090";
-        #  orgId = 1;
-        #}
         {
           name = "InfluxDB";
           type = "influxdb";
@@ -137,6 +129,8 @@ in {
           basicAuth = true;
           basicAuthUser = "${nodeName}+grafana-influxdb-basic-auth-password";
           secureJsonData.basicAuthPassword = "$__file{${config.age.secrets.grafana-influxdb-basic-auth-password.path}}";
+          #secureJsonData.token = "$__file{${config.age.secrets.grafana-influxdb-token.path}}";
+          jsonData.version = "Flux";
         }
         {
           name = "Loki";

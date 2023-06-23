@@ -9,6 +9,8 @@
   influxdbDomain = "influxdb.${sentinelCfg.repo.secrets.local.personalDomain}";
   influxdbPort = 8086;
 in {
+  microvm.mem = 1024;
+
   imports = [
     ../../../../modules/proxy-via-sentinel.nix
   ];
@@ -45,23 +47,15 @@ in {
       virtualHosts.${influxdbDomain} = {
         forceSSL = true;
         useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert influxdbDomain;
+        oauth2.enable = true;
+        oauth2.allowedGroups = ["access_influxdb"];
         locations."/" = {
           proxyPass = "http://influxdb";
           proxyWebsockets = true;
           extraConfig = ''
+            satisfy any;
             auth_basic "Authentication required";
             auth_basic_user_file ${sentinelCfg.age.secrets.influxdb-basic-auth-hashes.path};
-
-            proxy_read_timeout 1800s;
-            proxy_connect_timeout 1600s;
-
-            access_log off;
-          '';
-        };
-        locations."= /ready" = {
-          proxyPass = "http://influxdb";
-          extraConfig = ''
-            auth_basic off;
             access_log off;
           '';
         };

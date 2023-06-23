@@ -36,7 +36,7 @@ in {
         forceSSL = true;
         useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert adguardhomeDomain;
         oauth2.enable = true;
-        oauth2.allowedGroups = ["adguardhome"];
+        oauth2.allowedGroups = ["access_adguardhome"];
         locations."/" = {
           proxyPass = "http://adguardhome";
           proxyWebsockets = true;

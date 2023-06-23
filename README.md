@@ -151,7 +151,7 @@ kanidm group create grafana-server-admins
 kanidm group create grafana-admins
 kanidm group create grafana-editors
 kanidm system oauth2 create grafana "Grafana" https://grafana.${personalDomain}
-kanidm system oauth2 update-scope-map grafana grafana-access openid profile email
+kanidm system oauth2 update-scope-map grafana grafana-access openid email profile
 kanidm system oauth2 update-sup-scope-map grafana grafana-server-admins server_admin
 kanidm system oauth2 update-sup-scope-map grafana grafana-admins admin
 kanidm system oauth2 update-sup-scope-map grafana grafana-editors editor
@@ -160,7 +160,7 @@ kanidm system oauth2 show-basic-secret grafana
 kanidm group create web-sentinel-access
 kanidm group create web-sentinel-adguardhome-access
 kanidm system oauth2 create web-sentinel "Web services" https://oauth2.${personalDomain}
-kanidm system oauth2 update-scope-map web-sentinel web-sentinel-access openid profile email
+kanidm system oauth2 update-scope-map web-sentinel web-sentinel-access openid email
 kanidm system oauth2 update-sup-scope-map web-sentinel web-sentinel-adguardhome-access access_adguardhome
 kanidm system oauth2 show-basic-secret web-sentinel
 # Add new user
@@ -169,6 +169,7 @@ kanidm person create myuser "My User"
 kanidm person update myuser --legalname "Full Name" --mail "myuser@example.com"
 kanidm group add-members grafana-access myuser
 kanidm group add-members grafana-server-admins myuser
+kanidm group add-members web-sentinel-access myuser
 
 
 ```

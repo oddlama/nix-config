@@ -99,12 +99,14 @@ in {
 
       cookie.domain = ".${cfg.cookieDomain}";
       cookie.secure = true;
-      cookie.httpOnly = false;
-      cookie.refresh = "5m";
+      # FIXME disabled because of errors. My closest guess is that this
+      # reuses refresh tokens but kanidm forbids that. Not sure though.
+      #cookie.refresh = "5m";
       cookie.expire = "30m";
 
       reverseProxy = true;
       httpAddress = "unix:///run/oauth2_proxy/oauth2_proxy.sock";
+      redirectURL = "https://${cfg.portalDomain}/oauth2/callback";
       setXauthrequest = true;
 
       extraConfig = {
@@ -112,12 +114,10 @@ in {
         code-challenge-method = "S256";
         # Share the cookie with all subpages
         whitelist-domain = ".${cfg.cookieDomain}";
-        redirect-url = "https://${cfg.portalDomain}/oauth2/callback";
         set-authorization-header = true;
         pass-access-token = true;
         skip-jwt-bearer-tokens = true;
         upstream = "static://202";
-        # TODO allowed group?
       };
     };
 

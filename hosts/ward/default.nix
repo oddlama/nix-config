@@ -40,6 +40,7 @@
     loki = defaults;
     vaultwarden = defaults;
     adguardhome = defaults;
+    influxdb = defaults;
   };
 
   #ddclient = defineVm;

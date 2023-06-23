@@ -35,9 +35,20 @@ in {
     group = "grafana";
   };
 
+  age.secrets.grafana-influxdb-basic-auth-password = {
+    rekeyFile = ./secrets/grafana-influxdb-basic-auth-password.age;
+    generator = "alnum";
+    mode = "440";
+    group = "grafana";
+  };
+
   nodes.sentinel = {
     age.secrets.loki-basic-auth-hashes.generator.dependencies = [
       config.age.secrets.grafana-loki-basic-auth-password
+    ];
+
+    age.secrets.influxdb-basic-auth-hashes.generator.dependencies = [
+      config.age.secrets.grafana-influxdb-basic-auth-password
     ];
 
     proxiedDomains.grafana = grafanaDomain;
@@ -53,6 +64,8 @@ in {
       virtualHosts.${grafanaDomain} = {
         forceSSL = true;
         useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert grafanaDomain;
+        oauth2.enable = true;
+        oauth2.allowedGroups = ["access_grafana"];
         locations."/" = {
           proxyPass = "http://grafana";
           proxyWebsockets = true;
@@ -115,6 +128,16 @@ in {
         #  url = "http://127.0.0.1:9090";
         #  orgId = 1;
         #}
+        {
+          name = "InfluxDB";
+          type = "influxdb";
+          access = "proxy";
+          url = "https://${sentinelCfg.proxiedDomains.influxdb}";
+          orgId = 1;
+          basicAuth = true;
+          basicAuthUser = "${nodeName}+grafana-influxdb-basic-auth-password";
+          secureJsonData.basicAuthPassword = "$__file{${config.age.secrets.grafana-influxdb-basic-auth-password.path}}";
+        }
         {
           name = "Loki";
           type = "loki";

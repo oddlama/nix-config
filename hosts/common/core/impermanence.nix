@@ -139,6 +139,14 @@
           group = "vaultwarden";
           mode = "0700";
         }
+      ]
+      ++ lib.optionals config.services.influxdb2.enable [
+        {
+          directory = "/var/lib/influxdb2";
+          user = "influxdb2";
+          group = "influxdb2";
+          mode = "0700";
+        }
       ];
   };
 }

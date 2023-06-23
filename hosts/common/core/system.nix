@@ -378,7 +378,7 @@
       echo " -> Aggregating [32m"${lib.escapeShellArg host}":[m[33m"${lib.escapeShellArg name}"[m" >&2
       ${decrypt} ${lib.escapeShellArg file} \
         | ${pkgs.apacheHttpd}/bin/htpasswd -niBC 12 ${lib.escapeShellArg host}"+"${lib.escapeShellArg name} \
-        || die "Failure while aggregating caddy basic auth hashes"
+        || die "Failure while aggregating basic auth hashes"
     '');
 
   boot = {
@@ -435,5 +435,6 @@
     loki = uidGid 989;
     vaultwarden = uidGid 988;
     oauth2_proxy = uidGid 987;
+    influxdb2 = uidGid 986;
   };
 }

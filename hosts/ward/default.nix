@@ -25,6 +25,16 @@
     proxy = "sentinel";
   };
 
+  extra.telegraf = {
+    enable = true;
+    proxy = "sentinel";
+    # TODO organization = "servers";
+    # TODO bucket = "telegraf";
+  };
+
+  # TODO track my github stats
+  # services.telegraf.extraConfig.inputs.github = {};
+
   extra.microvms.vms = let
     defaults = {
       system = "x86_64-linux";
@@ -52,9 +62,6 @@
   #radicale = defineVm;
   #minecraft = defineVm;
   #firefly
-
-  #prometheus
-  #influxdb
 
   #maddy = defineVm;
   #anonaddy = defineVm;

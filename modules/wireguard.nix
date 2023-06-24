@@ -137,7 +137,6 @@
         assertion = stringLength wgCfg.linkName < 16;
         message = "${assertionPrefix}: The specified linkName '${wgCfg.linkName}' is too long (must be max 15 characters).";
       }
-      # TODO at least 3 network participants and (externalPeers != {} or someone has via set to us) -> ip forwarding
     ];
 
     networking.firewall.allowedUDPPorts =

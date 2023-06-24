@@ -1,6 +1,7 @@
 {
-  pkgs,
   config,
+  lib,
+  pkgs,
   ...
 }: {
   boot.supportedFilesystems = ["zfs"];
@@ -21,5 +22,9 @@
       enable = true;
       interval = "weekly";
     };
+  };
+
+  services.telegraf.extraConfig.inputs = lib.mkIf config.services.telegraf.enable {
+    zfs.poolMetrics = true;
   };
 }

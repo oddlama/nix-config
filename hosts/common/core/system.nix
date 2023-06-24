@@ -436,5 +436,6 @@
     vaultwarden = uidGid 988;
     oauth2_proxy = uidGid 987;
     influxdb2 = uidGid 986;
+    telegraf = uidGid 985;
   };
 }

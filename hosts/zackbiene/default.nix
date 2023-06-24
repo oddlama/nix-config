@@ -8,8 +8,9 @@
   imports = [
     ../common/core
     ../common/hardware/odroid-n2plus.nix
-    #../common/initrd-ssh.nix
+    ../common/initrd-ssh.nix
     ../common/zfs.nix
+    ../common/bios-boot.nix
 
     ./fs.nix
     ./net.nix
@@ -23,10 +24,7 @@
     ./zigbee2mqtt.nix
   ];
 
-  # TODO replace by bios-boot.nix
-  # and grub.devices = ... once disko is in use.
-  boot.loader.grub.enable = false;
-  boot.loader.generic-extlinux-compatible.enable = true;
+  # TODO boot.loader.grub.devices = ["/dev/disk/by-id/${config.repo.secrets.local.disk.main}"];
   console.earlySetup = true;
 
   # Fails if there are no SMART devices

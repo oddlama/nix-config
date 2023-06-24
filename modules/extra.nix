@@ -117,8 +117,20 @@ in {
         access_log syslog:server=unix:/dev/log,nohostname json_combined;
         ssl_ecdh_curve secp384r1;
       '';
+
+      virtualHosts.localhost = {
+        locations."= /nginx_status".extraConfig = ''
+          allow 127.0.0.0/8;
+          deny all;
+          stub_status;
+        '';
+      };
     };
 
     networking.firewall.allowedTCPPorts = optionals config.services.nginx.enable [80 443];
+
+    services.telegraf.extraConfig.inputs = mkIf config.services.nginx.enable {
+      nginx.urls = ["http://localhost/nginx_status"];
+    };
   };
 }

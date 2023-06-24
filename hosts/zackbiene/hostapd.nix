@@ -10,6 +10,8 @@
   # Associates each known client to a unique password
   age.secrets.wifi-clients.rekeyFile = ./secrets/wifi-clients.age;
 
+  hardware.wirelessRegulatoryDatabase = true;
+
   services.hostapd = {
     enable = true;
     radios.wlan1 = {

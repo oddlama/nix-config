@@ -147,6 +147,14 @@
           group = "influxdb2";
           mode = "0700";
         }
+      ]
+      ++ lib.optionals config.services.telegraf.enable [
+        {
+          directory = "/var/lib/telegraf";
+          user = "telegraf";
+          group = "telegraf";
+          mode = "0700";
+        }
       ];
   };
 }

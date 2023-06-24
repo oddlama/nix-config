@@ -21,6 +21,7 @@
     ../../../modules/promtail.nix
     ../../../modules/proxied-domains.nix
     ../../../modules/repo.nix
+    ../../../modules/telegraf.nix
     ../../../modules/wireguard.nix
   ];
 

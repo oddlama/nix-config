@@ -18,7 +18,7 @@
     ../common/efi.nix
     ../common/initrd-ssh.nix
     ../common/laptop.nix
-    ../common/sound.nix
+    # ../common/sound.nix
     ../common/yubikey.nix
     ../common/zfs.nix
 

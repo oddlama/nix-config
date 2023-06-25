@@ -41,7 +41,7 @@
     isoImage.isoName = lib.mkForce "nixos-image-${nodeName}.iso";
     system.stateVersion = self.stateVersion;
     nix.extraOptions = ''
-      experimental-features = nix-command flakes recursive-nix
+      experimental-features = nix-command flakes
     '';
 
     console.keyMap = "de-latin1-nodeadkeys";

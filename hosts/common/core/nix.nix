@@ -14,7 +14,6 @@
       auto-optimise-store = true;
       allowed-users = ["@wheel"];
       trusted-users = ["root" "@wheel"];
-      system-features = ["recursive-nix"];
       substituters = [
         "https://nix-config.cachix.org"
         "https://nix-community.cachix.org"
@@ -31,7 +30,7 @@
     distributedBuilds = true;
     extraOptions = ''
       builders-use-substitutes = true
-      experimental-features = nix-command flakes recursive-nix
+      experimental-features = nix-command flakes
       flake-registry = /etc/nix/registry.json
     '';
     nixPath = ["nixpkgs=/run/current-system/nixpkgs"];

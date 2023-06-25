@@ -22,10 +22,10 @@ in {
   options.extra.telegraf = {
     enable = mkEnableOption (mdDoc "telegraf to push metrics to influx.");
     influxdb2 = {
-      url = mkOption {
+      domain = mkOption {
         type = types.str;
-        example = "https://influxdb.example.com";
-        description = mdDoc "The influxdb v2 database url to push to.";
+        example = "influxdb.example.com";
+        description = mdDoc "The influxdb v2 database to push to. https will be enforced.";
       };
 
       organization = mkOption {
@@ -65,7 +65,7 @@ in {
         };
         outputs = {
           influxdb_v2 = {
-            urls = [cfg.influxdb2.url];
+            urls = ["https://${cfg.influxdb2.domain}"];
             token = "$INFLUX_TOKEN";
             inherit (cfg.influxdb2) organization bucket;
           };

@@ -30,7 +30,7 @@
   networking.hosts.${nodes.sentinel.config.extra.wireguard.proxy-sentinel.ipv4} = [nodes.sentinel.config.providedDomains.influxdb];
   extra.telegraf = {
     enable = true;
-    influxdb2.url = nodes.sentinel.config.providedDomains.influxdb;
+    influxdb2.domain = nodes.sentinel.config.providedDomains.influxdb;
     influxdb2.organization = "servers";
     influxdb2.bucket = "telegraf";
   };

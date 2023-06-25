@@ -22,7 +22,7 @@ in {
   networking.hosts.${sentinelCfg.extra.wireguard.proxy-sentinel.ipv4} = [sentinelCfg.providedDomains.influxdb];
   extra.telegraf = {
     enable = true;
-    influxdb2.url = sentinelCfg.providedDomains.influxdb;
+    influxdb2.domain = sentinelCfg.providedDomains.influxdb;
     influxdb2.organization = "servers";
     influxdb2.bucket = "telegraf";
   };

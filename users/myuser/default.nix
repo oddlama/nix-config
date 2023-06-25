@@ -17,13 +17,14 @@ in {
       ["wheel" "input" "video"]
       ++ lib.optionals config.sound.enable ["audio"];
     isNormalUser = true;
+    autoSubUidGidRange = false;
     shell = pkgs.zsh;
   };
 
   home-manager.users.${myuser} = {
     imports = [
       #impermanence.home-manager.impermanence
-      ../common/core
+      ../common
       ./dev.nix
       ./gpg.nix
       ./ssh.nix

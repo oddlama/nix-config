@@ -43,6 +43,16 @@ in {
   config = mkIf cfg.enable {
     age.secrets.telegraf-influxdb-token = {
       rekeyFile = nodePath + "/secrets/telegraf-influxdb-token.age";
+      # TODO generator.script = { pkgs, lib, decrypt, deps, ... }: let
+      # TODO   adminBasicAuth = (builtins.head deps).file;
+      # TODO   adminToken = (builtins.head deps).file; # TODO ..... filter by name?
+      # TODO in ''
+      # TODO   echo " -> Provisioning influxdb token for [34mtelegraf[m on [32m${nodeName}[m at [33mhttps://${cfg.influxdb2.domain}[m" >&2
+      # TODO   ${decrypt} ${lib.escapeShellArg aba.file} \
+      # TODO   INFLUX_HOST=https://${aba.host}+${aba.name}:${PW}@${URL}
+      # TODO     | ${pkgs.influxdb2-cli}/bin/influx -niBC 12 ${lib.escapeShellArg host}"+"${lib.escapeShellArg name} \
+      # TODO     || die "Failure"
+      # TODO '');
       mode = "440";
       group = "telegraf";
     };

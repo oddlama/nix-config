@@ -36,6 +36,26 @@ in {
   nodes.sentinel = {
     providedDomains.influxdb = influxdbDomain;
 
+    # Not actually used on the system, but to allow us to provision tokens
+    # when generating secrets.
+    age.secrets.admin-influxdb-basic-auth-password = {
+      rekeyFile = ./secrets/admin-influxdb-basic-auth-password.age;
+      generator = "alnum";
+      mode = "000";
+    };
+
+    age.secrets.influxdb-basic-auth-hashes = {
+      rekeyFile = ./secrets/influxdb-basic-auth-hashes.age;
+      # Copy only the script so the dependencies can be added by the nodes
+      # that define passwords (using distributed-config).
+      generator = {
+        inherit (config.age.generators.basic-auth) script;
+        dependencies = [sentinelCfg.age.secrets.admin-influxdb-basic-auth-password];
+      };
+      mode = "440";
+      group = "nginx";
+    };
+
     services.nginx = {
       upstreams.influxdb = {
         servers."${config.services.influxdb2.settings.http-bind-address}" = {};
@@ -54,6 +74,8 @@ in {
           proxyWebsockets = true;
           extraConfig = ''
             satisfy any;
+            auth_basic "Authentication required";
+            auth_basic_user_file ${sentinelCfg.age.secrets.influxdb-basic-auth-hashes.path};
             ${lib.concatMapStrings (ip: "allow ${ip};\n") sentinelCfg.extra.wireguard.proxy-sentinel.server.reservedAddresses}
             deny all;
           '';

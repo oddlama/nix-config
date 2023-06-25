@@ -73,9 +73,7 @@ in rec {
   # Counts how often each element occurrs in xs
   countOccurrences = let
     addOrUpdate = acc: x:
-      if builtins.hasAttr x acc
-      then acc // {${x} = acc.${x} + 1;}
-      else acc // {${x} = 1;};
+      acc // {${x} = (acc.${x} or 0) + 1;};
   in
     foldl' addOrUpdate {};
 

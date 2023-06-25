@@ -166,7 +166,7 @@ in rec {
         };
       };
     };
-    zfs = {
+    zfs = rec {
       defaultZpoolOptions = {
         type = "zpool";
         mountRoot = "/mnt";
@@ -181,6 +181,19 @@ in rec {
           devices = "off";
         };
         options.ashift = "12";
+      };
+
+      defaultZfsDatasets = {
+        "local" = unmountable;
+        "local/root" =
+          filesystem "/"
+          // {
+            postCreateHook = "zfs snapshot rpool/local/root@blank";
+          };
+        "local/nix" = filesystem "/nix";
+        "local/state" = filesystem "/state";
+        "safe" = unmountable;
+        "safe/persist" = filesystem "/persist";
       };
 
       unmountable = {type = "zfs_fs";};

@@ -25,19 +25,11 @@
       rpool =
         defaultZpoolOptions
         // {
-          datasets = {
-            "local" = unmountable;
-            "local/root" =
-              filesystem "/"
-              // {
-                postCreateHook = "zfs snapshot rpool/local/root@blank";
-              };
-            "local/nix" = filesystem "/nix";
-            "local/state" = filesystem "/state";
-            "safe" = unmountable;
-            "safe/persist" = filesystem "/persist";
-            "safe/vms" = unmountable;
-          };
+          datasets =
+            defaultZfsDatasets
+            // {
+              "safe/vms" = unmountable;
+            };
         };
     };
   };

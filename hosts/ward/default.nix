@@ -1,6 +1,7 @@
 {
   config,
   nixos-hardware,
+  nodes,
   ...
 }: {
   imports = [
@@ -25,11 +26,13 @@
     proxy = "sentinel";
   };
 
+  # Connect safely via wireguard to skip authentication
+  networking.hosts.${nodes.sentinel.config.extra.wireguard.proxy-sentinel.ipv4} = [nodes.sentinel.config.providedDomains.influxdb];
   extra.telegraf = {
     enable = true;
-    proxy = "sentinel";
-    # TODO organization = "servers";
-    # TODO bucket = "telegraf";
+    influxdb2.url = nodes.sentinel.config.providedDomains.influxdb;
+    influxdb2.organization = "servers";
+    influxdb2.bucket = "telegraf";
   };
 
   # TODO track my github stats

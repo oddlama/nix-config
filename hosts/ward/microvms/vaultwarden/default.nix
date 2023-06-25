@@ -17,6 +17,15 @@ in {
     proxy = "sentinel";
   };
 
+  # Connect safely via wireguard to skip authentication
+  networking.hosts.${sentinelCfg.extra.wireguard.proxy-sentinel.ipv4} = [sentinelCfg.providedDomains.influxdb];
+  extra.telegraf = {
+    enable = true;
+    influxdb2.url = sentinelCfg.providedDomains.influxdb;
+    influxdb2.organization = "servers";
+    influxdb2.bucket = "telegraf";
+  };
+
   age.secrets.vaultwarden-env = {
     rekeyFile = ./secrets/vaultwarden-env.age;
     mode = "440";
@@ -31,7 +40,7 @@ in {
   };
 
   nodes.sentinel = {
-    proxiedDomains.vaultwarden = vaultwardenDomain;
+    providedDomains.vaultwarden = vaultwardenDomain;
 
     upstreams.vaultwarden = {
       servers."${config.services.vaultwarden.config.rocketAddress}:${toString config.services.vaultwarden.config.rocketPort}" = {};

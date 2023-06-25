@@ -18,6 +18,15 @@ in {
     proxy = "sentinel";
   };
 
+  # Connect safely via wireguard to skip authentication
+  networking.hosts.${sentinelCfg.extra.wireguard.proxy-sentinel.ipv4} = [sentinelCfg.providedDomains.influxdb];
+  extra.telegraf = {
+    enable = true;
+    influxdb2.url = sentinelCfg.providedDomains.influxdb;
+    influxdb2.organization = "servers";
+    influxdb2.bucket = "telegraf";
+  };
+
   networking.nftables.firewall.rules = lib.mkForce {
     sentinel-to-local.allowedTCPPorts = [config.services.grafana.settings.server.http_port];
   };
@@ -46,7 +55,7 @@ in {
       config.age.secrets.grafana-loki-basic-auth-password
     ];
 
-    proxiedDomains.grafana = grafanaDomain;
+    providedDomains.grafana = grafanaDomain;
 
     services.nginx = {
       upstreams.grafana = {
@@ -102,9 +111,9 @@ in {
         client_secret = "aZKNCM6KpjBy4RqwKJXMLXzyx9rKH6MZTFk4wYrKWuBqLj6t"; # TODO temporary test not a real secret
         scopes = "openid email profile";
         login_attribute_path = "prefered_username";
-        auth_url = "https://${sentinelCfg.proxiedDomains.kanidm}/ui/oauth2";
-        token_url = "https://${sentinelCfg.proxiedDomains.kanidm}/oauth2/token";
-        api_url = "https://${sentinelCfg.proxiedDomains.kanidm}/oauth2/openid/grafana/userinfo";
+        auth_url = "https://${sentinelCfg.providedDomains.kanidm}/ui/oauth2";
+        token_url = "https://${sentinelCfg.providedDomains.kanidm}/oauth2/token";
+        api_url = "https://${sentinelCfg.providedDomains.kanidm}/oauth2/openid/grafana/userinfo";
         use_pkce = true;
         # Allow mapping oauth2 roles to server admin
         allow_assign_grafana_admin = true;
@@ -116,19 +125,22 @@ in {
       enable = true;
       datasources.settings.datasources = [
         {
-          name = "InfluxDB";
+          name = "InfluxDB (servers)";
           type = "influxdb";
           access = "proxy";
-          url = "https://${sentinelCfg.proxiedDomains.influxdb}";
+          url = "https://${sentinelCfg.providedDomains.influxdb}";
           orgId = 1;
           secureJsonData.token = "$__file{${config.age.secrets.grafana-influxdb-token.path}}";
           jsonData.version = "Flux";
+          jsonData.organization = "servers";
+          jsonData.defaultBucket = "telegraf";
         }
+        # TODO duplicate above influxdb source (with scoped read tokens??) for each organization
         {
           name = "Loki";
           type = "loki";
           access = "proxy";
-          url = "https://${sentinelCfg.proxiedDomains.loki}";
+          url = "https://${sentinelCfg.providedDomains.loki}";
           orgId = 1;
           basicAuth = true;
           basicAuthUser = "${nodeName}+grafana-loki-basic-auth-password";

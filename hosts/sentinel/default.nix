@@ -24,4 +24,13 @@
     enable = true;
     proxy = "sentinel";
   };
+
+  # Connect safely via wireguard to skip authentication
+  networking.hosts.${config.extra.wireguard.proxy-sentinel.ipv4} = [config.providedDomains.influxdb];
+  extra.telegraf = {
+    enable = true;
+    influxdb2.url = config.providedDomains.influxdb;
+    influxdb2.organization = "servers";
+    influxdb2.bucket = "telegraf";
+  };
 }

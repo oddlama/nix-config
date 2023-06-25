@@ -20,12 +20,21 @@ in {
     proxy = "sentinel";
   };
 
+  # Connect safely via wireguard to skip authentication
+  networking.hosts.${sentinelCfg.extra.wireguard.proxy-sentinel.ipv4} = [sentinelCfg.providedDomains.influxdb];
+  extra.telegraf = {
+    enable = true;
+    influxdb2.url = sentinelCfg.providedDomains.influxdb;
+    influxdb2.organization = "servers";
+    influxdb2.bucket = "telegraf";
+  };
+
   networking.nftables.firewall.rules = lib.mkForce {
     sentinel-to-local.allowedTCPPorts = [influxdbPort];
   };
 
   nodes.sentinel = {
-    proxiedDomains.influxdb = influxdbDomain;
+    providedDomains.influxdb = influxdbDomain;
 
     services.nginx = {
       upstreams.influxdb = {
@@ -45,7 +54,7 @@ in {
           proxyWebsockets = true;
           extraConfig = ''
             satisfy any;
-            ${lib.concatMapStrings (ip: "allow ${ip};\n") sentinelCfg.extra.wireguard.proxy-sentinel.server.reservedAddresses};
+            ${lib.concatMapStrings (ip: "allow ${ip};\n") sentinelCfg.extra.wireguard.proxy-sentinel.server.reservedAddresses}
             deny all;
           '';
         };

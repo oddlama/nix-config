@@ -177,4 +177,7 @@ in {
     macvtapInterface = "lan";
     wireguard.openFirewallRules = ["lan-to-local"];
   };
+
+  # Allow accessing influx
+  extra.wireguard.proxy-sentinel.client.via = "sentinel";
 }

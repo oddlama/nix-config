@@ -50,7 +50,7 @@ in {
           {
             basic_auth.username = "${nodeName}+promtail-loki-basic-auth-password";
             basic_auth.password_file = config.age.secrets.promtail-loki-basic-auth-password.path;
-            url = "https://${nodes.${cfg.proxy}.config.proxiedDomains.loki}/loki/api/v1/push";
+            url = "https://${nodes.${cfg.proxy}.config.providedDomains.loki}/loki/api/v1/push";
           }
         ];
 
@@ -147,5 +147,7 @@ in {
         ];
       };
     };
+
+    systemd.services.promtail.serviceConfig.RestartSec = "600"; # Retry every 10 minutes
   };
 }

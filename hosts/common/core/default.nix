@@ -19,7 +19,7 @@
     ../../../modules/microvms.nix
     ../../../modules/oauth2-proxy.nix
     ../../../modules/promtail.nix
-    ../../../modules/proxied-domains.nix
+    ../../../modules/provided-domains.nix
     ../../../modules/repo.nix
     ../../../modules/telegraf.nix
     ../../../modules/wireguard.nix

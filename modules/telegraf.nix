@@ -21,16 +21,26 @@
 in {
   options.extra.telegraf = {
     enable = mkEnableOption (mdDoc "telegraf to push metrics to influx.");
-    proxy = mkOption {
-      type = types.str;
-      description = mdDoc "The node name of the proxy server which provides the influx api endpoint.";
+    influxdb2 = {
+      url = mkOption {
+        type = types.str;
+        example = "https://influxdb.example.com";
+        description = mdDoc "The influxdb v2 database url to push to.";
+      };
+
+      organization = mkOption {
+        type = types.str;
+        description = mdDoc "The organization to push to.";
+      };
+
+      bucket = mkOption {
+        type = types.str;
+        description = mdDoc "The bucket to push to.";
+      };
     };
   };
 
   config = mkIf cfg.enable {
-    # Connect safely via wireguard to skip authentication
-    networking.hosts.${nodes.${cfg.proxy}.config.extra.wireguard."proxy-${cfg.proxy}".ipv4} = [nodes.${cfg.proxy}.config.proxiedDomains.influxdb];
-
     age.secrets.telegraf-influxdb-token = {
       rekeyFile = nodePath + "/secrets/telegraf-influxdb-token.age";
       mode = "440";
@@ -55,10 +65,9 @@ in {
         };
         outputs = {
           influxdb_v2 = {
-            urls = ["https://${nodes.${cfg.proxy}.config.proxiedDomains.influxdb}"];
+            urls = [cfg.influxdb2.url];
             token = "$INFLUX_TOKEN";
-            organization = "servers";
-            bucket = "telegraf";
+            inherit (cfg.influxdb2) organization bucket;
           };
         };
         inputs =
@@ -103,8 +112,11 @@ in {
         "/run/wrappers"
         pkgs.lm_sensors
       ];
-      # For wireguard statistics
-      serviceConfig.AmbientCapabilities = ["CAP_NET_ADMIN"];
+      serviceConfig = {
+        # For wireguard statistics
+        AmbientCapabilities = ["CAP_NET_ADMIN"];
+        RestartSec = "600"; # Retry every 10 minutes
+      };
     };
   };
 }

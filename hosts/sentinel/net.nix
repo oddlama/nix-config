@@ -40,6 +40,15 @@
   networking.nftables.firewall = {
     zones = lib.mkForce {
       untrusted.interfaces = ["wan"];
+      proxy-sentinel.interfaces = ["proxy-sentinel"];
+    };
+    rules = lib.mkForce {
+      # Allow accessing nginx through the proxy
+      proxy-sentinel-to-local = {
+        from = ["proxy-sentinel"];
+        to = ["local"];
+        allowedTCPPorts = [80 443];
+      };
     };
   };
 

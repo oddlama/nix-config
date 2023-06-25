@@ -22,15 +22,15 @@
   in {
     provider = "oidc";
     scope = "openid email";
-    loginURL = "https://${config.proxiedDomains.kanidm}/ui/oauth2";
-    redeemURL = "https://${config.proxiedDomains.kanidm}/oauth2/token";
-    validateURL = "https://${config.proxiedDomains.kanidm}/oauth2/openid/${clientId}/userinfo";
+    loginURL = "https://${config.providedDomains.kanidm}/ui/oauth2";
+    redeemURL = "https://${config.providedDomains.kanidm}/oauth2/token";
+    validateURL = "https://${config.providedDomains.kanidm}/oauth2/openid/${clientId}/userinfo";
     clientID = clientId;
     keyFile = config.age.secrets.oauth2-proxy-secret.path;
     email.domains = ["*"];
 
     extraConfig = {
-      oidc-issuer-url = "https://${config.proxiedDomains.kanidm}/oauth2/openid/${clientId}";
+      oidc-issuer-url = "https://${config.providedDomains.kanidm}/oauth2/openid/${clientId}";
       provider-display-name = "Kanidm";
       #skip-provider-button = true;
     };

@@ -10,31 +10,10 @@
   influxdbPort = 8086;
 in {
   microvm.mem = 1024;
-
-  imports = [
-    ../../../../modules/proxy-via-sentinel.nix
-  ];
-
-  extra.promtail = {
-    enable = true;
-    proxy = "sentinel";
-  };
-
-  # Connect safely via wireguard to skip authentication
-  networking.hosts.${sentinelCfg.extra.wireguard.proxy-sentinel.ipv4} = [sentinelCfg.providedDomains.influxdb];
-  extra.telegraf = {
-    enable = true;
-    influxdb2.domain = sentinelCfg.providedDomains.influxdb;
-    influxdb2.organization = "servers";
-    influxdb2.bucket = "telegraf";
-  };
-
-  networking.nftables.firewall.rules = lib.mkForce {
-    sentinel-to-local.allowedTCPPorts = [influxdbPort];
-  };
+  meta.wireguard-proxy.sentinel.allowedTCPPorts = [influxdbPort];
 
   nodes.sentinel = {
-    providedDomains.influxdb = influxdbDomain;
+    networking.providedDomains.influxdb = influxdbDomain;
 
     services.nginx = {
       upstreams.influxdb = {
@@ -46,7 +25,7 @@ in {
       };
       virtualHosts.${influxdbDomain} = {
         forceSSL = true;
-        useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert influxdbDomain;
+        useACMEWildcardHost = true;
         oauth2.enable = true;
         oauth2.allowedGroups = ["access_influxdb"];
         locations."/" = {
@@ -54,7 +33,7 @@ in {
           proxyWebsockets = true;
           extraConfig = ''
             satisfy any;
-            ${lib.concatMapStrings (ip: "allow ${ip};\n") sentinelCfg.extra.wireguard.proxy-sentinel.server.reservedAddresses}
+            ${lib.concatMapStrings (ip: "allow ${ip};\n") sentinelCfg.meta.wireguard.proxy-sentinel.server.reservedAddresses}
             deny all;
           '';
         };
@@ -66,7 +45,7 @@ in {
     enable = true;
     settings = {
       reporting-disabled = true;
-      http-bind-address = "${config.extra.wireguard.proxy-sentinel.ipv4}:${toString influxdbPort}";
+      http-bind-address = "${config.meta.wireguard.proxy-sentinel.ipv4}:${toString influxdbPort}";
     };
   };
 

@@ -172,12 +172,12 @@ in {
 
   systemd.services.kea-dhcp4-server.after = ["sys-subsystem-net-devices-${utils.escapeSystemdPath "lan-self"}.device"];
 
-  extra.microvms.networking = {
+  meta.microvms.networking = {
     baseMac = config.repo.secrets.local.networking.interfaces.lan.mac;
     macvtapInterface = "lan";
     wireguard.openFirewallRules = ["lan-to-local"];
   };
 
   # Allow accessing influx
-  extra.wireguard.proxy-sentinel.client.via = "sentinel";
+  meta.wireguard.proxy-sentinel.client.via = "sentinel";
 }

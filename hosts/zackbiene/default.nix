@@ -6,26 +6,25 @@
   ...
 }: {
   imports = [
-    ../common/core
-    ../common/hardware/odroid-n2plus.nix
-    ../common/initrd-ssh.nix
-    ../common/zfs.nix
-    ../common/bios-boot.nix
+    ../../modules/optional/hardware/odroid-n2plus.nix
 
-    ./fs.nix
-    ./net.nix
+    ../../modules
+    ../../modules/optional/boot-bios.nix
+    ../../modules/optional/initrd-ssh.nix
+    ../../modules/optional/zfs.nix
 
     #./dnsmasq.nix
     ./esphome.nix
+    ./fs.nix
     ./home-assistant.nix
     ./hostapd.nix
     ./mosquitto.nix
+    ./net.nix
     ./nginx.nix
     ./zigbee2mqtt.nix
   ];
 
   # TODO boot.loader.grub.devices = ["/dev/disk/by-id/${config.repo.secrets.local.disk.main}"];
-  console.earlySetup = true;
 
   # Fails if there are no SMART devices
   services.smartd.enable = lib.mkForce false;

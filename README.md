@@ -2,39 +2,64 @@
 
 This is my personal nix config.
 
-## Structure
+## Hosts
 
-- `hosts/` contains configuration for all hosts.
-  - `common/` shared configuration. Hosts will include what they need from here.
-    - `core/` configuration that is shared across _all_ machines. (base setup, ssh, ...)
-    - `dev/` configuration for development machines
-    - `graphical/` configuration for graphical setup
-    - `hardware/` configuration for various hardware components
-    - `<something>.nix` commonly required configuration for `<something>`
-  - `<hostname>/` configuration for `<hostname>`
-    - `[microvms/]` configuration for microvms. This is optional even for existing microvms, since they can also be defined in-place.
-    - `secrets/` Local secrets for this host. Still theoretically accessible by other hosts, but owned by this one.
-      - `local.nix.age` Repository-wide local secrets. Decrypted on import via `builtins.extraBuiltins.rageImportEncrypted`.
-      - `[host.pub]` This host's public key. Used for agenix rekeying if it exists.
-    - `default.nix` The actual system definition. Follow the imports from there to see what it entails.
-    - `fs.nix` Filesystem setup.
-    - `net.nix` Networking setup.
+  TODO make a table.
   - `nom/` - My laptop and main development machine
   - `ward/` - ODROID H3, energy efficient SBC. Used as a firewall betwenn my ISP and internal home network. Hosts some lightweight services using full KVM virtual machines.
   - `envoy/` - Hetzner Cloud server. Primarily used as my mailserver and VPN provider.
+  - `sentinel/` - Hetzner Cloud server. Primarily used as a http proxy
   - `zackbiene/` - ODROID N2+. Hosts IoT and Home Automation stuff and fully isolates that stuff from my internal network.
   - not yet ready to be publicized: my main development machine, the powerful home server, some services ... (still in transition from gentoo :/)
-- `modules/` additional NixOS modules that are not yet upstreamed, or specific to this setup.
-  - `interface-naming.nix` Provides an option to rename interfaces based on their MAC address
-  - `microvms.nix` Used to define microvms including all of the boilerplate setup (networking, shares, local wireguard)
-  - `repo.nix` Provides options to define and access repository-wide secrets
-  - `wireguard.nix` A meta module that allows defining wireguard networks that automatically collects network participants across nodes
-- `nix/` library functions and plumbing
-  - `apps/` Additional runnable actions for this flake
-    - `default.nix` Collects all apps and generates a definition for a specified system
-    - `draw-graph.nix` (**WIP:** infrastructure graph renderer)
-    - `format-secrets.nix` Runs the code formatter on the secret .nix files
-    - `show-wireguard-qr.nix` Generates a QR code for external wireguard participants
+
+## Structure
+
+- `apps/` Additional runnable actions for flake maintenance, like showing wireguard QR codes.
+
+- `hosts/<hostname>` contains the top-level configuration for `<hostname>`.
+  Follow the imports from there to see what it entails.
+
+  By convention I place secrets related to this host in the `secrets/` subfolder, but any host
+  could technically use them. Especialy important files in this folder are:
+
+  - `host.pub` This host's public key (retrieved after initial setup). Used to rekey secrets so the host can access them at runtime.
+  - `local.nix.age` Repository-wide local secrets. Decrypted on import, see `modules/repo/secrets.nix` for more information.
+
+  Some hosts define microvms that run as their guests. These are typically stored
+  in `microvms/<vm>` and have the same layout as a regular host.
+
+- `modules/` contains modularized configuration. If you are interested in reusable parts of
+  my configuration, this is probably the folder you are looking for. Unless stated otherwise,
+  all of these will be regular reusable modules like those you would find in `nixpkgs/nixos/modules`,
+  and the tree of all relevant modules is included via `modules/default.nix`.
+
+  - `modules/config/` contains configuration that is I use across all my host and is applied by default.
+    These just add configuration unconditionally and don't expose any further options.
+
+  - `modules/optional/` contains configuration that is only needed sometimes, and which should
+    be included explicitly by hosts that require it.
+
+  - `modules/meta/` contains meta-modules that simplify the option interface of existing options.
+    I use this for stuff that I don't need on all my hosts and that may require different settings
+    for each host while sharing a common basis.
+
+    Some of these are "meta" in the sense that they depend on their own definitions on multiple hosts (wireguard).
+    These are probably as opinionated as stuff in `modules/config/` but may be a little more general.
+    The `wireguard` module would even be a candidate for extraction to a separate flake, together with the related apps.
+
+  - `modules/<xyz>/` regular modules related to <xyz>, similar structure as in `nixpkgs/nixos/modules`
+
+- `pkgs/` Custom packages and scripts
+
+- `secrets/` Global secrets and age identities
+  - `global.nix.age` Repository-wide global secrets. Available on nodes via the repo module as `config.repo.secrets.global`.
+  - `backup.pub` Backup age-identity in case I ever lose my YubiKey or it breaks.
+  - `yk1-nix-rage.pub` Master YubiKey split-identity. Used as a key-grab.
+
+- `users/` User account configuration mostly via home-manager.
+  This is the place to look for my dotfiles.
+
+- `nix/` library functions and flake plumbing
   - `checks.nix` pre-commit-hooks for this repository
   - `colmena.nix` Setup for distributed deployment using colmena (actually defines all NixOS hosts)
   - `dev-shell.nix` Environment setup for `nix develop` for using this flake
@@ -43,12 +68,6 @@ This is my personal nix config.
   - `generate-node.nix` Helper function that outputs everything that is necessary to define a new node in a predictable format. Used to define colmena nodes and microvms.
   - `lib.nix` Commonly used functionality or helpers that weren't available in the standard library
   - `rage-decrypt-and-cache.sh` Auxiliary script for repository-wide secrets that decrypts a file and caches the output in /tmp
-- `secrets/` Global secrets and age identities
-  - `global.nix.age` Repository-wide global secrets. Available on nodes via the repo module as `config.repo.secrets.global`.
-  - `backup.pub` Backup age-identity in case I ever lose my YubiKey or it breaks.
-  - `yk1-nix-rage.pub` Master YubiKey split-identity. Used as a key-grab.
-- `pkgs/` Custom packages and scripts
-- `users/` User account configuration via home-manager. Imported by each host separately.
 
 ## How-To
 

@@ -10,27 +10,7 @@
   kanidmDomain = "auth.${sentinelCfg.repo.secrets.local.personalDomain}";
   kanidmPort = 8300;
 in {
-  imports = [
-    ../../../../modules/proxy-via-sentinel.nix
-  ];
-
-  extra.promtail = {
-    enable = true;
-    proxy = "sentinel";
-  };
-
-  # Connect safely via wireguard to skip authentication
-  networking.hosts.${sentinelCfg.extra.wireguard.proxy-sentinel.ipv4} = [sentinelCfg.providedDomains.influxdb];
-  extra.telegraf = {
-    enable = true;
-    influxdb2.domain = sentinelCfg.providedDomains.influxdb;
-    influxdb2.organization = "servers";
-    influxdb2.bucket = "telegraf";
-  };
-
-  networking.nftables.firewall.rules = lib.mkForce {
-    sentinel-to-local.allowedTCPPorts = [kanidmPort];
-  };
+  meta.wireguard-proxy.sentinel.allowedTCPPorts = [kanidmPort];
 
   age.secrets."kanidm-self-signed.crt" = {
     rekeyFile = ./secrets/kanidm-self-signed.crt.age;
@@ -45,7 +25,7 @@ in {
   };
 
   nodes.sentinel = {
-    providedDomains.kanidm = kanidmDomain;
+    networking.providedDomains.kanidm = kanidmDomain;
 
     services.nginx = {
       upstreams.kanidm = {
@@ -57,7 +37,7 @@ in {
       };
       virtualHosts.${kanidmDomain} = {
         forceSSL = true;
-        useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert kanidmDomain;
+        useACMEWildcardHost = true;
         locations."/".proxyPass = "https://kanidm";
         # Allow using self-signed certs to satisfy kanidm's requirement
         # for TLS connections. (Although this is over wireguard anyway)
@@ -76,7 +56,7 @@ in {
       origin = "https://${kanidmDomain}";
       tls_chain = config.age.secrets."kanidm-self-signed.crt".path;
       tls_key = config.age.secrets."kanidm-self-signed.key".path;
-      bindaddress = "${config.extra.wireguard.proxy-sentinel.ipv4}:${toString kanidmPort}";
+      bindaddress = "${config.meta.wireguard.proxy-sentinel.ipv4}:${toString kanidmPort}";
       trust_x_forward_for = true;
     };
   };

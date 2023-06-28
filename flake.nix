@@ -107,7 +107,7 @@
       microvmNodes = nixpkgs.lib.concatMapAttrs (_: node:
         nixpkgs.lib.mapAttrs'
         (vm: def: nixpkgs.lib.nameValuePair def.nodeName node.config.microvm.vms.${vm}.config)
-        (node.config.extra.microvms.vms or {}))
+        (node.config.meta.microvms.vms or {}))
       self.colmenaNodes;
       # Expose all nodes in a single attribute
       nodes = self.colmenaNodes // self.microvmNodes;
@@ -130,7 +130,7 @@
 
       apps =
         agenix-rekey.defineApps self pkgs self.nodes
-        // import ./nix/apps inputs system;
+        // import ./apps inputs system;
       checks = import ./nix/checks.nix inputs system;
       devShells.default = import ./nix/dev-shell.nix inputs system;
       formatter = pkgs.alejandra;

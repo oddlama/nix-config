@@ -8,30 +8,10 @@
   sentinelCfg = nodes.sentinel.config;
   lokiDomain = "loki.${sentinelCfg.repo.secrets.local.personalDomain}";
 in {
-  imports = [
-    ../../../../modules/proxy-via-sentinel.nix
-  ];
-
-  extra.promtail = {
-    enable = true;
-    proxy = "sentinel";
-  };
-
-  # Connect safely via wireguard to skip authentication
-  networking.hosts.${sentinelCfg.extra.wireguard.proxy-sentinel.ipv4} = [sentinelCfg.providedDomains.influxdb];
-  extra.telegraf = {
-    enable = true;
-    influxdb2.domain = sentinelCfg.providedDomains.influxdb;
-    influxdb2.organization = "servers";
-    influxdb2.bucket = "telegraf";
-  };
-
-  networking.nftables.firewall.rules = lib.mkForce {
-    sentinel-to-local.allowedTCPPorts = [config.services.loki.configuration.server.http_listen_port];
-  };
+  meta.wireguard-proxy.sentinel.allowedTCPPorts = [config.services.loki.configuration.server.http_listen_port];
 
   nodes.sentinel = {
-    providedDomains.loki = lokiDomain;
+    networking.providedDomains.loki = lokiDomain;
 
     age.secrets.loki-basic-auth-hashes = {
       rekeyFile = ./secrets/loki-basic-auth-hashes.age;
@@ -52,7 +32,7 @@ in {
       };
       virtualHosts.${lokiDomain} = {
         forceSSL = true;
-        useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert lokiDomain;
+        useACMEWildcardHost = true;
         locations."/" = {
           proxyPass = "http://loki";
           proxyWebsockets = true;
@@ -86,7 +66,7 @@ in {
       auth_enabled = false;
 
       server = {
-        http_listen_address = config.extra.wireguard.proxy-sentinel.ipv4;
+        http_listen_address = config.meta.wireguard.proxy-sentinel.ipv4;
         http_listen_port = 3100;
         log_level = "warn";
       };

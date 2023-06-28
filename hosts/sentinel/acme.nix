@@ -17,5 +17,5 @@ in {
       reloadServices = ["nginx"];
     };
   };
-  extra.acme.wildcardDomains = acme.domains;
+  security.acme.wildcardDomains = acme.domains;
 }

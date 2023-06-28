@@ -230,7 +230,7 @@ in rec {
     inherit (self.nodes.${head participatingNodes}.config.lib) net;
 
     # Returns the given node's wireguard configuration of this network
-    wgCfgOf = node: self.nodes.${node}.config.extra.wireguard.${wgName};
+    wgCfgOf = node: self.nodes.${node}.config.meta.wireguard.${wgName};
 
     sortedPeers = peerA: peerB:
       if peerA < peerB
@@ -261,7 +261,7 @@ in rec {
     # All nodes that are part of this network
     participatingNodes =
       filter
-      (n: builtins.hasAttr wgName self.nodes.${n}.config.extra.wireguard)
+      (n: builtins.hasAttr wgName self.nodes.${n}.config.meta.wireguard)
       (attrNames self.nodes);
 
     # Partition nodes by whether they are servers
@@ -305,7 +305,7 @@ in rec {
       (n:
         filter (x: !types.isLazyValue x)
         (concatLists
-          (self.nodes.${n}.options.extra.wireguard.type.functor.wrapped.getSubOptions (wgCfgOf n)).addresses.definitions))
+          (self.nodes.${n}.options.meta.wireguard.type.functor.wrapped.getSubOptions (wgCfgOf n)).addresses.definitions))
       ++ flatten (concatMap (n: attrValues (wgCfgOf n).server.externalPeers) participatingNodes);
 
     # The cidrv4 and cidrv6 of the network spanned by all participating peer addresses.

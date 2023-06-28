@@ -8,30 +8,10 @@
   sentinelCfg = nodes.sentinel.config;
   adguardhomeDomain = "adguardhome.${sentinelCfg.repo.secrets.local.personalDomain}";
 in {
-  imports = [
-    ../../../../modules/proxy-via-sentinel.nix
-  ];
-
-  extra.promtail = {
-    enable = true;
-    proxy = "sentinel";
-  };
-
-  # Connect safely via wireguard to skip authentication
-  networking.hosts.${sentinelCfg.extra.wireguard.proxy-sentinel.ipv4} = [sentinelCfg.providedDomains.influxdb];
-  extra.telegraf = {
-    enable = true;
-    influxdb2.domain = sentinelCfg.providedDomains.influxdb;
-    influxdb2.organization = "servers";
-    influxdb2.bucket = "telegraf";
-  };
-
-  networking.nftables.firewall.rules = lib.mkForce {
-    sentinel-to-local.allowedTCPPorts = [config.services.adguardhome.settings.bind_port];
-  };
+  meta.wireguard-proxy.sentinel.allowedTCPPorts = [config.services.adguardhome.settings.bind_port];
 
   nodes.sentinel = {
-    providedDomains.adguard = adguardhomeDomain;
+    networking.providedDomains.adguard = adguardhomeDomain;
 
     services.nginx = {
       upstreams.adguardhome = {
@@ -43,7 +23,7 @@ in {
       };
       virtualHosts.${adguardhomeDomain} = {
         forceSSL = true;
-        useACMEHost = sentinelCfg.lib.extra.matchingWildcardCert adguardhomeDomain;
+        useACMEWildcardHost = true;
         oauth2.enable = true;
         oauth2.allowedGroups = ["access_adguardhome"];
         locations."/" = {
@@ -57,7 +37,7 @@ in {
   services.adguardhome = {
     enable = true;
     settings = {
-      bind_host = config.extra.wireguard.proxy-sentinel.ipv4;
+      bind_host = config.meta.wireguard.proxy-sentinel.ipv4;
       bind_port = 3000;
       #dns = {
       #  edns_client_subnet.enabled = false;

@@ -52,7 +52,7 @@
     };
   };
 
-  extra.wireguard.proxy-sentinel.server = {
+  meta.wireguard.proxy-sentinel.server = {
     host = config.networking.fqdn;
     port = 51443;
     reservedAddresses = ["10.43.0.0/24" "fd00:43::/120"];

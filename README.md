@@ -1,16 +1,37 @@
 # About
 
-This is my personal nix config.
+This is my personal nix config. Some highlights include:
+
+- Full disk encryption using [disko](https://github.com/nix-community/disko), remotely unlockable via ssh
+- Zoned nftables firewall
+- Service isolation using [microvms](https://github.com/astro/microvm.nix) instead of containers
+- Log and system monitoring via loki, telegraf, influxdb, promtail and grafana
+- Single-Sign-On for all services using oauth2 via kanidm
+- Automatic wireguard mesh generation
+- Secret rekeying, generation and bootstrapping using [agenix-rekey](https://github.com/oddlama/agenix-rekey)
+- Support for repository-wide secrets at evaluation time (hides PII like MACs)
+
+|   |   |   |
+|---|---|---|
+**Shell** | [nushell](https://github.com/nushell/nushell)
+**Terminal** | [kitty](https://github.com/kovidgoyal/kitty)
+**Editor** | [neovim](https://github.com/neovim/neovim)
+**WM** | [sway](https://github.com/swaywm/sway)
 
 ## Hosts
 
-  TODO make a table.
-  - `nom/` - My laptop and main development machine
-  - `ward/` - ODROID H3, energy efficient SBC. Used as a firewall betwenn my ISP and internal home network. Hosts some lightweight services using full KVM virtual machines.
-  - `envoy/` - Hetzner Cloud server. Primarily used as my mailserver and VPN provider.
-  - `sentinel/` - Hetzner Cloud server. Primarily used as a http proxy
-  - `zackbiene/` - ODROID N2+. Hosts IoT and Home Automation stuff and fully isolates that stuff from my internal network.
-  - not yet ready to be publicized: my main development machine, the powerful home server, some services ... (still in transition from gentoo :/)
+Name | Type | Purpose
+---|---|---
+
+nom | Gigabyte AERO 15-W8 (i7-8750H) <sub>Framework when?</sub> | My laptop and my main portable development machine
+ward | ODROID H3 | Energy efficient SBC for my home firewall and some lightweight services using microvms.
+envoy | Hetzner Cloud server | Mailserver
+sentinel | Hetzner Cloud server | Proxies and protects my local services
+zackbiene | ODROID N2+ | ARM SBC for home automation, isolating the sketchy stuff from my main network
+
+<sub>
+not yet nixified: my main development machine, the powerful home server, and some services (still in transition from gentoo :/)
+</sub>
 
 ## Structure
 

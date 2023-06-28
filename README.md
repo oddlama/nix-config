@@ -1,6 +1,6 @@
 # About
 
-This is my personal nix config. Some highlights include:
+This is my personal nix config. It's still in the making, but this is what I got so far:
 
 - Full disk encryption using [disko](https://github.com/nix-community/disko), remotely unlockable via ssh
 - Zoned nftables firewall
@@ -11,8 +11,8 @@ This is my personal nix config. Some highlights include:
 - Secret rekeying, generation and bootstrapping using [agenix-rekey](https://github.com/oddlama/agenix-rekey)
 - Support for repository-wide secrets at evaluation time (hides PII like MACs)
 
-|   |   |   |
-|---|---|---|
+|   |   |
+|---|---|
 **Shell** | [nushell](https://github.com/nushell/nushell)
 **Terminal** | [kitty](https://github.com/kovidgoyal/kitty)
 **Editor** | [neovim](https://github.com/neovim/neovim)
@@ -22,12 +22,14 @@ This is my personal nix config. Some highlights include:
 
 Name | Type | Purpose
 ---|---|---
+💻 nom | Gigabyte AERO 15-W8 (i7-8750H) | My laptop and my main portable development machine <sub>Framework when?</sub>
+☁️  envoy | Hetzner Cloud server | Mailserver
+☁️  sentinel | Hetzner Cloud server | Proxies and protects my local services
+🖥️ ward | ODROID H3 | Energy efficient SBC for my home firewall and some lightweight services using microvms.
+🥔 zackbiene | ODROID N2+ | ARM SBC for home automation, isolating the sketchy stuff from my main network
 
-nom | Gigabyte AERO 15-W8 (i7-8750H) <sub>Framework when?</sub> | My laptop and my main portable development machine
-ward | ODROID H3 | Energy efficient SBC for my home firewall and some lightweight services using microvms.
-envoy | Hetzner Cloud server | Mailserver
-sentinel | Hetzner Cloud server | Proxies and protects my local services
-zackbiene | ODROID N2+ | ARM SBC for home automation, isolating the sketchy stuff from my main network
+<!-- 🖥️ workstation -->
+<!-- 🖥️ home server -->
 
 <sub>
 not yet nixified: my main development machine, the powerful home server, and some services (still in transition from gentoo :/)

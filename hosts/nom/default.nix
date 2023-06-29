@@ -1,17 +1,19 @@
 {
-  nixos-hardware,
+  inputs,
   pkgs,
   ...
 }: {
   imports = [
-    nixos-hardware.common-cpu-intel
-    nixos-hardware.common-gpu-intel
-    nixos-hardware.common-pc-laptop
-    nixos-hardware.common-pc-laptop-ssd
+    inputs.nixos-hardware.nixosModules.common-cpu-intel
+    inputs.nixos-hardware.nixosModules.common-gpu-intel
+    inputs.nixos-hardware.nixosModules.common-pc-laptop
+    inputs.nixos-hardware.nixosModules.common-pc-laptop-ssd
     ../../modules/optional/hardware/intel.nix
     ../../modules/optional/hardware/physical.nix
 
-    ../../modules
+    #../../modules
+    ../../modules/config/lib.nix
+
     ../../modules/optional/boot-efi.nix
     ../../modules/optional/initrd-ssh.nix
     ../../modules/optional/dev

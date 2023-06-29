@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  extraLib,
   pkgs,
   ...
 }: {
@@ -10,7 +9,7 @@
       m2-ssd = {
         type = "disk";
         device = "/dev/disk/by-id/${config.repo.secrets.local.disk.m2-ssd}";
-        content = with extraLib.disko.gpt; {
+        content = with config.lib.disko.gpt; {
           type = "table";
           format = "gpt";
           partitions = [
@@ -21,7 +20,7 @@
         };
       };
     };
-    zpool = with extraLib.disko.zfs; {
+    zpool = with config.lib.disko.zfs; {
       rpool =
         defaultZpoolOptions
         // {
@@ -34,20 +33,5 @@
     };
   };
 
-  # TODO remove once this is upstreamed
-  boot.initrd.systemd.services."zfs-import-rpool".after = ["cryptsetup.target"];
-  fileSystems."/state".neededForBoot = true;
-  fileSystems."/persist".neededForBoot = true;
-
-  # After importing the rpool, rollback the root system to be empty.
-  boot.initrd.systemd.services.impermanence-root = {
-    wantedBy = ["initrd.target"];
-    after = ["zfs-import-rpool.service"];
-    before = ["sysroot.mount"];
-    unitConfig.DefaultDependencies = "no";
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = "${pkgs.zfs}/bin/zfs rollback -r rpool/local/root@blank";
-    };
-  };
+  boot.initrd.luks.devices.enc-rpool.allowDiscards = true;
 }

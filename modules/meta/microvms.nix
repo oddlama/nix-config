@@ -1,11 +1,7 @@
 {
   config,
-  extraLib,
   inputs,
   lib,
-  microvm,
-  nodeName,
-  nodePath,
   pkgs,
   utils,
   ...
@@ -36,7 +32,8 @@
 
   parentConfig = config;
   cfg = config.meta.microvms;
-  inherit (config.meta.microvms) vms;
+  nodeName = config.repo.node.name;
+  inherit (cfg) vms;
   inherit (config.lib) net;
 
   # Configuration for each microvm
@@ -44,7 +41,7 @@
     # Add the required datasets to the disko configuration of the machine
     disko.devices.zpool = mkIf vmCfg.zfs.enable {
       ${vmCfg.zfs.pool}.datasets."${vmCfg.zfs.dataset}" =
-        extraLib.disko.zfs.filesystem vmCfg.zfs.mountpoint;
+        config.lib.disko.zfs.filesystem vmCfg.zfs.mountpoint;
     };
 
     # Ensure that the zfs dataset exists before it is mounted.
@@ -94,8 +91,9 @@
     nodes = mkMerge config.microvm.vms.${vmName}.config.options.nodes.definitions;
 
     microvm.vms.${vmName} = let
-      node = import ../../nix/generate-node.nix inputs vmCfg.nodeName {
-        inherit (vmCfg) system configPath;
+      node = import ../../nix/generate-node.nix inputs {
+        name = vmCfg.nodeName;
+        inherit (vmCfg) system;
       };
       mac = (net.mac.assignMacs "02:01:27:00:00:00" 24 [] (attrNames vms)).${vmName};
     in {
@@ -217,7 +215,7 @@
 in {
   imports = [
     # Add the host module, but only enable if it necessary
-    microvm.host
+    inputs.microvm.nixosModules.host
     # This is opt-out, so we can't put this into the mkIf below
     {microvm.host.enable = vms != {};}
   ];
@@ -286,26 +284,6 @@ in {
               The name of the resulting node. By default this will be a compound name
               of the host's name and the vm's name to avoid name clashes. Can be
               overwritten to designate special names to specific vms.
-            '';
-          };
-
-          configPath = mkOption {
-            type = types.nullOr types.path;
-            default =
-              if nodePath != null && builtins.pathExists (nodePath + "/microvms/${name}")
-              then nodePath + "/microvms/${name}"
-              else null;
-            description = mdDoc ''
-              The main configuration directory for this microvm. If not-null, the given
-              directory will automatically be imported as system configuration. It will
-              become the nodePath for the microvm meaning that some machine-specific files
-              may be referenced there automatically (for example host.pub).
-
-              This can also be set to a file, which will then simply be used as the main
-              import for configuration, without setting a nodePath.
-
-              By default this will be set to the current node's <nodePath>/microvms/<vmname>
-              if the current nodePath is non-null and the directory exists.
             '';
           };
 
@@ -378,6 +356,6 @@ in {
         };
       };
     }
-    // extraLib.mergeToplevelConfigs ["nodes" "disko" "microvm" "systemd"] (mapAttrsToList microvmConfig vms)
+    // config.lib.misc.mergeToplevelConfigs ["nodes" "disko" "microvm" "systemd"] (mapAttrsToList microvmConfig vms)
   );
 }

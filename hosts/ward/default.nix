@@ -1,12 +1,12 @@
 {
+  inputs,
   config,
-  nixos-hardware,
   nodes,
   ...
 }: {
   imports = [
-    nixos-hardware.common-cpu-intel
-    nixos-hardware.common-pc-ssd
+    inputs.nixos-hardware.nixosModules.common-cpu-intel
+    inputs.nixos-hardware.nixosModules.common-pc-ssd
     ../../modules/optional/hardware/intel.nix
     ../../modules/optional/hardware/physical.nix
 
@@ -50,6 +50,13 @@
         enable = true;
         pool = "rpool";
       };
+      todo
+      configPath =
+        if nodePath != null && builtins.pathExists (nodePath + "/microvms/${name}") then
+        nodePath + "/microvms/${name}"
+        else if nodePath != null && builtins.pathExists (nodePath + "/microvms/${name}") then
+        nodePath + "/microvms/${name}.nix"
+        else null;
     };
   in {
     kanidm = defaults;

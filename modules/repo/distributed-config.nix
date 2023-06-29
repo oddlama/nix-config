@@ -1,9 +1,7 @@
 {
   config,
-  extraLib,
+  inputs,
   lib,
-  nodeName,
-  colmenaNodes,
   ...
 }: let
   inherit
@@ -18,10 +16,7 @@
     types
     ;
 
-  inherit
-    (extraLib)
-    mergeToplevelConfigs
-    ;
+  nodeName = config.repo.node.name;
 in {
   options.nodes = mkOption {
     type = types.attrsOf (mkOptionType {
@@ -33,12 +28,12 @@ in {
   };
 
   config = let
-    allNodes = attrNames colmenaNodes;
+    allNodes = attrNames inputs.self.colmenaNodes;
     isColmenaNode = elem nodeName allNodes;
-    foreignConfigs = concatMap (n: colmenaNodes.${n}.config.nodes.${nodeName} or []) allNodes;
+    foreignConfigs = concatMap (n: inputs.self.colmenaNodes.${n}.config.nodes.${nodeName} or []) allNodes;
     toplevelAttrs = ["age" "networking" "systemd" "services"];
   in
-    optionalAttrs isColmenaNode (mergeToplevelConfigs toplevelAttrs (
+    optionalAttrs isColmenaNode (config.lib.misc.mergeToplevelConfigs toplevelAttrs (
       foreignConfigs
       # Also allow extending ourselves, in case some attributes from depenent
       # configurations such as containers or microvms are merged to the host

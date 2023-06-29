@@ -68,18 +68,15 @@
   outputs = {
     self,
     colmena,
-    nixos-generators,
     nixpkgs,
     microvm,
     flake-utils,
     agenix-rekey,
     ...
   } @ inputs: let
-    recursiveMergeAttrs = nixpkgs.lib.foldl' nixpkgs.lib.recursiveUpdate {};
+    inherit (nixpkgs) lib;
   in
     {
-      extraLib = import ./nix/lib.nix inputs;
-
       # The identities that are used to rekey agenix secrets and to
       # decrypt all repository-wide secrets.
       secretsConfig = {
@@ -87,8 +84,8 @@
         extraEncryptionPubkeys = [./secrets/backup.pub];
       };
 
-      stateVersion = "23.05";
-
+      # This is the list of hosts that this flake defines, plus the minimum
+      # amount of metadata that is necessary to instanciate it correctly.
       hosts = let
         nixos = system: {
           type = "nixos";
@@ -101,21 +98,30 @@
         zackbiene = nixos "aarch64-linux";
       };
 
+      # This will process all defined hosts of type "nixos" and
+      # generate the required colmena definition for each host.
+      # We call the resulting instanciations "nodes".
+      # TODO: switch to nixosConfigurations once colmena supports it upstream
       colmena = import ./nix/colmena.nix inputs;
       colmenaNodes = ((colmena.lib.makeHive self.colmena).introspect (x: x)).nodes;
-      # Collect all defined microvm nodes from each colmena node
-      microvmNodes = nixpkgs.lib.concatMapAttrs (_: node:
-        nixpkgs.lib.mapAttrs'
-        (vm: def: nixpkgs.lib.nameValuePair def.nodeName node.config.microvm.vms.${vm}.config)
-        (node.config.meta.microvms.vms or {}))
-      self.colmenaNodes;
-      # Expose all nodes in a single attribute
+
+      # True NixOS nodes can define additional microvms (guest nodes) that are built
+      # together with the true host. We collect all defined microvm nodes
+      # from each node here to allow accessing any node via the unified attribute `nodes`.
+      microvmNodes = lib.flip lib.concatMapAttrs self.colmenaNodes (_: node:
+        lib.mapAttrs'
+        (vm: def: lib.nameValuePair def.nodeName node.config.microvm.vms.${vm}.config)
+        (node.config.meta.microvms.vms or {}));
+
+      # All nixosSystem instanciations are collected here, so that we can refer
+      # to any system via nodes.<name>
       nodes = self.colmenaNodes // self.microvmNodes;
 
-      # Collect installer packages
+      # For each true NixOS system, we want to expose an installer image that
+      # can be used to do setup on the node.
       inherit
-        (recursiveMergeAttrs
-          (nixpkgs.lib.mapAttrsToList
+        (lib.foldl' lib.recursiveUpdate {}
+          (lib.mapAttrsToList
             (import ./nix/generate-installer.nix inputs)
             self.colmenaNodes))
         packages

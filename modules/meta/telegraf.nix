@@ -1,8 +1,6 @@
 {
   config,
   lib,
-  nodeName,
-  nodePath,
   nodes,
   pkgs,
   ...
@@ -18,6 +16,7 @@
     ;
 
   cfg = config.meta.telegraf;
+  nodeName = config.repo.node.name;
 in {
   options.meta.telegraf = {
     enable = mkEnableOption (mdDoc "telegraf to push metrics to influx.");
@@ -42,7 +41,7 @@ in {
 
   config = mkIf cfg.enable {
     age.secrets.telegraf-influxdb-token = {
-      rekeyFile = nodePath + "/secrets/telegraf-influxdb-token.age";
+      rekeyFile = config.node.secretsDir + "/telegraf-influxdb-token.age";
       # TODO generator.script = { pkgs, lib, decrypt, deps, ... }: let
       # TODO   adminBasicAuth = (builtins.head deps).file;
       # TODO   adminToken = (builtins.head deps).file; # TODO ..... filter by name?

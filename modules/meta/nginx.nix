@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  nodePath,
   ...
 }: let
   inherit
@@ -37,7 +36,7 @@ in {
 
   config = mkIf config.services.nginx.enable {
     age.secrets."dhparams.pem" = {
-      rekeyFile = nodePath + "/secrets/dhparams.pem.age";
+      rekeyFile = config.node.secretsDir + "/dhparams.pem.age";
       generator = "dhparams";
       mode = "440";
       group = "nginx";

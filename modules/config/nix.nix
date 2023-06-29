@@ -1,7 +1,6 @@
 {
   inputs,
   pkgs,
-  stateVersion,
   ...
 }: {
   environment.etc."nixos/configuration.nix".source = pkgs.writeText "configuration.nix" ''
@@ -53,6 +52,6 @@
     extraSystemBuilderCmds = ''
       ln -sv ${pkgs.path} $out/nixpkgs
     '';
-    inherit stateVersion;
+    stateVersion = "23.11";
   };
 }

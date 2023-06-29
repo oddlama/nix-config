@@ -1,4 +1,5 @@
 {
+  # TODO disko
   fileSystems = {
     "/" = {
       device = "rpool/root/nixos";

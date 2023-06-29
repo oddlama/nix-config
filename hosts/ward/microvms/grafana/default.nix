@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  nodeName,
   nodes,
   utils,
   ...
@@ -123,7 +122,7 @@ in {
           url = "https://${sentinelCfg.networking.providedDomains.loki}";
           orgId = 1;
           basicAuth = true;
-          basicAuthUser = "${nodeName}+grafana-loki-basic-auth-password";
+          basicAuthUser = "${config.repo.node.name}+grafana-loki-basic-auth-password";
           secureJsonData.basicAuthPassword = "$__file{${config.age.secrets.grafana-loki-basic-auth-password.path}}";
         }
       ];

@@ -1,13 +1,11 @@
 {
   config,
   lib,
-  nodeName,
   ...
 }: {
   systemd.network.enable = true;
 
   networking = {
-    hostName = nodeName;
     useDHCP = lib.mkForce false;
     useNetworkd = true;
     dhcpcd.enable = false;

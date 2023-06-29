@@ -1,7 +1,6 @@
 # Provides an option to easily rename interfaces by their mac addresses.
 {
   config,
-  extraLib,
   lib,
   pkgs,
   ...
@@ -35,7 +34,7 @@ in {
 
   config = lib.mkIf (cfg != {}) {
     assertions = let
-      duplicateMacs = extraLib.duplicates (attrValues cfg);
+      duplicateMacs = config.lib.misc.duplicates (attrValues cfg);
     in [
       {
         assertion = duplicateMacs == [];

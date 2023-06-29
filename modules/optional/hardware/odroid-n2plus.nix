@@ -1,12 +1,6 @@
-{
-  lib,
-  config,
-  nixos-hardware,
-  pkgs,
-  ...
-}: {
+{inputs, ...}: {
   imports = [
-    nixos-hardware.common-pc-ssd
+    inputs.nixos-hardware.nixosModules.common-pc-ssd
     ./physical.nix
   ];
 

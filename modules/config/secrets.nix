@@ -1,17 +1,17 @@
 {
+  config,
   inputs,
   lib,
-  nodePath,
   ...
 }: {
   # Define local repo secrets
   repo.secretFiles = let
-    local = nodePath + "/secrets/local.nix.age";
+    local = config.node.secretsDir + "/local.nix.age";
   in
     {
       global = ../../secrets/global.nix.age;
     }
-    // lib.optionalAttrs (nodePath != null && lib.pathExists local) {inherit local;};
+    // lib.optionalAttrs (lib.pathExists local) {inherit local;};
 
   # Setup secret rekeying parameters
   age.rekey = {
@@ -24,13 +24,7 @@
     # This is technically impure, but intended. We need to rekey on the
     # current system due to yubikey availability.
     forceRekeyOnSystem = builtins.extraBuiltins.unsafeCurrentSystem;
-    hostPubkey = let
-      pubkeyPath =
-        if nodePath == null
-        then null
-        else nodePath + "/secrets/host.pub";
-    in
-      lib.mkIf (pubkeyPath != null && lib.pathExists pubkeyPath) pubkeyPath;
+    hostPubkey = config.node.secretsDir + "/host.pub";
   };
 
   age.generators.dhparams.script = {pkgs, ...}: "${pkgs.openssl}/bin/openssl dhparam 4096";

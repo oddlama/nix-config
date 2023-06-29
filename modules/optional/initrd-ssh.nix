@@ -1,11 +1,10 @@
 {
   config,
   pkgs,
-  nodePath,
   ...
 }: {
   age.secrets.initrd_host_ed25519_key = {
-    rekeyFile = nodePath + "/secrets/initrd_host_ed25519_key.age";
+    rekeyFile = config.node.secretsDir + "/initrd_host_ed25519_key.age";
     # Generate only an ssh-ed25519 private key
     generator.script = {
       pkgs,

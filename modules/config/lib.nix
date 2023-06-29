@@ -1,16 +1,244 @@
 {
-  extraLib,
   inputs,
   lib,
   ...
-}: {
+}: let
+  inherit
+    (lib)
+    all
+    any
+    assertMsg
+    attrNames
+    attrValues
+    concatLists
+    concatMap
+    concatMapStrings
+    concatStringsSep
+    elem
+    escapeShellArg
+    filter
+    flatten
+    flip
+    foldAttrs
+    foldl'
+    genAttrs
+    genList
+    hasInfix
+    head
+    isAttrs
+    mapAttrs'
+    mergeAttrs
+    min
+    mkMerge
+    mkOptionType
+    nameValuePair
+    optionalAttrs
+    partition
+    range
+    recursiveUpdate
+    removeSuffix
+    reverseList
+    showOption
+    splitString
+    stringToCharacters
+    substring
+    types
+    unique
+    warnIf
+    ;
+in {
   # IP address math library
   # https://gist.github.com/duairc/5c9bb3c922e5d501a1edb9e7b3b845ba
   # Plus some extensions by us
   lib = let
     libWithNet = (import "${inputs.lib-net}/net.nix" {inherit lib;}).lib;
   in
-    lib.recursiveUpdate libWithNet {
+    recursiveUpdate libWithNet {
+      types = rec {
+        # Checks whether the value is a lazy value without causing
+        # it's value to be evaluated
+        isLazyValue = x: isAttrs x && x ? _lazyValue;
+        # Constructs a lazy value holding the given value.
+        lazyValue = value: {_lazyValue = value;};
+
+        # Represents a lazy value of the given type, which
+        # holds the actual value as an attrset like { _lazyValue = <actual value>; }.
+        # This allows the option to be defined and filtered from a defintion
+        # list without evaluating the value.
+        lazyValueOf = type:
+          mkOptionType rec {
+            name = "lazyValueOf ${type.name}";
+            inherit (type) description descriptionClass emptyValue getSubOptions getSubModules;
+            check = isLazyValue;
+            merge = loc: defs:
+              assert assertMsg
+              (all (x: type.check x._lazyValue) defs)
+              "The option `${showOption loc}` is defined with a lazy value holding an invalid type";
+                types.mergeOneOption loc defs;
+            substSubModules = m: types.uniq (type.substSubModules m);
+            functor = (types.defaultFunctor name) // {wrapped = type;};
+            nestedTypes.elemType = type;
+          };
+
+        # Represents a value or lazy value of the given type that will
+        # automatically be coerced to the given type when merged.
+        lazyOf = type: types.coercedTo (lazyValueOf type) (x: x._lazyValue) type;
+      };
+      misc = rec {
+        # Counts how often each element occurrs in xs
+        countOccurrences = let
+          addOrUpdate = acc: x:
+            acc // {${x} = (acc.${x} or 0) + 1;};
+        in
+          foldl' addOrUpdate {};
+
+        # Returns all elements in xs that occur at least twice
+        duplicates = xs: let
+          occurrences = countOccurrences xs;
+        in
+          unique (filter (x: occurrences.${x} > 1) xs);
+
+        # Concatenates all given attrsets as if calling a // b in order.
+        concatAttrs = foldl' mergeAttrs {};
+
+        # True if the path or string starts with /
+        isAbsolutePath = x: substring 0 1 x == "/";
+
+        # Merges all given attributes from the given attrsets using mkMerge.
+        # Useful to merge several top-level configs in a module.
+        mergeToplevelConfigs = keys: attrs:
+          genAttrs keys (attr: mkMerge (map (x: x.${attr} or {}) attrs));
+
+        # Calculates base^exp, but careful, this overflows for results > 2^62
+        pow = base: exp: foldl' (a: x: x * a) 1 (genList (_: base) exp);
+
+        # Converts the given hex string to an integer. Only reliable for inputs in [0, 2^63),
+        # after that the sign bit will overflow.
+        hexToDec = v: let
+          literalValues = {
+            "0" = 0;
+            "1" = 1;
+            "2" = 2;
+            "3" = 3;
+            "4" = 4;
+            "5" = 5;
+            "6" = 6;
+            "7" = 7;
+            "8" = 8;
+            "9" = 9;
+            "a" = 10;
+            "b" = 11;
+            "c" = 12;
+            "d" = 13;
+            "e" = 14;
+            "f" = 15;
+            "A" = 10;
+            "B" = 11;
+            "C" = 12;
+            "D" = 13;
+            "E" = 14;
+            "F" = 15;
+          };
+        in
+          foldl' (acc: x: acc * 16 + literalValues.${x}) 0 (stringToCharacters v);
+      };
+      disko = {
+        gpt = {
+          partGrub = name: start: end: {
+            inherit name start end;
+            part-type = "primary";
+            flags = ["bios_grub"];
+          };
+          partEfi = name: start: end: {
+            inherit name start end;
+            fs-type = "fat32";
+            bootable = true;
+            content = {
+              type = "filesystem";
+              format = "vfat";
+              mountpoint = "/boot";
+            };
+          };
+          partSwap = name: start: end: {
+            inherit name start end;
+            fs-type = "linux-swap";
+            content = {
+              type = "swap";
+              randomEncryption = true;
+            };
+          };
+          partLuksZfs = name: start: end: {
+            inherit start end;
+            name = "enc-${name}";
+            content = {
+              type = "luks";
+              name = "enc-${name}";
+              extraOpenArgs = ["--allow-discards"];
+              content = {
+                type = "zfs";
+                pool = name;
+              };
+            };
+          };
+        };
+        zfs = rec {
+          defaultZpoolOptions = {
+            type = "zpool";
+            mountRoot = "/mnt";
+            rootFsOptions = {
+              compression = "zstd";
+              acltype = "posix";
+              atime = "off";
+              xattr = "sa";
+              dnodesize = "auto";
+              mountpoint = "none";
+              canmount = "off";
+              devices = "off";
+            };
+            options.ashift = "12";
+          };
+
+          defaultZfsDatasets = {
+            "local" = unmountable;
+            "local/root" =
+              filesystem "/"
+              // {
+                postCreateHook = "zfs snapshot rpool/local/root@blank";
+              };
+            "local/nix" = filesystem "/nix";
+            "local/state" = filesystem "/state";
+            "safe" = unmountable;
+            "safe/persist" = filesystem "/persist";
+          };
+
+          unmountable = {type = "zfs_fs";};
+          filesystem = mountpoint: {
+            type = "zfs_fs";
+            options = {
+              canmount = "noauto";
+              inherit mountpoint;
+            };
+            # Required to add dependencies for initrd
+            inherit mountpoint;
+          };
+        };
+      };
+      secrets = let
+        rageMasterIdentityArgs = concatMapStrings (x: "-i ${escapeShellArg x} ") inputs.self.secretsConfig.masterIdentities;
+        rageExtraEncryptionPubkeys =
+          concatMapStrings (
+            x:
+              if misc.isAbsolutePath x
+              then "-R ${escapeShellArg x} "
+              else "-r ${escapeShellArg x} "
+          )
+          inputs.self.secretsConfig.extraEncryptionPubkeys;
+      in {
+        # TODO replace these by lib.agenix-rekey
+        # The arguments required to de-/encrypt a secret in this repository
+        rageDecryptArgs = "${rageMasterIdentityArgs}";
+        rageEncryptArgs = "${rageMasterIdentityArgs} ${rageExtraEncryptionPubkeys}";
+      };
       net = {
         cidr = rec {
           # host :: (ip | mac | integer) -> cidr -> ip
@@ -33,7 +261,7 @@
           host = i: n: let
             cap = libWithNet.net.cidr.capacity n;
           in
-            assert lib.assertMsg (i >= (-cap) && i < cap) "The host ${toString i} lies outside of ${n}";
+            assert assertMsg (i >= (-cap) && i < cap) "The host ${toString i} lies outside of ${n}";
               libWithNet.net.cidr.host i n;
           # hostCidr :: (ip | mac | integer) -> cidr -> cidr
           #
@@ -55,7 +283,7 @@
           # "192.168.1.100"
           # > net.cidr.ip "192.168.1.100"
           # "192.168.1.100"
-          ip = x: lib.head (lib.splitString "/" x);
+          ip = x: head (splitString "/" x);
           # canonicalize :: cidr -> cidr
           #
           # Replaces the ip of the cidr with the canonical network address
@@ -78,32 +306,31 @@
           mergev4 = addrs_: let
             # Append /32 if necessary
             addrs = map (x:
-              if lib.hasInfix "/" x
+              if hasInfix "/" x
               then x
               else "${x}/32")
             addrs_;
             # The smallest occurring length is the first we need to start checking, since
             # any greater cidr length represents a smaller address range which
             # wouldn't contain all of the original addresses.
-            startLength = lib.foldl' lib.min 32 (map libWithNet.net.cidr.length addrs);
-            possibleLengths = lib.reverseList (lib.range 0 startLength);
+            startLength = foldl' min 32 (map libWithNet.net.cidr.length addrs);
+            possibleLengths = reverseList (range 0 startLength);
             # The first ip address will be "expanded" in cidr length until it covers all other
             # used addresses.
-            firstIp = ip (lib.head addrs);
+            firstIp = ip (head addrs);
             # Return the first (i.e. greatest length -> smallest prefix) cidr length
             # in the list that covers all used addresses
-            bestLength = lib.head (lib.filter
+            bestLength = head (filter
               # All given addresses must be contained by the generated address.
               (len:
-                lib.all
-                (x:
+                all (x:
                   libWithNet.net.cidr.contains
                   (ip x)
                   (libWithNet.net.cidr.make len firstIp))
                 addrs)
               possibleLengths);
           in
-            assert lib.assertMsg (!lib.any (lib.hasInfix ":") addrs) "mergev4 cannot operate on ipv6 addresses";
+            assert assertMsg (!any (hasInfix ":") addrs) "mergev4 cannot operate on ipv6 addresses";
               if addrs == []
               then null
               else libWithNet.net.cidr.make bestLength firstIp;
@@ -119,32 +346,31 @@
           mergev6 = addrs_: let
             # Append /128 if necessary
             addrs = map (x:
-              if lib.hasInfix "/" x
+              if hasInfix "/" x
               then x
               else "${x}/128")
             addrs_;
             # The smallest occurring length is the first we need to start checking, since
             # any greater cidr length represents a smaller address range which
             # wouldn't contain all of the original addresses.
-            startLength = lib.foldl' lib.min 128 (map libWithNet.net.cidr.length addrs);
-            possibleLengths = lib.reverseList (lib.range 0 startLength);
+            startLength = foldl' min 128 (map libWithNet.net.cidr.length addrs);
+            possibleLengths = reverseList (range 0 startLength);
             # The first ip address will be "expanded" in cidr length until it covers all other
             # used addresses.
-            firstIp = ip (lib.head addrs);
+            firstIp = ip (head addrs);
             # Return the first (i.e. greatest length -> smallest prefix) cidr length
             # in the list that covers all used addresses
-            bestLength = lib.head (lib.filter
+            bestLength = head (filter
               # All given addresses must be contained by the generated address.
               (len:
-                lib.all
-                (x:
+                all (x:
                   libWithNet.net.cidr.contains
                   (ip x)
                   (libWithNet.net.cidr.make len firstIp))
                 addrs)
               possibleLengths);
           in
-            assert lib.assertMsg (lib.all (lib.hasInfix ":") addrs) "mergev6 cannot operate on ipv4 addresses";
+            assert assertMsg (all (hasInfix ":") addrs) "mergev6 cannot operate on ipv4 addresses";
               if addrs == []
               then null
               else libWithNet.net.cidr.make bestLength firstIp;
@@ -154,7 +380,7 @@
           # but yields two separate result for all given ipv4 and ipv6 addresses.
           # Equivalent to calling mergev4 and mergev6 on a partition individually.
           merge = addrs: let
-            v4_and_v6 = lib.partition (lib.hasInfix ":") addrs;
+            v4_and_v6 = partition (hasInfix ":") addrs;
           in {
             cidrv4 = mergev4 v4_and_v6.wrong;
             cidrv6 = mergev6 v4_and_v6.right;
@@ -186,9 +412,9 @@
             # The network and broadcast address should never be used, and we
             # want to reserve the host address for the host. We also convert
             # any ips to offsets here.
-            init = lib.unique (
+            init = unique (
               [0 (capacity - 1)]
-              ++ lib.flip map reserved (x:
+              ++ flip map reserved (x:
                 if builtins.typeOf x == "int"
                 then x
                 else -(libWithNet.net.ip.diff baseAddr x))
@@ -197,17 +423,17 @@
             nInit = builtins.length init;
             # Pre-sort all hosts, to ensure ordering invariance
             sortedHosts =
-              lib.warnIf
+              warnIf
               ((nInit + nHosts) > 0.3 * capacity)
               "assignIps: hash stability may be degraded since utilization is >30%"
               (builtins.sort builtins.lessThan hosts);
             # Generates a hash (i.e. offset value) for a given hostname
             hashElem = x:
               builtins.bitAnd (capacity - 1)
-              (extraLib.hexToDec (builtins.substring 0 16 (builtins.hashString "sha256" x)));
+              (misc.hexToDec (builtins.substring 0 16 (builtins.hashString "sha256" x)));
             # Do linear probing. Returns the first unused value at or after the given value.
             probe = avoid: value:
-              if lib.elem value avoid
+              if elem value avoid
               # TODO lib.mod
               # Poor man's modulo, because nix has no modulo. Luckily we operate on a residue
               # class of x modulo 2^n, so we can use bitAnd instead.
@@ -228,12 +454,12 @@
               used = [value] ++ used;
             };
           in
-            assert lib.assertMsg (cidrSize >= 2 && cidrSize <= 62)
+            assert assertMsg (cidrSize >= 2 && cidrSize <= 62)
             "assignIps: cidrSize=${toString cidrSize} is not in [2, 62].";
-            assert lib.assertMsg (nHosts <= capacity - nInit)
+            assert assertMsg (nHosts <= capacity - nInit)
             "assignIps: number of hosts (${toString nHosts}) must be <= capacity (${toString capacity}) - reserved (${toString nInit})";
             # Assign an ip in the subnet to each element, in order
-              (lib.foldl' assignOne {
+              (foldl' assignOne {
                   assigned = {};
                   used = init;
                 }
@@ -244,15 +470,15 @@
           # Checks whether the given address (with or without cidr notation) is an ipv4 address.
           isv4 = x: !isv6 x;
           # Checks whether the given address (with or without cidr notation) is an ipv6 address.
-          isv6 = lib.hasInfix ":";
+          isv6 = hasInfix ":";
         };
         mac = {
           # Adds offset to the given base address and ensures the result is in
           # a locally administered range by replacing the second nibble with a 2.
           addPrivate = base: offset: let
             added = libWithNet.net.mac.add base offset;
-            pre = lib.substring 0 1 added;
-            suf = lib.substring 2 (-1) added;
+            pre = substring 0 1 added;
+            suf = substring 2 (-1) added;
           in "${pre}2${suf}";
           # assignMacs :: mac (base) -> int (size) -> [int | mac] (reserved) -> [string] (hosts) -> [mac]
           #
@@ -272,10 +498,10 @@
           # > net.mac.assignMacs "11:22:33:00:00:00" 24 ["11:22:33:1b:bd:ca"] ["a" "b" "c"]
           # { a = "11:22:33:1b:bd:cb"; b = "11:22:33:39:59:4a"; c = "11:22:33:50:7a:e2"; }
           assignMacs = base: size: reserved: hosts: let
-            capacity = extraLib.pow 2 size;
+            capacity = misc.pow 2 size;
             baseAsInt = libWithNet.net.mac.diff base "00:00:00:00:00:00";
-            init = lib.unique (
-              lib.flip map reserved (x:
+            init = unique (
+              flip map reserved (x:
                 if builtins.typeOf x == "int"
                 then x
                 else libWithNet.net.mac.diff x base)
@@ -284,17 +510,17 @@
             nInit = builtins.length init;
             # Pre-sort all hosts, to ensure ordering invariance
             sortedHosts =
-              lib.warnIf
+              warnIf
               ((nInit + nHosts) > 0.3 * capacity)
               "assignMacs: hash stability may be degraded since utilization is >30%"
               (builtins.sort builtins.lessThan hosts);
             # Generates a hash (i.e. offset value) for a given hostname
             hashElem = x:
               builtins.bitAnd (capacity - 1)
-              (extraLib.hexToDec (builtins.substring 0 16 (builtins.hashString "sha256" x)));
+              (misc.hexToDec (builtins.substring 0 16 (builtins.hashString "sha256" x)));
             # Do linear probing. Returns the first unused value at or after the given value.
             probe = avoid: value:
-              if lib.elem value avoid
+              if elem value avoid
               # TODO lib.mod
               # Poor man's modulo, because nix has no modulo. Luckily we operate on a residue
               # class of x modulo 2^n, so we can use bitAnd instead.
@@ -315,14 +541,14 @@
               used = [value] ++ used;
             };
           in
-            assert lib.assertMsg (size >= 2 && size <= 62)
+            assert assertMsg (size >= 2 && size <= 62)
             "assignMacs: size=${toString size} is not in [2, 62].";
-            assert lib.assertMsg (builtins.bitAnd (capacity - 1) baseAsInt == 0)
+            assert assertMsg (builtins.bitAnd (capacity - 1) baseAsInt == 0)
             "assignMacs: the size=${toString size} least significant bits of the base mac address must be 0.";
-            assert lib.assertMsg (nHosts <= capacity - nInit)
+            assert assertMsg (nHosts <= capacity - nInit)
             "assignMacs: number of hosts (${toString nHosts}) must be <= capacity (${toString capacity}) - reserved (${toString nInit})";
             # Assign an ip in the subnet to each element, in order
-              (lib.foldl' assignOne {
+              (foldl' assignOne {
                   assigned = {};
                   used = init;
                 }

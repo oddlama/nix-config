@@ -1,10 +1,4 @@
-{
-  lib,
-  config,
-  nixos-hardware,
-  pkgs,
-  ...
-}: {
+{lib, ...}: {
   imports = [
     ../../modules/optional/hardware/odroid-n2plus.nix
 

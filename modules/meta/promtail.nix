@@ -1,8 +1,6 @@
 {
   config,
   lib,
-  nodeName,
-  nodePath,
   nodes,
   ...
 }: let
@@ -27,7 +25,7 @@ in {
 
   config = mkIf cfg.enable {
     age.secrets.promtail-loki-basic-auth-password = {
-      rekeyFile = nodePath + "/secrets/promtail-loki-basic-auth-password.age";
+      rekeyFile = config.node.secretsDir + "/promtail-loki-basic-auth-password.age";
       generator = "alnum";
       mode = "440";
       group = "promtail";
@@ -48,7 +46,7 @@ in {
 
         clients = [
           {
-            basic_auth.username = "${nodeName}+promtail-loki-basic-auth-password";
+            basic_auth.username = "${config.repo.node.name}+promtail-loki-basic-auth-password";
             basic_auth.password_file = config.age.secrets.promtail-loki-basic-auth-password.path;
             url = "https://${nodes.${cfg.proxy}.config.networking.providedDomains.loki}/loki/api/v1/push";
           }

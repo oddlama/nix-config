@@ -11,13 +11,6 @@ This is my personal nix config. It's still in the making, but this is what I got
 - Secret rekeying, generation and bootstrapping using [agenix-rekey](https://github.com/oddlama/agenix-rekey)
 - Support for repository-wide secrets at evaluation time (hides PII like MACs)
 
-|   |   |
-|---|---|
-**Shell** | [nushell](https://github.com/nushell/nushell)
-**Terminal** | [kitty](https://github.com/kovidgoyal/kitty)
-**Editor** | [neovim](https://github.com/neovim/neovim)
-**WM** | [sway](https://github.com/swaywm/sway)
-
 ## Hosts
 
 Name | Type | Purpose
@@ -35,7 +28,19 @@ Name | Type | Purpose
 not yet nixified: my main development machine, the powerful home server, and some services (still in transition from gentoo :/)
 </sub>
 
+## Programs
+
+|   |   |
+|---|---|
+**Shell** | [nushell](https://github.com/nushell/nushell)
+**Terminal** | [kitty](https://github.com/kovidgoyal/kitty)
+**Editor** | [neovim](https://github.com/neovim/neovim)
+**WM** | [sway](https://github.com/swaywm/sway)
+
 ## Structure
+
+If you are interested in parts of my configuration, you probably want to examine the contents of `users/`, `modules/` and `hosts/`.
+Make sure to utilize the github search if you know what you need!
 
 - `apps/` Additional runnable actions for flake maintenance, like showing wireguard QR codes.
 
@@ -48,8 +53,10 @@ not yet nixified: my main development machine, the powerful home server, and som
   - `host.pub` This host's public key (retrieved after initial setup). Used to rekey secrets so the host can access them at runtime.
   - `local.nix.age` Repository-wide local secrets. Decrypted on import, see `modules/repo/secrets.nix` for more information.
 
-  Some hosts define microvms that run as their guests. These are typically stored
-  in `microvms/<vm>` and have the same layout as a regular host.
+  Some hosts define microvms that run as virtualized guests. Their configuration is usually just a single file
+  stored in `microvms/<vm>.nix`. Their secrets are usually stored in a subfolder of the host's secrets.
+
+- `lib/` contains extra library functions that are needed throughout the config.
 
 - `modules/` contains modularized configuration. If you are interested in reusable parts of
   my configuration, this is probably the folder you are looking for. Unless stated otherwise,
@@ -72,16 +79,6 @@ not yet nixified: my main development machine, the powerful home server, and som
 
   - `modules/<xyz>/` regular modules related to <xyz>, similar structure as in `nixpkgs/nixos/modules`
 
-- `pkgs/` Custom packages and scripts
-
-- `secrets/` Global secrets and age identities
-  - `global.nix.age` Repository-wide global secrets. Available on nodes via the repo module as `config.repo.secrets.global`.
-  - `backup.pub` Backup age-identity in case I ever lose my YubiKey or it breaks.
-  - `yk1-nix-rage.pub` Master YubiKey split-identity. Used as a key-grab.
-
-- `users/` User account configuration mostly via home-manager.
-  This is the place to look for my dotfiles.
-
 - `nix/` library functions and flake plumbing
   - `checks.nix` pre-commit-hooks for this repository
   - `colmena.nix` Setup for distributed deployment using colmena (actually defines all NixOS hosts)
@@ -91,6 +88,16 @@ not yet nixified: my main development machine, the powerful home server, and som
   - `generate-node.nix` Helper function that outputs everything that is necessary to define a new node in a predictable format. Used to define colmena nodes and microvms.
   - `lib.nix` Commonly used functionality or helpers that weren't available in the standard library
   - `rage-decrypt-and-cache.sh` Auxiliary script for repository-wide secrets that decrypts a file and caches the output in /tmp
+
+- `pkgs/` Custom packages and scripts
+
+- `secrets/` Global secrets and age identities
+  - `global.nix.age` Repository-wide global secrets. Available on nodes via the repo module as `config.repo.secrets.global`.
+  - `backup.pub` Backup age-identity in case I ever lose my YubiKey or it breaks.
+  - `yk1-nix-rage.pub` Master YubiKey split-identity. Used as a key-grab.
+
+- `users/` User account configuration mostly via home-manager.
+  This is the place to look for my dotfiles.
 
 ## How-To
 

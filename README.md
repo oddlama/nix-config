@@ -13,13 +13,13 @@ This is my personal nix config. It's still in the making, but this is what I got
 
 ## Hosts
 
-Name | Type | Purpose
----|---|---
-💻 nom | Gigabyte AERO 15-W8 (i7-8750H) | My laptop and my main portable development machine <sub>Framework when?</sub>
-☁️  envoy | Hetzner Cloud server | Mailserver
-☁️  sentinel | Hetzner Cloud server | Proxies and protects my local services
-🖥️ ward | ODROID H3 | Energy efficient SBC for my home firewall and some lightweight services using microvms.
-🥔 zackbiene | ODROID N2+ | ARM SBC for home automation, isolating the sketchy stuff from my main network
+|  | Name | Type | Purpose
+---|---|---|---
+💻 | nom | Gigabyte AERO 15-W8 (i7-8750H) | My laptop and my main portable development machine <sub>Framework when?</sub>
+🖥️ | ward | ODROID H3 | Energy efficient SBC for my home firewall and some lightweight services using microvms.
+🥔 | zackbiene | ODROID N2+ | ARM SBC for home automation, isolating the sketchy stuff from my main network
+☁️  | envoy | Hetzner Cloud server | Mailserver
+☁️  | sentinel | Hetzner Cloud server | Proxies and protects my local services
 
 <!-- 🖥️ workstation -->
 <!-- 🖥️ home server -->

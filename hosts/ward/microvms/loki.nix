@@ -14,7 +14,7 @@ in {
     networking.providedDomains.loki = lokiDomain;
 
     age.secrets.loki-basic-auth-hashes = {
-      rekeyFile = ./secrets/loki-basic-auth-hashes.age;
+      rekeyFile = config.node.secretsDir + "/loki-basic-auth-hashes.age";
       # Copy only the script so the dependencies can be added by the nodes
       # that define passwords (using distributed-config).
       generator.script = config.age.generators.basic-auth.script;

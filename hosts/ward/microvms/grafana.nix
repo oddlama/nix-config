@@ -11,20 +11,20 @@ in {
   meta.wireguard-proxy.sentinel.allowedTCPPorts = [config.services.grafana.settings.server.http_port];
 
   age.secrets.grafana-secret-key = {
-    rekeyFile = ./secrets/grafana-secret-key.age;
+    rekeyFile = config.node.secretsDir + "/grafana-secret-key.age";
     mode = "440";
     group = "grafana";
   };
 
   age.secrets.grafana-loki-basic-auth-password = {
-    rekeyFile = ./secrets/grafana-loki-basic-auth-password.age;
+    rekeyFile = config.node.secretsDir + "/grafana-loki-basic-auth-password.age";
     generator = "alnum";
     mode = "440";
     group = "grafana";
   };
 
   age.secrets.grafana-influxdb-token = {
-    rekeyFile = ./secrets/grafana-influxdb-token.age;
+    rekeyFile = config.node.secretsDir + "/grafana-influxdb-token.age";
     mode = "440";
     group = "grafana";
   };

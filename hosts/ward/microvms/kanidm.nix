@@ -13,13 +13,13 @@ in {
   meta.wireguard-proxy.sentinel.allowedTCPPorts = [kanidmPort];
 
   age.secrets."kanidm-self-signed.crt" = {
-    rekeyFile = ./secrets/kanidm-self-signed.crt.age;
+    rekeyFile = config.node.secretsDir + "/kanidm-self-signed.crt.age";
     mode = "440";
     group = "kanidm";
   };
 
   age.secrets."kanidm-self-signed.key" = {
-    rekeyFile = ./secrets/kanidm-self-signed.key.age;
+    rekeyFile = config.node.secretsDir + "/kanidm-self-signed.key.age";
     mode = "440";
     group = "kanidm";
   };

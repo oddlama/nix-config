@@ -1,10 +1,14 @@
 {
   config,
+  inputs,
   lib,
   utils,
   ...
 }: let
-  inherit (config.lib.net) cidr;
+  inherit
+    (import ../../lib/net.nix inputs)
+    cidr
+    ;
 
   lanCidrv4 = "192.168.100.0/24";
   lanCidrv6 = "fd10::/64";

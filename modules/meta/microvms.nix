@@ -30,18 +30,25 @@
     types
     ;
 
+  inherit
+    (import ../../lib/misc.nix inputs)
+    mergeToplevelConfigs
+    ;
+
+  net = import ../../lib/net.nix inputs;
+  disko = import ../../lib/disko.nix inputs;
+
   parentConfig = config;
   cfg = config.meta.microvms;
-  nodeName = config.repo.node.name;
+  nodeName = config.node.name;
   inherit (cfg) vms;
-  inherit (config.lib) net;
 
   # Configuration for each microvm
   microvmConfig = vmName: vmCfg: {
     # Add the required datasets to the disko configuration of the machine
     disko.devices.zpool = mkIf vmCfg.zfs.enable {
       ${vmCfg.zfs.pool}.datasets."${vmCfg.zfs.dataset}" =
-        config.lib.disko.zfs.filesystem vmCfg.zfs.mountpoint;
+        disko.zfs.filesystem vmCfg.zfs.mountpoint;
     };
 
     # Ensure that the zfs dataset exists before it is mounted.
@@ -107,7 +114,7 @@
       inherit (node) pkgs;
       inherit (vmCfg) autostart;
       config = {config, ...}: {
-        imports = cfg.commonImports ++ node.imports;
+        imports = cfg.commonImports ++ node.imports ++ vmCfg.modules;
 
         microvm = {
           hypervisor = mkDefault "cloud-hypervisor";
@@ -332,6 +339,12 @@ in {
             type = types.str;
             description = mdDoc "The system that this microvm should use";
           };
+
+          modules = mkOption {
+            type = types.listOf types.unspecified;
+            default = [];
+            description = mdDoc "Additional modules to load";
+          };
         };
       }));
     };
@@ -356,6 +369,6 @@ in {
         };
       };
     }
-    // config.lib.misc.mergeToplevelConfigs ["nodes" "disko" "microvm" "systemd"] (mapAttrsToList microvmConfig vms)
+    // mergeToplevelConfigs ["nodes" "disko" "microvm" "systemd"] (mapAttrsToList microvmConfig vms)
   );
 }

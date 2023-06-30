@@ -46,7 +46,7 @@ in {
 
         clients = [
           {
-            basic_auth.username = "${config.repo.node.name}+promtail-loki-basic-auth-password";
+            basic_auth.username = "${config.node.name}+promtail-loki-basic-auth-password";
             basic_auth.password_file = config.age.secrets.promtail-loki-basic-auth-password.path;
             url = "https://${nodes.${cfg.proxy}.config.networking.providedDomains.loki}/loki/api/v1/push";
           }

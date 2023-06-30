@@ -16,7 +16,7 @@
     ;
 
   cfg = config.meta.telegraf;
-  nodeName = config.repo.node.name;
+  nodeName = config.node.name;
 in {
   options.meta.telegraf = {
     enable = mkEnableOption (mdDoc "telegraf to push metrics to influx.");

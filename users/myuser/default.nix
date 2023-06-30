@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  stateVersion,
   ...
 }: let
   myuser = config.repo.secrets.global.myuser.name;
@@ -31,7 +30,7 @@ in {
     ];
 
     home = {
-      inherit stateVersion;
+      inherit (config.system) stateVersion;
       inherit (config.users.users.${myuser}) uid;
       username = config.users.users.${myuser}.name;
       shellAliases = {

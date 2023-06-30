@@ -1,6 +1,7 @@
 {
-  inputs,
   config,
+  inputs,
+  lib,
   nodes,
   ...
 }: {
@@ -43,29 +44,23 @@
   ];
 
   meta.microvms.vms = let
-    defaults = {
+    defaultConfig = name: {
       system = "x86_64-linux";
       autostart = true;
       zfs = {
         enable = true;
         pool = "rpool";
       };
-      todo
-      configPath =
-        if nodePath != null && builtins.pathExists (nodePath + "/microvms/${name}") then
-        nodePath + "/microvms/${name}"
-        else if nodePath != null && builtins.pathExists (nodePath + "/microvms/${name}") then
-        nodePath + "/microvms/${name}.nix"
-        else null;
+      modules = [
+        # XXX: this could be interpolated in-place but statix has a bug https://github.com/nerdypepper/statix/issues/75
+        (./microvms + "/${name}.nix")
+        {node.secretsDir = ./secrets + "/${name}";}
+      ];
     };
-  in {
-    kanidm = defaults;
-    grafana = defaults;
-    loki = defaults;
-    vaultwarden = defaults;
-    adguardhome = defaults;
-    influxdb = defaults;
-  };
+  in
+    lib.genAttrs
+    ["kanidm" "grafana" "loki" "vaultwarden" "adguardhome" "influxdb"]
+    defaultConfig;
 
   #ddclient = defineVm;
   #gitea/forgejo = defineVm;

@@ -29,7 +29,7 @@
   imports =
     modules
     ++ [
-      {repo.node.name = name;}
+      {node.name = name;}
       agenix.nixosModules.default
       agenix-rekey.nixosModules.default
       disko.nixosModules.disko

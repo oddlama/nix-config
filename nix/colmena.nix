@@ -15,7 +15,10 @@
     import ./generate-node.nix inputs {
       inherit name;
       inherit (hostCfg) system;
-      modules = [../hosts/${name}];
+      modules = [
+        ../hosts/${name}
+        {node.secretsDir = ../hosts/${name}/secrets;}
+      ];
     });
 in
   {

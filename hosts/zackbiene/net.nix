@@ -1,9 +1,13 @@
 {
-  lib,
   config,
+  inputs,
+  lib,
   ...
 }: let
-  inherit (config.lib.net) cidr;
+  inherit
+    (import ../../lib/net.nix inputs)
+    cidr
+    ;
 
   iotCidrv4 = "10.90.0.0/24";
   iotCidrv6 = "fd00:90::/64";

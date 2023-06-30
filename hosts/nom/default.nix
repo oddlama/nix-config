@@ -11,9 +11,7 @@
     ../../modules/optional/hardware/intel.nix
     ../../modules/optional/hardware/physical.nix
 
-    #../../modules
-    ../../modules/config/lib.nix
-
+    ../../modules
     ../../modules/optional/boot-efi.nix
     ../../modules/optional/initrd-ssh.nix
     ../../modules/optional/dev

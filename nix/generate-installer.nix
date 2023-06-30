@@ -39,7 +39,7 @@
     ...
   }: {
     isoImage.isoName = lib.mkForce "nixos-image-${nodeName}.iso";
-    system.stateVersion = self.stateVersion;
+    system.stateVersion = nodeAttrs.system.stateVersion;
     nix.extraOptions = ''
       experimental-features = nix-command flakes
     '';

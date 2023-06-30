@@ -1,6 +1,7 @@
 # Provides an option to easily rename interfaces by their mac addresses.
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
@@ -13,6 +14,11 @@
     mkIf
     mkOption
     types
+    ;
+
+  inherit
+    (import ../../lib/misc.nix inputs)
+    duplicates
     ;
 
   cfg = config.networking.renameInterfacesByMac;
@@ -34,7 +40,7 @@ in {
 
   config = lib.mkIf (cfg != {}) {
     assertions = let
-      duplicateMacs = config.lib.misc.duplicates (attrValues cfg);
+      duplicateMacs = duplicates (attrValues cfg);
     in [
       {
         assertion = duplicateMacs == [];

@@ -6,7 +6,6 @@
   inherit
     (lib)
     mdDoc
-    mkDefault
     mkOption
     types
     ;
@@ -26,6 +25,6 @@ in {
   };
 
   config = {
-    networking.hostName = mkDefault config.node.name;
+    networking.hostName = config.node.name;
   };
 }

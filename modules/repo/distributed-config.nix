@@ -17,7 +17,6 @@
     mkOption
     mkOptionType
     mkMerge
-    optionalAttrs
     recursiveUpdate
     hasAttrByPath
     setAttrByPath

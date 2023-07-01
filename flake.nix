@@ -131,7 +131,10 @@
       pkgs = import nixpkgs {
         localSystem = system;
         config.allowUnfree = true;
-        overlays = [microvm.overlay] ++ import ./pkgs/default.nix;
+        overlays =
+          import ./lib inputs
+          ++ import ./pkgs/default.nix
+          ++ [microvm.overlay];
       };
 
       apps =

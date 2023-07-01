@@ -1,6 +1,5 @@
 {
   config,
-  inputs,
   lib,
   nodes,
   pkgs,
@@ -12,10 +11,12 @@
     assertMsg
     attrNames
     attrValues
+    concatAttrs
     concatLists
     concatMap
     concatMapStrings
     concatStringsSep
+    duplicates
     escapeShellArg
     filter
     filterAttrs
@@ -27,41 +28,28 @@
     mapAttrsToList
     mdDoc
     mergeAttrs
+    mergeToplevelConfigs
     mkForce
     mkIf
     mkMerge
     mkOption
     nameValuePair
+    net
     optionalAttrs
     optionals
     partition
     removeSuffix
     stringLength
     types
+    wireguard
     ;
-
-  inherit
-    (import ../../lib/misc.nix inputs)
-    concatAttrs
-    duplicates
-    mergeToplevelConfigs
-    ;
-
-  inherit
-    (import ../../lib/types.nix inputs)
-    lazyOf
-    lazyValue
-    ;
-
-  net = import ../../lib/net.nix inputs;
-  wgLibFor = import ../../lib/wireguard.nix inputs;
 
   cfg = config.meta.wireguard;
   nodeName = config.node.name;
 
   configForNetwork = wgName: wgCfg: let
     inherit
-      (wgLibFor wgName)
+      (wireguard wgName)
       externalPeerName
       externalPeerNamesRaw
       networkCidrs
@@ -307,7 +295,7 @@ in {
           };
 
           externalPeers = mkOption {
-            type = types.attrsOf (types.listOf (net.types.ip-in config.addresses));
+            type = types.attrsOf (types.listOf (types.net.ip-in config.addresses));
             default = {};
             example = {my-android-phone = ["10.0.0.97"];};
             description = mdDoc ''
@@ -321,7 +309,7 @@ in {
           };
 
           reservedAddresses = mkOption {
-            type = types.listOf net.types.cidr;
+            type = types.listOf types.net.cidr;
             default = [];
             example = ["10.0.0.1/24" "fd00:cafe::/64"];
             description = mdDoc ''
@@ -377,8 +365,8 @@ in {
         };
 
         ipv4 = mkOption {
-          type = lazyOf net.types.ipv4;
-          default = lazyValue (wgLibFor name).assignedIpv4Addresses.${nodeName};
+          type = types.lazyOf types.net.ipv4;
+          default = types.lazyValue (wireguard name).assignedIpv4Addresses.${nodeName};
           description = mdDoc ''
             The ipv4 address for this machine. If you do not set this explicitly,
             a semi-stable ipv4 address will be derived automatically based on the
@@ -389,8 +377,8 @@ in {
         };
 
         ipv6 = mkOption {
-          type = lazyOf net.types.ipv6;
-          default = lazyValue (wgLibFor name).assignedIpv6Addresses.${nodeName};
+          type = types.lazyOf types.net.ipv6;
+          default = types.lazyValue (wireguard name).assignedIpv6Addresses.${nodeName};
           description = mdDoc ''
             The ipv6 address for this machine. If you do not set this explicitly,
             a semi-stable ipv6 address will be derived automatically based on the
@@ -401,7 +389,7 @@ in {
         };
 
         addresses = mkOption {
-          type = types.listOf (lazyOf net.types.ip);
+          type = types.listOf (types.lazyOf types.net.ip);
           default = [
             (head options.ipv4.definitions)
             (head options.ipv6.definitions)
@@ -420,7 +408,7 @@ in {
         #   to use the network without routing additional stuff.
         # - allow specifying the route metric.
         routedAddresses = mkOption {
-          type = types.listOf net.types.cidr;
+          type = types.listOf types.net.cidr;
           default = [];
           example = ["0.0.0.0/0"];
           description = mdDoc ''

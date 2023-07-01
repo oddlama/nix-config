@@ -1,15 +1,9 @@
 {
   config,
-  inputs,
   lib,
   utils,
   ...
 }: let
-  inherit
-    (import ../../lib/net.nix inputs)
-    cidr
-    ;
-
   lanCidrv4 = "192.168.100.0/24";
   lanCidrv6 = "fd10::/64";
 in {
@@ -60,8 +54,8 @@ in {
     };
     "20-lan-self" = {
       address = [
-        (cidr.hostCidr 1 lanCidrv4)
-        (cidr.hostCidr 1 lanCidrv6)
+        (lib.net.cidr.hostCidr 1 lanCidrv4)
+        (lib.net.cidr.hostCidr 1 lanCidrv6)
       ];
       matchConfig.Name = "lan-self";
       networkConfig = {
@@ -84,7 +78,7 @@ in {
       ipv6SendRAConfig = {
         EmitDNS = true;
         # TODO change to self later
-        #DNS = cidr.host 1 net.lan.ipv6cidr;
+        #DNS = lib.net.cidr.host 1 net.lan.ipv6cidr;
         DNS = ["2606:4700:4700::1111" "2001:4860:4860::8888"];
       };
       linkConfig.RequiredForOnline = "routable";
@@ -160,12 +154,12 @@ in {
             interface = "lan-self";
             subnet = lanCidrv4;
             pools = [
-              {pool = "${cidr.host 20 lanCidrv4} - ${cidr.host (-6) lanCidrv4}";}
+              {pool = "${lib.net.cidr.host 20 lanCidrv4} - ${lib.net.cidr.host (-6) lanCidrv4}";}
             ];
             option-data = [
               {
                 name = "routers";
-                data = cidr.host 1 lanCidrv4;
+                data = lib.net.cidr.host 1 lanCidrv4;
               }
             ];
           }

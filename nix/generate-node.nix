@@ -22,7 +22,7 @@
   inherit system;
   pkgs = self.pkgs.${system};
   specialArgs = {
-    inherit (nixpkgs) lib;
+    inherit (self.pkgs.${system}) lib;
     inherit (self) nodes;
     inherit inputs;
   };

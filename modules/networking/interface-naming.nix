@@ -1,7 +1,6 @@
 # Provides an option to easily rename interfaces by their mac addresses.
 {
   config,
-  inputs,
   lib,
   pkgs,
   ...
@@ -10,15 +9,11 @@
     (lib)
     attrValues
     concatStringsSep
+    duplicates
     mapAttrsToList
     mkIf
     mkOption
     types
-    ;
-
-  inherit
-    (import ../../lib/misc.nix inputs)
-    duplicates
     ;
 
   cfg = config.networking.renameInterfacesByMac;

@@ -1,16 +1,14 @@
 {
-  inputs,
   config,
+  lib,
   ...
-}: let
-  disko = import ../../lib/disko.nix inputs;
-in {
+}: {
   disko.devices = {
     disk = {
       m2-ssd = {
         type = "disk";
         device = "/dev/disk/by-id/${config.repo.secrets.local.disk.m2-ssd}";
-        content = with disko.gpt; {
+        content = with lib.disko.gpt; {
           type = "table";
           format = "gpt";
           partitions = [
@@ -21,7 +19,7 @@ in {
       boot-ssd = {
         type = "disk";
         device = "/dev/disk/by-id/${config.repo.secrets.local.disk.boot-ssd}";
-        content = with disko.gpt; {
+        content = with lib.disko.gpt; {
           type = "table";
           format = "gpt";
           partitions = [
@@ -31,7 +29,7 @@ in {
         };
       };
     };
-    zpool = with disko.zfs; {
+    zpool = with lib.disko.zfs; {
       rpool = defaultZpoolOptions // {datasets = defaultZfsDatasets;};
     };
   };

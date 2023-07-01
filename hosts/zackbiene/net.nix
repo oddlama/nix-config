@@ -1,14 +1,8 @@
 {
   config,
-  inputs,
   lib,
   ...
 }: let
-  inherit
-    (import ../../lib/net.nix inputs)
-    cidr
-    ;
-
   iotCidrv4 = "10.90.0.0/24";
   iotCidrv6 = "fd00:90::/64";
 in {
@@ -31,8 +25,8 @@ in {
     };
     "10-wlan1" = {
       address = [
-        (cidr.hostCidr 1 iotCidrv4)
-        (cidr.hostCidr 1 iotCidrv6)
+        (lib.net.cidr.hostCidr 1 iotCidrv4)
+        (lib.net.cidr.hostCidr 1 iotCidrv6)
       ];
       matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.wlan1.mac;
       linkConfig.RequiredForOnline = "no";

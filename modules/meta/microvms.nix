@@ -12,31 +12,26 @@
     attrNames
     attrValues
     concatStringsSep
+    disko
     escapeShellArg
     filterAttrs
     foldl'
     makeBinPath
     mapAttrsToList
     mdDoc
+    mergeToplevelConfigs
     mkDefault
     mkEnableOption
     mkForce
     mkIf
     mkMerge
     mkOption
+    net
     optional
     optionalAttrs
     recursiveUpdate
     types
     ;
-
-  inherit
-    (import ../../lib/misc.nix inputs)
-    mergeToplevelConfigs
-    ;
-
-  net = import ../../lib/net.nix inputs;
-  disko = import ../../lib/disko.nix inputs;
 
   parentConfig = config;
   cfg = config.meta.microvms;
@@ -236,7 +231,7 @@ in {
 
     networking = {
       baseMac = mkOption {
-        type = net.types.mac;
+        type = types.net.mac;
         description = mdDoc ''
           This MAC address will be used as a base address to derive all MicroVM MAC addresses from.
           A good practise is to use the physical address of the macvtap interface.
@@ -250,13 +245,13 @@ in {
 
       wireguard = {
         cidrv4 = mkOption {
-          type = net.types.cidrv4;
+          type = types.net.cidrv4;
           description = mdDoc "The ipv4 network address range to use for internal vm traffic.";
           default = "172.31.0.0/24";
         };
 
         cidrv6 = mkOption {
-          type = net.types.cidrv6;
+          type = types.net.cidrv6;
           description = mdDoc "The ipv6 network address range to use for internal vm traffic.";
           default = "fd00:172:31::/120";
         };

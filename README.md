@@ -2,12 +2,12 @@
 
 This is my personal nix config. It's still in the making, but this is what I got so far:
 
-- Full disk encryption using [disko](https://github.com/nix-community/disko), remotely unlockable via ssh
-- Zoned nftables firewall
-- Service isolation using [microvms](https://github.com/astro/microvm.nix) instead of containers
 - Log and system monitoring via loki, telegraf, influxdb, promtail and grafana
 - Single-Sign-On for all services using oauth2 via kanidm
 - Automatic wireguard mesh generation
+- Full disk encryption using [disko](https://github.com/nix-community/disko), remotely unlockable via ssh
+- Zoned nftables firewall via [nixos-nftables-firewall](https://github.com/thelegy/nixos-nftables-firewall)
+- Service isolation using [microvms](https://github.com/astro/microvm.nix) instead of containers
 - Secret rekeying, generation and bootstrapping using [agenix-rekey](https://github.com/oddlama/agenix-rekey)
 - Support for repository-wide secrets at evaluation time (hides PII like MACs)
 

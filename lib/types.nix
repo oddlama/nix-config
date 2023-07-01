@@ -1,48 +1,15 @@
-inputs: let
+inputs: self: super: let
   inherit
     (inputs.nixpkgs.lib)
     all
-    any
     assertMsg
-    attrNames
-    attrValues
-    concatLists
-    concatMap
-    concatMapStrings
-    concatStringsSep
-    elem
-    escapeShellArg
-    filter
-    flatten
-    flip
-    foldAttrs
-    foldl'
-    genAttrs
-    genList
-    hasInfix
-    head
     isAttrs
-    mapAttrs'
-    mergeAttrs
-    min
-    mkMerge
     mkOptionType
-    nameValuePair
-    optionalAttrs
-    partition
-    range
     recursiveUpdate
-    removeSuffix
-    reverseList
     showOption
-    splitString
-    stringToCharacters
-    substring
     types
-    unique
-    warnIf
     ;
-in rec {
+
   # Checks whether the value is a lazy value without causing
   # it's value to be evaluated
   isLazyValue = x: isAttrs x && x ? _lazyValue;
@@ -71,4 +38,15 @@ in rec {
   # Represents a value or lazy value of the given type that will
   # automatically be coerced to the given type when merged.
   lazyOf = type: types.coercedTo (lazyValueOf type) (x: x._lazyValue) type;
+in {
+  lib = recursiveUpdate super.lib {
+    types = {
+      inherit
+        isLazyValue
+        lazyValue
+        lazyValueOf
+        lazyOf
+        ;
+    };
+  };
 }

@@ -49,7 +49,10 @@ but here's a quick breakdown of the what you will find where.
 `apps/` | runnable actions for flake maintenance
 `hosts/<hostname>` | top-level configuration for `<hostname>`
 `lib/` | library functions overlayed on top of `nixpkgs.lib`
-`modules/` | contains modularized configuration.
+`modules/config/` | global configuration for all hosts
+`modules/optional/` | optional configuration included by hosts
+`modules/meta/` | simplified setup for existing modules and cross-host config
+`modules/*/` | classical reusable configuration modules
 `nix/` | library functions and flake plumbing
 `pkgs/` | Custom packages and scripts
 `secrets/` | Global secrets and age identities

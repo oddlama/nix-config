@@ -32,7 +32,7 @@ Make sure to utilize the github search if you know what you need!
     Some of these are "meta" in the sense that they depend on their own definitions on multiple hosts (wireguard).
     These are probably as opinionated as stuff in `modules/config/` but may be a little more general.
     The `wireguard` module would even be a candidate for extraction to a separate flake, together with the related apps.
-  - `modules/<xyz>/` regular modules related to <xyz>, similar structure as in `nixpkgs/nixos/modules`
+  - `modules/*/` regular modules related to <xyz>, similar structure as in `nixpkgs/nixos/modules`
 
 - `nix/` library functions and flake plumbing
   - `checks.nix` pre-commit-hooks for this repository

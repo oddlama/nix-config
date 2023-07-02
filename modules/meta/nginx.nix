@@ -71,6 +71,16 @@ in {
         access_log syslog:server=unix:/dev/log,nohostname json_combined;
         ssl_ecdh_curve secp384r1;
       '';
+
+      # Default host that rejects everything.
+      # This is selected when no matching host is found for a request.
+      virtualHosts.dummy = {
+        listenAddresses = ["127.0.0.1" "[::1]"];
+        default = true;
+        locations."/".extraConfig = ''
+          deny all;
+        '';
+      };
     };
 
     networking.firewall.allowedTCPPorts = [80 443];

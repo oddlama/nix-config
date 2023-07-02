@@ -120,8 +120,10 @@ in {
     };
 
     services.nginx.virtualHosts = mkIf config.services.telegraf.enable {
+      localhost.listenAddresses = ["127.0.0.1" "[::1]"];
       localhost.locations."= /nginx_status".extraConfig = ''
         allow 127.0.0.0/8;
+        allow ::1;
         deny all;
         stub_status;
       '';

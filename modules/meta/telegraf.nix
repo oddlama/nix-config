@@ -56,6 +56,26 @@ in {
       group = "telegraf";
     };
 
+    security.elewrap.telegraf-sensors = {
+      command = ["${pkgs.lm_sensors}/bin/sensors" "-A" "-d"];
+      targetUser = "root";
+      allowedUsers = ["telegraf"];
+    };
+
+    security.elewrap.telegraf-nvme = {
+      command = ["${pkgs.nvme-cli}/bin/nvme"];
+      targetUser = "root";
+      allowedUsers = ["telegraf"];
+      passArguments = true;
+    };
+
+    security.elewrap.telegraf-smartctl = {
+      command = ["${pkgs.smartmontools}/bin/smartctl"];
+      targetUser = "root";
+      allowedUsers = ["telegraf"];
+      passArguments = true;
+    };
+
     services.telegraf = {
       enable = true;
       environmentFiles = [config.age.secrets.telegraf-influxdb-token.path];
@@ -95,10 +115,14 @@ in {
             netstat = {};
             nstat = {};
             processes = {};
-            sensors = {};
+            sensors = {
+              inherit (config.security.elewrap.telegraf-sensors) path;
+            };
             swap = {};
             system = {};
-            systemd_units = {unittype = "service";};
+            systemd_units = {
+              unittype = "service";
+            };
             temp = {};
             wireguard = {};
             # http_response = { urls = [ "http://localhost/" ]; };
@@ -106,20 +130,21 @@ in {
           }
           // optionalAttrs config.services.smartd.enable {
             smart = {
-              path_nvme = "${pkgs.nvme-cli}/bin/nvme";
-              path_smartctl = "${pkgs.smartmontools}/bin/smartctl";
-              use_sudo = true;
+              path_nvme = config.security.elewrap.telegraf-nvme.path;
+              path_smartctl = config.security.elewrap.telegraf-smartctl.path;
+              use_sudo = false;
             };
           }
           // optionalAttrs config.services.nginx.enable {
             nginx.urls = ["http://localhost/nginx_status"];
-            # TODO } // optionalAttrs config.services.iwd.enable {
-            # TODO   wireless = { };
+          }
+          // optionalAttrs (config.networking.wireless.enable || config.networking.wireless.iwd.enable) {
+            wireless = {};
           };
       };
     };
 
-    services.nginx.virtualHosts = mkIf config.services.telegraf.enable {
+    services.nginx.virtualHosts = mkIf config.services.nginx.enable {
       localhost.listenAddresses = ["127.0.0.1" "[::1]"];
       localhost.locations."= /nginx_status".extraConfig = ''
         allow 127.0.0.0/8;

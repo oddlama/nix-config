@@ -4,6 +4,7 @@
   agenix-rekey,
   colmena,
   disko,
+  elewrap,
   home-manager,
   impermanence,
   microvm,
@@ -33,6 +34,7 @@
       agenix.nixosModules.default
       agenix-rekey.nixosModules.default
       disko.nixosModules.disko
+      elewrap.nixosModules.default
       home-manager.nixosModules.default
       impermanence.nixosModules.impermanence
       nixos-nftables-firewall.nixosModules.default

@@ -13,6 +13,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    elewrap = {
+      url = "github:oddlama/elewrap";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -68,6 +73,7 @@
   outputs = {
     self,
     colmena,
+    elewrap,
     nixpkgs,
     microvm,
     flake-utils,
@@ -129,12 +135,15 @@
     }
     // flake-utils.lib.eachDefaultSystem (system: rec {
       pkgs = import nixpkgs {
-        localSystem = system;
+        inherit system;
         config.allowUnfree = true;
         overlays =
           import ./lib inputs
           ++ import ./pkgs/default.nix
-          ++ [microvm.overlay];
+          ++ [
+            microvm.overlay
+            elewrap.overlays.default
+          ];
       };
 
       apps =

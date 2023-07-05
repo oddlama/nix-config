@@ -67,7 +67,7 @@
           in ''
             export PATH=${makeBinPath [pkgs.zfs]}":$PATH"
             if ! zfs list -H -o type ${escapeShellArg poolDataset} &>/dev/null ; then
-              ${diskoDataset._create {zpool = vmCfg.zfs.pool;}}
+              ${diskoDataset._create}
             fi
           '';
         };

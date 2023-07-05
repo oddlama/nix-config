@@ -56,20 +56,23 @@ in {
       group = "telegraf";
     };
 
-    security.elewrap.telegraf-sensors = {
-      command = ["${pkgs.lm_sensors}/bin/sensors" "-A" "-d"];
+    # It's intentional to gate this behind smartd. Hosts without smartd are usually
+    # virtual and won't need sensor collection either.
+    # XXX: maybe as separate option?
+    security.elewrap.telegraf-sensors = mkIf config.services.smartd.enable {
+      command = ["${pkgs.lm_sensors}/bin/sensors" "-A" "-u"];
       targetUser = "root";
       allowedUsers = ["telegraf"];
     };
 
-    security.elewrap.telegraf-nvme = {
+    security.elewrap.telegraf-nvme = mkIf config.services.smartd.enable {
       command = ["${pkgs.nvme-cli}/bin/nvme"];
       targetUser = "root";
       allowedUsers = ["telegraf"];
       passArguments = true;
     };
 
-    security.elewrap.telegraf-smartctl = {
+    security.elewrap.telegraf-smartctl = mkIf config.services.smartd.enable {
       command = ["${pkgs.smartmontools}/bin/smartctl"];
       targetUser = "root";
       allowedUsers = ["telegraf"];
@@ -115,9 +118,6 @@ in {
             netstat = {};
             nstat = {};
             processes = {};
-            sensors = {
-              inherit (config.security.elewrap.telegraf-sensors) path;
-            };
             swap = {};
             system = {};
             systemd_units = {
@@ -129,6 +129,7 @@ in {
             # ping = { urls = [ "9.9.9.9" ]; };
           }
           // optionalAttrs config.services.smartd.enable {
+            sensors = {};
             smart = {
               path_nvme = config.security.elewrap.telegraf-nvme.path;
               path_smartctl = config.security.elewrap.telegraf-smartctl.path;
@@ -156,8 +157,8 @@ in {
 
     systemd.services.telegraf = {
       path = [
-        "/run/wrappers"
-        pkgs.lm_sensors
+        # Make sensors refer to the correct wrapper
+        (mkIf config.services.smartd.enable (pkgs.writeShellScriptBin "sensors" config.security.elewrap.telegraf-sensors.path))
       ];
       serviceConfig = {
         # For wireguard statistics

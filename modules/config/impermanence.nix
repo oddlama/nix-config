@@ -160,9 +160,9 @@
       ]
       ++ lib.optionals config.services.adguardhome.enable [
         {
-          directory = "/var/lib/adguardhome";
-          user = "adguardhome";
-          group = "adguardhome";
+          directory = "/var/lib/private/AdGuardHome";
+          user = "root";
+          group = "root";
           mode = "0700";
         }
       ];

@@ -49,7 +49,6 @@ in {
       bind_host = config.meta.wireguard.proxy-sentinel.ipv4;
       bind_port = 3000;
       dns = {
-        edns_client_subnet.enabled = false;
         bind_hosts = [
           # This dummy address passes the configuration check and will
           # later be replaced by the actual interface address.
@@ -60,15 +59,15 @@ in {
         #trusted_proxied = [];
         ratelimit = 60;
         upstream_dns = [
+          "1.1.1.1"
+          "2606:4700:4700::1111"
           "8.8.8.8"
-          "8.8.4.4"
-          "2001:4860:4860::8888"
           "2001:4860:4860::8844"
         ];
         bootstrap_dns = [
+          "1.1.1.1"
+          "2606:4700:4700::1111"
           "8.8.8.8"
-          "8.8.4.4"
-          "2001:4860:4860::8888"
           "2001:4860:4860::8844"
         ];
         dhcp.enabled = false;
@@ -82,5 +81,6 @@ in {
       INTERFACE_ADDR=$(${pkgs.iproute2}/bin/ip -family inet -brief addr show wan | grep -o "[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+")
       sed -i -e "s/123.123.123.123/$INTERFACE_ADDR/" "$STATE_DIRECTORY/AdGuardHome.yaml"
     '';
+    serviceConfig.RestartSec = lib.mkForce "600"; # Retry every 10 minutes
   };
 }

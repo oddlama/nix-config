@@ -72,5 +72,8 @@ in {
     };
   };
 
-  systemd.services.kanidm.after = ["sys-subsystem-net-devices-${utils.escapeSystemdPath "proxy-sentinel"}.device"];
+  systemd.services.kanidm = {
+    after = ["sys-subsystem-net-devices-${utils.escapeSystemdPath "proxy-sentinel"}.device"];
+    serviceConfig.RestartSec = "600"; # Retry every 10 minutes
+  };
 }

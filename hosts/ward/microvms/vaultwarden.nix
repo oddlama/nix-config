@@ -90,5 +90,6 @@ in {
   systemd.services.vaultwarden = {
     after = ["sys-subsystem-net-devices-${utils.escapeSystemdPath "proxy-sentinel"}.device"];
     serviceConfig.StateDirectory = lib.mkForce "vaultwarden";
+    serviceConfig.RestartSec = "600"; # Retry every 10 minutes
   };
 }

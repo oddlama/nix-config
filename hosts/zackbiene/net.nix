@@ -16,7 +16,9 @@ in {
   systemd.network.networks = {
     "10-lan1" = {
       DHCP = "yes";
-      dhcpConfig.UseDNS = false;
+      dhcpV4Config.UseDNS = false;
+      dhcpV6Config.UseDNS = false;
+      ipv6AcceptRAConfig.UseDNS = false;
       matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.lan1.mac;
       networkConfig = {
         IPv6PrivacyExtensions = "yes";

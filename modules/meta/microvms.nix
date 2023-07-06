@@ -174,7 +174,9 @@
             "10-${vmCfg.networking.mainLinkName}" = {
               matchConfig.MACAddress = mac;
               DHCP = "yes";
-              dhcpConfig.UseDNS = false;
+              dhcpV4Config.UseDNS = false;
+              dhcpV6Config.UseDNS = false;
+              ipv6AcceptRAConfig.UseDNS = false;
               networkConfig = {
                 IPv6PrivacyExtensions = "yes";
                 MulticastDNS = true;

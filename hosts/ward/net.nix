@@ -41,7 +41,9 @@ in {
     };
     "10-wan" = {
       DHCP = "yes";
-      dhcpConfig.UseDNS = false;
+      dhcpV4Config.UseDNS = false;
+      dhcpV6Config.UseDNS = false;
+      ipv6AcceptRAConfig.UseDNS = false;
       #address = [
       #  "192.168.178.2/24"
       #  "fdee::1/64"

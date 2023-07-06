@@ -131,6 +131,7 @@ in {
           // optionalAttrs config.services.smartd.enable {
             sensors = {};
             smart = {
+              attributes = true;
               path_nvme = config.security.elewrap.telegraf-nvme.path;
               path_smartctl = config.security.elewrap.telegraf-smartctl.path;
               use_sudo = false;

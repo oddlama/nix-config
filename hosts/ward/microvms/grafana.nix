@@ -110,6 +110,7 @@ in {
           url = "https://${sentinelCfg.networking.providedDomains.influxdb}";
           orgId = 1;
           secureJsonData.token = "$__file{${config.age.secrets.grafana-influxdb-token.path}}";
+          jsonData.version = "Flux";
           jsonData.organization = "servers";
           jsonData.defaultBucket = "telegraf";
         }

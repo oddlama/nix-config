@@ -157,6 +157,14 @@
           group = "telegraf";
           mode = "0700";
         }
+      ]
+      ++ lib.optionals config.services.adguardhome.enable [
+        {
+          directory = "/var/lib/adguardhome";
+          user = "adguardhome";
+          group = "adguardhome";
+          mode = "0700";
+        }
       ];
   };
 }

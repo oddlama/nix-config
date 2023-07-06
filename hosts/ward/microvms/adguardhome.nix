@@ -42,6 +42,8 @@ in {
 
   services.adguardhome = {
     enable = true;
+    # TODO allow mutable settings, replace 123.123.123.123 with
+    # simpler sed dns.host_addr logic.
     mutableSettings = false;
     settings = {
       bind_host = config.meta.wireguard.proxy-sentinel.ipv4;

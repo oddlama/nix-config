@@ -23,7 +23,13 @@ in {
           keepalive 2;
         '';
       };
-      virtualHosts.${influxdbDomain} = {
+      virtualHosts.${influxdbDomain} = let
+        accessRules = ''
+          satisfy any;
+          ${lib.concatMapStrings (ip: "allow ${ip};\n") sentinelCfg.meta.wireguard.proxy-sentinel.server.reservedAddresses}
+          deny all;
+        '';
+      in {
         forceSSL = true;
         useACMEWildcardHost = true;
         oauth2.enable = true;
@@ -31,10 +37,14 @@ in {
         locations."/" = {
           proxyPass = "http://influxdb";
           proxyWebsockets = true;
+          extraConfig = accessRules;
+        };
+        locations."/api/v2/write" = {
+          proxyPass = "http://influxdb/api/v2/write";
+          proxyWebsockets = true;
           extraConfig = ''
-            satisfy any;
-            ${lib.concatMapStrings (ip: "allow ${ip};\n") sentinelCfg.meta.wireguard.proxy-sentinel.server.reservedAddresses}
-            deny all;
+            ${accessRules}
+            access_log off;
           '';
         };
       };

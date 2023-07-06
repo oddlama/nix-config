@@ -152,6 +152,7 @@ in {
         allow ::1;
         deny all;
         stub_status;
+        access_log off;
       '';
     };
 

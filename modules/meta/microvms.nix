@@ -111,6 +111,8 @@
       config = {config, ...}: {
         imports = cfg.commonImports ++ node.imports ++ vmCfg.modules;
 
+        lib.microvm.mac = mac;
+
         microvm = {
           hypervisor = mkDefault "cloud-hypervisor";
 

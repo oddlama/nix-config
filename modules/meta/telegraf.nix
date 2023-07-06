@@ -158,7 +158,8 @@ in {
     systemd.services.telegraf = {
       path = [
         # Make sensors refer to the correct wrapper
-        (mkIf config.services.smartd.enable (pkgs.writeShellScriptBin "sensors" config.security.elewrap.telegraf-sensors.path))
+        (mkIf config.services.smartd.enable
+          (pkgs.writeShellScriptBin "sensors" config.security.elewrap.telegraf-sensors.path))
       ];
       serviceConfig = {
         # For wireguard statistics

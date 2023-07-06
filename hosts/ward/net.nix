@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  utils,
   ...
 }: let
   lanCidrv4 = "192.168.100.0/24";
@@ -124,51 +123,6 @@ in {
       };
     };
   };
-
-  services.kea = {
-    dhcp4 = {
-      enable = true;
-      settings = {
-        lease-database = {
-          name = "/var/lib/kea/dhcp4.leases";
-          persist = true;
-          type = "memfile";
-        };
-        valid-lifetime = 4000;
-        renew-timer = 1000;
-        rebind-timer = 2000;
-        interfaces-config = {
-          # TODO why does this bind other macvtaps?
-          interfaces = ["lan-self"];
-          service-sockets-max-retries = -1;
-        };
-        option-data = [
-          {
-            name = "domain-name-servers";
-            # TODO pihole via self
-            data = "1.1.1.1, 8.8.8.8";
-          }
-        ];
-        subnet4 = [
-          {
-            interface = "lan-self";
-            subnet = lanCidrv4;
-            pools = [
-              {pool = "${lib.net.cidr.host 20 lanCidrv4} - ${lib.net.cidr.host (-6) lanCidrv4}";}
-            ];
-            option-data = [
-              {
-                name = "routers";
-                data = lib.net.cidr.host 1 lanCidrv4;
-              }
-            ];
-          }
-        ];
-      };
-    };
-  };
-
-  systemd.services.kea-dhcp4-server.after = ["sys-subsystem-net-devices-${utils.escapeSystemdPath "lan-self"}.device"];
 
   meta.microvms.networking = {
     baseMac = config.repo.secrets.local.networking.interfaces.lan.mac;

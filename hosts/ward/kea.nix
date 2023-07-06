@@ -1,0 +1,77 @@
+{
+  config,
+  lib,
+  utils,
+  nodes,
+  ...
+}: let
+  inherit
+    (lib)
+    flip
+    mapAttrsToList
+    mkOption
+    net
+    types
+    ;
+
+  lanCidrv4 = "192.168.100.0/24";
+  dnsIp = net.cidr.host 2 lanCidrv4;
+in {
+  # TODO make meta.kea module?
+  # TODO reserve by default using assignIps algo?
+  options.networking.dhcp4Reservations = mkOption {
+    default = {};
+    type = types.attrsOf (types.net.ipv4-in lanCidrv4);
+    description = "Maps MAC addresses to their reserved ipv4 address.";
+  };
+
+  config = {
+    services.kea.dhcp4 = {
+      enable = true;
+      settings = {
+        lease-database = {
+          name = "/var/lib/kea/dhcp4.leases";
+          persist = true;
+          type = "memfile";
+        };
+        valid-lifetime = 4000;
+        renew-timer = 1000;
+        rebind-timer = 2000;
+        interfaces-config = {
+          # XXX: why does this bind other macvtaps?
+          interfaces = ["lan-self"];
+          service-sockets-max-retries = -1;
+        };
+        option-data = [
+          {
+            name = "domain-name-servers";
+            data = dnsIp;
+          }
+        ];
+        subnet4 = [
+          {
+            interface = "lan-self";
+            subnet = lanCidrv4;
+            pools = [
+              {pool = "${net.cidr.host 20 lanCidrv4} - ${net.cidr.host (-6) lanCidrv4}";}
+            ];
+            option-data = [
+              {
+                name = "routers";
+                data = net.cidr.host 1 lanCidrv4;
+              }
+            ];
+            reservations = [
+              {
+                hw-address = nodes.ward-adguardhome.config.lib.microvm.mac;
+                ip-address = dnsIp;
+              }
+            ];
+          }
+        ];
+      };
+    };
+
+    systemd.services.kea-dhcp4-server.after = ["sys-subsystem-net-devices-${utils.escapeSystemdPath "lan-self"}.device"];
+  };
+}

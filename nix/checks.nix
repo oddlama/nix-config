@@ -6,7 +6,7 @@
   pre-commit-check =
     pre-commit-hooks.lib.${system}.run
     {
-      src = lib.cleanSource ../.;
+      src = self.pkgs.${system}.lib.cleanSource ../.;
       hooks = {
         alejandra.enable = true;
         statix.enable = true;

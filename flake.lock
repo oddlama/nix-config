@@ -183,11 +183,11 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "lastModified": 1688559207,
-        "narHash": "sha256-PMdOEV3bAqZSiN7qsu9voEsSugMaPFI8YAx+Xhd7vO4=",
+        "lastModified": 1688574676,
+        "narHash": "sha256-rsTVftF7zSXTCsb0/ngkLL3bBhV97w30ZZXoB2roRhQ=",
         "owner": "oddlama",
         "repo": "elewrap",
-        "rev": "0c9bf39af5ff0c65dfaaad3c32769cdd73aa1c29",
+        "rev": "70c583d67fa88db4d0cf881432cc7c0325521fa8",
         "type": "github"
       },
       "original": {
@@ -415,7 +415,7 @@
       },
       "locked": {
         "lastModified": 1687369979,
-        "narHash": "sha256-rRV+VKRVb0N2xYLVMfAGk8FQnII3mCuH5JMTOCLlEnk=",
+        "narHash": "sha256-Dgiop+/ERu4e2Bolqd3H0ENWPQoZ5c4kSiQo8e73nKA=",
         "type": "git",
         "url": "file:///root/projects/microvm.nix"
       },
@@ -584,11 +584,11 @@
         "nixpkgs-stable": "nixpkgs-stable_2"
       },
       "locked": {
-        "lastModified": 1688473851,
-        "narHash": "sha256-j+ViA3lh4uQGIDqB6TjM4+wijX2M5mfNb6MVJVekpAs=",
+        "lastModified": 1688596063,
+        "narHash": "sha256-9t7RxBiKWHygsqXtiNATTJt4lim/oSYZV3RG8OjDDng=",
         "owner": "cachix",
         "repo": "pre-commit-hooks.nix",
-        "rev": "f6a6863a3bcb61e846a9e4777b90ee365607a925",
+        "rev": "c8d18ba345730019c3faf412c96a045ade171895",
         "type": "github"
       },
       "original": {

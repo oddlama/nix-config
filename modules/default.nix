@@ -26,7 +26,6 @@
     ./meta/wireguard-proxy.nix
     ./meta/wireguard.nix
 
-    ./networking/hostapd.nix
     ./networking/interface-naming.nix
     ./networking/provided-domains.nix
 

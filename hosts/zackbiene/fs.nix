@@ -1,19 +1,29 @@
 {
-  # TODO disko
-  fileSystems = {
-    "/" = {
-      device = "rpool/root/nixos";
-      fsType = "zfs";
-      options = ["zfsutil" "X-mount.mkdir"];
+  config,
+  lib,
+  ...
+}: {
+  disko.devices = {
+    disk = {
+      mmc = {
+        type = "disk";
+        device = "/dev/disk/by-id/${config.repo.secrets.local.disk.mmc}";
+        content = with lib.disko.gpt; {
+          type = "table";
+          format = "gpt";
+          partitions = [
+            (partEfi "efi" "0%" "1GiB")
+            (partSwap "swap" "1GiB" "9GiB")
+            (partLuksZfs "rpool" "9GiB" "100%")
+          ];
+        };
+      };
     };
-
-    "/boot" = {
-      device = "/dev/disk/by-uuid/c0bb3411-7af3-4901-83ea-eb2560b11784";
-      fsType = "ext4";
+    zpool = with lib.disko.zfs; {
+      rpool = defaultZpoolOptions // {datasets = defaultZfsDatasets;};
     };
   };
 
-  swapDevices = [
-    {device = "/dev/disk/by-uuid/a4a5fee7-2b6f-4cec-9ec9-fc4b71e8055a";}
-  ];
+  boot.loader.grub.devices = ["/dev/disk/by-id/${config.repo.secrets.local.disk.mmc}"];
+  boot.initrd.luks.devices.enc-rpool.allowDiscards = true;
 }

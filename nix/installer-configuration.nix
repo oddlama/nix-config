@@ -1,9 +1,4 @@
-{
-  pkgs,
-  lib,
-  ...
-}: {
-  isoImage.isoName = lib.mkForce "nixos.iso";
+{pkgs, ...}: {
   system.stateVersion = "23.11";
   nix.extraOptions = ''
     experimental-features = nix-command flakes

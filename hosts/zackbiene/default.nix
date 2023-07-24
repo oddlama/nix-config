@@ -8,14 +8,14 @@
     ../../modules/optional/zfs.nix
 
     #./dnsmasq.nix
-    ./esphome.nix
+    #./esphome.nix
     ./fs.nix
-    ./home-assistant.nix
-    ./hostapd.nix
-    ./mosquitto.nix
+    #./home-assistant.nix
+    #./hostapd.nix
+    #./mosquitto.nix
     ./net.nix
-    ./nginx.nix
-    ./zigbee2mqtt.nix
+    #./nginx.nix
+    #./zigbee2mqtt.nix
   ];
 
   # TODO boot.loader.grub.devices = ["/dev/disk/by-id/${config.repo.secrets.local.disk.main}"];

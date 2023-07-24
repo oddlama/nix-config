@@ -44,7 +44,6 @@ inputs: self: super: {
         zfs = rec {
           defaultZpoolOptions = {
             type = "zpool";
-            mountRoot = "/mnt";
             rootFsOptions = {
               compression = "zstd";
               acltype = "posix";

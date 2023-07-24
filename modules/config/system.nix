@@ -5,6 +5,4 @@
   time.timeZone = lib.mkDefault "Europe/Berlin";
   i18n.defaultLocale = "C.UTF-8";
   console.keyMap = "de-latin1-nodeadkeys";
-
-  systemd.enableUnifiedCgroupHierarchy = true;
 }

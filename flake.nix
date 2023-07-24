@@ -72,12 +72,14 @@
 
   outputs = {
     self,
+    agenix-rekey,
     colmena,
     elewrap,
-    nixpkgs,
-    microvm,
     flake-utils,
-    agenix-rekey,
+    microvm,
+    nixos-generators,
+    nixpkgs,
+    pre-commit-hooks,
     ...
   } @ inputs: let
     inherit (nixpkgs) lib;
@@ -123,12 +125,12 @@
       # to any system via nodes.<name>
       nodes = self.colmenaNodes // self.microvmNodes;
 
-      # For each true NixOS system, we want to expose an installer image that
-      # can be used to do setup on the node.
+      # For each true NixOS system, we want to expose an installer package that
+      # can be used to do the initial setup on the node from a live environment.
       inherit
         (lib.foldl' lib.recursiveUpdate {}
           (lib.mapAttrsToList
-            (import ./nix/generate-installer.nix inputs)
+            (import ./nix/generate-installer-package.nix inputs)
             self.colmenaNodes))
         packages
         ;
@@ -146,11 +148,60 @@
           ];
       };
 
+      # For each major system, we provide a customized installer image that
+      # has ssh and some other convenience stuff preconfigured.
+      # Not strictly necessary for new setups.
+      images.live-iso = nixos-generators.nixosGenerate {
+        inherit pkgs;
+        modules = [
+          ./nix/installer-configuration.nix
+          ./modules/config/ssh.nix
+        ];
+        format =
+          {
+            x86_64-linux = "install-iso";
+            aarch64-linux = "sd-aarch64-installer";
+          }
+          .${system};
+      };
+
+      # Define local apps and apps used for rekeying secrets
+      # `nix run .#<app>`
       apps =
         agenix-rekey.defineApps self pkgs self.nodes
         // import ./apps inputs system;
-      checks = import ./nix/checks.nix inputs system;
-      devShells.default = import ./nix/dev-shell.nix inputs system;
+
+      # `nix flake check`
+      checks.pre-commit-hooks = pre-commit-hooks.lib.${system}.run {
+        src = lib.cleanSource ./.;
+        hooks = {
+          alejandra.enable = true;
+          statix.enable = true;
+          luacheck.enable = true;
+          stylua.enable = true;
+        };
+      };
+
+      # `nix develop`
+      devShells.default = pkgs.mkShell {
+        name = "nix-config";
+        packages = with pkgs; [
+          # Nix
+          alejandra
+          cachix
+          colmena
+          deadnix
+          nix-tree
+          statix
+          update-nix-fetchgit
+        ];
+
+        shellHook = ''
+          ${self.checks.${system}.pre-commit-check.shellHook}
+        '';
+      };
+
+      # `nix fmt`
       formatter = pkgs.alejandra;
     });
 }

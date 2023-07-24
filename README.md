@@ -64,28 +64,21 @@ but here's a quick breakdown of the what you will find where.
 
 ... incomplete.
 
-- add <name> to `hosts` in `flake.nix`
-- create hosts/<name>
-- fill net.nix
-- fill fs.nix (you need to know the device by-id paths in advance for formatting to work!)
-- run generate-secrets
+- Add <name> to `hosts` in `flake.nix`
+- Create hosts/<name>
+- Fill net.nix
+- Fill fs.nix (you need to know the device by-id paths in advance for formatting to work!)
+- Run generate-secrets
 
 #### Initial deploy
 
-A. Fresh pre-made installer ISO
-
-- Create a iso disk image for the system with `nix build --print-out-paths --no-link .#installer-image-<host>`
-- dd the resulting image to a stick and boot from it on the target
-- (Optional) ssh into the target (keys are already set up)
-
-B. Reusing any nixos-live iso
-
-- Boot from live-iso and setup ssh access by writing your key to `/root/.ssh/authorized_keys`
-- Copy installer package with `nix copy --to <target> .#installer-package-<host>`
+- Create a bootable iso disk image with `nix build --print-out-paths --no-link .#images.<target-system>.live-iso`, dd it to a stick and boot
+- (Alternative) Use an official NixOS live-iso and setup ssh manually
+- Copy the installer from a local machine to the live system with `nix copy --to <target> .#packages.<target-system>.installer-package.<target>`
 
 Afterwards:
 
-- Run `install-system` and reboot
+- Run `install-system` in the live environment and reboot
 - Retrieve the new host identity by using `ssh-keyscan <host/ip> | grep -o 'ed25519.*' > host/<host>/secrets/host.pub`
 - (If the host has microvms, also retrieve their identities!)
 - Rekey the secrets for the new identity `nix run .#rekey`

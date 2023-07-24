@@ -23,7 +23,4 @@
       rpool = defaultZpoolOptions // {datasets = defaultZfsDatasets;};
     };
   };
-
-  boot.loader.grub.devices = ["/dev/disk/by-id/${config.repo.secrets.local.disk.mmc}"];
-  boot.initrd.luks.devices.enc-rpool.allowDiscards = true;
 }

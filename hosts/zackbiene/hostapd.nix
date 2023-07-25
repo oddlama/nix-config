@@ -1,9 +1,4 @@
-{
-  lib,
-  config,
-  pkgs,
-  ...
-}: {
+{config, ...}: {
   # Associates each known client to a unique password
   age.secrets.wifi-clients.rekeyFile = ./secrets/wifi-clients.age;
 
@@ -12,7 +7,7 @@
   services.hostapd = {
     enable = true;
     radios.wlan1 = {
-      hwMode = "g";
+      band = "2g";
       countryCode = "DE";
       channel = 13; # Automatic Channel Selection (ACS) is unfortunately not implemented for mt7612u.
       wifi4.capabilities = ["LDPC" "HT40+" "HT40-" "GF" "SHORT-GI-20" "SHORT-GI-40" "TX-STBC" "RX-STBC1"];
@@ -22,7 +17,8 @@
         apIsolate = true;
         authentication = {
           saePasswordsFile = config.age.secrets.wifi-clients.path;
-          saeAddToMacAllow = true;
+          # TODO reenable when nixpkgs#245413 is merged
+          # saeAddToMacAllow = true;
           enableRecommendedPairwiseCiphers = true;
         };
         bssid = "00:c0:ca:b1:4f:9f";

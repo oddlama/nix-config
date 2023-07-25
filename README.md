@@ -79,7 +79,7 @@ but here's a quick breakdown of the what you will find where.
 Afterwards:
 
 - Run `install-system` in the live environment and reboot
-- Retrieve the new host identity by using `ssh-keyscan <host/ip> | grep -o 'ed25519.*' > host/<host>/secrets/host.pub`
+- Retrieve the new host identity by using `ssh-keyscan <host/ip> | grep -o 'ssh-ed25519.*' > hosts/<host>/secrets/host.pub`
 - (If the host has microvms, also retrieve their identities!)
 - Rekey the secrets for the new identity `nix run .#rekey`
 - Deploy again remotely via colmena

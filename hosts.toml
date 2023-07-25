@@ -1,0 +1,15 @@
+[nom]
+type = "nixos"
+system = "x86_64-linux"
+
+[sentinel]
+type = "nixos"
+system = "x86_64-linux"
+
+[ward]
+type = "nixos"
+system = "x86_64-linux"
+
+[zackbiene]
+type = "nixos"
+system = "aarch64-linux"

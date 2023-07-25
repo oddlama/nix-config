@@ -92,19 +92,10 @@
         extraEncryptionPubkeys = [./secrets/backup.pub];
       };
 
-      # This is the list of hosts that this flake defines, plus the minimum
-      # amount of metadata that is necessary to instanciate it correctly.
-      hosts = let
-        nixos = system: {
-          type = "nixos";
-          inherit system;
-        };
-      in {
-        nom = nixos "x86_64-linux";
-        sentinel = nixos "x86_64-linux";
-        ward = nixos "x86_64-linux";
-        zackbiene = nixos "aarch64-linux";
-      };
+      # Load the list of hosts that this flake defines, which
+      # associates the minimum amount of metadata that is necessary
+      # to instanciate hosts correctly.
+      hosts = builtins.fromTOML (builtins.readFile ./hosts.toml);
 
       # This will process all defined hosts of type "nixos" and
       # generate the required colmena definition for each host.

@@ -10,6 +10,9 @@
     # TODO instead deny the zigbee device
   };
 
+  #security.acme.certs."home.${personalDomain}".extraDomainNames = [
+  #  "esphome.home.${personalDomain}"
+  #];
   systemd.services.nginx = {
     serviceConfig.SupplementaryGroups = ["esphome"];
     requires = ["esphome.service"];

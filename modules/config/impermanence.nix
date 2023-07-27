@@ -165,6 +165,22 @@
           group = "root";
           mode = "0700";
         }
+      ]
+      ++ lib.optionals config.services.esphome.enable [
+        {
+          directory = "/var/lib/private/esphome";
+          user = "root";
+          group = "root";
+          mode = "0700";
+        }
+      ]
+      ++ lib.optionals config.services.home-assistant.enable [
+        {
+          directory = config.services.home-assistant.configDir;
+          user = "hass";
+          group = "hass";
+          mode = "0700";
+        }
       ];
   };
 }

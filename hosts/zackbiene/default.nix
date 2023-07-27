@@ -1,9 +1,12 @@
 {
+  config,
   lib,
   nodes,
   ...
 }: let
+  inherit (config.repo.secrets.local) acme;
   sentinelCfg = nodes.sentinel.config;
+  inherit (sentinelCfg.repo.secrets.local) personalDomain;
 in {
   imports = [
     ../../modules/optional/hardware/odroid-n2plus.nix
@@ -15,14 +18,24 @@ in {
 
     #./esphome.nix
     ./fs.nix
-    #./home-assistant.nix
+    ./home-assistant.nix
     ./hostapd.nix
     #./mosquitto.nix
     ./kea.nix
     ./net.nix
-    #./nginx.nix
     #./zigbee2mqtt.nix
   ];
+
+  users.groups.acme.members = ["nginx"];
+  services.nginx.enable = true;
+
+  security.acme = {
+    acceptTerms = true;
+    defaults = {
+      inherit (acme) email;
+      reloadServices = ["nginx"];
+    };
+  };
 
   meta.wireguard-proxy.sentinel = {};
   meta.promtail = {

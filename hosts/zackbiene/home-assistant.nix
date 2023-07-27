@@ -1,10 +1,14 @@
 {
   lib,
   config,
+  nodes,
   ...
 }: let
-  haPort = 8123;
+  sentinelCfg = nodes.sentinel.config;
+  homeDomain = "home.${sentinelCfg.repo.secrets.local.personalDomain}";
 in {
+  meta.wireguard-proxy.sentinel.allowedTCPPorts = [80];
+
   services.home-assistant = {
     enable = true;
     extraComponents = [
@@ -21,7 +25,7 @@ in {
     config = {
       http = {
         server_host = ["127.0.0.1"];
-        server_port = haPort;
+        server_port = 8123;
         use_x_forwarded_for = true;
         trusted_proxies = ["127.0.0.1"];
       };
@@ -38,7 +42,6 @@ in {
           manual = "!include manual.yaml";
         };
       };
-      met = {};
 
       #### only selected components from default_config ####
 
@@ -107,28 +110,44 @@ in {
   # - only allow connections from privileged LAN to HA or from vpn range
 
   services.nginx = {
-    upstreams."homeassistant" = {
-      servers."localhost:${toString haPort}" = {};
+    upstreams.homeassistant = {
+      servers."localhost:${toString config.services.home-assistant.config.http.server_port}" = {};
       extraConfig = ''
         zone homeassistant 64k;
         keepalive 2;
       '';
     };
-    virtualHosts."${config.repo.secrets.local.homeassistant.domain}" = {
-      serverAliases = ["192.168.1.21"]; # TODO remove later
+    virtualHosts.${homeDomain} = {
       forceSSL = true;
-      #enableACME = true;
-      sslCertificate = config.age.secrets."selfcert.crt".path;
-      sslCertificateKey = config.age.secrets."selfcert.key".path;
+      enableACME = true;
       locations."/" = {
         proxyPass = "http://homeassistant";
         proxyWebsockets = true;
       };
+      # TODO listenAddresses = ["127.0.0.1" "[::1]"];
       # TODO dynamic definitions for the "local" network, IPv6
       extraConfig = ''
         allow 192.168.0.0/22;
         deny all;
       '';
+    };
+  };
+
+  nodes.sentinel = {
+    services.nginx = {
+      upstreams."zackbiene" = {
+        servers."${config.meta.wireguard.proxy-sentinel.ipv4}:80" = {};
+        extraConfig = ''
+          zone zackbiene 64k;
+          keepalive 2;
+        '';
+      };
+      virtualHosts.${homeDomain} = {
+        # useACMEWildcardHost = true;
+        # TODO add aliases
+        rejectSSL = true; # TODO TLS SNI pass with `ssl_preread on;`
+        locations."/".proxyPass = "http://zackbiene";
+      };
     };
   };
 }

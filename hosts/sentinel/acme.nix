@@ -16,6 +16,6 @@ in {
       dnsPropagationCheck = true;
       reloadServices = ["nginx"];
     };
+    wildcardDomains = acme.domains;
   };
-  security.acme.wildcardDomains = acme.domains;
 }

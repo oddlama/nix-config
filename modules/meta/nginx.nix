@@ -77,6 +77,7 @@ in {
       virtualHosts.dummy = {
         listenAddresses = ["127.0.0.1" "[::1]"];
         default = true;
+        rejectSSL = true;
         locations."/".extraConfig = ''
           deny all;
         '';

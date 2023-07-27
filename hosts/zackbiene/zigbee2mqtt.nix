@@ -10,6 +10,9 @@
     group = "mosquitto";
   };
 
+  #security.acme.certs."home.${personalDomain}".extraDomainNames = [
+  #  "zigbee.home.${personalDomain}"
+  #];
   services.zigbee2mqtt = {
     enable = true;
     settings = {

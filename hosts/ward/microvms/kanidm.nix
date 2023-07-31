@@ -73,7 +73,9 @@ in {
   };
 
   systemd.services.kanidm = {
+    # TODO this doesn't suffice, percieved 1 in 50 this fails because kanidm starts too soon,
+    # a requiredforonline might be necessary
     after = ["sys-subsystem-net-devices-${utils.escapeSystemdPath "proxy-sentinel"}.device"];
-    serviceConfig.RestartSec = "600"; # Retry every 10 minutes
+    serviceConfig.RestartSec = "60"; # Retry every minute
   };
 }

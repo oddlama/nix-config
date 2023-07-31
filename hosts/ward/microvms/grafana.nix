@@ -17,8 +17,7 @@ in {
   };
 
   age.secrets.grafana-loki-basic-auth-password = {
-    rekeyFile = config.node.secretsDir + "/grafana-loki-basic-auth-password.age";
-    generator = "alnum";
+    generator.script = "alnum";
     mode = "440";
     group = "grafana";
   };

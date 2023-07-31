@@ -25,10 +25,10 @@
     # current system due to yubikey availability.
     forceRekeyOnSystem = builtins.extraBuiltins.unsafeCurrentSystem;
     hostPubkey = config.node.secretsDir + "/host.pub";
+    generatedSecretsDir = inputs.self.outPath + "/secrets/generated/${config.node.name}";
   };
 
-  age.generators.dhparams.script = {pkgs, ...}: "${pkgs.openssl}/bin/openssl dhparam 4096";
-  age.generators.basic-auth.script = {
+  age.generators.basic-auth = {
     pkgs,
     lib,
     decrypt,

@@ -25,8 +25,7 @@ in {
 
   config = mkIf cfg.enable {
     age.secrets.promtail-loki-basic-auth-password = {
-      rekeyFile = config.node.secretsDir + "/promtail-loki-basic-auth-password.age";
-      generator = "alnum";
+      generator.script = "alnum";
       mode = "440";
       group = "promtail";
     };

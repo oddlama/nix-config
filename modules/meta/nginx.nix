@@ -36,8 +36,7 @@ in {
 
   config = mkIf config.services.nginx.enable {
     age.secrets."dhparams.pem" = {
-      rekeyFile = config.node.secretsDir + "/dhparams.pem.age";
-      generator = "dhparams";
+      generator.script = "dhparams";
       mode = "440";
       group = "nginx";
     };

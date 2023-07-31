@@ -16,7 +16,6 @@
     ;
 
   cfg = config.meta.telegraf;
-  nodeName = config.node.name;
 in {
   options.meta.telegraf = {
     enable = mkEnableOption (mdDoc "telegraf to push metrics to influx.");
@@ -92,7 +91,7 @@ in {
           flush_interval = "20s";
           flush_jitter = "5s";
           precision = "1ms";
-          hostname = nodeName;
+          hostname = config.node.name;
           omit_hostname = false;
         };
         outputs = {

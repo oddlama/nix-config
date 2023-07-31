@@ -47,13 +47,12 @@
         ]
       },
       "locked": {
-        "lastModified": 1690798647,
-        "narHash": "sha256-7871l3pVqSIozmY/31G2aJRVmbN3kHbxj+GP2LS9N6k=",
-        "ref": "refs/heads/main",
-        "rev": "af31e2c282ab26d2c7bb3524f6508df1cb88ff10",
-        "revCount": 72,
-        "type": "git",
-        "url": "file:///root/projects/agenix-rekey"
+        "lastModified": 1690800481,
+        "narHash": "sha256-fKfhHO3wZVeLGY0ZpxtBKNesyqVEVfcrpDRxX+/W/AE=",
+        "owner": "oddlama",
+        "repo": "agenix-rekey",
+        "rev": "a5d025629c5bef2d8e33bfc615fde93bad40ac7c",
+        "type": "github"
       },
       "original": {
         "owner": "oddlama",

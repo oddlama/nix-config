@@ -60,11 +60,10 @@
     };
   in
     lib.genAttrs
-    ["kanidm" "grafana" "loki" "vaultwarden" "adguardhome" "influxdb"]
+    ["kanidm" "grafana" "loki" "vaultwarden" "adguardhome" "influxdb" "forgejo"]
     defaultConfig;
 
   #ddclient = defineVm;
-  #gitea/forgejo = defineVm;
   #samba+wsdd = defineVm;
   #fasten-health = defineVm;
   #immich = defineVm;

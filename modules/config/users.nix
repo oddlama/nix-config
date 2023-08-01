@@ -23,5 +23,6 @@
     influxdb2 = uidGid 986;
     telegraf = uidGid 985;
     rtkit = uidGid 984;
+    gitea = uidGid 983;
   };
 }

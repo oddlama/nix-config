@@ -7,6 +7,7 @@
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
+  # XXX: other domain on other proxy?
   forgejoDomain = "git.${sentinelCfg.repo.secrets.local.personalDomain}";
 in {
   # TODO forward ssh port
@@ -16,8 +17,8 @@ in {
 
   age.secrets.forgejo-mailer-password = {
     rekeyFile = config.node.secretsDir + "/forgejo-mailer-password.age";
-    mode = "400";
-    group = "forgejo";
+    mode = "440";
+    inherit (config.services.gitea) group;
   };
 
   nodes.sentinel = {

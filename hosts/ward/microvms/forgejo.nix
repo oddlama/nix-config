@@ -52,8 +52,8 @@ in {
     };
   };
 
-  # XXX: TODO ssh if not using internal
-  # AcceptEnv GIT_PROTOCOL
+  # Recommended by forgejo: https://forgejo.org/docs/latest/admin/recommendations/#git-over-ssh
+  services.openssh.settings.AcceptEnv = "GIT_PROTOCOL";
 
   services.gitea = {
     enable = true;
@@ -105,7 +105,7 @@ in {
         HTTP_PORT = 3000;
         DOMAIN = forgejoDomain;
         ROOT_URL = "https://${forgejoDomain}/";
-        LANDING_PAGE = "/explore/repos";
+        LANDING_PAGE = "login";
         SSH_PORT = 9922;
       };
       service = {
@@ -115,7 +115,6 @@ in {
         SHOW_REGISTRATION_BUTTON = false;
         REGISTER_EMAIL_CONFIRM = false;
         ENABLE_NOTIFY_MAIL = true;
-        REQUIRE_SIGNIN_VIEW = false;
       };
       session.COOKIE_SECURE = true;
       ui.DEFAULT_THEME = "forgejo-auto";

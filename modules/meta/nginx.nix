@@ -5,33 +5,45 @@
 }: let
   inherit
     (lib)
-    mdDoc
+    mkBefore
     mkIf
     mkOption
     types
     ;
 in {
   options.services.nginx.virtualHosts = mkOption {
-    type = types.attrsOf (types.submodule ({config, ...}: {
-      options.recommendedSecurityHeaders = mkOption {
-        type = types.bool;
-        default = true;
-        description = mdDoc ''Whether to add additional security headers to the "/" location.'';
-      };
-      config = mkIf config.recommendedSecurityHeaders {
-        locations."/".extraConfig = ''
-          # Enable HTTP Strict Transport Security (HSTS)
-          add_header Strict-Transport-Security "max-age=63072000; includeSubdomains; preload";
+    type = types.attrsOf (types.submodule {
+      options.locations = mkOption {
+        type = types.attrsOf (types.submodule ({config, ...}: {
+          options = {
+            recommendedSecurityHeaders = mkOption {
+              type = types.bool;
+              default = true;
+              description = "Whether to add additional security headers to this location.";
+            };
 
-          # Minimize information leaked to other domains
-          add_header Referrer-Policy "origin-when-cross-origin";
+            X-Frame-Options = mkOption {
+              type = types.str;
+              default = "DENY";
+              description = "The value to use for X-Frame-Options";
+            };
+          };
+          config = mkIf config.recommendedSecurityHeaders {
+            extraConfig = mkBefore ''
+              # Enable HTTP Strict Transport Security (HSTS)
+              add_header Strict-Transport-Security "max-age=63072000; includeSubdomains; preload";
 
-          add_header X-XSS-Protection "1; mode=block";
-          add_header X-Frame-Options "DENY";
-          add_header X-Content-Type-Options "nosniff";
-        '';
+              # Minimize information leaked to other domains
+              add_header Referrer-Policy "origin-when-cross-origin";
+
+              add_header X-XSS-Protection "1; mode=block";
+              add_header X-Frame-Options "${config.X-Frame-Options}";
+              add_header X-Content-Type-Options "nosniff";
+            '';
+          };
+        }));
       };
-    }));
+    });
   };
 
   config = mkIf config.services.nginx.enable {

@@ -59,8 +59,16 @@
       ];
     };
   in
-    lib.genAttrs
-    ["kanidm" "grafana" "loki" "vaultwarden" "adguardhome" "influxdb" "forgejo"]
+    lib.genAttrs [
+      "adguardhome"
+      "forgejo"
+      "grafana"
+      "influxdb"
+      "kanidm"
+      "loki"
+      "paperless"
+      "vaultwarden"
+    ]
     defaultConfig;
 
   #ddclient = defineVm;

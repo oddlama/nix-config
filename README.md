@@ -136,11 +136,9 @@ openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
 
 
 ```bash
-# Recover admin account (server must not be running)
-systemctl stop kanidm
-kanidmd recover-account -c server.toml admin
+# Recover admin account
+kanidmd recover-account admin
 > AhNeQgKkwwEHZ85dxj1GPjx58vWsBU8QsvKSyYwUL7bz57bp
-systemctl start kanidm
 # Login with recovered root account
 kanidm login --name admin
 # Generate new credentials for idm_admin account
@@ -166,6 +164,15 @@ kanidm system oauth2 update-scope-map web-sentinel web-sentinel-access openid em
 kanidm system oauth2 update-sup-scope-map web-sentinel web-sentinel-adguardhome-access access_adguardhome
 kanidm system oauth2 update-sup-scope-map web-sentinel web-sentinel-influxdb-access access_influxdb
 kanidm system oauth2 show-basic-secret web-sentinel
+# Generate new oauth2 app for forgejo
+kanidm group create forgejo-access
+kanidm group create forgejo-admins
+kanidm system oauth2 create forgejo "Forgejo" https://git.${personalDomain}
+kanidm system oauth2 update-scope-map forgejo forgejo-access openid email profile
+kanidm system oauth2 update-sup-scope-map forgejo forgejo-server-admins server_admin
+kanidm system oauth2 update-sup-scope-map forgejo forgejo-admins admin
+kanidm system oauth2 update-sup-scope-map forgejo forgejo-editors editor
+kanidm system oauth2 show-basic-secret forgejo
 # Add new user
 kanidm login --name idm_admin
 kanidm person create myuser "My User"

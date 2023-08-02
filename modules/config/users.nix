@@ -24,5 +24,6 @@
     telegraf = uidGid 985;
     rtkit = uidGid 984;
     gitea = uidGid 983;
+    redis-paperless = uidGid 982;
   };
 }

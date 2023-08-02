@@ -1,0 +1,73 @@
+{
+  config,
+  lib,
+  nodes,
+  utils,
+  ...
+}: let
+  sentinelCfg = nodes.sentinel.config;
+  paperlessDomain = "paperless.${sentinelCfg.repo.secrets.local.personalDomain}";
+in {
+  microvm.mem = 1024 * 12;
+  # XXX: increase once real hardware is used
+  microvm.vcpu = 4;
+
+  meta.wireguard-proxy.sentinel.allowedTCPPorts = [
+    config.services.paperless.port
+  ];
+
+  age.secrets.paperless-admin-password = {
+    rekeyFile = config.node.secretsDir + "/paperless-admin-password.age";
+    generator.script = "alnum";
+    mode = "440";
+    group = "paperless";
+  };
+
+  nodes.sentinel = {
+    networking.providedDomains.paperless = paperlessDomain;
+
+    services.nginx = {
+      upstreams.paperless = {
+        servers."${config.services.paperless.address}:${toString config.services.paperless.port}" = {};
+        extraConfig = ''
+          zone paperless 64k;
+          keepalive 2;
+        '';
+      };
+      virtualHosts.${paperlessDomain} = {
+        forceSSL = true;
+        useACMEWildcardHost = true;
+        extraConfig = ''
+          client_max_body_size 512M;
+        '';
+        locations."/" = {
+          proxyPass = "http://paperless";
+          proxyWebsockets = true;
+          X-Frame-Options = "SAMEORIGIN";
+        };
+      };
+    };
+  };
+
+  services.paperless = {
+    enable = true;
+    address = config.meta.wireguard.proxy-sentinel.ipv4;
+    passwordFile = config.age.secrets.paperless-admin-password.path;
+    extraConfig = {
+      PAPERLESS_URL = "https://${paperlessDomain}";
+      PAPERLESS_CONSUMER_ENABLE_ASN_BARCODE = true;
+      PAPERLESS_FILENAME_FORMAT = "{created_year}-{created_month}-{created_day}_{asn}_{title}";
+      #PAPERLESS_IGNORE_DATES = concatStringsSep "," ignoreDates;
+      PAPERLESS_NUMBER_OF_SUGGESTED_DATES = 4;
+      PAPERLESS_OCR_LANGUAGE = "deu+eng";
+      PAPERLESS_TASK_WORKERS = 4;
+      PAPERLESS_WEBSERVER_WORKERS = 4;
+    };
+  };
+
+  #systemd.services.paperless = {
+  #  after = ["sys-subsystem-net-devices-${utils.escapeSystemdPath "proxy-sentinel"}.device"];
+  #  serviceConfig.StateDirectory = lib.mkForce "paperless";
+  #  serviceConfig.RestartSec = "600"; # Retry every 10 minutes
+  #};
+}

@@ -180,7 +180,6 @@
           # Nix
           alejandra
           cachix
-          colmena
           deadnix
           nix-tree
           statix
@@ -188,7 +187,7 @@
         ];
 
         shellHook = ''
-          ${self.checks.${system}.pre-commit-check.shellHook}
+          ${self.checks.${system}.pre-commit-hooks.shellHook}
         '';
       };
 

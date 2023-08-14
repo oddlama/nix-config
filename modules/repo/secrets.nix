@@ -27,7 +27,7 @@
 
   # Try to access the extra builtin we loaded via nix-plugins.
   # Throw an error if that doesn't exist.
-  rageImportEncrypted = assert assertMsg (builtins ? extraBuiltins.rageImportEncrypted) "The extra builtin 'rageImportEncrypted' is not available, so repo.secrets cannot be decrypted. Did you forget to use `defineNixExtraBuiltins` or use the appropriate ad-hoc command line arguments?";
+  rageImportEncrypted = assert assertMsg (builtins ? extraBuiltins.rageImportEncrypted) "The extra builtin 'rageImportEncrypted' is not available, so repo.secrets cannot be decrypted. Did you forget to add nix-plugins and point it to `./nix/extra-builtins.nix` ?";
     builtins.extraBuiltins.rageImportEncrypted;
 
   # This "imports" an encrypted .nix.age file by evaluating the decrypted content.
@@ -41,15 +41,6 @@
   cfg = config.repo;
 in {
   options.repo = {
-    defineNixExtraBuiltins = mkOption {
-      default = false;
-      type = types.bool;
-      description = mdDoc ''
-        Add nix-plugins and the correct extra-builtin-files definition to this host's
-        nix configuration, so that it can be used to decrypt the secrets in this repository.
-      '';
-    };
-
     secretFiles = mkOption {
       default = {};
       type = types.attrsOf types.path;
@@ -81,14 +72,5 @@ in {
       type = types.unspecified;
       description = "Exposes the loaded repo secrets. This option is read-only.";
     };
-  };
-
-  config = {
-    # Make sure not to reference the extra-builtins file directly but
-    # at least via its parent folder so it can access relative files.
-    nix.extraOptions = mkIf cfg.defineNixExtraBuiltins ''
-      plugin-files = ${pkgs.nix-plugins}/lib/nix/plugins
-      extra-builtins-file = ${inputs.self.outPath}/nix/extra-builtins.nix
-    '';
   };
 }

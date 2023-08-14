@@ -5,5 +5,4 @@
   ];
 
   environment.enableDebugInfo = true;
-  repo.defineNixExtraBuiltins = true;
 }

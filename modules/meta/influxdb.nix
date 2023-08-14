@@ -575,7 +575,7 @@ in {
             ${influxCli} auth list --json --org ${escapeShellArg apiToken.org} 2>/dev/null \
               | ${getExe pkgs.jq} -r '.[] | select(.description | contains("${apiToken.id}")) | .id'
           ) && [[ -n "$id" ]]; then
-            ${influxCli} auth delete --id "$id" &>/dev/null
+            ${influxCli} auth delete --id "$id" >/dev/null
             echo "Deleted api token id="${escapeShellArg apiToken.id}
           fi
         '')
@@ -584,7 +584,7 @@ in {
             ${influxCli} replication list --json --org ${escapeShellArg replication.org} --name ${escapeShellArg replication.name} 2>/dev/null \
               | ${getExe pkgs.jq} -r ".[0].id"
           ); then
-            ${influxCli} replication delete --id "$id" &>/dev/null
+            ${influxCli} replication delete --id "$id" >/dev/null
             echo "Deleted replication org="${escapeShellArg replication.org}" name="${escapeShellArg replication.name}
           fi
         '')
@@ -593,7 +593,7 @@ in {
             ${influxCli} remote list --json --org ${escapeShellArg remote.org} --name ${escapeShellArg remote.name} 2>/dev/null \
               | ${getExe pkgs.jq} -r ".[0].id"
           ); then
-            ${influxCli} remote delete --id "$id" &>/dev/null
+            ${influxCli} remote delete --id "$id" >/dev/null
             echo "Deleted remote org="${escapeShellArg remote.org}" name="${escapeShellArg remote.name}
           fi
         '')
@@ -602,7 +602,7 @@ in {
             ${influxCli} user list --json --name ${escapeShellArg user} 2>/dev/null \
               | ${getExe pkgs.jq} -r ".[0].id"
           ); then
-            ${influxCli} user delete --id "$id" &>/dev/null
+            ${influxCli} user delete --id "$id" >/dev/null
             echo "Deleted user name="${escapeShellArg user}
           fi
         '')
@@ -611,7 +611,7 @@ in {
             ${influxCli} bucket list --json --org ${escapeShellArg bucket.org} --name ${escapeShellArg bucket.name} 2>/dev/null \
               | ${getExe pkgs.jq} -r ".[0].id"
           ); then
-            ${influxCli} bucket delete --id "$id" &>/dev/null
+            ${influxCli} bucket delete --id "$id" >/dev/null
             echo "Deleted bucket org="${escapeShellArg bucket.org}" name="${escapeShellArg bucket.name}
           fi
         '')
@@ -620,7 +620,7 @@ in {
             ${influxCli} org list --json --name ${escapeShellArg org} 2>/dev/null \
               | ${getExe pkgs.jq} -r ".[0].id"
           ); then
-            ${influxCli} org delete --id "$id" &>/dev/null
+            ${influxCli} org delete --id "$id" >/dev/null
             echo "Deleted org name="${escapeShellArg org}
           fi
         '')
@@ -639,9 +639,9 @@ in {
             ${influxCli} org list --json ${escapeShellArgs listArgs} 2>/dev/null \
               | ${getExe pkgs.jq} -r ".[0].id"
           ); then
-            ${influxCli} org update --id "$id" ${escapeShellArgs updateArgs} &>/dev/null
+            ${influxCli} org update --id "$id" ${escapeShellArgs updateArgs} >/dev/null
           else
-            ${influxCli} org create ${escapeShellArgs createArgs} &>/dev/null
+            ${influxCli} org create ${escapeShellArgs createArgs} >/dev/null
             echo "Created org name="${escapeShellArg org.name}
           fi
         '')
@@ -667,9 +667,9 @@ in {
             ${influxCli} bucket list --json ${escapeShellArgs listArgs} 2>/dev/null \
               | ${getExe pkgs.jq} -r ".[0].id"
           ); then
-            ${influxCli} bucket update --id "$id" ${escapeShellArgs updateArgs} &>/dev/null
+            ${influxCli} bucket update --id "$id" ${escapeShellArgs updateArgs} >/dev/null
           else
-            ${influxCli} bucket create ${escapeShellArgs createArgs} &>/dev/null
+            ${influxCli} bucket create ${escapeShellArgs createArgs} >/dev/null
             echo "Created bucket org="${escapeShellArg bucket.org}" name="${escapeShellArg bucket.name}
           fi
         '')
@@ -692,13 +692,13 @@ in {
             ); then
               true # No updateable args
             else
-              ${influxCli} user create ${escapeShellArgs createArgs} &>/dev/null
+              ${influxCli} user create ${escapeShellArgs createArgs} >/dev/null
               echo "Created user name="${escapeShellArg user.name}
             fi
           ''
           + optionalString (user.passwordFile != null) ''
             ${influxCli} user password ${escapeShellArgs listArgs} \
-              --password "$(< ${escapeShellArg user.passwordFile})" &>/dev/null
+              --password "$(< ${escapeShellArg user.passwordFile})" >/dev/null
           '')
         + flip concatMapStrings cfg.ensureRemotes (remote: let
           listArgs = [
@@ -726,7 +726,7 @@ in {
             ${influxCli} remote list --json ${escapeShellArgs listArgs} 2>/dev/null \
               | ${getExe pkgs.jq} -r ".[0].id"
           ); then
-            ${influxCli} remote update --id "$id" ${escapeShellArgs updateArgs} &>/dev/null \
+            ${influxCli} remote update --id "$id" ${escapeShellArgs updateArgs} >/dev/null \
               --remote-api-token "$(< ${escapeShellArg remote.remoteTokenFile})"
           else
             extraArgs=()
@@ -735,12 +735,12 @@ in {
               ${influxCli} org list --json \
                 --host ${escapeShellArg remote.remoteUrl} \
                 --token "$(< ${escapeShellArg remote.remoteTokenFile})" \
-                --name ${escapeShellArg remote.remoteOrg} 2>/dev/null \
+                --name ${escapeShellArg remote.remoteOrg} \
                 | ${getExe pkgs.jq} -r ".[0].id"
             )
             extraArgs+=("--remote-org-id" "$remote_org_id")
           ''}
-            ${influxCli} remote create ${escapeShellArgs createArgs} &>/dev/null \
+            ${influxCli} remote create ${escapeShellArgs createArgs} >/dev/null \
               --remote-api-token "$(< ${escapeShellArg remote.remoteTokenFile})" \
               "''${extraArgs[@]}"
             echo "Created remote org="${escapeShellArg remote.org}" name="${escapeShellArg remote.name}
@@ -756,8 +756,6 @@ in {
           createArgs =
             listArgs
             ++ [
-              "--local-bucket"
-              replication.localBucket
               "--remote-bucket"
               replication.remoteBucket
             ];
@@ -769,11 +767,16 @@ in {
             true # No updateable args
           else
             remote_id=$(
-              ${influxCli} remote list --json --name ${escapeShellArg replication.remote} 2>/dev/null \
+              ${influxCli} remote list --json --org ${escapeShellArg replication.org} --name ${escapeShellArg replication.remote} \
                 | ${getExe pkgs.jq} -r ".[0].id"
             )
-            ${influxCli} replication create ${escapeShellArgs createArgs} &>/dev/null \
-              --remote-id "$remote_id"
+            local_bucket_id=$(
+              ${influxCli} bucket list --json --org ${escapeShellArg replication.org} --name ${escapeShellArg replication.localBucket} \
+                | ${getExe pkgs.jq} -r ".[0].id"
+            )
+            ${influxCli} replication create ${escapeShellArgs createArgs} >/dev/null \
+              --remote-id "$remote_id" \
+              --local-bucket-id "$local_bucket_id"
             echo "Created replication org="${escapeShellArg replication.org}" name="${escapeShellArg replication.name}
           fi
         '')
@@ -796,15 +799,15 @@ in {
             ++ map (x: "--write-${x}") apiToken.writePermissions;
         in ''
           if id=$(
-            ${influxCli} apiToken list --json ${escapeShellArgs listArgs} 2>/dev/null \
-              | ${getExe pkgs.jq} -r ".[0].id"
+            ${influxCli} auth list --json --org ${escapeShellArg apiToken.org} 2>/dev/null \
+              | ${getExe pkgs.jq} -r '.[] | select(.description | contains("${apiToken.id}")) | .id'
           ); then
             true # No updateable args
           else
             declare -A bucketIds
             ${flip concatMapStrings (unique (apiToken.readBuckets ++ apiToken.writeBuckets)) (bucket: ''
             bucketIds[${escapeShellArg bucket}]=$(
-              ${influxCli} bucket list --json --org ${escapeShellArg apiToken.org} --name ${escapeShellArg bucket} 2>/dev/null \
+              ${influxCli} bucket list --json --org ${escapeShellArg apiToken.org} --name ${escapeShellArg bucket} \
                 | ${getExe pkgs.jq} -r ".[0].id"
             )
           '')}
@@ -816,7 +819,7 @@ in {
             "--write-bucket" "''${bucketIds[${escapeShellArg bucket}]}"
           '')}
             )
-            ${influxCli} auth create ${escapeShellArgs createArgs} &>/dev/null \
+            ${influxCli} auth create ${escapeShellArgs createArgs} >/dev/null \
               "''${extraArgs[@]}"
             echo "Created api token org="${escapeShellArg apiToken.org}" user="${escapeShellArg apiToken.user}
           fi

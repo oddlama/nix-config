@@ -18,13 +18,14 @@
     ./config/users.nix
     ./config/xdg.nix
 
+    ./meta/influxdb.nix
     ./meta/microvms.nix
     ./meta/nginx.nix
     ./meta/oauth2-proxy.nix
     ./meta/promtail.nix
     ./meta/telegraf.nix
-    ./meta/wireguard-proxy.nix
     ./meta/wireguard.nix
+    ./meta/wireguard-proxy.nix
 
     ./networking/interface-naming.nix
     ./networking/provided-domains.nix

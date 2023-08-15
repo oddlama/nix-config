@@ -31,9 +31,9 @@
 
   cfg = config.services.influxdb2;
 in {
-  options.services.influxdb2 = {
+  options.services.influxdb2.provision = {
+    enable = mkEnableOption "initial database setup";
     initialSetup = {
-      enable = mkEnableOption "initial database setup";
       organization = mkOption {
         type = types.str;
         example = "main";
@@ -408,7 +408,7 @@ in {
     };
   };
 
-  config = mkIf (cfg.enable && cfg.initialSetup.enable) {
+  config = mkIf (cfg.enable && cfg.provision.enable) {
     assertions = let
       validPermissions = flip genAttrs (x: true) [
         "authorizations"
@@ -435,23 +435,23 @@ in {
         "replications"
       ];
 
-      knownOrgs = map (x: x.name) cfg.ensureOrganizations;
-      knownRemotes = map (x: x.name) cfg.ensureRemotes;
-      knownBucketsFor = org: map (x: x.name) (filter (x: x.org == org) cfg.ensureBuckets);
+      knownOrgs = map (x: x.name) cfg.provision.ensureOrganizations;
+      knownRemotes = map (x: x.name) cfg.provision.ensureRemotes;
+      knownBucketsFor = org: map (x: x.name) (filter (x: x.org == org) cfg.provision.ensureBuckets);
     in
-      flip concatMap cfg.ensureBuckets (bucket: [
+      flip concatMap cfg.provision.ensureBuckets (bucket: [
         {
           assertion = elem bucket.org knownOrgs;
           message = "The influxdb bucket '${bucket.name}' refers to an unknown organization '${bucket.org}'.";
         }
       ])
-      ++ flip concatMap cfg.ensureUsers (user: [
+      ++ flip concatMap cfg.provision.ensureUsers (user: [
         {
           assertion = elem user.org knownOrgs;
           message = "The influxdb user '${user.name}' refers to an unknown organization '${user.org}'.";
         }
       ])
-      ++ flip concatMap cfg.ensureRemotes (remote: [
+      ++ flip concatMap cfg.provision.ensureRemotes (remote: [
         {
           assertion = (remote.remoteOrgId == null) != (remote.remoteOrg == null);
           message = "The influxdb remote '${remote.name}' must specify exactly one of remoteOrgId or remoteOrg.";
@@ -461,19 +461,19 @@ in {
           message = "The influxdb remote '${remote.name}' refers to an unknown organization '${remote.org}'.";
         }
       ])
-      ++ flip concatMap cfg.ensureReplications (replication: [
+      ++ flip concatMap cfg.provision.ensureReplications (replication: [
         {
           assertion = elem replication.remote knownRemotes;
           message = "The influxdb replication '${replication.name}' refers to an unknown remote '${replication.remote}'.";
         }
         (let
-          remote = head (filter (x: x.name == replication.remote) cfg.ensureRemotes);
+          remote = head (filter (x: x.name == replication.remote) cfg.provision.ensureRemotes);
         in {
           assertion = elem replication.localBucket (knownBucketsFor remote.org);
           message = "The influxdb replication '${replication.name}' refers to an unknown bucket '${replication.localBucket}' in organization '${remote.org}'.";
         })
       ])
-      ++ flip concatMap cfg.ensureApiTokens (apiToken: let
+      ++ flip concatMap cfg.provision.ensureApiTokens (apiToken: let
         validBuckets = flip genAttrs (x: true) (knownBucketsFor apiToken.org);
       in [
         {
@@ -557,20 +557,20 @@ in {
             # avoid saving the token as the active config.
             ${influxCli} setup \
               --configs-path /dev/null \
-              --org ${escapeShellArg cfg.initialSetup.organization} \
-              --bucket ${escapeShellArg cfg.initialSetup.bucket} \
-              --username ${escapeShellArg cfg.initialSetup.username} \
-              --password "$(< ${escapeShellArg cfg.initialSetup.passwordFile})" \
-              --token "$(< ${escapeShellArg cfg.initialSetup.tokenFile})" \
-              --retention ${escapeShellArg cfg.initialSetup.retention} \
+              --org ${escapeShellArg cfg.provision.initialSetup.organization} \
+              --bucket ${escapeShellArg cfg.provision.initialSetup.bucket} \
+              --username ${escapeShellArg cfg.provision.initialSetup.username} \
+              --password "$(< ${escapeShellArg cfg.provision.initialSetup.passwordFile})" \
+              --token "$(< ${escapeShellArg cfg.provision.initialSetup.tokenFile})" \
+              --retention ${escapeShellArg cfg.provision.initialSetup.retention} \
               --force >/dev/null
 
             rm -f "$STATE_DIRECTORY/.first_startup"
           fi
 
-          export INFLUX_TOKEN=$(< ${escapeShellArg cfg.initialSetup.tokenFile})
+          export INFLUX_TOKEN=$(< ${escapeShellArg cfg.provision.initialSetup.tokenFile})
         ''
-        + flip concatMapStrings cfg.deleteApiTokens (apiToken: ''
+        + flip concatMapStrings cfg.provision.deleteApiTokens (apiToken: ''
           if id=$(
             ${influxCli} auth list --json --org ${escapeShellArg apiToken.org} 2>/dev/null \
               | ${getExe pkgs.jq} -r '.[] | select(.description | contains("${apiToken.id}")) | .id'
@@ -579,7 +579,7 @@ in {
             echo "Deleted api token id="${escapeShellArg apiToken.id}
           fi
         '')
-        + flip concatMapStrings cfg.deleteReplications (replication: ''
+        + flip concatMapStrings cfg.provision.deleteReplications (replication: ''
           if id=$(
             ${influxCli} replication list --json --org ${escapeShellArg replication.org} --name ${escapeShellArg replication.name} 2>/dev/null \
               | ${getExe pkgs.jq} -r ".[0].id"
@@ -588,7 +588,7 @@ in {
             echo "Deleted replication org="${escapeShellArg replication.org}" name="${escapeShellArg replication.name}
           fi
         '')
-        + flip concatMapStrings cfg.deleteRemotes (remote: ''
+        + flip concatMapStrings cfg.provision.deleteRemotes (remote: ''
           if id=$(
             ${influxCli} remote list --json --org ${escapeShellArg remote.org} --name ${escapeShellArg remote.name} 2>/dev/null \
               | ${getExe pkgs.jq} -r ".[0].id"
@@ -597,7 +597,7 @@ in {
             echo "Deleted remote org="${escapeShellArg remote.org}" name="${escapeShellArg remote.name}
           fi
         '')
-        + flip concatMapStrings cfg.deleteUsers (user: ''
+        + flip concatMapStrings cfg.provision.deleteUsers (user: ''
           if id=$(
             ${influxCli} user list --json --name ${escapeShellArg user} 2>/dev/null \
               | ${getExe pkgs.jq} -r ".[0].id"
@@ -606,7 +606,7 @@ in {
             echo "Deleted user name="${escapeShellArg user}
           fi
         '')
-        + flip concatMapStrings cfg.deleteBuckets (bucket: ''
+        + flip concatMapStrings cfg.provision.deleteBuckets (bucket: ''
           if id=$(
             ${influxCli} bucket list --json --org ${escapeShellArg bucket.org} --name ${escapeShellArg bucket.name} 2>/dev/null \
               | ${getExe pkgs.jq} -r ".[0].id"
@@ -615,7 +615,7 @@ in {
             echo "Deleted bucket org="${escapeShellArg bucket.org}" name="${escapeShellArg bucket.name}
           fi
         '')
-        + flip concatMapStrings cfg.deleteOrganizations (org: ''
+        + flip concatMapStrings cfg.provision.deleteOrganizations (org: ''
           if id=$(
             ${influxCli} org list --json --name ${escapeShellArg org} 2>/dev/null \
               | ${getExe pkgs.jq} -r ".[0].id"
@@ -624,7 +624,7 @@ in {
             echo "Deleted org name="${escapeShellArg org}
           fi
         '')
-        + flip concatMapStrings cfg.ensureOrganizations (org: let
+        + flip concatMapStrings cfg.provision.ensureOrganizations (org: let
           listArgs = [
             "--name"
             org.name
@@ -645,7 +645,7 @@ in {
             echo "Created org name="${escapeShellArg org.name}
           fi
         '')
-        + flip concatMapStrings cfg.ensureBuckets (bucket: let
+        + flip concatMapStrings cfg.provision.ensureBuckets (bucket: let
           listArgs = [
             "--org"
             bucket.org
@@ -673,7 +673,7 @@ in {
             echo "Created bucket org="${escapeShellArg bucket.org}" name="${escapeShellArg bucket.name}
           fi
         '')
-        + flip concatMapStrings cfg.ensureUsers (user: let
+        + flip concatMapStrings cfg.provision.ensureUsers (user: let
           listArgs = [
             "--name"
             user.name
@@ -700,7 +700,7 @@ in {
             ${influxCli} user password ${escapeShellArgs listArgs} \
               --password "$(< ${escapeShellArg user.passwordFile})" >/dev/null
           '')
-        + flip concatMapStrings cfg.ensureRemotes (remote: let
+        + flip concatMapStrings cfg.provision.ensureRemotes (remote: let
           listArgs = [
             "--name"
             remote.name
@@ -746,7 +746,7 @@ in {
             echo "Created remote org="${escapeShellArg remote.org}" name="${escapeShellArg remote.name}
           fi
         '')
-        + flip concatMapStrings cfg.ensureReplications (replication: let
+        + flip concatMapStrings cfg.provision.ensureReplications (replication: let
           listArgs = [
             "--name"
             replication.name
@@ -780,7 +780,7 @@ in {
             echo "Created replication org="${escapeShellArg replication.org}" name="${escapeShellArg replication.name}
           fi
         '')
-        + flip concatMapStrings cfg.ensureApiTokens (apiToken: let
+        + flip concatMapStrings cfg.provision.ensureApiTokens (apiToken: let
           listArgs = [
             "--user"
             apiToken.user
@@ -801,7 +801,7 @@ in {
           if id=$(
             ${influxCli} auth list --json --org ${escapeShellArg apiToken.org} 2>/dev/null \
               | ${getExe pkgs.jq} -r '.[] | select(.description | contains("${apiToken.id}")) | .id'
-          ); then
+          ) && [[ -n "$id" ]]; then
             true # No updateable args
           else
             declare -A bucketIds

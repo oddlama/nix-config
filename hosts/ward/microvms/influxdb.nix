@@ -3,6 +3,7 @@
   lib,
   nodes,
   utils,
+  pkgs,
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
@@ -51,13 +52,53 @@ in {
     };
   };
 
+  age.secrets.influxdb-admin-password = {
+    generator.script = "alnum";
+    mode = "440";
+    group = "influxdb2";
+  };
+
+  age.secrets.influxdb-admin-token = {
+    generator.script = "alnum";
+    mode = "440";
+    group = "influxdb2";
+  };
+
+  age.secrets.influxdb-user-telegraf-token = {
+    generator.script = "alnum";
+    mode = "440";
+    group = "influxdb2";
+  };
+
   services.influxdb2 = {
     enable = true;
     settings = {
       reporting-disabled = true;
       http-bind-address = "${config.meta.wireguard.proxy-sentinel.ipv4}:${toString influxdbPort}";
     };
+    provision = {
+      enable = true;
+      initialSetup = {
+        organization = "default";
+        bucket = "default";
+        passwordFile = config.age.secrets.influxdb-admin-password.path;
+        tokenFile = config.age.secrets.influxdb-admin-token.path;
+      };
+      ensureOrganizations = [
+        {
+          name = "servers";
+        }
+      ];
+      ensureBuckets = [
+        {
+          name = "telegraf";
+          org = "servers";
+        }
+      ];
+    };
   };
+
+  environment.systemPackages = [pkgs.influxdb2-cli];
 
   systemd.services.influxdb2 = {
     after = ["sys-subsystem-net-devices-${utils.escapeSystemdPath "proxy-sentinel"}.device"];

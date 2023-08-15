@@ -18,6 +18,7 @@
     ./config/users.nix
     ./config/xdg.nix
 
+    ./meta/influxdb-retrieve.nix
     ./meta/influxdb.nix
     ./meta/microvms.nix
     ./meta/nginx.nix

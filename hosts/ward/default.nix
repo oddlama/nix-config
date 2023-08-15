@@ -32,9 +32,12 @@
   networking.hosts.${nodes.sentinel.config.meta.wireguard.proxy-sentinel.ipv4} = [nodes.sentinel.config.networking.providedDomains.influxdb];
   meta.telegraf = {
     enable = true;
-    influxdb2.domain = nodes.sentinel.config.networking.providedDomains.influxdb;
-    influxdb2.organization = "servers";
-    influxdb2.bucket = "telegraf";
+    influxdb2 = {
+      domain = nodes.sentinel.config.networking.providedDomains.influxdb;
+      organization = "servers";
+      bucket = "telegraf";
+      node = "ward-influxdb";
+    };
   };
 
   # TODO track my github stats

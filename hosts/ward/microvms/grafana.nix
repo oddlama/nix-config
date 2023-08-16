@@ -23,10 +23,22 @@ in {
   };
 
   age.secrets.grafana-influxdb-token = {
-    rekeyFile = config.node.secretsDir + "/grafana-influxdb-token.age";
+    generator.script = "alnum";
+    generator.tags = ["influxdb"];
     mode = "440";
     group = "grafana";
   };
+
+  nodes.ward-influxdb.services.influxdb2.provision.ensureApiTokens = [
+    {
+      name = "grafana servers:telegraf (${config.node.name})";
+      org = "servers";
+      user = "admin";
+      readBuckets = ["telegraf"];
+      writeBuckets = ["telegraf"];
+      tokenFile = config.age.secrets.grafana-influxdb-token.path;
+    }
+  ];
 
   nodes.sentinel = {
     age.secrets.loki-basic-auth-hashes.generator.dependencies = [

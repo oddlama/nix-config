@@ -114,7 +114,7 @@
         lib.microvm.mac = mac;
 
         microvm = {
-          hypervisor = mkDefault "cloud-hypervisor";
+          hypervisor = mkDefault "qemu";
 
           # MACVTAP bridge to the host's network
           interfaces = [

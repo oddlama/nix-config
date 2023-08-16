@@ -545,11 +545,14 @@ in {
       preStart = ''
         if ! test -e "$STATE_DIRECTORY/influxd.bolt"; then
           touch "$STATE_DIRECTORY/.first_startup"
+        else
+          # Manipulate provisioned api tokens if necessary
+          ${getExe tokenManipulator} "$STATE_DIRECTORY/influxd.bolt"
         fi
       '';
 
       postStart = let
-        influxCli = "${pkgs.influxdb2-cli}/bin/influx"; # getExe pkgs.influxdb2-cli
+        influxCli = getExe pkgs.influxdb2-cli;
       in
         ''
           set -euo pipefail
@@ -589,6 +592,7 @@ in {
           fi
 
           export INFLUX_TOKEN=$(< ${escapeShellArg cfg.provision.initialSetup.tokenFile})
+          any_tokens_created=0
         ''
         + flip concatMapStrings cfg.provision.deleteApiTokens (apiToken: ''
           if id=$(
@@ -839,11 +843,17 @@ in {
             "--write-bucket" "''${bucketIds[${escapeShellArg bucket}]}"
           '')}
             )
-            ${influxCli} auth create ${escapeShellArgs createArgs} >/dev/null \
-              "''${extraArgs[@]}"
+            ${influxCli} auth create ${escapeShellArgs createArgs} >/dev/null "''${extraArgs[@]}"
+            any_tokens_created=1
             echo "Created api token org="${escapeShellArg apiToken.org}" user="${escapeShellArg apiToken.user}
           fi
-        '');
+        '')
+        + ''
+          if [[ $any_tokens_created == 1 ]]; then
+            echo "Created new tokens, forcing service restart so we can manipulate secrets"
+            kill "$MAINPID"
+          fi
+        '';
     };
   };
 }

@@ -858,7 +858,7 @@ in {
         + ''
           if [[ $any_tokens_created == 1 ]]; then
             echo "Created new tokens, forcing service restart so we can manipulate secrets"
-            kill "$MAINPID"
+            exit 75 # TEMPFAIL
           fi
         '';
     };

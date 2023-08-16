@@ -100,8 +100,6 @@ in {
 
   environment.systemPackages = [pkgs.influxdb2-cli];
 
-  systemd.services.influxdb2 = {
-    after = ["sys-subsystem-net-devices-${utils.escapeSystemdPath "proxy-sentinel"}.device"];
-    serviceConfig.RestartSec = "600"; # Retry every 10 minutes
-  };
+  # Do NOT configure RestartSec here, this must be left short to allow token manipulation
+  systemd.services.influxdb2.after = ["sys-subsystem-net-devices-${utils.escapeSystemdPath "proxy-sentinel"}.device"];
 }

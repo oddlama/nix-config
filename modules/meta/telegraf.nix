@@ -57,16 +57,25 @@ in {
   };
 
   config = mkIf cfg.enable {
-    nodes.${cfg.influxdb2.node}.services.influxdb2.provision.ensureApiTokens = [
-      {
-        name = "telegraf (${config.node.name})";
-        org = "servers";
-        user = "admin";
-        readBuckets = ["telegraf"];
-        writeBuckets = ["telegraf"];
-        tokenFile = config.age.secrets.telegraf-influxdb-token.path;
-      }
-    ];
+    nodes.${cfg.influxdb2.node} = {
+      # Mirror the original secret on the influx host
+      age.secrets."telegraf-influxdb-token-${config.node.name}" = {
+        inherit (config.age.secrets.telegraf-influxdb-token) rekeyFile;
+        mode = "440";
+        group = "influxdb2";
+      };
+
+      services.influxdb2.provision.ensureApiTokens = [
+        {
+          name = "telegraf (${config.node.name})";
+          org = "servers";
+          user = "admin";
+          readBuckets = ["telegraf"];
+          writeBuckets = ["telegraf"];
+          tokenFile = nodes.${cfg.influxdb2.node}.config.age.secrets."telegraf-influxdb-token-${config.node.name}".path;
+        }
+      ];
+    };
 
     age.secrets.telegraf-influxdb-token = {
       generator.script = "alnum";

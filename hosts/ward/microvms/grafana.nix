@@ -29,16 +29,25 @@ in {
     group = "grafana";
   };
 
-  nodes.ward-influxdb.services.influxdb2.provision.ensureApiTokens = [
-    {
-      name = "grafana servers:telegraf (${config.node.name})";
-      org = "servers";
-      user = "admin";
-      readBuckets = ["telegraf"];
-      writeBuckets = ["telegraf"];
-      tokenFile = config.age.secrets.grafana-influxdb-token.path;
-    }
-  ];
+  nodes.ward-influxdb = {
+    # Mirror the original secret on the influx host
+    age.secrets."grafana-influxdb-token-${config.node.name}" = {
+      inherit (config.age.secrets.grafana-influxdb-token) rekeyFile;
+      mode = "440";
+      group = "influxdb2";
+    };
+
+    services.influxdb2.provision.ensureApiTokens = [
+      {
+        name = "grafana servers:telegraf (${config.node.name})";
+        org = "servers";
+        user = "admin";
+        readBuckets = ["telegraf"];
+        writeBuckets = ["telegraf"];
+        tokenFile = nodes.ward-influxdb.config.age.secrets."grafana-influxdb-token-${config.node.name}".path;
+      }
+    ];
+  };
 
   nodes.sentinel = {
     age.secrets.loki-basic-auth-hashes.generator.dependencies = [

@@ -3,6 +3,7 @@
   inputs,
   lib,
   options,
+  nodes,
   ...
 }: let
   inherit
@@ -35,23 +36,17 @@ in {
   };
 
   config = let
-    allNodes = attrNames inputs.self.colmenaNodes;
-    isColmenaNode = elem nodeName allNodes;
-    foreignConfigs = concatMap (n: inputs.self.colmenaNodes.${n}.config.nodes.${nodeName} or []) allNodes;
-    relevantConfigs = foreignConfigs ++ [config.nodes.${nodeName} or {}];
+    allNodes = attrNames nodes;
+    foreignConfigs = concatMap (n: nodes.${n}.config.nodes.${nodeName} or []) allNodes;
     mergeFromOthers = path:
       mkMerge (map
-        (x: mkIf (hasAttrByPath path x) (getAttrFromPath path x))
-        relevantConfigs);
-    pathsToMerge = [
-      ["age" "secrets"]
-      ["networking" "providedDomains"]
-      ["services" "nginx" "upstreams"]
-      ["services" "nginx" "virtualHosts"]
-    ];
-  in
-    mkIf isColmenaNode (foldl'
-      (acc: path: recursiveUpdate acc (setAttrByPath path (mergeFromOthers path)))
-      {}
-      pathsToMerge);
+        (x: (getAttrFromPath path x))
+        (lib.filter (x: (hasAttrByPath path x)) foreignConfigs));
+  in {
+    age.secrets = mergeFromOthers ["age" "secrets"];
+    networking.providedDomains = mergeFromOthers ["networking" "providedDomains"];
+    services.nginx.upstreams = mergeFromOthers ["services" "nginx" "upstreams"];
+    services.nginx.virtualHosts = mergeFromOthers ["services" "nginx" "virtualHosts"];
+    services.influxdb2.provision.ensureApiTokens = mergeFromOthers ["services" "influxdb2" "provision" "ensureApiTokens"];
+  };
 }

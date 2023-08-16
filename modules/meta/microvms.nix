@@ -88,10 +88,6 @@
         };
       };
 
-    # Propagate node expansions, since doing this directly in the
-    # distributed-config module would cause infinite recursion.
-    nodes = mkMerge config.microvm.vms.${vmName}.config.options.nodes.definitions;
-
     microvm.vms.${vmName} = let
       node = import ../../nix/generate-node.nix inputs {
         name = vmCfg.nodeName;
@@ -369,6 +365,6 @@ in {
         };
       };
     }
-    // mergeToplevelConfigs ["nodes" "disko" "microvm" "systemd"] (mapAttrsToList microvmConfig vms)
+    // mergeToplevelConfigs ["disko" "microvm" "systemd"] (mapAttrsToList microvmConfig vms)
   );
 }

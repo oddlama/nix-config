@@ -43,6 +43,13 @@
       }' main.go
     '';
     vendorHash = "sha256-zBZk7JbNILX18g9+2ukiESnFtnIVWhdN/J/MBhIITh8=";
+
+    meta = with lib; {
+      description = "Utility program to manipulate influxdb api tokens for declarative setups";
+      mainProgram = "influx-token-manipulator";
+      license = with licenses; [mit];
+      maintainers = with maintainers; [oddlama];
+    };
   };
 in {
   options.services.influxdb2.provision = {

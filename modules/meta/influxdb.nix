@@ -30,6 +30,20 @@
     ;
 
   cfg = config.services.influxdb2;
+
+  tokenManipulator = pkgs.buildGoModule rec {
+    pname = "influx-token-manipulator";
+    version = "1.0.0";
+    src = ./influx-token-manipulator;
+    postPatch = ''
+      sed -i '/Add token secrets here/ r ${
+        pkgs.writeText "token-paths" (concatMapStrings
+          (x: ''"${x.id}": "${x.tokenFile}",''\n'')
+          (filter (x: x.tokenFile != null) cfg.provision.ensureApiTokens))
+      }' main.go
+    '';
+    vendorHash = "sha256-zBZk7JbNILX18g9+2ukiESnFtnIVWhdN/J/MBhIITh8=";
+  };
 in {
   options.services.influxdb2.provision = {
     enable = mkEnableOption "initial database setup";
@@ -341,6 +355,12 @@ in {
           '';
           default = null;
           type = types.nullOr types.str;
+        };
+
+        options.tokenFile = mkOption {
+          type = types.nullOr types.path;
+          default = null;
+          description = "The token value. If not given, influx will automatically generate one.";
         };
 
         options.operator = mkOption {

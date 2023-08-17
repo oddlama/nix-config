@@ -1,4 +1,5 @@
 {
+  disabledModules = ["services/databases/influxdb2.nix"];
   imports = [
     ../users/root
 
@@ -18,7 +19,7 @@
     ./config/users.nix
     ./config/xdg.nix
 
-    ./meta/influxdb.nix
+    ./meta/influxdb2.nix
     ./meta/microvms.nix
     ./meta/nginx.nix
     ./meta/oauth2-proxy.nix

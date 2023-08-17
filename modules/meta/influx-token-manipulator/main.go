@@ -29,13 +29,19 @@ func main() {
 	defer db.Close()
 
 	err = db.Update(func(tx *bbolt.Tx) error {
-		bucket := tx.Bucket([]byte("authorizationsv1"))
-		if bucket == nil {
+		authBucket := tx.Bucket([]byte("authorizationsv1"))
+		if authBucket == nil {
 			fmt.Println("Bucket 'authorizationsv1' not found.")
 			os.Exit(1)
 		}
 
-		return bucket.ForEach(func(k, v []byte) error {
+		authIndex := tx.Bucket([]byte("authorizationindexv1"))
+		if authIndex == nil {
+			fmt.Println("Bucket 'authorizationindexv1' not found.")
+			os.Exit(1)
+		}
+
+		return authBucket.ForEach(func(k, v []byte) error {
 			var obj map[string]interface{}
 			if err := json.Unmarshal(v, &obj); err != nil {
 				fmt.Printf("Error unmarshalling JSON: %v\n", err)
@@ -83,8 +89,18 @@ func main() {
 				return nil // Continue processing other rows
 			}
 
-			if err := bucket.Put(k, updatedValue); err != nil {
-				fmt.Printf("Error updating bucket: %v\n", err)
+			if err := authIndex.Delete([]byte(oldToken)); err != nil {
+				fmt.Printf("Error deleting old token index in authorizationindexv1: %v\n", err)
+				return nil // Continue processing other rows
+			}
+
+			if err := authIndex.Put([]byte(newToken), k); err != nil {
+				fmt.Printf("Error adding new token index in authorizationindexv1: %v\n", err)
+				return nil // Continue processing other rows
+			}
+
+			if err := authBucket.Put(k, updatedValue); err != nil {
+				fmt.Printf("Error updating token in authorizationsv1: %v\n", err)
 				return nil // Continue processing other rows
 			}
 

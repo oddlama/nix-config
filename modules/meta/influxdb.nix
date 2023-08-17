@@ -822,7 +822,7 @@ in {
             listArgs
             ++ [
               "--description"
-              (optionalString (apiToken.description != null) "${apiToken.description} - " + apiToken.id)
+              ("${apiToken.name} - " + optionalString (apiToken.description != null) "${apiToken.description} - " + apiToken.id)
             ]
             ++ optional apiToken.operator "--operator"
             ++ optional apiToken.allAccess "--all-access"

@@ -17,6 +17,7 @@
     genAttrs
     getExe
     hasAttr
+    hasInfix
     head
     literalExpression
     mkBefore
@@ -24,8 +25,8 @@
     mkIf
     mkOption
     optional
-    optionalString
     optionals
+    optionalString
     types
     unique
     ;
@@ -64,7 +65,13 @@
 
   provisioningScript = pkgs.writeShellScript "post-start-provision" (''
       set -euo pipefail
-      export INFLUX_HOST="http://"${escapeShellArg (cfg.settings.http-bind-address or "localhost:8086")}
+      export INFLUX_HOST="http://"${escapeShellArg (
+        if
+          ! hasAttr "http-bind-address" cfg.settings
+          || hasInfix "0.0.0.0" cfg.settings.http-bind-address
+        then "localhost:8086"
+        else cfg.settings.http-bind-address
+      )}
 
       # Wait for the influxdb server to come online
       count=0

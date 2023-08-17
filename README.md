@@ -182,8 +182,6 @@ kanidm group add-members grafana-server-admins myuser
 kanidm group add-members web-sentinel-access myuser
 kanidm group add-members web-sentinel-adguardhome-access myuser
 kanidm group add-members web-sentinel-influxdb-access myuser
-
-# TODO influxdb temporary pw d0lRidLSqZ03W5BBjQ7Id3oM2zVE5jLrRUKcMXeYDk5WGabb
 ```
 
 

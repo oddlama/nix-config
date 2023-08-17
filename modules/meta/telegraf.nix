@@ -106,7 +106,7 @@ in {
 
     services.telegraf = {
       enable = true;
-      environmentFiles = ["/run/telegraf/env"];
+      environmentFiles = ["/dev/null"]; # Needed so the config file is copied to /run/telegraf
       extraConfig = {
         agent = {
           interval = "10s";
@@ -188,10 +188,14 @@ in {
         (mkIf cfg.scrapeSensors
           (pkgs.writeShellScriptBin "sensors" config.security.elewrap.telegraf-sensors.path))
       ];
-      preStart = mkAfter ''
-        echo "INFLUX_TOKEN=$(< ${config.age.secrets.telegraf-influxdb-token.path})" > /run/telegraf/env
-      '';
       serviceConfig = {
+        Environment = "INFLUX_TOKEN=\$INFLUX_TOKEN"; # Required so the first envsubst in the original module doesn't change it
+        ExecStartPre = mkAfter [
+          (pkgs.writeShellScript "pre-start-token" ''
+            export INFLUX_TOKEN=$(< ${config.age.secrets.telegraf-influxdb-token.path})
+            ${pkgs.envsubst}/bin/envsubst -i /var/run/telegraf/config.toml -o /var/run/telegraf/config.toml
+          '')
+        ];
         # For wireguard statistics
         AmbientCapabilities = ["CAP_NET_ADMIN"];
         RestartSec = "600"; # Retry every 10 minutes

@@ -3,7 +3,6 @@
   lib,
   nodes,
   pkgs,
-  utils,
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
@@ -101,7 +100,7 @@ in {
         ENABLE_PUSH_CREATE_ORG = true;
       };
       server = {
-        HTTP_ADDR = config.meta.wireguard.proxy-sentinel.ipv4;
+        HTTP_ADDR = "0.0.0.0";
         HTTP_PORT = 3000;
         DOMAIN = forgejoDomain;
         ROOT_URL = "https://${forgejoDomain}/";
@@ -126,7 +125,6 @@ in {
   };
 
   systemd.services.gitea = {
-    after = ["sys-subsystem-net-devices-${utils.escapeSystemdPath "proxy-sentinel"}.device"];
     serviceConfig.RestartSec = "600"; # Retry every 10 minutes
     #preStart = let
     #  exe = lib.getExe config.services.gitea.package;

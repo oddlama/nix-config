@@ -2,7 +2,6 @@
   config,
   lib,
   nodes,
-  utils,
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
@@ -21,7 +20,7 @@ in {
 
     services.nginx = {
       upstreams.loki = {
-        servers."${config.services.loki.configuration.server.http_listen_address}:${toString config.services.loki.configuration.server.http_listen_port}" = {};
+        servers."${config.meta.wireguard.proxy-sentinel.ipv4}:${toString config.services.loki.configuration.server.http_listen_port}" = {};
         extraConfig = ''
           zone loki 64k;
           keepalive 2;
@@ -63,7 +62,7 @@ in {
       auth_enabled = false;
 
       server = {
-        http_listen_address = config.meta.wireguard.proxy-sentinel.ipv4;
+        http_listen_address = "0.0.0.0";
         http_listen_port = 3100;
         log_level = "warn";
       };
@@ -124,8 +123,5 @@ in {
     };
   };
 
-  systemd.services.loki = {
-    after = ["sys-subsystem-net-devices-${utils.escapeSystemdPath "proxy-sentinel"}.device"];
-    serviceConfig.RestartSec = "600"; # Retry every 10 minutes
-  };
+  systemd.services.loki.serviceConfig.RestartSec = "600"; # Retry every 10 minutes
 }

@@ -2,7 +2,6 @@
   config,
   lib,
   nodes,
-  utils,
   pkgs,
   ...
 }: let
@@ -18,7 +17,7 @@ in {
 
     services.nginx = {
       upstreams.influxdb = {
-        servers."${config.services.influxdb2.settings.http-bind-address}" = {};
+        servers."${config.meta.wireguard.proxy-sentinel.ipv4}:${toString influxdbPort}" = {};
         extraConfig = ''
           zone influxdb 64k;
           keepalive 2;
@@ -74,7 +73,7 @@ in {
     enable = true;
     settings = {
       reporting-disabled = true;
-      http-bind-address = "${config.meta.wireguard.proxy-sentinel.ipv4}:${toString influxdbPort}";
+      http-bind-address = "0.0.0.0:${toString influxdbPort}";
     };
     provision = {
       enable = true;
@@ -100,6 +99,5 @@ in {
 
   environment.systemPackages = [pkgs.influxdb2-cli];
 
-  # Do NOT configure RestartSec here, this must be left short to allow token manipulation
-  systemd.services.influxdb2.after = ["sys-subsystem-net-devices-${utils.escapeSystemdPath "proxy-sentinel"}.device"];
+  systemd.services.grafana.serviceConfig.RestartSec = "600"; # Retry every 10 minutes
 }

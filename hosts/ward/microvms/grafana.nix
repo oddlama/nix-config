@@ -2,7 +2,6 @@
   config,
   lib,
   nodes,
-  utils,
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
@@ -58,7 +57,7 @@ in {
 
     services.nginx = {
       upstreams.grafana = {
-        servers."${config.services.grafana.settings.server.http_addr}:${toString config.services.grafana.settings.server.http_port}" = {};
+        servers."${config.meta.wireguard.proxy-sentinel.ipv4}:${toString config.services.grafana.settings.server.http_port}" = {};
         extraConfig = ''
           zone grafana 64k;
           keepalive 2;
@@ -86,7 +85,7 @@ in {
         root_url = "https://${grafanaDomain}";
         enforce_domain = true;
         enable_gzip = true;
-        http_addr = config.meta.wireguard.proxy-sentinel.ipv4;
+        http_addr = "0.0.0.0";
         http_port = 3001;
       };
 
@@ -149,8 +148,5 @@ in {
     };
   };
 
-  systemd.services.grafana = {
-    after = ["sys-subsystem-net-devices-${utils.escapeSystemdPath "proxy-sentinel"}.device"];
-    serviceConfig.RestartSec = "600"; # Retry every 10 minutes
-  };
+  systemd.services.grafana.serviceConfig.RestartSec = "600"; # Retry every 10 minutes
 }

@@ -2,7 +2,6 @@
   config,
   lib,
   nodes,
-  utils,
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
@@ -24,14 +23,14 @@ in {
 
     services.nginx = {
       upstreams.vaultwarden = {
-        servers."${config.services.vaultwarden.config.rocketAddress}:${toString config.services.vaultwarden.config.rocketPort}" = {};
+        servers."${config.meta.wireguard.proxy-sentinel.ipv4}:${toString config.services.vaultwarden.config.rocketPort}" = {};
         extraConfig = ''
           zone vaultwarden 64k;
           keepalive 2;
         '';
       };
       upstreams.vaultwarden-websocket = {
-        servers."${config.services.vaultwarden.config.websocketAddress}:${toString config.services.vaultwarden.config.websocketPort}" = {};
+        servers."${config.meta.wireguard.proxy-sentinel.ipv4}:${toString config.services.vaultwarden.config.websocketPort}" = {};
         extraConfig = ''
           zone vaultwarden-websocket 64k;
           keepalive 2;
@@ -66,9 +65,9 @@ in {
       webVaultEnabled = true;
 
       websocketEnabled = true;
-      websocketAddress = config.meta.wireguard.proxy-sentinel.ipv4;
+      websocketAddress = "0.0.0.0";
       websocketPort = 3012;
-      rocketAddress = config.meta.wireguard.proxy-sentinel.ipv4;
+      rocketAddress = "0.0.0.0";
       rocketPort = 8012;
 
       signupsAllowed = false;
@@ -87,9 +86,8 @@ in {
 
   # Replace uses of old name
   systemd.services.backup-vaultwarden.environment.DATA_FOLDER = lib.mkForce "/var/lib/vaultwarden";
-  systemd.services.vaultwarden = {
-    after = ["sys-subsystem-net-devices-${utils.escapeSystemdPath "proxy-sentinel"}.device"];
-    serviceConfig.StateDirectory = lib.mkForce "vaultwarden";
-    serviceConfig.RestartSec = "600"; # Retry every 10 minutes
+  systemd.services.vaultwarden.serviceConfig = {
+    StateDirectory = lib.mkForce "vaultwarden";
+    RestartSec = "600"; # Retry every 10 minutes
   };
 }

@@ -112,6 +112,9 @@
         microvm = {
           hypervisor = mkDefault "qemu";
 
+          # Give them some juice by default
+          mem = mkDefault (2 * 1024);
+
           # MACVTAP bridge to the host's network
           interfaces = [
             {

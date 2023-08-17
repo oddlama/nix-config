@@ -3,7 +3,6 @@
   lib,
   nodes,
   pkgs,
-  utils,
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
@@ -29,7 +28,7 @@ in {
 
     services.nginx = {
       upstreams.kanidm = {
-        servers."${config.services.kanidm.serverSettings.bindaddress}" = {};
+        servers."${config.meta.wireguard.proxy-sentinel.ipv4}:${toString kanidmPort}" = {};
         extraConfig = ''
           zone kanidm 64k;
           keepalive 2;
@@ -56,7 +55,7 @@ in {
       origin = "https://${kanidmDomain}";
       tls_chain = config.age.secrets."kanidm-self-signed.crt".path;
       tls_key = config.age.secrets."kanidm-self-signed.key".path;
-      bindaddress = "${config.meta.wireguard.proxy-sentinel.ipv4}:${toString kanidmPort}";
+      bindaddress = "0.0.0.0:${toString kanidmPort}";
       trust_x_forward_for = true;
     };
   };
@@ -72,10 +71,5 @@ in {
     };
   };
 
-  systemd.services.kanidm = {
-    # TODO this doesn't suffice, percieved 1 in 50 this fails because kanidm starts too soon,
-    # a requiredforonline might be necessary
-    after = ["sys-subsystem-net-devices-${utils.escapeSystemdPath "proxy-sentinel"}.device"];
-    serviceConfig.RestartSec = "60"; # Retry every minute
-  };
+  systemd.services.grafana.serviceConfig.RestartSec = "60"; # Retry every minute
 }

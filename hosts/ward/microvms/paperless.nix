@@ -2,7 +2,6 @@
   config,
   lib,
   nodes,
-  utils,
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
@@ -28,7 +27,7 @@ in {
 
     services.nginx = {
       upstreams.paperless = {
-        servers."${config.services.paperless.address}:${toString config.services.paperless.port}" = {};
+        servers."${config.meta.wireguard.proxy-sentinel.ipv4}:${toString config.services.paperless.port}" = {};
         extraConfig = ''
           zone paperless 64k;
           keepalive 2;
@@ -51,11 +50,13 @@ in {
 
   services.paperless = {
     enable = true;
-    address = config.meta.wireguard.proxy-sentinel.ipv4;
+    address = "0.0.0.0";
     passwordFile = config.age.secrets.paperless-admin-password.path;
     extraConfig = {
       PAPERLESS_URL = "https://${paperlessDomain}";
+      PAPERLESS_CONSUMER_ENABLE_BARCODES = true;
       PAPERLESS_CONSUMER_ENABLE_ASN_BARCODE = true;
+      PAPERLESS_CONSUMER_BARCODE_SCANNER = "ZXING";
       PAPERLESS_FILENAME_FORMAT = "{created_year}-{created_month}-{created_day}_{asn}_{title}";
       #PAPERLESS_IGNORE_DATES = concatStringsSep "," ignoreDates;
       PAPERLESS_NUMBER_OF_SUGGESTED_DATES = 4;
@@ -65,9 +66,5 @@ in {
     };
   };
 
-  #systemd.services.paperless = {
-  #  after = ["sys-subsystem-net-devices-${utils.escapeSystemdPath "proxy-sentinel"}.device"];
-  #  serviceConfig.StateDirectory = lib.mkForce "paperless";
-  #  serviceConfig.RestartSec = "600"; # Retry every 10 minutes
-  #};
+  systemd.services.paperless.serviceConfig.RestartSec = "600"; # Retry every 10 minutes
 }

@@ -9,7 +9,6 @@
   influxdbDomain = "influxdb.${sentinelCfg.repo.secrets.local.personalDomain}";
   influxdbPort = 8086;
 in {
-  microvm.mem = 1024;
   meta.wireguard-proxy.sentinel.allowedTCPPorts = [influxdbPort];
 
   nodes.sentinel = {

@@ -69,7 +69,7 @@ in {
 
       ingester = {
         lifecycler = {
-          interface_names = ["proxy-sentinel"];
+          address = "127.0.0.1";
           ring = {
             kvstore.store = "inmemory";
             replication_factor = 1;

@@ -1,0 +1,10 @@
+[package]
+name = "kanidm-secret-manipulator"
+version = "1.0.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.75"
+rusqlite = "0.29.0"
+serde = { version = "1.0.183", features = ["derive"] }
+serde_json = "1.0.105"

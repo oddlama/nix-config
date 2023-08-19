@@ -2,6 +2,9 @@
 name = "kanidm-secret-manipulator"
 version = "1.0.0"
 edition = "2021"
+authors = ["oddlama <oddlama@oddlama.org>"]
+description = "A helper utility that modifies the kanidm database to allow provisioning declarative secrets with NixOS"
+license = "MIT"
 
 [dependencies]
 anyhow = "1.0.75"

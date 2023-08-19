@@ -131,6 +131,23 @@ openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
 
 
 
+```nix
+{
+  services.kanidm.provision = {
+    persons.myuser = {
+      legalname = "Full Name";
+      mail = "mail@example.com";
+      groups = ["grafana-access" "grafana-server-admins"];
+    };
+
+    groups.grafana-access = {};
+    groups.grafana-server-admins = {};
+
+    systems.oauth2.grafana = {
+    };
+  };
+}
+```
 
 
 

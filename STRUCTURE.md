@@ -35,13 +35,11 @@ Make sure to utilize the github search if you know what you need!
   - `modules/*/` regular modules related to <xyz>, similar structure as in `nixpkgs/nixos/modules`
 
 - `nix/` library functions and flake plumbing
-  - `checks.nix` pre-commit-hooks for this repository
   - `colmena.nix` Setup for distributed deployment using colmena (actually defines all NixOS hosts)
-  - `dev-shell.nix` Environment setup for `nix develop` for using this flake
   - `extra-builtins.nix` Extra builtins via nix-plugins to support transparent repository-wide secrets
-  - `generate-installer.nix` Helper functions to generate a iso image for any host for simple deployment from scratch. The iso will contain an executable `install-system` that will do a full install including partitioning.
+  - `generate-installer-package.nix` Helper package that that will be available in our iso images. This provides the `install-system` command that will do a full install including partitioning.
   - `generate-node.nix` Helper function that outputs everything that is necessary to define a new node in a predictable format. Used to define colmena nodes and microvms.
-  - `lib.nix` Commonly used functionality or helpers that weren't available in the standard library
+  - `installer-configuration.nix` Our modified ISO installer image config (sets up ssh, contains the installer package, ...)
   - `rage-decrypt-and-cache.sh` Auxiliary script for repository-wide secrets that decrypts a file and caches the output in /tmp
 
 - `pkgs/` Custom packages and scripts

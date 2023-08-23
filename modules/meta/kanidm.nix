@@ -39,7 +39,7 @@
       default = script;
     };
 
-  provisionScript = pkgs.writeShellScrip "post-start-provision" ''
+  provisionScript = pkgs.writeShellScript "post-start-provision" ''
     set -euo pipefail
 
     # Wait for the kanidm server to come online
@@ -75,15 +75,15 @@
       [[ -n "$(${getExe jq} <<< "$known_groups" '. | select(.name[0] == "$1")')" ]]
     }
 
-    #known_persons=$(kanidm person list --output=json)
-    #function person_exists() {
-    #  [[ -n "$(${getExe jq} <<< "$known_persons" '. | select(.name[0] == "$1")')" ]]
-    #}
+    known_persons=$(kanidm person list --output=json)
+    function person_exists() {
+      [[ -n "$(${getExe jq} <<< "$known_persons" '. | select(.name[0] == "$1")')" ]]
+    }
 
-    #known_oauth2_systems=$(kanidm person list --output=json)
-    #function oauth2_system_exists() {
-    #  [[ -n "$(${getExe jq} <<< "$known_oauth2_systems" '. | select(.oauth2_rs_name[0] == "$1")')" ]]
-    #}
+    known_oauth2_systems=$(kanidm person list --output=json)
+    function oauth2_system_exists() {
+      [[ -n "$(${getExe jq} <<< "$known_oauth2_systems" '. | select(.oauth2_rs_name[0] == "$1")')" ]]
+    }
 
     ${concatMapStrings (x: x._script) (attrValues cfg.provision.groups)}
     ${concatMapStrings (x: x._script) (attrValues cfg.provision.persons)}
@@ -99,7 +99,7 @@
     set -euo pipefail
     if test -e "$STATE_DIRECTORY/.needs_restart"; then
       rm -f "$STATE_DIRECTORY/.needs_restart"
-      systemctl restart kanidm
+      /run/current-system/systemd/bin/systemctl restart kanidm
     fi
   '';
 in {
@@ -299,9 +299,8 @@ in {
     systemd.services.kanidm = {
       serviceConfig.ExecStartPost =
         [provisioningScript]
-        ++
         # Only the restarter runs with elevated privileges
-        optional (cfg.provision.systems.oauth2 != {}) "+${restarterScript}";
+        ++ optional (cfg.provision.systems.oauth2 != {}) "+${restarterScript}";
 
       preStart = let
         mappingsJson = pkgs.writeText "mappings.json" (builtins.toJSON {

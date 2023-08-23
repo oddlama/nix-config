@@ -142,8 +142,21 @@ openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
 
     groups.grafana-access = {};
     groups.grafana-server-admins = {};
+    groups.grafana-admins = {};
+    groups.grafana-editors = {};
 
     systems.oauth2.grafana = {
+      displayName = "Grafana";
+      originUrl = "https://grafana.${personalDomain}";
+      basicSecretFile = pkgs.writeText "bs" "verygoodsecret";
+      scopeMaps = {
+        grafana-access = ["openid" "email" "profile"];
+      };
+      supplementaryScopeMaps = {
+        grafana-server-admins = ["server_admin"];
+        grafana-admins = ["admin"];
+        grafana-editors = ["editor"];
+      };
     };
   };
 }

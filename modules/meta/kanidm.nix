@@ -39,10 +39,36 @@
       default = script;
     };
 
-  script = ''
+  provisionScript = pkgs.writeShellScrip "post-start-provision" ''
     set -euo pipefail
 
-    # TODO login
+    # Wait for the kanidm server to come online
+    count=0
+    while ! test -e /run/kanidmd/sock; do
+      if [ "$count" -eq 300 ]; then
+        echo "Tried for 30 seconds, giving up..."
+        exit 1
+      fi
+      if ! kill -0 "$MAINPID"; then
+        echo "Main server died, giving up..."
+        exit 1
+      fi
+      sleep 0.1
+      count=$((count++))
+    done
+
+    # If this is the first start, we login this time by recovering the admin account
+    # and force a restart afterwards to rewrite the password.
+    if test -e "$STATE_DIRECTORY/.first_startup"; then
+      KANIDM_PASSWORD="$(${cfg.package}/bin/kanidmd recover-account admin)"
+      needs_rewrite=1
+      rm -f "$STATE_DIRECTORY/.first_startup"
+    else
+      # Login using the admin password
+      KANIDM_PASSWORD="$(< ${escapeShellArg cfg.provision.adminPasswordFile})"
+    fi
+
+    ${cfg.package}/bin/kanidm login --name admin <<< "$KANIDM_PASSWORD"
 
     known_groups=$(kanidm group list --output=json)
     function group_exists() {
@@ -62,10 +88,29 @@
     ${concatMapStrings (x: x._script) (attrValues cfg.provision.groups)}
     ${concatMapStrings (x: x._script) (attrValues cfg.provision.persons)}
     ${concatMapStrings (x: x._script) (attrValues cfg.provision.systems.oauth2)}
+
+    if [[ "''${needs_rewrite-0}" == 1 ]]; then
+      echo "Queueing service restart to rewrite secrets"
+      touch "$STATE_DIRECTORY/.needs_restart"
+    fi
+  '';
+
+  restarterScript = pkgs.writeShellScript "post-start-restarter" ''
+    set -euo pipefail
+    if test -e "$STATE_DIRECTORY/.needs_restart"; then
+      rm -f "$STATE_DIRECTORY/.needs_restart"
+      systemctl restart kanidm
+    fi
   '';
 in {
   options.services.kanidm.provision = {
     enable = mkEnableOption "provisioning of systems (oauth2), groups and users";
+
+    adminPasswordFile = mkOption {
+      description = "Path to a file containing the admin password for kanidm. Do NOT use a file from the nix store here!";
+      example = "/run/secrets/kanidm-admin-password";
+      type = types.path;
+    };
 
     persons = mkOption {
       description = "Provisioning of kanidm persons";
@@ -73,7 +118,9 @@ in {
       type = types.attrsOf (types.submodule (personSubmod: let
         inherit (personSubmod.module._args) name;
         updateArgs =
-          (optionals (personSubmod.config.legalName != null) ["--legalname" personSubmod.config.legalName])
+          ["--displayname" personSubmod.config.displayName]
+          ++ optionals (personSubmod.config.legalName != null)
+          ["--legalname" personSubmod.config.legalName]
           # mail addresses
           ++ concatMap (addr: ["--mail" addr]) personSubmod.config.mailAddresses;
       in {
@@ -86,8 +133,6 @@ in {
                   kanidm person create ${escapeShellArg name} \
                     ${escapeShellArg personSubmod.config.displayName}
                 fi
-              ''
-              + optionalString (updateArgs != []) ''
                 kanidm person update ${escapeShellArg name} ${escapeShellArgs updateArgs}
               ''
               + flip concatMapStrings personSubmod.config.groups (group: ''
@@ -173,6 +218,7 @@ in {
                     ${escapeShellArg name} \
                     ${escapeShellArg oauth2Submod.config.displayName} \
                     ${escapeShellArg oauth2Submod.config.originUrl}
+                  needs_rewrite=1
                 fi
               ''
               + concatLines (flip mapAttrsToList oauth2Submod.config.scopeMaps (group: scopes: ''
@@ -227,7 +273,7 @@ in {
     };
   };
 
-  config = {
+  config = mkIf (cfg.enableServer && cfg.provision.enable) {
     assertions =
       flip mapAttrsToList cfg.provision.persons (person: personCfg: let
         unknownGroups = subtractLists (attrNames cfg.provision.groups) personCfg.groups;
@@ -249,5 +295,26 @@ in {
           message = "kanidm: provision.systems.oauth2.${oauth2}.supplementaryScopeMaps: Refers to unknown groups: ${unknownGroups}";
         })
       ]));
+
+    systemd.services.kanidm = {
+      serviceConfig.ExecStartPost =
+        [provisioningScript]
+        ++
+        # Only the restarter runs with elevated privileges
+        optional (cfg.provision.systems.oauth2 != {}) "+${restarterScript}";
+
+      preStart = let
+        mappingsJson = pkgs.writeText "mappings.json" (builtins.toJSON {
+          account_secrets.admin = cfg.provision.adminPasswordFile;
+          oauth2_basic_secrets = mapAttrs (_: x: v.basicSecretFile) cfg.provision.systems.oauth2;
+        });
+      in ''
+        if ! test -e ${escapeShellArg cfg.serverSettings.db_path}; then
+          touch "$STATE_DIRECTORY/.first_startup"
+        else
+          ${getExe pkgs.kanidm-secret-manipulator} ${escapeShellArg cfg.serverSettings.db_path} ${tokenMappings}
+        fi
+      '';
+    };
   };
 }

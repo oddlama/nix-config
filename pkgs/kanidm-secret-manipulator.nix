@@ -8,8 +8,15 @@
 rustPlatform.buildRustPackage rec {
   pname = "kanidm-secret-manipulator";
   version = "1.0.0";
-  src = ./.;
-  cargoHash = "sha256-EAPlI5wZ6ZByafWnCJ199SShtOppErjKyrNHAQIqr/Y=";
+
+  src = fetchFromGitHub {
+    owner = "oddlama";
+    repo = "kanidm-secret-manipulator";
+    rev = "v${version}";
+    hash = "sha256-mLOTnOsbUozYRDBXVYtIrUE5jDXEqW8HMO57qWsp1Go=";
+  };
+
+  cargoHash = "sha256-L//ZtfbOxV6Hf5x5tLAQ52MChSclzJlhI7sZKqvByMo=";
 
   nativeBuildInputs = [pkg-config];
   buildInputs = [sqlite];

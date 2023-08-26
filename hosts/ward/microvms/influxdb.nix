@@ -82,17 +82,7 @@ in {
         passwordFile = config.age.secrets.influxdb-admin-password.path;
         tokenFile = config.age.secrets.influxdb-admin-token.path;
       };
-      ensureOrganizations = [
-        {
-          name = "servers";
-        }
-      ];
-      ensureBuckets = [
-        {
-          name = "telegraf";
-          org = "servers";
-        }
-      ];
+      organizations.servers.buckets.telegraf = {};
     };
   };
 

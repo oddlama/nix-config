@@ -65,16 +65,11 @@ in {
         group = "influxdb2";
       };
 
-      services.influxdb2.provision.ensureApiTokens = [
-        {
-          name = "telegraf (${config.node.name})";
-          org = "servers";
-          user = "admin";
-          readBuckets = ["telegraf"];
-          writeBuckets = ["telegraf"];
-          tokenFile = nodes.${cfg.influxdb2.node}.config.age.secrets."telegraf-influxdb-token-${config.node.name}".path;
-        }
-      ];
+      services.influxdb2.provision.organization.servers.auths."telegraf (${config.node.name})" = {
+        readBuckets = ["telegraf"];
+        writeBuckets = ["telegraf"];
+        tokenFile = nodes.${cfg.influxdb2.node}.config.age.secrets."telegraf-influxdb-token-${config.node.name}".path;
+      };
     };
 
     age.secrets.telegraf-influxdb-token = {

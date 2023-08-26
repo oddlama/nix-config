@@ -13,7 +13,7 @@ rustPlatform.buildRustPackage rec {
     owner = "oddlama";
     repo = "kanidm-secret-manipulator";
     rev = "v${version}";
-    hash = "sha256-mLOTnOsbUozYRDBXVYtIrUE5jDXEqW8HMO57qWsp1Go=";
+    hash = "sha256-Hn/143YJ0rn9AihuI/wsDlqtnGi/LBzbfdMNTukc34c=";
   };
 
   cargoHash = "sha256-L//ZtfbOxV6Hf5x5tLAQ52MChSclzJlhI7sZKqvByMo=";

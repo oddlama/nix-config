@@ -168,7 +168,7 @@ openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
 ```bash
 # Recover admin account
 kanidmd recover-account admin
-> AhNeQgKkwwEHZ85dxj1GPjx58vWsBU8QsvKSyYwUL7bz57bp
+> FrEELN4tfyVbUAfhGeuUyZyaKk8cbpFufuDwyCPhY3xhb3X2
 # Login with recovered root account
 kanidm login --name admin
 # Generate new credentials for idm_admin account

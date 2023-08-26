@@ -36,16 +36,11 @@ in {
       group = "influxdb2";
     };
 
-    services.influxdb2.provision.ensureApiTokens = [
-      {
-        name = "grafana servers:telegraf (${config.node.name})";
-        org = "servers";
-        user = "admin";
-        readBuckets = ["telegraf"];
-        writeBuckets = ["telegraf"];
-        tokenFile = nodes.ward-influxdb.config.age.secrets."grafana-influxdb-token-${config.node.name}".path;
-      }
-    ];
+    services.influxdb2.provision.organization.servers.auths."grafana servers:telegraf (${config.node.name})" = {
+      readBuckets = ["telegraf"];
+      writeBuckets = ["telegraf"];
+      tokenFile = nodes.ward-influxdb.config.age.secrets."grafana-influxdb-token-${config.node.name}".path;
+    };
   };
 
   nodes.sentinel = {

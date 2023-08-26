@@ -47,6 +47,6 @@ in {
     networking.providedDomains = mergeFromOthers ["networking" "providedDomains"];
     services.nginx.upstreams = mergeFromOthers ["services" "nginx" "upstreams"];
     services.nginx.virtualHosts = mergeFromOthers ["services" "nginx" "virtualHosts"];
-    services.influxdb2.provision.ensureApiTokens = mergeFromOthers ["services" "influxdb2" "provision" "ensureApiTokens"];
+    services.influxdb2.provision.organizations = mergeFromOthers ["services" "influxdb2" "organizations"];
   };
 }

@@ -1,5 +1,5 @@
 {
-  disabledModules = ["services/databases/influxdb2.nix"];
+  disabledModules = ["services/security/kanidm.nix"];
   imports = [
     ../users/root
 
@@ -19,7 +19,7 @@
     ./config/users.nix
     ./config/xdg.nix
 
-    ./meta/influxdb2.nix
+    ./meta/kanidm.nix
     ./meta/microvms.nix
     ./meta/nginx.nix
     ./meta/oauth2-proxy.nix

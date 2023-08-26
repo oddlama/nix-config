@@ -28,6 +28,13 @@ in {
     group = "grafana";
   };
 
+  # Mirror the original oauth2 secret
+  age.secrets.grafana-oauth2-client-secret = {
+    inherit (nodes.ward-kanidm.config.age.secrets.kanidm-oauth2-grafana) rekeyFile;
+    mode = "440";
+    group = "grafana";
+  };
+
   nodes.ward-influxdb = {
     # Mirror the original secret on the influx host
     age.secrets."grafana-influxdb-token-${config.node.name}" = {
@@ -100,8 +107,7 @@ in {
         allow_sign_up = true;
         #auto_login = true;
         client_id = "grafana";
-        #client_secret = "$__file{${config.age.secrets.grafana-oauth-client-secret.path}}";
-        client_secret = "aZKNCM6KpjBy4RqwKJXMLXzyx9rKH6MZTFk4wYrKWuBqLj6t"; # TODO temporary test not a real secret
+        client_secret = "$__file{${config.age.secrets.grafana-oauth2-client-secret.path}}";
         scopes = "openid email profile";
         login_attribute_path = "prefered_username";
         auth_url = "https://${sentinelCfg.networking.providedDomains.kanidm}/ui/oauth2";

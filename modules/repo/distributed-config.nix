@@ -47,6 +47,8 @@ in {
     networking.providedDomains = mergeFromOthers ["networking" "providedDomains"];
     services.nginx.upstreams = mergeFromOthers ["services" "nginx" "upstreams"];
     services.nginx.virtualHosts = mergeFromOthers ["services" "nginx" "virtualHosts"];
-    services.influxdb2.provision.organizations = mergeFromOthers ["services" "influxdb2" "organizations"];
+    services.influxdb2.provision.organizations = mergeFromOthers ["services" "influxdb2" "provision" "organizations"];
+    services.kanidm.provision.groups = mergeFromOthers ["services" "kanidm" "provision" "groups"];
+    services.kanidm.provision.systems.oauth2 = mergeFromOthers ["services" "kanidm" "provision" "systems" "oauth2"];
   };
 }

@@ -20,6 +20,13 @@ in {
     inherit (config.services.gitea) group;
   };
 
+  # Mirror the original oauth2 secret
+  age.secrets.forgejo-oauth2-client-secret = {
+    inherit (nodes.ward-kanidm.config.age.secrets.kanidm-oauth2-forgejo) rekeyFile;
+    mode = "440";
+    inherit (config.services.gitea) group;
+  };
+
   nodes.sentinel = {
     networking.providedDomains.forgejo = forgejoDomain;
 

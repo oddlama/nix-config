@@ -88,7 +88,7 @@ in {
     };
 
     provision = {
-      inherit (config.secrets.global.kanidm) persons;
+      inherit (config.repo.secrets.global.kanidm) persons;
 
       # Grafana
       groups.grafana = {};

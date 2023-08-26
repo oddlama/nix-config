@@ -46,7 +46,6 @@
     redeemURL = "https://${config.networking.providedDomains.kanidm}/oauth2/token";
     validateURL = "https://${config.networking.providedDomains.kanidm}/oauth2/openid/${clientId}/userinfo";
     clientID = clientId;
-    keyFile = config.age.secrets.oauth2-cookie-secret.path;
     email.domains = ["*"];
 
     extraConfig = {
@@ -55,4 +54,9 @@
       #skip-provider-button = true;
     };
   };
+
+  systemd.services.oauth2_proxy.serviceConfig.EnvironmentFile = [
+    config.age.secrets.oauth2-cookie-secret.path
+    config.age.secrets.oauth2-client-secret.path
+  ];
 }

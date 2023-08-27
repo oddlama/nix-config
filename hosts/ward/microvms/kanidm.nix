@@ -98,7 +98,7 @@ in {
       groups."grafana.server-admins" = {};
       systems.oauth2.grafana = {
         displayName = "Grafana";
-        originUrl = "https://${config.networking.providedDomains.grafana}";
+        originUrl = "https://${sentinelCfg.networking.providedDomains.grafana}";
         basicSecretFile = config.age.secrets.kanidm-oauth2-grafana.path;
         scopeMaps.grafana = ["openid" "email" "profile"];
         supplementaryScopeMaps = {
@@ -113,7 +113,7 @@ in {
       groups."forgejo.admins" = {};
       systems.oauth2.forgejo = {
         displayName = "Forgejo";
-        originUrl = "https://${config.networking.providedDomains.forgejo}";
+        originUrl = "https://${sentinelCfg.networking.providedDomains.forgejo}";
         basicSecretFile = config.age.secrets.kanidm-oauth2-forgejo.path;
         scopeMaps.forgejo = ["openid" "email" "profile"];
         supplementaryScopeMaps = {
@@ -126,6 +126,7 @@ in {
       # Web Sentinel
       groups.web-sentinel = {};
       groups."web-sentinel.adguardhome" = {};
+      groups."web-sentinel.influxdb" = {};
       systems.oauth2.web-sentinel = {
         displayName = "Web Sentinel";
         originUrl = "https://oauth2.${personalDomain}";

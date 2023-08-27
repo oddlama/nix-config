@@ -619,7 +619,7 @@ in {
         unknownGroups = subtractLists (attrNames cfg.provision.groups) personCfg.groups;
       in {
         assertion = (cfg.enableServer && cfg.provision.enable) -> unknownGroups == [];
-        message = "kanidm: provision.persons.${person}.groups: Refers to unknown groups: ${unknownGroups}";
+        message = "kanidm: provision.persons.${person}.groups: Refers to unknown groups: ${toString unknownGroups}";
       })
       ++ concatLists (flip mapAttrsToList cfg.provision.systems.oauth2 (oauth2: oauth2Cfg: [
         {
@@ -630,13 +630,13 @@ in {
           unknownGroups = subtractLists (attrNames cfg.provision.groups) (attrNames oauth2Cfg.scopeMaps);
         in {
           assertion = (cfg.enableServer && cfg.provision.enable) -> unknownGroups == [];
-          message = "kanidm: provision.systems.oauth2.${oauth2}.scopeMaps: Refers to unknown groups: ${unknownGroups}";
+          message = "kanidm: provision.systems.oauth2.${oauth2}.scopeMaps: Refers to unknown groups: ${toString unknownGroups}";
         })
         (let
           unknownGroups = subtractLists (attrNames cfg.provision.groups) (attrNames oauth2Cfg.supplementaryScopeMaps);
         in {
           assertion = (cfg.enableServer && cfg.provision.enable) -> unknownGroups == [];
-          message = "kanidm: provision.systems.oauth2.${oauth2}.supplementaryScopeMaps: Refers to unknown groups: ${unknownGroups}";
+          message = "kanidm: provision.systems.oauth2.${oauth2}.supplementaryScopeMaps: Refers to unknown groups: ${toString unknownGroups}";
         })
       ]));
 

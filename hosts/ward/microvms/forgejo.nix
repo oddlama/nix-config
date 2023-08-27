@@ -32,7 +32,7 @@ in {
 
     services.nginx = {
       upstreams.forgejo = {
-        servers."${config.services.gitea.settings.server.HTTP_ADDR}:${toString config.services.gitea.settings.server.HTTP_PORT}" = {};
+        servers."${config.meta.wireguard.proxy-sentinel.ipv4}:${toString config.services.gitea.settings.server.HTTP_PORT}" = {};
         extraConfig = ''
           zone forgejo 64k;
           keepalive 2;
@@ -131,27 +131,38 @@ in {
     };
   };
 
+  # XXX: PKCE is currently not supported by gitea/forgejo,
+  # see https://github.com/go-gitea/gitea/issues/21376.
+  # Disable PKCE manually in kanidm for now.
+  # `kanidm system oauth2 warning-insecure-client-disable-pkce forgejo`
   systemd.services.gitea = {
     serviceConfig.RestartSec = "600"; # Retry every 10 minutes
-    #preStart = let
-    #  exe = lib.getExe config.services.gitea.package;
-    #  providerName = "PrivateVoidAccount";
-    #  args = lib.escapeShellArgs [
-    #    "--name" providerName
-    #    "--provider" "openidConnect"
-    #    "--key" "net.privatevoid.forge1"
-    #    "--auto-discover-url" "https://login.${domain}/auth/realms/master/.well-known/openid-configuration"
-    #    "--group-claim-name" "groups"
-    #    "--admin-group" "/forge_admins@${domain}"
-    #    "--skip-local-2fa"
-    #  ];
-    #in lib.mkAfter /* bash */ ''
-    #  provider_id=$(${exe} admin auth list | ${pkgs.gnugrep}/bin/grep -w '${providerName}' | cut -f1)
-    #  if [[ -z "$provider_id" ]]; then
-    #    FORGEJO_ADMIN_OAUTH2_SECRET="$(< ${secrets.forgejoOidcSecret.path})" ${exe} admin auth add-oauth ${args}
-    #  else
-    #    FORGEJO_ADMIN_OAUTH2_SECRET="$(< ${secrets.forgejoOidcSecret.path})" ${exe} admin auth update-oauth --id "$provider_id" ${args}
-    #  fi
-    #'';
+    preStart = let
+      exe = lib.getExe config.services.gitea.package;
+      providerName = "kanidm";
+      clientId = "forgejo";
+      args = lib.escapeShellArgs [
+        "--name"
+        providerName
+        "--provider"
+        "openidConnect"
+        "--key"
+        clientId
+        "--auto-discover-url"
+        "https://${sentinelCfg.networking.providedDomains.kanidm}/oauth2/openid/${clientId}/.well-known/openid-configuration"
+        #"--required-claim-name" "groups"
+        #"--group-claim-name" "groups"
+        #"--admin-group" "/forge_admins@${domain}"
+        "--skip-local-2fa"
+      ];
+    in
+      lib.mkAfter ''
+        provider_id=$(${exe} admin auth list | ${pkgs.gnugrep}/bin/grep -w '${providerName}' | cut -f1)
+        if [[ -z "$provider_id" ]]; then
+          FORGEJO_ADMIN_OAUTH2_SECRET="$(< ${config.age.secrets.forgejo-oauth2-client-secret.path})" ${exe} admin auth add-oauth ${args}
+        else
+          FORGEJO_ADMIN_OAUTH2_SECRET="$(< ${config.age.secrets.forgejo-oauth2-client-secret.path})" ${exe} admin auth update-oauth --id "$provider_id" ${args}
+        fi
+      '';
   };
 }

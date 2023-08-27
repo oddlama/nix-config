@@ -24,6 +24,18 @@ in {
     group = "kanidm";
   };
 
+  age.secrets.kanidm-admin-password = {
+    generator.script = "alnum";
+    mode = "440";
+    group = "kanidm";
+  };
+
+  age.secrets.kanidm-idm-admin-password = {
+    generator.script = "alnum";
+    mode = "440";
+    group = "kanidm";
+  };
+
   age.secrets.kanidm-oauth2-grafana = {
     generator.script = "alnum";
     generator.tags = ["oauth2"];
@@ -89,6 +101,9 @@ in {
 
     provision = {
       enable = true;
+      adminPasswordFile = config.age.secrets.kanidm-admin-password.path;
+      idmAdminPasswordFile = config.age.secrets.kanidm-idm-admin-password.path;
+
       inherit (config.repo.secrets.global.kanidm) persons;
 
       # Grafana
@@ -118,8 +133,6 @@ in {
         scopeMaps.forgejo = ["openid" "email" "profile"];
         supplementaryScopeMaps = {
           "forgejo.admins" = ["admin"];
-          "forgejo.editors" = ["editor"];
-          "forgejo.server-admins" = ["server_admin"];
         };
       };
 

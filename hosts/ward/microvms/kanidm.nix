@@ -88,6 +88,7 @@ in {
     };
 
     provision = {
+      enable = true;
       inherit (config.repo.secrets.global.kanidm) persons;
 
       # Grafana

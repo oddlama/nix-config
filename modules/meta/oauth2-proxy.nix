@@ -10,6 +10,7 @@
     flip
     mapAttrs
     mdDoc
+    mkDefault
     mkEnableOption
     mkIf
     mkOption
@@ -103,7 +104,9 @@ in {
       # reuses refresh tokens but kanidm forbids that. Not sure though.
       #cookie.refresh = "5m";
       cookie.expire = "30m";
+      cookie.secret = mkDefault null;
 
+      clientSecret = mkDefault null;
       reverseProxy = true;
       httpAddress = "unix:///run/oauth2_proxy/oauth2_proxy.sock";
       redirectURL = "https://${cfg.portalDomain}/oauth2/callback";

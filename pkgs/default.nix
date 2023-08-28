@@ -2,12 +2,6 @@
   (import ./caddy.nix)
   (import ./oauth2-proxy)
   (self: super: {
-    grafana = super.grafana.overrideAttrs (finalAttrs: previousAttrs: {
-      srcStatic = super.fetchurl {
-        url = "https://dl.grafana.com/oss/release/grafana-${previousAttrs.version}.linux-amd64.tar.gz";
-        hash = "sha256-QFRahjDyL7BNikK2cCsFLfu4/odDbkCxplf6f7yCezE=";
-      };
-    });
     kanidm-secret-manipulator = super.callPackage ./kanidm-secret-manipulator.nix {};
     kanidm = super.kanidm.overrideAttrs (finalAttrs: previousAttrs: {
       patches = [

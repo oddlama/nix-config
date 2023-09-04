@@ -1,14 +1,9 @@
 {pkgs, ...}: {
   imports = [
+    ./firefox.nix
     ./kitty.nix
     ./sway.nix
   ];
-
-  # TODO own file
-  programs.firefox.enable = true;
-  home.sessionVariables = {
-    MOZ_WEBRENDER = 1;
-  };
 
   home = {
     packages = with pkgs; [
@@ -22,8 +17,7 @@
 
     # TODO VP9 hardware video decoding blocklisted
     # TODO gpg switch to sk
-    # TODO some font icons not showing
-    # TODO seogue ui
+    # TODO some font icons not showing neovim
 
     shellAliases = {
       p = "cd ~/projects";

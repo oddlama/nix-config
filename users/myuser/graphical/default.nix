@@ -4,10 +4,15 @@
     ./sway.nix
   ];
 
+  # TODO own file
+  programs.firefox.enable = true;
+  home.sessionVariables = {
+    MOZ_WEBRENDER = 1;
+  };
+
   home = {
     packages = with pkgs; [
       discord
-      firefox
       thunderbird
       signal-desktop
       chromium

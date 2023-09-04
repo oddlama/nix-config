@@ -1,4 +1,4 @@
-inputs: self: super: {
+_inputs: _self: super: {
   lib =
     super.lib
     // {

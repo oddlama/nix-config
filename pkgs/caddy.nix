@@ -3,7 +3,6 @@ self: super: let
     (self.lib)
     escapeShellArg
     concatMapStrings
-    flatten
     flip
     ;
 

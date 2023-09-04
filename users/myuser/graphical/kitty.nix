@@ -1,14 +1,10 @@
-{
-  config,
-  pkgs,
-  ...
-}: {
+{pkgs, ...}: {
   home.sessionVariables = {
     TERMINFO_DIRS = "${pkgs.kitty.terminfo.outPath}/share/terminfo";
   };
   programs.kitty = {
     enable = true;
-    package = pkgs.kitty.overrideAttrs (finalAttrs: prevAttrs: {
+    package = pkgs.kitty.overrideAttrs (_finalAttrs: _prevAttrs: {
       doCheck = false;
     });
     font = {

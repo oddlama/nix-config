@@ -7,7 +7,6 @@
 }: let
   inherit
     (lib)
-    all
     any
     attrNames
     attrValues
@@ -16,7 +15,6 @@
     concatMap
     concatMapStrings
     converge
-    elem
     escapeShellArg
     escapeShellArgs
     filter

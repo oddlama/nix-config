@@ -1,9 +1,9 @@
 [
   (import ./caddy.nix)
   (import ./oauth2-proxy)
-  (self: super: {
+  (_self: super: {
     kanidm-secret-manipulator = super.callPackage ./kanidm-secret-manipulator.nix {};
-    kanidm = super.kanidm.overrideAttrs (finalAttrs: previousAttrs: {
+    kanidm = super.kanidm.overrideAttrs (_finalAttrs: _previousAttrs: {
       patches = [
         (super.fetchpatch {
           name = "group-list-json-output.patch";

@@ -9,8 +9,6 @@
     mkOption
     types
     ;
-
-  cfg = config.node;
 in {
   options.node = {
     name = mkOption {

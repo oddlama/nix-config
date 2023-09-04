@@ -2,7 +2,7 @@
   self,
   pkgs,
   ...
-} @ inputs: let
+}: let
   inherit
     (pkgs.lib)
     attrNames

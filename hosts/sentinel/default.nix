@@ -1,8 +1,4 @@
-{
-  config,
-  lib,
-  ...
-}: {
+{config, ...}: {
   imports = [
     ../../modules/optional/hardware/hetzner-cloud.nix
 

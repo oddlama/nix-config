@@ -11,7 +11,6 @@
     mkDefault
     mdDoc
     mkIf
-    mkMerge
     mkOption
     types
     ;

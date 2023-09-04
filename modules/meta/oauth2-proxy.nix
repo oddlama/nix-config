@@ -1,14 +1,11 @@
 {
   lib,
   config,
-  pkgs,
   ...
 }: let
   inherit
     (lib)
     concatStringsSep
-    flip
-    mapAttrs
     mdDoc
     mkDefault
     mkEnableOption
@@ -35,11 +32,7 @@ in {
   };
 
   options.services.nginx.virtualHosts = mkOption {
-    type = types.attrsOf (types.submodule ({
-      name,
-      config,
-      ...
-    }: {
+    type = types.attrsOf (types.submodule ({config, ...}: {
       options.oauth2 = {
         enable = mkEnableOption (mdDoc "access protection of this resource using oauth2_proxy.");
         allowedGroups = mkOption {

@@ -6,7 +6,6 @@
 }: let
   inherit (config.repo.secrets.local) acme;
   sentinelCfg = nodes.sentinel.config;
-  inherit (sentinelCfg.repo.secrets.local) personalDomain;
 in {
   imports = [
     ../../modules/optional/hardware/odroid-n2plus.nix

@@ -1,6 +1,5 @@
 {
   config,
-  inputs,
   lib,
   options,
   nodes,
@@ -10,17 +9,12 @@
     (lib)
     attrNames
     concatMap
-    elem
-    foldl'
     getAttrFromPath
     mdDoc
-    mkIf
     mkOption
     mkOptionType
     mkMerge
-    recursiveUpdate
     hasAttrByPath
-    setAttrByPath
     types
     ;
 
@@ -31,7 +25,7 @@ in {
     description = mdDoc "Allows extending the configuration of other machines.";
     type = types.attrsOf (mkOptionType {
       name = "Toplevel NixOS config";
-      merge = loc: map (x: x.value);
+      merge = _loc: map (x: x.value);
     });
   };
 

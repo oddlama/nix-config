@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{
   systemd.network.wait-online.anyInterface = true;
 
   services = {

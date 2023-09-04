@@ -2,17 +2,14 @@
   config,
   inputs,
   lib,
-  pkgs,
   ...
 }: let
   inherit
     (lib)
     assertMsg
-    attrNames
     literalExpression
     mapAttrs
     mdDoc
-    mkIf
     mkOption
     types
     ;

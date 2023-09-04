@@ -1,8 +1,4 @@
-{
-  lib,
-  config,
-  ...
-}: {
+{config, ...}: {
   services.esphome = {
     enable = true;
     enableUnixSocket = true;

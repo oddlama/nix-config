@@ -2,14 +2,11 @@
   self,
   agenix,
   agenix-rekey,
-  colmena,
   disko,
   elewrap,
   home-manager,
   impermanence,
-  microvm,
   nixos-nftables-firewall,
-  nixpkgs,
   ...
 } @ inputs: {
   # The name of the generated node

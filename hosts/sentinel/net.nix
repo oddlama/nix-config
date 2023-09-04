@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  utils,
   ...
 }: {
   networking.hostId = config.repo.secrets.local.networking.hostId;

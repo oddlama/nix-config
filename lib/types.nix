@@ -1,4 +1,4 @@
-inputs: self: super: let
+inputs: _self: super: let
   inherit
     (inputs.nixpkgs.lib)
     all

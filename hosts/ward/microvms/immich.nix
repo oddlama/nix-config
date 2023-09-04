@@ -1,8 +1,6 @@
 {
   config,
-  lib,
   nodes,
-  pkgs,
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;

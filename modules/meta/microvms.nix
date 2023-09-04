@@ -11,11 +11,8 @@
     any
     attrNames
     attrValues
-    concatStringsSep
     disko
     escapeShellArg
-    filterAttrs
-    foldl'
     makeBinPath
     mapAttrsToList
     mdDoc
@@ -24,12 +21,10 @@
     mkEnableOption
     mkForce
     mkIf
-    mkMerge
     mkOption
     net
     optional
     optionalAttrs
-    recursiveUpdate
     types
     ;
 
@@ -277,11 +272,7 @@ in {
     vms = mkOption {
       default = {};
       description = "Defines the actual vms and handles the necessary base setup for them.";
-      type = types.attrsOf (types.submodule ({
-        name,
-        config,
-        ...
-      }: {
+      type = types.attrsOf (types.submodule ({name, ...}: {
         options = {
           nodeName = mkOption {
             type = types.str;

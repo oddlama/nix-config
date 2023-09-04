@@ -1,8 +1,4 @@
-{
-  lib,
-  config,
-  ...
-}: {
+{config, ...}: {
   age.secrets.mosquitto-pw-zigbee2mqtt = {
     rekeyFile = ./secrets/mosquitto-pw-zigbee2mqtt.age;
     mode = "440";

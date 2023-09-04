@@ -6,6 +6,7 @@
       fd
       file
       hexyl
+      ncdu
       neofetch
       rage
       rclone

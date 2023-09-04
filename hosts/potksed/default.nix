@@ -12,6 +12,7 @@
     inputs.nixos-hardware.nixosModules.common-pc-ssd
 
     ../../modules/optional/hardware/physical.nix
+    ../../modules/optional/hardware/nvidia.nix
 
     ../../modules
     ../../modules/optional/boot-efi.nix
@@ -30,21 +31,7 @@
 
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod"];
 
-  hardware.nvidia.modesetting.enable = true;
-  hardware.opengl = {
-    enable = true;
-    driSupport = true;
-    driSupport32Bit = true;
-  };
-  hardware.nvidia.powerManagement.enable = true;
-  hardware.nvidia.open = false;
-  hardware.nvidia.nvidiaSettings = true;
-
-  environment.systemPackages = with pkgs; [
-    killall
-    vaapiVdpau
-    libvdpau-va-gl
-  ];
+  # TODO goodbye once -sk keys.
   environment.shellInit = ''
     gpg-connect-agent /bye
     export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)

@@ -6,6 +6,7 @@
       fd
       file
       hexyl
+      killall
       ncdu
       neofetch
       rage

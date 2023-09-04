@@ -20,8 +20,8 @@
       # Do not wait for inherited child processes.
       close_on_child_death = "yes";
 
-      # Disable ligatures.
-      disable_ligatures = "always";
+      # Disable ligatures when the cursor is on them.
+      disable_ligatures = "cursor";
 
       # Modified onehalfdark color scheme
       foreground = "#c9d3e5";

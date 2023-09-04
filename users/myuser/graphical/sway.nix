@@ -43,7 +43,7 @@
       // {
         potksed = let
           monitorMain = "LG Electronics 27GN950 111NTGYLB719";
-          monitorLeft = "LG Electronics LG Ultra HD 0x00007F39";
+          monitorLeft = "LG Electronics LG Ultra HD 0x00077939";
         in {
           output = {
             # TODO "*" = { background = background; };

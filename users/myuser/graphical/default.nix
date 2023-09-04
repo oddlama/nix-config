@@ -17,6 +17,8 @@
 
     # TODO VP9 hardware video decoding blocklisted
     # TODO gpg switch to sk
+    # TODO some font icons not showing
+    # TODO seogue ui
 
     shellAliases = {
       p = "cd ~/projects";

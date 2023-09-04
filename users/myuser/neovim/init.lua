@@ -59,7 +59,7 @@ return packer.startup(function(use)
 	-- Replace built-in LSP prompts and windows
 	use { "stevearc/dressing.nvim", config = conf_setup "dressing" }
 	-- Status updates for LSP progress in right bottom corner.
-	use { "j-hui/fidget.nvim", after = "nvim-lspconfig", config = conf_setup "fidget" }
+	use { "j-hui/fidget.nvim", after = "nvim-lspconfig", config = conf_setup "fidget", tag = "legacy" }
 	-- Show latex math equations
 	use { "jbyuki/nabla.nvim", config = conf_fn "nabla" }
 	-- Show colors
@@ -99,8 +99,8 @@ return packer.startup(function(use)
 	use "johmsalas/text-case.nvim"
 	-- camelcase (and similar) word motions and textobjects
 	use { "chaoren/vim-wordmotion", config = conf_fn "wordmotion" }
-	-- Codex completion
-	use { "tom-doerr/vim_codex" }
+	-- Respect editor-config files
+	use { "gpanders/editorconfig.nvim" }
 
 	----------------------------------------------------------------------------------------------------
 	-- Functionality
@@ -135,7 +135,7 @@ return packer.startup(function(use)
 	----------------------------------------------------------------------------------------------------
 
 	-- Snippet engine
-	use { "L3MON4D3/LuaSnip" }
+	use { "L3MON4D3/LuaSnip", tag = "v1.*" }
 	-- Completion engine
 	use { "hrsh7th/nvim-cmp", config = conf_module "cmp", after = "LuaSnip" }
 	-- Luasnip completion source

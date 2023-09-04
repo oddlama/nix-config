@@ -16,7 +16,6 @@
     ];
 
     home = {
-      inherit (config.system) stateVersion;
       inherit (config.users.users.root) uid;
       username = config.users.users.root.name;
 

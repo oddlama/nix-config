@@ -8,6 +8,11 @@
       inputs.flake-utils.follows = "flake-utils";
     };
 
+    devshell = {
+      url = "github:numtide/devshell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -74,6 +79,7 @@
     self,
     agenix-rekey,
     colmena,
+    devshell,
     elewrap,
     flake-utils,
     microvm,
@@ -136,6 +142,7 @@
           ++ [
             microvm.overlay
             elewrap.overlays.default
+            devshell.overlays.default
           ];
       };
 
@@ -174,21 +181,56 @@
       };
 
       # `nix develop`
-      devShells.default = pkgs.mkShell {
+      devShells.default = pkgs.devshell.mkShell {
         name = "nix-config";
         packages = with pkgs; [
-          # Nix
-          alejandra
-          cachix
-          deadnix
-          nix-tree
-          statix
-          update-nix-fetchgit
+          nix # Always use the nix version from this flake's nixpkgs versios, so that nix-plugins (below) doesn't fail because of different nix versions.
         ];
 
-        shellHook = ''
-          ${self.checks.${system}.pre-commit-hooks.shellHook}
-        '';
+        commands = with pkgs; [
+          {
+            package = colmena.packages.${system}.colmena;
+            help = "Build and deploy this nix config to nodes";
+          }
+          {
+            package = alejandra;
+            help = "Format nix code";
+          }
+          {
+            package = statix;
+            help = "Lint nix code";
+          }
+          {
+            package = deadnix;
+            help = "Find unused expressions in nix code";
+          }
+          {
+            package = update-nix-fetchgit;
+            help = "Update fetcher hashes inside nix files";
+          }
+          {
+            package = nix-tree;
+            help = "Interactively browse dependency graphs of Nix derivations";
+          }
+          {
+            package = nix-diff;
+            help = "Explain why two Nix derivations differ";
+          }
+        ];
+
+        devshell.startup.pre-commit.text = self.checks.${system}.pre-commit-hooks.shellHook;
+
+        env = [
+          {
+            # Additionally configure nix-plugins with our extra builtins file.
+            # We need this for our repo secrets.
+            name = "NIX_CONFIG";
+            value = ''
+              plugin-files = ${pkgs.nix-plugins}/lib/nix/plugins
+              extra-builtins-file = ${self.outPath}/nix/extra-builtins.nix
+            '';
+          }
+        ];
       };
 
       # `nix fmt`

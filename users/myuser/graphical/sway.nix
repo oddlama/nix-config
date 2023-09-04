@@ -80,7 +80,8 @@
   home.sessionVariables = {
     # Let nixos electron wrappers enable wayland
     NIXOS_OZONE_WL = 1;
-    # Cursor invisible, TODO retest with vulkan
+    # Cursor is invisible otherwise
+    # XXX: retest in 2024
     WLR_NO_HARDWARE_CURSORS = 1;
     # opengl backend flickers, also vulkan is love.
     WLR_RENDERER = "vulkan";

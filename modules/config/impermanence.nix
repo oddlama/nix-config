@@ -2,9 +2,86 @@
   config,
   lib,
   ...
-}: {
+}: let
+  inherit
+    (lib)
+    attrNames
+    flip
+    isAttrs
+    mapAttrs
+    mkMerge
+    mkOption
+    optionals
+    types
+    ;
+in {
   # Give agenix access to the hostkey independent of impermanence activation
   age.identityPaths = ["/persist/etc/ssh/ssh_host_ed25519_key"];
+
+  # Expose a home manager module for each user that allows extending
+  # environment.persistence.${sourceDir}.users.${userName} simply by
+  # specifying home.persistence.${sourceDir} in home manager.
+  home-manager.sharedModules = [
+    {
+      options.home.persistence = mkOption {
+        description = "Additional persistence config for the given source path";
+        default = {};
+        type = types.attrsOf (types.submodule {
+          options = {
+            files = mkOption {
+              description = "Additional files to persist via NixOS impermanence.";
+              type = types.listOf (types.either types.attrs types.str);
+              default = [];
+            };
+
+            directories = mkOption {
+              description = "Additional directories to persist via NixOS impermanence.";
+              type = types.listOf (types.either types.attrs types.str);
+              default = [];
+            };
+          };
+        });
+      };
+    }
+  ];
+
+  # For each user that has a home-manager config, merge the locally defined
+  # persistence options that we defined above.
+  imports = let
+    mkUserFiles = map (x:
+      {mode = "600";}
+      // (
+        if isAttrs x
+        then x
+        else {file = x;}
+      ));
+    mkUserDirs = map (x:
+      {mode = "700";}
+      // (
+        if isAttrs x
+        then x
+        else {directory = x;}
+      ));
+  in [
+    {
+      environment.persistence = mkMerge (
+        flip map
+        (attrNames config.home-manager.users)
+        (
+          user: let
+            hmUserCfg = config.home-manager.users.${user};
+          in
+            flip mapAttrs hmUserCfg.home.persistence
+            (_: sourceCfg: {
+              users.${user} = {
+                files = mkUserFiles sourceCfg.files;
+                directories = mkUserDirs sourceCfg.directories;
+              };
+            })
+        )
+      );
+    }
+  ];
 
   # State that should be kept across reboots, but is otherwise
   # NOT important information in any way that needs to be backed up.
@@ -34,7 +111,7 @@
           mode = "0755";
         }
       ]
-      ++ lib.optionals config.networking.wireless.iwd.enable [
+      ++ optionals config.networking.wireless.iwd.enable [
         {
           directory = "/var/lib/iwd";
           user = "root";
@@ -62,7 +139,7 @@
           mode = "0755";
         }
       ]
-      ++ lib.optionals config.security.acme.acceptTerms [
+      ++ optionals config.security.acme.acceptTerms [
         {
           directory = "/var/lib/acme";
           user = "acme";
@@ -70,7 +147,7 @@
           mode = "0755";
         }
       ]
-      ++ lib.optionals config.services.printing.enable [
+      ++ optionals config.services.printing.enable [
         {
           directory = "/var/lib/cups";
           user = "root";
@@ -78,7 +155,7 @@
           mode = "0700";
         }
       ]
-      ++ lib.optionals config.services.fail2ban.enable [
+      ++ optionals config.services.fail2ban.enable [
         {
           directory = "/var/lib/fail2ban";
           user = "fail2ban";
@@ -86,7 +163,7 @@
           mode = "0750";
         }
       ]
-      ++ lib.optionals config.services.postgresql.enable [
+      ++ optionals config.services.postgresql.enable [
         {
           directory = "/var/lib/postgresql";
           user = "postgres";
@@ -94,7 +171,7 @@
           mode = "0700";
         }
       ]
-      ++ lib.optionals config.services.gitea.enable [
+      ++ optionals config.services.gitea.enable [
         {
           directory = config.services.gitea.stateDir;
           user = "gitea";
@@ -102,7 +179,7 @@
           mode = "0700";
         }
       ]
-      ++ lib.optionals config.services.caddy.enable [
+      ++ optionals config.services.caddy.enable [
         {
           directory = config.services.caddy.dataDir;
           user = "caddy";
@@ -110,7 +187,7 @@
           mode = "0700";
         }
       ]
-      ++ lib.optionals config.services.loki.enable [
+      ++ optionals config.services.loki.enable [
         {
           directory = "/var/lib/loki";
           user = "loki";
@@ -118,7 +195,7 @@
           mode = "0700";
         }
       ]
-      ++ lib.optionals config.services.grafana.enable [
+      ++ optionals config.services.grafana.enable [
         {
           directory = config.services.grafana.dataDir;
           user = "grafana";
@@ -126,7 +203,7 @@
           mode = "0700";
         }
       ]
-      ++ lib.optionals config.services.kanidm.enableServer [
+      ++ optionals config.services.kanidm.enableServer [
         {
           directory = "/var/lib/kanidm";
           user = "kanidm";
@@ -134,7 +211,7 @@
           mode = "0700";
         }
       ]
-      ++ lib.optionals config.services.vaultwarden.enable [
+      ++ optionals config.services.vaultwarden.enable [
         {
           directory = "/var/lib/vaultwarden";
           user = "vaultwarden";
@@ -142,7 +219,7 @@
           mode = "0700";
         }
       ]
-      ++ lib.optionals config.services.influxdb2.enable [
+      ++ optionals config.services.influxdb2.enable [
         {
           directory = "/var/lib/influxdb2";
           user = "influxdb2";
@@ -150,7 +227,7 @@
           mode = "0700";
         }
       ]
-      ++ lib.optionals config.services.telegraf.enable [
+      ++ optionals config.services.telegraf.enable [
         {
           directory = "/var/lib/telegraf";
           user = "telegraf";
@@ -158,7 +235,7 @@
           mode = "0700";
         }
       ]
-      ++ lib.optionals config.services.adguardhome.enable [
+      ++ optionals config.services.adguardhome.enable [
         {
           directory = "/var/lib/private/AdGuardHome";
           user = "root";
@@ -166,7 +243,7 @@
           mode = "0700";
         }
       ]
-      ++ lib.optionals config.services.esphome.enable [
+      ++ optionals config.services.esphome.enable [
         {
           directory = "/var/lib/private/esphome";
           user = "root";
@@ -174,7 +251,7 @@
           mode = "0700";
         }
       ]
-      ++ lib.optionals config.services.home-assistant.enable [
+      ++ optionals config.services.home-assistant.enable [
         {
           directory = config.services.home-assistant.configDir;
           user = "hass";

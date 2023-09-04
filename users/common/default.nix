@@ -4,6 +4,7 @@
 
     ./git.nix
     ./htop.nix
+    ./impermanence.nix
     ./neovim.nix
     ./shell
     ./utils.nix

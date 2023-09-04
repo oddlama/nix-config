@@ -84,7 +84,7 @@ function setup_keybinds() {
 
     local keys_Backspace=(      "${terminfo[kbs]}"   '^?')
     local keys_CtrlBackspace=(  "${terminfo[cub1]}"  '^H')
-    local keys_AltBackspace=(   "${terminfo[kbs]}"   '\e^?')
+    local keys_AltBackspace=(   '\e^?')
 
     local keys_Delete=(         "${terminfo[kdch1]}" '\e[3~' )
     local keys_ShiftDelete=(    "${terminfo[kDC]}"   '\e[3;2~' )

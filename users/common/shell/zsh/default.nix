@@ -19,16 +19,16 @@
         unset HISTFILE
       '')
       (lib.mkAfter (''
-              function atuin-prefix-search() {
-                  local out
-                  if out=$(${pkgs.sqlite}/bin/sqlite3 -readonly ~/.local/share/atuin/history.db \
-                      'SELECT command FROM history WHERE command LIKE cast('"x'$(str_to_hex "$_atuin_search_prefix")'"' as text) || "%" ORDER BY timestamp DESC LIMIT 1 OFFSET '"$_atuin_search_offset"); then
-          [[ -z "$out" ]] && return 1
-                      BUFFER=$out
-                  else
-                      return 1
-                  fi
-              }; zle -N atuin-prefix-search
+          function atuin-prefix-search() {
+              local out
+              if out=$(${pkgs.sqlite}/bin/sqlite3 -readonly ~/.local/share/atuin/history.db \
+                  'SELECT command FROM history WHERE command LIKE cast('"x'$(str_to_hex "$_atuin_search_prefix")'"' as text) || "%" ORDER BY timestamp DESC LIMIT 1 OFFSET '"$_atuin_search_offset"); then
+                  [[ -z "$out" ]] && return 1
+                  BUFFER=$out
+              else
+                  return 1
+              fi
+          }; zle -N atuin-prefix-search
         ''
         + lib.readFile ./zshrc))
     ];

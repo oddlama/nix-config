@@ -17,7 +17,6 @@
     ./config/ssh.nix
     ./config/system.nix
     ./config/users.nix
-    ./config/xdg.nix
 
     ./meta/kanidm.nix
     ./meta/microvms.nix

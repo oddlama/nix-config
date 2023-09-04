@@ -1,11 +1,10 @@
 {pkgs, ...}: {
   imports = [
     ./modules/uid.nix
-    ./modules/minimal.nix
 
     ./git.nix
     ./htop.nix
-    ./neovim
+    ./neovim.nix
     ./shell
     ./utils.nix
   ];

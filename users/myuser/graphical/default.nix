@@ -44,6 +44,10 @@
   # TODO mouse speed
   # TODO persist tmp malte ddelete.
   # TODO ncdu
+  home.shellAliases = {
+    p = "cd ~/projects";
+    zf = "zathura --fork";
+  };
 
   # Needed to fix cursors in firefox under wayland, see https://github.com/NixOS/nixpkgs/issues/207339#issuecomment-1374497558
   gtk = {

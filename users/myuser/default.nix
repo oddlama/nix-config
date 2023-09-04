@@ -16,9 +16,7 @@ in {
     inherit (config.repo.secrets.global.myuser) hashedPassword;
     createHome = true;
     group = myuser;
-    extraGroups =
-      ["wheel" "input" "video"]
-      ++ lib.optionals config.sound.enable ["audio"];
+    extraGroups = ["wheel" "input" "video"];
     isNormalUser = true;
     autoSubUidGidRange = false;
     shell = pkgs.zsh;
@@ -69,6 +67,7 @@ in {
     imports = [
       ../common
       ./graphical
+      ./neovim
 
       ./dev.nix
       ./gpg.nix
@@ -78,11 +77,6 @@ in {
     home = {
       inherit (config.users.users.${myuser}) uid;
       username = config.users.users.${myuser}.name;
-      # TODO this shall be moved!
-      shellAliases = {
-        p = "cd ~/projects";
-        zf = "zathura --fork";
-      };
     };
   };
 }

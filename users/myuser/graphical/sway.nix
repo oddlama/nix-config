@@ -18,9 +18,10 @@
         window.titlebar = false;
         input = {
           "type:keyboard" = {
-            xkb_layout = "de";
             repeat_delay = "235";
             repeat_rate = "60";
+            xkb_layout = "de";
+            xkb_numlock = "enabled";
           };
           "type:mouse" = {
             accel_profile = "flat";

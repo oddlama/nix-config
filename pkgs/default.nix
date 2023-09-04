@@ -3,6 +3,7 @@
   (import ./oauth2-proxy)
   (_self: super: {
     kanidm-secret-manipulator = super.callPackage ./kanidm-secret-manipulator.nix {};
+    segoe-ui-ttf = super.callPackage ./segoe-ui-ttf.nix {};
     kanidm = super.kanidm.overrideAttrs (_finalAttrs: _previousAttrs: {
       patches = [
         (super.fetchpatch {

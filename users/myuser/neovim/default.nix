@@ -6,8 +6,9 @@
   };
 
   xdg.configFile = {
-    "nvim/lua".source = ./lua;
+    "nvim/ftplugin".source = ./ftplugin;
     "nvim/init.lua".source = ./init.lua;
+    "nvim/lua".source = ./lua;
   };
 
   # TODO NO! NO! all of this goes away

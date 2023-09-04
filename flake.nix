@@ -49,6 +49,11 @@
 
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    nixpkgs-wayland = {
+      url = "github:nix-community/nixpkgs-wayland";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     microvm = {
       url = "github:astro/microvm.nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -85,6 +90,7 @@
     microvm,
     nixos-generators,
     nixpkgs,
+    nixpkgs-wayland,
     pre-commit-hooks,
     ...
   } @ inputs: let
@@ -140,9 +146,10 @@
           import ./lib inputs
           ++ import ./pkgs/default.nix
           ++ [
-            microvm.overlay
-            elewrap.overlays.default
             devshell.overlays.default
+            elewrap.overlays.default
+            microvm.overlay
+            nixpkgs-wayland.overlay
           ];
       };
 

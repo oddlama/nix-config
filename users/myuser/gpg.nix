@@ -1,7 +1,17 @@
-{lib, ...}: {
+{
+  lib,
+  nixosConfig,
+  ...
+}: {
   programs.gpg = {
     enable = true;
     scdaemonSettings.disable-ccid = true;
+    publicKeys = [
+      {
+        source = nixosConfig.age.secrets.my-gpg-pubkey-yubikey.path;
+        trust = 5;
+      }
+    ];
     settings = {
       # https://github.com/drduh/config/blob/master/gpg.conf
       # https://www.gnupg.org/documentation/manuals/gnupg/GPG-Configuration-Options.html
@@ -47,29 +57,7 @@
       use-agent = true;
       # Disable recipient key ID in messages
       throw-keyids = true;
-      # Default/trusted key ID to use (helpful with throw-keyids)
-      #default-key 0xFF3E7D88647EBCDB
-      #trusted-key 0xFF3E7D88647EBCDB
-      # Group recipient keys (preferred ID last)
-      #group keygroup = 0xFF00000000000001 0xFF00000000000002 0xFF3E7D88647EBCDB
-      # Keyserver URL
-      #keyserver hkps://keys.openpgp.org
-      #keyserver hkps://keyserver.ubuntu.com:443
-      #keyserver hkps://hkps.pool.sks-keyservers.net
-      #keyserver hkps://pgp.ocf.berkeley.edu
-      # Proxy to use for keyservers
-      #keyserver-options http-proxy=socks5-hostname://127.0.0.1:9050
-      # Verbose output
-      #verbose
-      # Show expired subkeys
-      #list-options show-unusable-subkeys
     };
-    # TODO publicKeys = [
-    # TODO   {
-    # TODO     source = ./yubikey.gpg;
-    # TODO     trust = 5;
-    # TODO   }
-    # TODO ];
   };
   services.gpg-agent = {
     enable = true;

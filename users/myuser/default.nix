@@ -32,6 +32,7 @@ in {
       ./graphical
       ./neovim
 
+      ./git.nix
       ./dev.nix
       ./gpg.nix
       ./ssh.nix

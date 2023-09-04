@@ -1,8 +1,11 @@
 {
   config,
   nixosConfig,
+  lib,
   ...
-}: {
+}: let
+  inherit (lib) optionals;
+in {
   home.persistence."/state".files =
     [
       # nothing yet ...
@@ -28,7 +31,7 @@
       ".local/state/nvim"
       ".cache/nvim"
     ]
-    ++ optionals nixosConfig.hardware.nvidia.enable [
+    ++ optionals nixosConfig.hardware.nvidia.modesetting.enable [
       ".cache/nvidia" # GLCache
     ]
     ++ optionals nixosConfig.services.pipewire.enable [

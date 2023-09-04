@@ -49,7 +49,7 @@ in {
   # persistence options that we defined above.
   imports = let
     mkUserFiles = map (x:
-      {mode = "600";}
+      {parentDirectory.mode = "700";}
       // (
         if isAttrs x
         then x

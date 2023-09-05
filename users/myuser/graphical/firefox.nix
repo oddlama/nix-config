@@ -8,4 +8,15 @@
     # To allow vaapi access for hardware acceleration
     MOZ_DISABLE_RDD_SANDBOX = 1;
   };
+
+  home.persistence."/state".directories = [
+    "Downloads"
+  ];
+
+  xdg.mimeApps.defaultApplications = {
+    "text/html" = ["firefox.desktop"];
+    "text/xml" = ["firefox.desktop"];
+    "x-scheme-handler/http" = ["firefox.desktop"];
+    "x-scheme-handler/https" = ["firefox.desktop"];
+  };
 }

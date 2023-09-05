@@ -1,20 +1,23 @@
 {pkgs, ...}: {
   imports = [
+    ./discord.nix
     ./firefox.nix
     ./kitty.nix
+    ./signal.nix
     ./sway.nix
   ];
 
   home = {
     packages = with pkgs; [
-      discord
       thunderbird
-      signal-desktop
       chromium
       zathura
       feh
     ];
 
+    # TODO sway config
+    # TODO kitty terminfo missing with ssh root@localhost
+    # TODO nvim coloscheme missing on reboot.... what state is missing?
     # TODO VP9 hardware video decoding blocklisted
     # TODO gpg switch to sk
     # TODO some font icons not showing neovim
@@ -25,13 +28,7 @@
     };
 
     persistence."/persist".directories = [
-      ".config/discord" # Bad Discord! BAD! Saves its state in .config tststs
-      ".config/Signal" # L take, electron.
       "projects"
-    ];
-
-    persistence."/state".directories = [
-      "Downloads"
     ];
   };
 }

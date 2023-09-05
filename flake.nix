@@ -191,6 +191,7 @@
       devShells.default = pkgs.devshell.mkShell {
         name = "nix-config";
         packages = with pkgs; [
+          faketty # Used in my colmena patch to show progress, XXX: should theoretically be propagated automatically from the patch....
           nix # Always use the nix version from this flake's nixpkgs versios, so that nix-plugins (below) doesn't fail because of different nix versions.
         ];
 

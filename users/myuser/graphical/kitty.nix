@@ -4,15 +4,10 @@
   };
   programs.kitty = {
     enable = true;
-    package = pkgs.kitty.overrideAttrs (_finalAttrs: _prevAttrs: {
-      doCheck = false;
-    });
-    font = {
-      package = pkgs.nerdfonts;
-      name = "FiraCode Nerd Font";
-      size = 10;
-    };
     settings = {
+      font_family = "FiraCode Nerd Font";
+      font_size = 20;
+
       # Do not wait for inherited child processes.
       close_on_child_death = "yes";
 

@@ -8,9 +8,6 @@
         home.stateVersion = config.system.stateVersion;
       }
     ];
-    extraSpecialArgs = {
-      nixosConfig = config;
-    };
   };
 
   # Required even when using home-manager's zsh module since the /etc/profile load order

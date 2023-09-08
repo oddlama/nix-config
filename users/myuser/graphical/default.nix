@@ -1,5 +1,8 @@
 {pkgs, ...}: {
   imports = [
+    #./games/league-of-legends.nix
+    #./games/steam.nix
+
     ./discord.nix
     ./firefox.nix
     ./kitty.nix
@@ -13,9 +16,16 @@
       chromium
       zathura
       feh
+      sirula
     ];
 
+    # TODO screenshot selection/all and copy clipboard
+    # TODO screenshot selection/all and save
+    # TODO screenshot selection and scan qr and copy clipboard
+    # TODO screenshot selection and ocr and copy clipboard
     # TODO sway config
+    # TODO sway shortcuts
+    # TODO enable nodeadkeys
     # TODO kitty terminfo missing with ssh root@localhost
     # TODO nvim coloscheme missing on reboot.... what state is missing?
     # TODO VP9 hardware video decoding blocklisted
@@ -24,11 +34,13 @@
 
     shellAliases = {
       p = "cd ~/projects";
-      zf = "zathura --fork";
+      zf = "zathura --fork"; # XXX: do i need this or can i just xdg-open?
     };
 
     persistence."/persist".directories = [
       "projects"
     ];
+
+    xdg.mimeApps.enable = true;
   };
 }

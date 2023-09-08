@@ -1,4 +1,4 @@
-{
+{pkgs, ...}: {
   boot.blacklistedKernelModules = ["nouveau"];
 
   hardware = {
@@ -13,6 +13,9 @@
       enable = true;
       driSupport = true;
       driSupport32Bit = true;
+      extraPackages = with pkgs; [
+        nvidia-vaapi-driver
+      ];
     };
   };
 }

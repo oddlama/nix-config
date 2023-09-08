@@ -1,14 +1,21 @@
-{pkgs, ...}: {
-  imports = [
-    #./games/league-of-legends.nix
-    #./games/steam.nix
-
-    ./discord.nix
-    ./firefox.nix
-    ./kitty.nix
-    ./signal.nix
-    ./sway.nix
-  ];
+{
+  lib,
+  pkgs,
+  nixosConfig,
+  ...
+}: {
+  imports =
+    [
+      ./discord.nix
+      ./firefox.nix
+      ./kitty.nix
+      ./signal.nix
+      ./sway.nix
+    ]
+    ++ lib.optionals (nixosConfig.node.name == "potksed") [
+      ./games/lutris.nix
+      #./games/steam.nix
+    ];
 
   home = {
     packages = with pkgs; [

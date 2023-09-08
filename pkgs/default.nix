@@ -20,12 +20,5 @@
 
       doCheck = false;
     });
-    signal-desktop = super.signal-desktop.overrideAttrs (_finalAttrs: _previousAttrs: {
-      version = "6.29.1";
-      src = super.fetchurl {
-        url = "https://updates.signal.org/desktop/apt/pool/s/signal-desktop/signal-desktop_6.29.1_amd64.deb";
-        hash = "sha256-QtQVH8cs42vwzJNiq6klaSQO2pmB80OYjzAR4Bibb/s";
-      };
-    });
   })
 ]

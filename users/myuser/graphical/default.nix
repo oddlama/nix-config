@@ -40,7 +40,7 @@
     persistence."/persist".directories = [
       "projects"
     ];
-
-    xdg.mimeApps.enable = true;
   };
+
+  xdg.mimeApps.enable = true;
 }

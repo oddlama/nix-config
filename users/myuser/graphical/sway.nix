@@ -130,7 +130,7 @@ in {
       # distinguish by node name here, but at least this way it can stay in the
       # sway related config file.
       // {
-        potksed = let
+        kroma = let
           monitorMain = "LG Electronics 27GN950 111NTGYLB719";
           monitorLeft = "LG Electronics LG Ultra HD 0x00077939";
         in {

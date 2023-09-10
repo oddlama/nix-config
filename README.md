@@ -16,7 +16,7 @@ This is my personal nix config. It's still in the making, but this is what I got
 |  | Name | Type | Purpose
 ---|---|---|---
 💻 | nom | Gigabyte AERO 15-W8 (i7-8750H) | My laptop and my main portable development machine <sub>Framework when?</sub>
-🖥️ | potksed | PC (AMD Ryzen 9 5900X) | Main workstation and development machine
+🖥️ | kroma | PC (AMD Ryzen 9 5900X) | Main workstation and development machine
 🖥️ | ward | ODROID H3 | Energy efficient SBC for my home firewall and some lightweight services using microvms.
 🥔 | zackbiene | ODROID N2+ | ARM SBC for home automation, isolating the sketchy stuff from my main network
 ☁️  | envoy | Hetzner Cloud server | Mailserver

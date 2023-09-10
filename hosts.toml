@@ -1,8 +1,4 @@
-#[kroma]
-#type = "nixos"
-#system = "x86_64-linux"
-
-[potksed]
+[kroma]
 type = "nixos"
 system = "x86_64-linux"
 

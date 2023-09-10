@@ -15,7 +15,7 @@
 
   home-manager.users.root = {
     imports = [
-      ../common
+      ../modules
     ];
 
     home = {

@@ -32,7 +32,7 @@
       hostname = {
         format = "[$ssh_symbol$hostname]($style)";
         ssh_only = false;
-        ssh_symbol = "🌐";
+        ssh_symbol = "->";
         style = "cyan";
       };
       directory = {

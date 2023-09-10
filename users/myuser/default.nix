@@ -28,7 +28,7 @@ in {
 
   home-manager.users.${myuser} = {
     imports = [
-      ../common
+      ../modules
       ./dev
       ./graphical
       ./neovim

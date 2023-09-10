@@ -12,13 +12,14 @@
       ./signal.nix
       ./sway.nix
     ]
-    ++ lib.optionals (nixosConfig.node.name == "potksed") [
+    ++ lib.optionals nixosConfig.graphical.gaming.enable [
       ./games/lutris.nix
-      #./games/steam.nix
     ];
 
   home = {
     packages = with pkgs; [
+      appimage-run
+      yt-dlp
       thunderbird
       chromium
       zathura
@@ -26,6 +27,7 @@
       sirula
     ];
 
+    # TODO emoji in firefox are wrong
     # TODO screenshot selection/all and copy clipboard
     # TODO screenshot selection/all and save
     # TODO screenshot selection and scan qr and copy clipboard

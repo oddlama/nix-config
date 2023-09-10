@@ -26,6 +26,7 @@
   ];
 
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod"];
+  graphical.gaming.enable = true;
 
   # TODO goodbye once -sk keys.
   environment.shellInit = ''

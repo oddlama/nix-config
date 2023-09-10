@@ -188,6 +188,7 @@ in {
     gtk.enable = true;
     name = "Adwaita-dark";
     package = pkgs.gnome.adwaita-icon-theme;
+    # TODO XXX: not working
     size = 24;
   };
 

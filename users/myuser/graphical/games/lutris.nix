@@ -6,6 +6,7 @@
   home.packages = with pkgs; [
     lutris
     wineWowPackages.stable
+    winetricks
   ];
 
   home.persistence."/state".directories = [
@@ -17,6 +18,7 @@
   xdg.desktopEntries.LeagueOfLegends = {
     name = "League of Legends";
     icon = "league-of-legends";
+    # XXX: TODO as popup dunst?
     exec = toString (pkgs.writeShellScript "league-launcher-script" ''
       set -euo pipefail
       if [[ "$(sysctl -n abi.vsyscall32)" != 0 ]]; then

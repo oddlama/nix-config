@@ -29,11 +29,11 @@ in {
   home-manager.users.${myuser} = {
     imports = [
       ../common
+      ./dev
       ./graphical
       ./neovim
 
       ./git.nix
-      ./dev.nix
       ./gpg.nix
       ./ssh.nix
     ];

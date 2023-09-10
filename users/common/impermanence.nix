@@ -1,7 +1,7 @@
 {
   config,
-  nixosConfig,
   lib,
+  nixosConfig,
   ...
 }: let
   inherit (lib) optionals;
@@ -20,17 +20,6 @@ in {
       ".cache/nix" # nix eval cache
       ".cache/nix-index"
     ]
-    ++ optionals config.programs.firefox.enable [
-      ".cache/mozilla"
-    ]
-    ++ optionals config.programs.direnv.enable [
-      ".local/share/direnv"
-    ]
-    ++ optionals config.programs.neovim.enable [
-      ".local/share/nvim"
-      ".local/state/nvim"
-      ".cache/nvim"
-    ]
     ++ optionals nixosConfig.hardware.nvidia.modesetting.enable [
       ".cache/nvidia" # GLCache
     ]
@@ -42,9 +31,7 @@ in {
     [
       ".local/share/nix" # Repl history
     ]
-    ++ optionals config.programs.firefox.enable [
-      ".mozilla"
-    ]
+    # TODO away once atuin is gone
     ++ optionals config.programs.atuin.enable [
       ".local/share/atuin"
     ]

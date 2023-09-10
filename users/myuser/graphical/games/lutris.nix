@@ -4,7 +4,14 @@
   ...
 }: {
   home.packages = with pkgs; [
-    lutris
+    (lutris.override {
+      # Needed to stop ntlm_auth warnings in lutris
+      extraLibraries = p: [p.jansson];
+    })
+
+    openssl
+    vulkan-tools
+    dxvk
     wineWowPackages.stable
     winetricks
   ];

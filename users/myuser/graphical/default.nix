@@ -13,7 +13,7 @@
       ./sway.nix
     ]
     ++ lib.optionals nixosConfig.graphical.gaming.enable [
-      ./games/lutris.nix
+      ./games/bottles.nix
     ];
 
   home = {

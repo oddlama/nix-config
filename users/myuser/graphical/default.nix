@@ -17,6 +17,7 @@
     ]
     ++ lib.optionals nixosConfig.graphical.gaming.enable [
       ./games/bottles.nix
+      ./games/minecraft.nix
     ];
 
   home = {

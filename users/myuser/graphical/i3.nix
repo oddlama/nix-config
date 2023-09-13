@@ -146,6 +146,11 @@ in {
     .${nixosConfig.node.name}
     or {};
 
+  home.sessionVariables = {
+    # Make gtk apps bigger
+    GDK_SCALE = 2;
+  };
+
   home.file.".xinitrc".text = ''
     if test -z "$DBUS_SESSION_BUS_ADDRESS"; then
       eval $(dbus-launch --exit-with-session --sh-syntax)

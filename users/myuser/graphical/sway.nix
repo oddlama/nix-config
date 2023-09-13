@@ -177,27 +177,7 @@ in {
   };
 
   home.packages = with pkgs; [
-    xdg-utils
     wdisplays
     wl-clipboard
-    pinentry # For yubikey
-    xdragon
   ];
-
-  home.pointerCursor = {
-    gtk.enable = true;
-    name = "Adwaita-dark";
-    package = pkgs.gnome.adwaita-icon-theme;
-    # TODO XXX: not working
-    size = 24;
-  };
-
-  # Needed to fix cursors in firefox under wayland, see https://github.com/NixOS/nixpkgs/issues/207339#issuecomment-1374497558
-  gtk = {
-    enable = true;
-    theme = {
-      package = pkgs.gnome.gnome-themes-extra;
-      name = "Adwaita-dark";
-    };
-  };
 }

@@ -10,7 +10,10 @@
       ./firefox.nix
       ./kitty.nix
       ./signal.nix
-      ./sway.nix
+      # XXX: disabled for the time being because gaming under nvidia+wayland has too many bugs
+      # XXX: retest this in the future. Problems were flickering under gles, black screens and refresh issues under vulkan, black wine windows.
+      # ./sway.nix
+      ./i3.nix
     ]
     ++ lib.optionals nixosConfig.graphical.gaming.enable [
       ./games/bottles.nix
@@ -19,12 +22,15 @@
   home = {
     packages = with pkgs; [
       appimage-run
-      yt-dlp
-      thunderbird
       chromium
-      zathura
       feh
+      pinentry # For yubikey
       sirula
+      thunderbird
+      xdg-utils
+      xdragon
+      yt-dlp
+      zathura
     ];
 
     # TODO emoji in firefox are wrong
@@ -49,6 +55,23 @@
     persistence."/persist".directories = [
       "projects"
     ];
+
+    pointerCursor = {
+      gtk.enable = true;
+      name = "Adwaita-dark";
+      package = pkgs.gnome.adwaita-icon-theme;
+      # TODO XXX: not working
+      size = 24;
+    };
+  };
+
+  # Needed to fix cursors in firefox under wayland, see https://github.com/NixOS/nixpkgs/issues/207339#issuecomment-1374497558
+  gtk = {
+    enable = true;
+    theme = {
+      package = pkgs.gnome.gnome-themes-extra;
+      name = "Adwaita-dark";
+    };
   };
 
   xdg.mimeApps.enable = true;

@@ -12,6 +12,7 @@ in {
   imports = [
     ./fonts.nix
     ./wayland.nix
+    ./xserver.nix
     ./steam.nix
   ];
 

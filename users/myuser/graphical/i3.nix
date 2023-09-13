@@ -149,6 +149,8 @@ in {
   home.sessionVariables = {
     # Make gtk apps bigger
     GDK_SCALE = 2;
+    # Make QT apps bigger
+    QT_SCREEN_SCALE_FACTORS = 2;
   };
 
   home.file.".xinitrc".text = ''

@@ -2,8 +2,9 @@
   (import ./caddy.nix)
   (import ./oauth2-proxy)
   (_self: super: {
-    kanidm-secret-manipulator = super.callPackage ./kanidm-secret-manipulator.nix {};
     segoe-ui-ttf = super.callPackage ./segoe-ui-ttf.nix {};
+
+    kanidm-secret-manipulator = super.callPackage ./kanidm-secret-manipulator.nix {};
     kanidm = super.kanidm.overrideAttrs (_finalAttrs: _previousAttrs: {
       patches = [
         (super.fetchpatch {
@@ -19,6 +20,16 @@
       ];
 
       doCheck = false;
+    });
+
+    bottles-unwrapped = super.bottles-unwrapped.overrideAttrs (_finalAttrs: _previousAttrs: {
+      version = "51.9";
+      src = super.fetchFromGitHub {
+        owner = "bottlesdevs";
+        repo = "bottles";
+        rev = "51.9";
+        hash = "sha256-iZUszwVcbVn6Xsqou6crSp9gJBRmm5vEqxS87h/s3PQ=";
+      };
     });
   })
 ]

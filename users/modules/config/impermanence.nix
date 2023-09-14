@@ -19,6 +19,7 @@ in {
       ".cache/fontconfig"
       ".cache/nix" # nix eval cache
       ".cache/nix-index"
+      ".config/dconf" # some apps store their configuration using dconf
     ]
     ++ optionals nixosConfig.hardware.nvidia.modesetting.enable [
       ".cache/nvidia" # GLCache

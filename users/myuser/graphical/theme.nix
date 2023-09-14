@@ -4,7 +4,7 @@
     x11.enable = true;
     package = pkgs.bibata-cursors;
     name = "Bibata-Modern-Ice";
-    size = 32;
+    size = 24;
   };
 
   xresources.properties = {
@@ -40,7 +40,7 @@
     };
 
     theme = {
-      name = "WhiteSur-dark-solid";
+      name = "WhiteSur-Dark-solid";
       package = pkgs.whitesur-gtk-theme;
     };
 
@@ -49,12 +49,10 @@
     gtk4.extraConfig = gtk34extraConfig;
   };
 
+  home.sessionVariables.GTK_THEME = "WhiteSur-Dark-solid";
+
   qt = {
     enable = true;
-    platformTheme = "gnome";
-    style = {
-      name = "adwaita";
-      package = pkgs.adwaita-qt;
-    };
+    platformTheme = "gtk";
   };
 }

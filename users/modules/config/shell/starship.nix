@@ -19,7 +19,6 @@
         "($jobs )"
         "($python )"
         "($rust )"
-        "($nix_shell )"
         "$time"
       ];
 
@@ -79,10 +78,6 @@
           "[($untracked )](blue)"
           "[($ahead_behind )](green)"
         ];
-      };
-      nix_shell = {
-        format = ''[$symbol$state( \($name\))]($style)'';
-        heuristic = true; # Also detect nix shell
       };
       status = {
         disabled = false;

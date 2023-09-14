@@ -3,7 +3,7 @@
     prismlauncher
   ];
 
-  home.persistence."/state".directories = [
+  home.persistence."/persist".directories = [
     ".local/share/PrismLauncher"
   ];
 }

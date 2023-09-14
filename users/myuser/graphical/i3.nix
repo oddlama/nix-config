@@ -7,6 +7,7 @@
 }: let
   inherit
     (lib)
+    escapeShellArg
     mapAttrs'
     nameValuePair
     ;
@@ -166,6 +167,9 @@ in {
     autorandr -c
     xset mouse 1 0
     xset r rate 235 60
+
+    [[ -f "$HOME"/${escapeShellArg config.xsession.scriptPath} ]] \
+      && source "$HOME"/${escapeShellArg config.xsession.scriptPath}
 
     exec i3
   '';

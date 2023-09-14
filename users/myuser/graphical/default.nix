@@ -10,6 +10,7 @@
       ./firefox.nix
       ./kitty.nix
       ./signal.nix
+      ./theme.nix
       # XXX: disabled for the time being because gaming under nvidia+wayland has too many bugs
       # XXX: retest this in the future. Problems were flickering under gles, black screens and refresh issues under vulkan, black wine windows.
       # ./sway.nix
@@ -27,6 +28,7 @@
       feh
       pinentry # For yubikey
       sirula
+      gamescope
       thunderbird
       xdg-utils
       xdragon
@@ -56,44 +58,6 @@
     persistence."/persist".directories = [
       "projects"
     ];
-
-    pointerCursor = {
-      gtk.enable = true;
-      name = "Adwaita-dark";
-      package = pkgs.gnome.adwaita-icon-theme;
-      # TODO XXX: not working
-      size = 24;
-    };
-  };
-
-  # Needed to fix cursors in firefox under wayland, see https://github.com/NixOS/nixpkgs/issues/207339#issuecomment-1374497558
-  gtk = {
-    enable = true;
-    theme = {
-      package = pkgs.gnome.gnome-themes-extra;
-      name = "Adwaita-dark";
-    };
-
-    gtk2.extraConfig = "gtk-application-prefer-dark-theme = true";
-    gtk3.extraConfig = {
-      gtk-application-prefer-dark-theme = true;
-      gtk-cursor-theme-size = 24;
-      gtk-enable-animations = true;
-      gtk-xft-antialias = 1;
-      gtk-xft-dpi = 160;
-      gtk-xft-hinting = 1;
-      gtk-xft-hintstyle = "hintslight";
-      gtk-xft-rgba = "rgb";
-    };
-  };
-
-  qt = {
-    enable = true;
-    platformTheme = "gnome";
-    style = {
-      name = "adwaita";
-      package = pkgs.adwaita-qt;
-    };
   };
 
   xdg.mimeApps.enable = true;

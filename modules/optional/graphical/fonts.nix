@@ -4,11 +4,37 @@
   ...
 }: {
   fonts = {
-    fontconfig.defaultFonts = {
-      sansSerif = lib.mkBefore ["Segoe UI"];
-      #serif = [];
-      monospace = ["FiraCode Nerd Font"];
-      emoji = ["Segoe UI Emoji" "Noto Fonts Emoji"];
+    fontconfig = {
+      # Always prefer emojis even if the original font would provide a glyph
+      localConf = ''
+        <?xml version="1.0"?>
+        <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+        <fontconfig>
+            <alias binding="weak">
+                <family>monospace</family>
+                <prefer>
+                    <family>emoji</family>
+                </prefer>
+            </alias>
+            <alias binding="weak">
+                <family>sans-serif</family>
+                <prefer>
+                    <family>emoji</family>
+                </prefer>
+            </alias>
+            <alias binding="weak">
+                <family>serif</family>
+                <prefer>
+                    <family>emoji</family>
+                </prefer>
+            </alias>
+        </fontconfig>
+      '';
+      defaultFonts = {
+        sansSerif = lib.mkBefore ["Segoe UI"];
+        monospace = ["FiraCode Nerd Font"];
+        emoji = ["Segoe UI Emoji" "Noto Fonts Emoji"];
+      };
     };
 
     packages = with pkgs; [

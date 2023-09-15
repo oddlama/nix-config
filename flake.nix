@@ -54,6 +54,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nixseparatedebuginfod = {
+      url = "github:symphorien/nixseparatedebuginfod";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
+    };
+
     microvm = {
       url = "github:astro/microvm.nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -91,6 +97,7 @@
     nixos-generators,
     nixpkgs,
     nixpkgs-wayland,
+    nixseparatedebuginfod,
     pre-commit-hooks,
     ...
   } @ inputs: let
@@ -150,6 +157,7 @@
             elewrap.overlays.default
             microvm.overlay
             nixpkgs-wayland.overlay
+            nixseparatedebuginfod.overlays.default
           ];
       };
 

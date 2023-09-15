@@ -7,6 +7,7 @@
   home-manager,
   impermanence,
   nixos-nftables-firewall,
+  nixseparatedebuginfod,
   ...
 } @ inputs: {
   # The name of the generated node
@@ -35,5 +36,6 @@
       home-manager.nixosModules.default
       impermanence.nixosModules.impermanence
       nixos-nftables-firewall.nixosModules.default
+      nixseparatedebuginfod.nixosModules.default
     ];
 }

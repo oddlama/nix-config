@@ -17,7 +17,7 @@
     ../../modules/optional/dev
     ../../modules/optional/graphical
     ../../modules/optional/laptop.nix
-    #../../modules/optional/sound.nix
+    ../../modules/optional/sound.nix
     ../../modules/optional/zfs.nix
 
     ../../users/myuser

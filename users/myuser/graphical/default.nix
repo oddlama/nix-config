@@ -37,6 +37,8 @@
       zathura
     ];
 
+    # TODO thunderbird date time format is wrong even though this is C.utf8
+    # TODO yubikey pinentry is curses but should be graphical
     # TODO accounts.concats accounts.calendar
     # TODO test different pinentrys (pinentry gtk?)
     # TODO agenix rekey edit secret should create temp files with same extension

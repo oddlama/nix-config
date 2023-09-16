@@ -1,5 +1,6 @@
 {...}: {
   imports = [
+    ./secrets.nix
     ./uid.nix
 
     ./config/htop.nix

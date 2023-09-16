@@ -17,11 +17,16 @@ in {
     shell = pkgs.zsh;
   };
 
-  # Needed for gtk
-  programs.dconf.enable = true;
+  repo.secretFiles.user-myuser = ./secrets/user.nix.age;
 
   age.secrets.my-gpg-pubkey-yubikey = {
-    rekeyFile = ./yubikey.gpg.age;
+    rekeyFile = ./secrets/yubikey.gpg.age;
+    group = myuser;
+    mode = "640";
+  };
+
+  age.secrets.mailpw-206fd3b8 = {
+    rekeyFile = ./secrets/mailpw-206fd3b8.age;
     group = myuser;
     mode = "640";
   };
@@ -38,6 +43,9 @@ in {
       ./ssh.nix
     ];
 
+    # Remove dependence on username (which also comes from these secrets) to
+    # avoid triggering infinite recursion.
+    userSecretsName = "user-myuser";
     home = {
       inherit (config.users.users.${myuser}) uid;
       username = config.users.users.${myuser}.name;

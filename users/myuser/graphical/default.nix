@@ -11,6 +11,7 @@
       ./kitty.nix
       ./signal.nix
       ./theme.nix
+      ./thunderbird.nix
       # XXX: disabled for the time being because gaming under nvidia+wayland has too many bugs
       # XXX: retest this in the future. Problems were flickering under gles, black screens and refresh issues under vulkan, black wine windows.
       # ./sway.nix
@@ -36,6 +37,13 @@
       zathura
     ];
 
+    # TODO accounts.concats accounts.calendar
+    # TODO test different pinentrys (pinentry gtk?)
+    # TODO agenix rekey edit secret should create temp files with same extension
+    # TODO mod+f1-4 for left monitor?
+    # TODO autostart signal, firefox (both windows), etc.
+    # TODO agenix rekey caches in /tmp which is removed each reboot and could be improved
+    # TODO entering devshell takes some time after reboot
     # TODO emoji in firefox are wrong
     # TODO screenshot selection/all and copy clipboard
     # TODO screenshot selection/all and save

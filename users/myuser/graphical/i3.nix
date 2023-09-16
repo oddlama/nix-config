@@ -173,4 +173,8 @@ in {
 
     exec i3
   '';
+
+  home.packages = with pkgs; [
+    xclip
+  ];
 }

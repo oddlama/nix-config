@@ -21,4 +21,9 @@ in {
     default = false;
     type = types.bool;
   };
+
+  config = {
+    # Needed for gtk
+    programs.dconf.enable = true;
+  };
 }

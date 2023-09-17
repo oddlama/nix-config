@@ -21,16 +21,19 @@
       t = "tag -s -m ''";
       ci = "commit -v -S";
       cam = "commit -v -S --amend";
-      fixup = ''!f() { TARGET=$(git rev-parse \"$1\"); git commit --fixup=$TARGET ''${@:2} && EDITOR=true git rebase -i --gpg-sign --autostash --autosquash $TARGET^; }; f'';
+      fixup = ''!f() { TARGET=$(git rev-parse "$1"); git commit --fixup=$TARGET ''${@:2} && EDITOR=true git rebase -i --gpg-sign --autostash --autosquash $TARGET^; }; f'';
+      commit-reuse-message = ''!git commit --edit --file "$(git rev-parse --git-dir)"/COMMIT_EDITMSG'';
+      cir = "commit-reuse-message -v -S";
     };
   };
 
   home.shellAliases = rec {
     g = "gitui";
-    gs = "git status";
     ga = "git add";
-    gc = "git commit -v -S";
-    gca = "${gc} --amend";
-    # TODO command to make new commit with old commit editmsg, beware worktrees have different path
+    gc = "git ci";
+    gca = "git ci --amend";
+    gcl = "git clone";
+    gcr = "git cir";
+    gs = "git s";
   };
 }

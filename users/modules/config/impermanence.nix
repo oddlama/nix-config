@@ -32,10 +32,6 @@ in {
     [
       ".local/share/nix" # Repl history
     ]
-    # TODO away once atuin is gone
-    ++ optionals config.programs.atuin.enable [
-      ".local/share/atuin"
-    ]
     ++ optionals nixosConfig.programs.steam.enable [
       ".local/share/Steam"
       ".steam"

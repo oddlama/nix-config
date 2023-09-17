@@ -8,8 +8,4 @@
   home.persistence."/persist".directories = [
     ".config/nushell"
   ];
-
-  # XXX: remove once removed. DEBOALOGR
-  programs.starship.enableNushellIntegration = false;
-  programs.atuin.enableNushellIntegration = false;
 }

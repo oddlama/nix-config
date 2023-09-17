@@ -1,65 +1,86 @@
 autoload -U add-zle-hook-widget
 
 # --------------------------------------------------------------------------------
+# FZF widgets
+
+function __fzf() {
+	if [[ -n "$TMUX_PANE" && ( "${FZF_TMUX:-0}" != 0 || -n "$FZF_TMUX_OPTS" ) ]]; then
+		fzf-tmux -d"${FZF_TMUX_HEIGHT:-40%}" -- "$@"
+	else
+		fzf "$@"
+	fi
+}
+
+function __fzf_select() {
+	setopt localoptions pipefail no_aliases 2>/dev/null
+	local item
+	FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} --reverse --bind=ctrl-z:ignore,tab:down,btab:up,change:top,ctrl-space:toggle $FZF_DEFAULT_OPTS" __fzf "$@" | while read item; do
+		echo -n "${(q)item} "
+	done
+	local ret=$?
+	echo
+	return $ret
+}
+
+function __fzf_find_files() {
+	local include_hidden=${1:-0}
+	local types=${2:-fdl}
+	shift 2
+	local type_selectors=()
+	local i
+	for (( i=0; i<${#types}; i++ )); do
+		[[ "$i" -gt 0 ]] && type_selectors+=('-o')
+		type_selectors+=('-type' "${types:$i:1}")
+	done
+	local hide_hidden_files=()
+	if [[ $include_hidden == "0" ]]; then
+		hide_hidden_files=('-path' '*/\.*' '-o')
+	fi
+	setopt localoptions pipefail no_aliases 2>/dev/null
+	command find -L . -mindepth 1 \
+			\( "${hide_hidden_files[@]}" -fstype 'sysfs' -o -fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' \) -prune \
+			-o \( "${type_selectors[@]}" \) -print \
+		| __fzf_select "$@"
+}
+
+function __fzf_find_files_widget_helper() {
+	LBUFFER="${LBUFFER}$(__fzf_find_files "$@")"
+	local ret=$?
+	zle reset-prompt
+	return $ret
+}
+
+function fzf-select-file-or-dir()        { __fzf_find_files_widget_helper 0 fdl -m; }; zle -N fzf-select-file-or-dir
+function fzf-select-file-or-dir-hidden() { __fzf_find_files_widget_helper 1 fdl -m; }; zle -N fzf-select-file-or-dir-hidden
+function fzf-select-dir()                { __fzf_find_files_widget_helper 0 d -m; };   zle -N fzf-select-dir
+function fzf-select-dir-hidden()         { __fzf_find_files_widget_helper 1 d -m; };   zle -N fzf-select-dir-hidden
+function fzf-cd() {
+	local dir="$(__fzf_find_files 0 d +m)"
+	if [[ -z "$dir" ]]; then
+		zle redisplay
+		return 0
+	fi
+	zle push-line # Clear buffer. Auto-restored on next prompt.
+	BUFFER="cd -- $dir"
+	zle accept-line
+	local ret=$?
+	unset dir # ensure this doesn't end up appearing in prompt expansion
+	zle reset-prompt
+	return $ret
+}
+zle -N fzf-cd
+
+# --------------------------------------------------------------------------------
 # Keybinds
 
 # Reset all keybinds and use "emacs" keybinds
-bindkey
 bindkey -d
 bindkey -e
 
-function str_to_hex() {
-	local str="$1"
-	for (( i=0; i<${#str}; i++ )); do
-		printf "%02x" "'${str:$i:1}"
-	done
-}
-function atuin-beginning-search-any-end() {
-	local reset_offset_to=$_atuin_search_offset
-    if [[ -v _atuin_search_last_buffer ]] && [[ "$_atuin_search_last_buffer" == "$BUFFER" ]]; then
-		_atuin_search_offset=$((_atuin_search_offset + $direction))
-    else
-		# You cannot start searching "forward", so instead we wan't to do nothing.
-		[[ "$direction" == "-1" ]] && return 1
-
-		reset_offset_to=0
-		_atuin_search_offset=0
-		_atuin_search_prefix=$LBUFFER
-        _atuin_search_original_cursor=$CURSOR
-		_atuin_search_original_buffer=$BUFFER
-    fi
-
-	# If the offset would become than zero we want to stop searching and reset the buffer,
-	# since we essentiall pressed "down" past the first search
-    if [[ "$_atuin_search_offset" -ge 0 ]] && zle atuin-prefix-search; then
-        zle .end-of-line
-		_atuin_search_last_buffer=$BUFFER
-    else
-		_atuin_search_offset=$reset_offset_to
-		# Reset to original input line if the history lookup fails
-		# while completing in "forward" direction (ArrowDown) i.e. the offset is 0
-		if [[ $_atuin_search_offset == 0 ]]; then
-			BUFFER=$_atuin_search_original_buffer
-			CURSOR=$_atuin_search_original_cursor
-		fi
-        return 1
-    fi
-}; zle -N atuin-beginning-search-any-end
-
-function atuin-reset-search() {
-	unset _atuin_search_last_buffer
-}; zle -N atuin-beginning-search-any-end
-add-zle-hook-widget line-init atuin-reset-search
-
-function atuin-beginning-search-backward-end() {
-	direction="1" atuin-beginning-search-any-end
-}; zle -N atuin-beginning-search-backward-end
-_zsh_autosuggest_bind_widget atuin-beginning-search-backward-end clear
-
-function atuin-beginning-search-forward-end() {
-	direction="-1" atuin-beginning-search-any-end
-}; zle -N atuin-beginning-search-forward-end
-_zsh_autosuggest_bind_widget atuin-beginning-search-forward-end clear
+if autoload history-search-end; then
+	zle -N history-beginning-search-backward-end history-search-end
+	zle -N history-beginning-search-forward-end  history-search-end
+fi
 
 function nop() {
     true
@@ -133,12 +154,12 @@ function setup_keybinds() {
     bindkeys keys_CtrlDelete      kill-line
     bindkeys keys_AltDelete       delete-word
 
-    bindkeys keys_Up              atuin-beginning-search-backward-end
+    bindkeys keys_Up              history-beginning-search-backward-end
     bindkeys keys_ShiftUp         up-line
     bindkeys keys_CtrlUp          nop
     bindkeys keys_AltUp           nop
 
-    bindkeys keys_Down            atuin-beginning-search-forward-end
+    bindkeys keys_Down            history-beginning-search-forward-end
     bindkeys keys_ShiftDown       down-line
     bindkeys keys_CtrlDown        nop
     bindkeys keys_AltDown         nop
@@ -158,9 +179,6 @@ function setup_keybinds() {
 
     bindkeys keys_PageDown        nop
     bindkeys keys_ShiftPageDown   nop
-
-    # atuin
-    bindkey '^R' _atuin_search_widget
 
     # fzf file and directory related expansions and functions
     bindkey '\ef' fzf-select-file-or-dir
@@ -253,6 +271,13 @@ zstyle ':completion:*' special-dirs ..
 # --------------------------------------------------------------------------------
 # ZSH Options
 
+# Ignore certain commands in history
+HISTORY_IGNORE_REGEX='^(.|. |..|.. |rm .*|rmd .*|git fixup.*|git unstash|git stash.*|git checkout -f.*)$'
+function zshaddhistory() {
+	emulate -L zsh
+	[[ ! $1 =~ "$HISTORY_IGNORE_REGEX" ]]
+}
+
 # Emit an error when a glob has no match
 setopt nomatch
 # Don't use extended globbing
@@ -292,10 +317,3 @@ setopt auto_list
 setopt auto_menu
 # Move cursor to end of word if there was only one match
 setopt always_to_end
-
-# Ignore certain commands in history
-HISTORY_IGNORE_REGEX='^(.|. |..|.. |rm .*|rmd .*|git fixup.*|git unstash|git stash.*|git checkout -f.*)$'
-function zshaddhistory() {
-	emulate -L zsh
-	[[ ! $1 =~ "$HISTORY_IGNORE_REGEX" ]]
-}

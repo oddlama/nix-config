@@ -29,9 +29,9 @@
         show_always = true;
       };
       hostname = {
-        format = "[$ssh_symbol$hostname]($style)";
+        format = "[$hostname]($style)[$ssh_symbol](green)";
         ssh_only = false;
-        ssh_symbol = "->";
+        ssh_symbol = "󰣀";
         style = "cyan";
       };
       directory = {

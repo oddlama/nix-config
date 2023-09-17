@@ -1,7 +1,7 @@
 {...}: {
   imports = [
-    ./nushell.nix
     ./starship.nix
+    ./nushell
     ./zsh
   ];
 
@@ -22,10 +22,5 @@
     ip = "ip --color";
     tmux = "tmux -2";
     rg = "rg -S";
-  };
-
-  programs.atuin = {
-    enable = true;
-    settings.auto_sync = false;
   };
 }

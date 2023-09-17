@@ -22,7 +22,7 @@
   programs = {
     bat = {
       enable = true;
-      config.theme = "base16";
+      config.theme = "TwoDark";
     };
     fzf.enable = true;
     gpg.enable = true;

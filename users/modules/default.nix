@@ -6,7 +6,7 @@
     ./config/htop.nix
     ./config/impermanence.nix
     ./config/neovim.nix
-    ./config/nushell
+    ./config/shell
     ./config/utils.nix
   ];
 }

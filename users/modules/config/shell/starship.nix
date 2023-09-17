@@ -1,6 +1,28 @@
-{lib, ...}: {
+{
+  lib,
+  pkgs,
+  ...
+}: {
+  disabledModules = ["programs/starship.nix"];
+  imports = [./starship-module.nix];
+
   programs.starship = {
     enable = true;
+    package = let
+      src = pkgs.fetchFromGitHub {
+        owner = "oddlama";
+        repo = "starship";
+        rev = "feat-more-dynamic-username-and-hostname";
+        hash = "sha256-me6GC1NTSEfdTdSbhwbmwMlzIhSmcs1PSUFCWu+2LG0=";
+      };
+    in
+      pkgs.starship.overrideAttrs (_finalAttrs: previousAttrs: {
+        inherit src;
+        cargoDeps = previousAttrs.cargoDeps.overrideAttrs (_: {
+          inherit src;
+          outputHash = "sha256-L4N55ghbPsBrESRK0vHGDSDytFCnib7ghoMKnWFIZvw=";
+        });
+      });
     settings = {
       add_newline = false;
       format = lib.concatStrings [
@@ -21,18 +43,18 @@
         "($rust )"
         "$time"
       ];
-
       username = {
-        format = "[$user]($style)";
-        style_root = "red";
-        style_user = "cyan";
-        show_always = true;
+        format = "[$user]($style) ";
+        show_if_root = false;
+        show_if_ssh = false;
+        style = "yellow";
       };
       hostname = {
         format = "[$hostname]($style)[$ssh_symbol](green)";
         ssh_only = false;
-        ssh_symbol = "󰣀";
-        style = "cyan";
+        ssh_symbol = " 󰣀";
+        style = "bold purple";
+        user_overrides.root.style = "bold red";
       };
       directory = {
         format = "[$path]($style)[$read_only]($read_only_style)";

@@ -12,6 +12,4 @@
       cloc
     ];
   };
-
-  programs.nix-index.enable = true;
 }

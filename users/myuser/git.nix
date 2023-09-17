@@ -19,21 +19,18 @@
       s = "status";
       tags = "tag -l";
       t = "tag -s -m ''";
-      ci = "commit -v -S";
-      cam = "commit -v -S --amend";
       fixup = ''!f() { TARGET=$(git rev-parse "$1"); git commit --fixup=$TARGET ''${@:2} && EDITOR=true git rebase -i --gpg-sign --autostash --autosquash $TARGET^; }; f'';
       commit-reuse-message = ''!git commit --edit --file "$(git rev-parse --git-dir)"/COMMIT_EDITMSG'';
-      cir = "commit-reuse-message -v -S";
     };
   };
 
   home.shellAliases = rec {
     g = "gitui";
     ga = "git add";
-    gc = "git ci";
-    gca = "git ci --amend";
+    gc = "git commit -v -S";
+    gca = "git commit -v -S --amend";
     gcl = "git clone";
-    gcr = "git cir";
+    gcr = "git commit-reuse-message -v -S";
     gs = "git s";
   };
 }

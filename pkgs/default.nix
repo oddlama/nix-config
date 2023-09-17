@@ -31,5 +31,7 @@
         hash = "sha256-iZUszwVcbVn6Xsqou6crSp9gJBRmm5vEqxS87h/s3PQ=";
       };
     });
+
+    zsh-histdb-skim = super.callPackage ./zsh-skim-histdb.nix {};
   })
 ]

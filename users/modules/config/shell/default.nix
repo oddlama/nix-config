@@ -19,6 +19,8 @@
     chmod = "chmod -c --preserve-root";
     chown = "chown -c --preserve-root";
 
+    nb = "nix build --no-link --print-out-paths";
+
     ip = "ip --color";
     tmux = "tmux -2";
     rg = "rg -S";

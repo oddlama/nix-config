@@ -46,12 +46,7 @@
       }
       {
         name = "zsh-histdb-skim";
-        src = pkgs.fetchFromGitHub {
-          owner = "m42e";
-          repo = "zsh-histdb-skim";
-          rev = "3af19b6ec38b93c85bb82a80a69bec8b0e050cc5";
-          hash = "sha256-lJ2kpIXPHE8qP0EBnLuyvatWMtepBobNAC09e7itGas=";
-        };
+        src = pkgs.zsh-histdb-skim;
       }
     ];
   };

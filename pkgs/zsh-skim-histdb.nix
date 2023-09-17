@@ -1,0 +1,28 @@
+{
+  fetchFromGitHub,
+  rustPlatform,
+  sqlite,
+}:
+rustPlatform.buildRustPackage rec {
+  pname = "zsh-histdb-skim";
+  version = "0.8.6";
+
+  buildInputs = [sqlite];
+  src = fetchFromGitHub {
+    owner = "m42e";
+    repo = "zsh-histdb-skim";
+    rev = "v${version}";
+    hash = "sha256-lJ2kpIXPHE8qP0EBnLuyvatWMtepBobNAC09e7itGas=";
+  };
+
+  cargoHash = "sha256-yvgyqm8WM7Oddxsbl/lfHQOmsEEiMTK6itbqea5+Ibg=";
+
+  patchPhase = ''
+    substituteInPlace zsh-histdb-skim-vendored.zsh \
+      --replace zsh-histdb-skim "$out/bin/zsh-histdb-skim"
+  '';
+
+  postInstall = ''
+    cp zsh-histdb-skim-vendored.zsh $out/zsh-histdb-skim.plugin.zsh
+  '';
+}

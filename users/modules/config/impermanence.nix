@@ -6,13 +6,9 @@
 }: let
   inherit (lib) optionals;
 in {
-  home.persistence."/state".files =
-    [
-      # nothing yet ...
-    ]
-    ++ optionals config.programs.ssh.enable [
-      ".ssh/known_hosts"
-    ];
+  home.persistence."/state".files = optionals config.programs.ssh.enable [
+    ".ssh/known_hosts"
+  ];
 
   home.persistence."/state".directories =
     [

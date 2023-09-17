@@ -20,6 +20,8 @@
       tags = "tag -l";
       t = "tag -s -m ''";
       fixup = ''!f() { TARGET=$(git rev-parse "$1"); git commit --fixup=$TARGET ''${@:2} && EDITOR=true git rebase -i --gpg-sign --autostash --autosquash $TARGET^; }; f'';
+      # An alias that uses the previous commit message by default.
+      # Useful when you mess up entering the signing password and git aborts.
       commit-reuse-message = ''!git commit --edit --file "$(git rev-parse --git-dir)"/COMMIT_EDITMSG'';
     };
   };

@@ -37,6 +37,8 @@
       zathura
     ];
 
+    # TODO thunderbird doesn't use passwords from password command
+    # TODO rotating wallpaper
     # TODO thunderbird date time format is wrong even though this is C.utf8
     # TODO yubikey pinentry is curses but should be graphical
     # TODO accounts.concats accounts.calendar
@@ -44,21 +46,18 @@
     # TODO agenix rekey edit secret should create temp files with same extension
     # TODO mod+f1-4 for left monitor?
     # TODO autostart signal, firefox (both windows), etc.
-    # TODO agenix rekey caches in /tmp which is removed each reboot and could be improved
+    # TODO repo secrets caches in /tmp which is removed each reboot and could be improved
     # TODO entering devshell takes some time after reboot
-    # TODO emoji in firefox are wrong
     # TODO screenshot selection/all and copy clipboard
     # TODO screenshot selection/all and save
     # TODO screenshot selection and scan qr and copy clipboard
     # TODO screenshot selection and ocr and copy clipboard
-    # TODO sway config
     # TODO sway shortcuts
-    # TODO enable nodeadkeys
     # TODO kitty terminfo missing with ssh root@localhost
     # TODO nvim coloscheme missing on reboot.... what state is missing?
     # TODO VP9 hardware video decoding blocklisted
     # TODO gpg switch to sk
-    # TODO some font icons not showing neovim
+    # TODO some font icons not showing neovim because removed from nerdfonts, replace with bertter .
 
     shellAliases = {
       p = "cd ~/projects";

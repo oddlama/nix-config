@@ -12,6 +12,7 @@
       merge.conflictstyle = "diff3";
       mergetool.prompt = true;
       pull.rebase = true;
+      push.autoSetupRemote = true;
     };
     aliases = {
       unstash = "stash pop";
@@ -30,5 +31,6 @@
     ga = "git add";
     gc = "git commit -v -S";
     gca = "${gc} --amend";
+    # TODO command to make new commit with old commit editmsg, beware worktrees have different path
   };
 }

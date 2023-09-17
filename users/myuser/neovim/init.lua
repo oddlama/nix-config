@@ -79,7 +79,13 @@ return packer.startup(function(use)
 	-- Neovim as an additional language server
 	use { "jose-elias-alvarez/null-ls.nvim", config = conf_fn "null-ls" }
 	-- Nushell syntax via treesitter
-	use { "LhKipp/nvim-nu", run = ":TSInstall nu", config = function() require("nu").setup{} end }
+	use {
+		"LhKipp/nvim-nu",
+		run = ":TSInstall nu",
+		config = function()
+			require("nu").setup {}
+		end,
+	}
 
 	----------------------------------------------------------------------------------------------------
 	-- Editing

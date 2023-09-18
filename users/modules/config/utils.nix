@@ -16,6 +16,7 @@
       rsync
       sd
       tree
+      wget
     ];
   };
 

@@ -35,6 +35,11 @@
       flake = false;
     };
 
+    nix-index-database = {
+      url = "github:Mic92/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
     nixos-generators = {
@@ -188,8 +193,11 @@
       checks.pre-commit-hooks = pre-commit-hooks.lib.${system}.run {
         src = lib.cleanSource ./.;
         hooks = {
+          # Nix
           alejandra.enable = true;
+          deadnix.enable = true;
           statix.enable = true;
+          # Lua (for neovim)
           luacheck.enable = true;
           stylua.enable = true;
         };

@@ -1,9 +1,14 @@
-{config, ...}: {
+{
+  inputs,
+  config,
+  ...
+}: {
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
     verbose = true;
     sharedModules = [
+      inputs.nix-index-database.hmModules.nix-index
       {
         home.stateVersion = config.system.stateVersion;
       }

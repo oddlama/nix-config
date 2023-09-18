@@ -29,8 +29,8 @@
     modules
     ++ [
       {node.name = name;}
-      agenix.nixosModules.default
       agenix-rekey.nixosModules.default
+      agenix.nixosModules.default
       disko.nixosModules.disko
       elewrap.nixosModules.default
       home-manager.nixosModules.default

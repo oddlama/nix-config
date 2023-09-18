@@ -12,7 +12,7 @@
 in {
   accounts.email.accounts =
     lib.flip lib.mapAttrs' config.userSecrets.accounts.email
-    (n: v:
+    (_n: v:
       lib.nameValuePair v.address ({
           # TODO genericize
           passwordCommand =

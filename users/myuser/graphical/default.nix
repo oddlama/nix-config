@@ -59,11 +59,6 @@
     # TODO gpg switch to sk
     # TODO some font icons not showing neovim because removed from nerdfonts, replace with bertter .
 
-    shellAliases = {
-      p = "cd ~/projects";
-      zf = "zathura --fork"; # XXX: do i need this or can i just xdg-open?
-    };
-
     persistence."/persist".directories = [
       "projects"
     ];

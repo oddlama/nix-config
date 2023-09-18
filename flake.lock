@@ -542,6 +542,26 @@
         "type": "github"
       }
     },
+    "nix-index-database": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1694921880,
+        "narHash": "sha256-yU36cs5UdzhTwsM9bUWUz43N//ELzQ1ro69C07pU/8E=",
+        "owner": "Mic92",
+        "repo": "nix-index-database",
+        "rev": "9d2bcc47110b3b6217dfebd6761ba20bc78aedf2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Mic92",
+        "repo": "nix-index-database",
+        "type": "github"
+      }
+    },
     "nixlib": {
       "locked": {
         "lastModified": 1693701915,
@@ -806,6 +826,7 @@
         "impermanence": "impermanence",
         "lib-net": "lib-net",
         "microvm": "microvm",
+        "nix-index-database": "nix-index-database",
         "nixos-generators": "nixos-generators",
         "nixos-hardware": "nixos-hardware",
         "nixos-nftables-firewall": "nixos-nftables-firewall",

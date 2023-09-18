@@ -4,10 +4,11 @@
   lib,
   makeWrapper,
   gitAndTools,
+  bc,
   bat,
   extraPackages ? [],
 }: let
-  binPath = lib.makeBinPath ([gitAndTools.hub gitAndTools.delta bat] ++ extraPackages);
+  binPath = lib.makeBinPath ([gitAndTools.hub gitAndTools.delta bc bat] ++ extraPackages);
 in
   stdenvNoCC.mkDerivation rec {
     pname = "git-fuzzy";
@@ -24,12 +25,24 @@ in
     ];
 
     postPatch = ''
-      for GF_key in $(grep -o -- 'GF_[A-Z0-9_]*' lib/load-configs.sh | sort -u); do
+      for GF_key in $(grep -ohr -- 'GF_[A-Z0-9_]*' lib | sort -u); do
       key=''${GF_key#"GF_"}
+      key=''${key//_/-}
       key=''${key,,}
       cat >> lib/load-configs-from-git.sh <<EOF
       if val=\$(git config --get fuzzy.''${key@Q}); then
-        $GF_key=\$val
+        export $GF_key=\$val
+      fi
+      EOF
+      done
+
+      for GIT_FUZZY_key in $(grep -ohr -- 'GIT_FUZZY_[A-Z0-9_]*' lib | sort -u); do
+      key=''${GIT_FUZZY_key#"GIT_FUZZY_"}
+      key=''${key//_/-}
+      key=''${key,,}
+      cat >> lib/load-configs-from-git.sh <<EOF
+      if val=\$(git config --get fuzzy.''${key@Q}); then
+        export $GIT_FUZZY_key=\$val
       fi
       EOF
       done
@@ -38,12 +51,11 @@ in
     nativeBuildInputs = [makeWrapper];
     installPhase = ''
       install -m755 -D ./bin/git-fuzzy $out/bin/git-fuzzy
-      install -d "$out/lib"
-      cp -r lib "$out/lib/git-fuzzy"
+      cp -r lib "$out/lib"
     '';
 
     postFixup = ''
-      sed -i 's%lib_dir="$script_dir/../lib"%lib_dir='"$out"'/lib/git-fuzzy%' $out/bin/git-fuzzy
+      sed -i 's%git_fuzzy_dir="$script_dir/.."%git_fuzzy_dir='"$out"'%' $out/bin/git-fuzzy
       wrapProgram "$out/bin/git-fuzzy" --prefix PATH : ${binPath}
     '';
 

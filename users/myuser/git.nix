@@ -27,6 +27,18 @@
         syntax-theme = "TwoDark";
         tabs = 4;
       };
+      fuzzy = {
+        bat-theme = "TwoDark";
+        # TODO fuzzy is bad, it hardcodes diff | pager exec style.
+        # This needs to be patched so we can use difft. alternative:
+        # don't use a pager in fuzzy and somehow make difft width available to the main git diff command
+        #preferred-pager = let
+        #  wrapper = pkgs.writeShellScript "difft-for-fuzzy" ''
+        #    ${pkgs.difftastic}/bin/difft --color=always --width "$1"
+        #  '');
+        #in "${wrapper} __WIDTH__";
+        status-directory-preview-command = "ls -lahF --group-directories-first --show-control-chars --quoting-style=escape --color=always";
+      };
       difftool.prompt = true;
       init.defaultBranch = "main";
       merge.conflictstyle = "diff3";

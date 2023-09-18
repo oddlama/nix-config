@@ -1,12 +1,32 @@
-{lib, ...}: {
-  # TODO use git-fuzzy.
-  # TODO integrate git-fuzzy and difft
+{
+  lib,
+  pkgs,
+  ...
+}: {
+  home.packages = with pkgs; [
+    git-filter-repo
+    git-fuzzy
+  ];
+
   programs.gitui.enable = true;
   programs.git = {
     enable = true;
-    difftastic.enable = true;
+    difftastic = {
+      enable = true;
+      background = "dark";
+    };
     lfs.enable = lib.mkDefault false;
     extraConfig = {
+      core.pager = "${pkgs.delta}/bin/delta";
+      delta = {
+        hyperlinks = true;
+        keep-plus-minus-markers = true;
+        line-numbers = true;
+        navigate = true;
+        side-by-side = true;
+        syntax-theme = "TwoDark";
+        tabs = 4;
+      };
       difftool.prompt = true;
       init.defaultBranch = "main";
       merge.conflictstyle = "diff3";

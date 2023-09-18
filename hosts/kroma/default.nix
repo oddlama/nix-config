@@ -25,6 +25,7 @@
   ];
 
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod"];
+  boot.binfmt.emulatedSystems = ["aarch64-linux"];
   graphical.gaming.enable = true;
 
   # TODO goodbye once -sk keys.

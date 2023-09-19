@@ -139,6 +139,8 @@
       # All nixosSystem instanciations are collected here, so that we can refer
       # to any system via nodes.<name>
       nodes = self.colmenaNodes // self.microvmNodes;
+      # Add a shorthand to easily target toplevel derivations
+      "@" = lib.mapAttrs (_: v: v.config.system.build.toplevel) self.nodes;
 
       # For each true NixOS system, we want to expose an installer package that
       # can be used to do the initial setup on the node from a live environment.

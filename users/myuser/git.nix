@@ -66,6 +66,8 @@
     gca = "git commit -v -S --amend";
     gcl = "git clone";
     gcr = "git commit-reuse-message -v -S";
+    gp = "git push";
+    gpf = "git push --force";
     gs = "git s";
   };
 }

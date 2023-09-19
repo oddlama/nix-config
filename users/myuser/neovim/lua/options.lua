@@ -18,8 +18,7 @@ opt.mouse = "a" -- Enable full mouse support
 
 opt.termguicolors = true -- Enable true color in terminals
 
--- FIXME: TODO: neovim after 0.8: enable this!
---opt.splitkeep = 'screen'                           -- Try not to move text when opening/closing splits
+opt.splitkeep = "screen" -- Try not to move text when opening/closing splits
 opt.wrap = false -- Do not wrap text longer than the window's width
 opt.scrolloff = 2 -- Keep 2 lines above and below the cursor.
 opt.sidescrolloff = 2 -- Keep 2 lines left and right of the cursor.

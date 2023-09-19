@@ -5,7 +5,7 @@
   ];
 
   home = {
-    extraOutputsToInstall = ["doc" "devdoc"];
+    extraOutputsToInstall = ["man" "doc" "devdoc"];
     packages = with pkgs; [
       git-lfs
       d2

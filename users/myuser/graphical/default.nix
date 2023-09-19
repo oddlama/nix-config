@@ -37,6 +37,8 @@
       zathura
     ];
 
+    # TODO neovim directtly opening file has different syntax
+    # TODO neovim reopening file should continue at the previous position
     # TODO thunderbird doesn't use passwords from password command
     # TODO rotating wallpaper
     # TODO thunderbird date time format is wrong even though this is C.utf8

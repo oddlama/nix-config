@@ -53,7 +53,7 @@
       }
       {
         name = "zsh-histdb-skim";
-        src = pkgs.zsh-histdb-skim;
+        src = "${pkgs.zsh-histdb-skim}/share/zsh-histdb-skim";
       }
     ];
   };

@@ -1,6 +1,15 @@
-{
+{inputs, ...}: {
   disabledModules = ["services/security/kanidm.nix"];
   imports = [
+    inputs.agenix-rekey.nixosModules.default
+    inputs.agenix.nixosModules.default
+    inputs.disko.nixosModules.disko
+    inputs.elewrap.nixosModules.default
+    inputs.home-manager.nixosModules.default
+    inputs.impermanence.nixosModules.impermanence
+    inputs.nixos-nftables-firewall.nixosModules.default
+    inputs.nixseparatedebuginfod.nixosModules.default
+
     ../users/root
 
     ./config/boot.nix
@@ -37,5 +46,10 @@
     ./security/acme-wildcard.nix
 
     ./system/deteministic-ids.nix
+  ];
+
+  nixpkgs.overlays = [
+    inputs.microvm.overlay
+    inputs.nixpkgs-wayland.overlay
   ];
 }

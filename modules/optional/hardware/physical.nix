@@ -8,6 +8,6 @@
   services = {
     fwupd.enable = true;
     smartd.enable = true;
-    thermald.enable = builtins.elem config.nixpkgs.system ["x86_64-linux"];
+    thermald.enable = builtins.elem config.nixpkgs.hostPlatform.system ["x86_64-linux"];
   };
 }

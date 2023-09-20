@@ -84,23 +84,21 @@
       };
 
     microvm.vms.${vmName} = let
-      node = import ../../nix/generate-node.nix inputs {
-        name = vmCfg.nodeName;
-        inherit (vmCfg) system;
-      };
       mac = (net.mac.assignMacs "02:01:27:00:00:00" 24 [] (attrNames vms)).${vmName};
     in {
       # Allow children microvms to know which node is their parent
-      specialArgs =
-        {
-          parentNode = config;
-          parentNodeName = nodeName;
-        }
-        // node.specialArgs;
-      inherit (node) pkgs;
+      specialArgs = {
+        parentNode = config;
+        parentNodeName = nodeName;
+        inherit (inputs.self) nodes;
+        inherit (inputs.self.pkgs.${vmCfg.system}) lib;
+        inherit inputs;
+      };
+      pkgs = inputs.self.pkgs.${vmCfg.system};
       inherit (vmCfg) autostart;
       config = {config, ...}: {
-        imports = cfg.commonImports ++ node.imports ++ vmCfg.modules;
+        imports = cfg.commonImports ++ vmCfg.modules;
+        node.name = vmCfg.nodeName;
 
         lib.microvm.mac = mac;
 

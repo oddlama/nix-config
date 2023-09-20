@@ -1,5 +1,5 @@
 {
-  description = "oddlama's NixOS Infrastructure";
+  description = " ❄️ oddlama's nix config and dotfiles";
 
   inputs = {
     colmena = {
@@ -96,17 +96,20 @@
     agenix-rekey,
     colmena,
     devshell,
-    elewrap,
     flake-utils,
-    microvm,
     nixos-generators,
     nixpkgs,
-    nixpkgs-wayland,
-    nixseparatedebuginfod,
     pre-commit-hooks,
     ...
   } @ inputs: let
-    inherit (nixpkgs) lib;
+    inherit
+      (nixpkgs.lib)
+      cleanSource
+      foldl'
+      mapAttrs
+      mapAttrsToList
+      recursiveUpdate
+      ;
   in
     {
       # The identities that are used to rekey agenix secrets and to
@@ -116,39 +119,27 @@
         extraEncryptionPubkeys = [./secrets/backup.pub];
       };
 
-      # Load the list of hosts that this flake defines, which
-      # associates the minimum amount of metadata that is necessary
-      # to instanciate hosts correctly.
-      hosts = builtins.fromTOML (builtins.readFile ./hosts.toml);
-
-      # This will process all defined hosts of type "nixos" and
-      # generate the required colmena definition for each host.
-      # We call the resulting instanciations "nodes".
-      # TODO: switch to nixosConfigurations once colmena supports it upstream
-      colmena = import ./nix/colmena.nix inputs;
-      colmenaNodes = ((colmena.lib.makeHive self.colmena).introspect (x: x)).nodes;
-
-      # True NixOS nodes can define additional microvms (guest nodes) that are built
-      # together with the true host. We collect all defined microvm nodes
-      # from each node here to allow accessing any node via the unified attribute `nodes`.
-      microvmNodes = lib.flip lib.concatMapAttrs self.colmenaNodes (_: node:
-        lib.mapAttrs'
-        (vm: def: lib.nameValuePair def.nodeName node.config.microvm.vms.${vm}.config)
-        (node.config.meta.microvms.vms or {}));
+      inherit
+        (import ./nix/hosts.nix inputs)
+        colmena
+        hosts
+        microvmConfigurations
+        nixosConfigurations
+        ;
 
       # All nixosSystem instanciations are collected here, so that we can refer
       # to any system via nodes.<name>
-      nodes = self.colmenaNodes // self.microvmNodes;
+      nodes = self.nixosConfigurations // self.microvmConfigurations;
       # Add a shorthand to easily target toplevel derivations
-      "@" = lib.mapAttrs (_: v: v.config.system.build.toplevel) self.nodes;
+      "@" = mapAttrs (_: v: v.config.system.build.toplevel) self.nodes;
 
       # For each true NixOS system, we want to expose an installer package that
       # can be used to do the initial setup on the node from a live environment.
       inherit
-        (lib.foldl' lib.recursiveUpdate {}
-          (lib.mapAttrsToList
+        (foldl' recursiveUpdate {}
+          (mapAttrsToList
             (import ./nix/generate-installer-package.nix inputs)
-            self.colmenaNodes))
+            self.nixosConfigurations))
         packages
         ;
     }
@@ -161,10 +152,6 @@
           ++ import ./pkgs/default.nix
           ++ [
             devshell.overlays.default
-            elewrap.overlays.default
-            microvm.overlay
-            nixpkgs-wayland.overlay
-            nixseparatedebuginfod.overlays.default
           ];
       };
 
@@ -193,7 +180,7 @@
 
       # `nix flake check`
       checks.pre-commit-hooks = pre-commit-hooks.lib.${system}.run {
-        src = lib.cleanSource ./.;
+        src = cleanSource ./.;
         hooks = {
           # Nix
           alejandra.enable = true;
@@ -210,7 +197,7 @@
         name = "nix-config";
         packages = with pkgs; [
           faketty # Used in my colmena patch to show progress, XXX: should theoretically be propagated automatically from the patch....
-          nix # Always use the nix version from this flake's nixpkgs versios, so that nix-plugins (below) doesn't fail because of different nix versions.
+          nix # Always use the nix version from this flake's nixpkgs version, so that nix-plugins (below) doesn't fail because of different nix versions.
         ];
 
         commands = with pkgs; [

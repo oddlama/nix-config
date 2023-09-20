@@ -23,6 +23,7 @@ rustPlatform.buildRustPackage rec {
   '';
 
   postInstall = ''
+    mkdir -p $out/share/zsh-histdb-skim
     cp zsh-histdb-skim-vendored.zsh $out/share/zsh-histdb-skim/zsh-histdb-skim.plugin.zsh
   '';
 }

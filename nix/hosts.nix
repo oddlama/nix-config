@@ -37,8 +37,6 @@ inputs: let
           node.secretsDir = ../hosts/${name}/secrets;
         }
         ../hosts/${name}
-        inputs.colmena.nixosModules.assertionModule
-        inputs.colmena.nixosModules.deploymentOptions
       ];
     };
 

@@ -8,7 +8,6 @@
     inputs.home-manager.nixosModules.default
     inputs.impermanence.nixosModules.impermanence
     inputs.nixos-nftables-firewall.nixosModules.default
-    inputs.nixseparatedebuginfod.nixosModules.default
 
     ../users/root
 

@@ -72,6 +72,8 @@ in {
         "browser.tabs.crashReporting.sendReport" = false;
         # Allow userCrome.css
         "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+        # Why the fuck can my search window make bell sounds
+        "accessibility.typeaheadfind.enablesound" = false;
 
         # Hardware acceleration
         # See https://github.com/elFarto/nvidia-vaapi-driver?tab=readme-ov-file#firefox

@@ -44,7 +44,7 @@
 
     ./security/acme-wildcard.nix
 
-    ./system/deteministic-ids.nix
+    ./system/deterministic-ids.nix
   ];
 
   nixpkgs.overlays = [

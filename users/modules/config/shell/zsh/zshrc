@@ -1,5 +1,9 @@
 autoload -U add-zle-hook-widget
 
+# autosuggests otherwise breaks these widgets.
+# See https://github.com/zsh-users/zsh-autosuggestions/issues/619
+ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(history-beginning-search-backward-end history-beginning-search-forward-end)
+
 # --------------------------------------------------------------------------------
 # FZF widgets
 

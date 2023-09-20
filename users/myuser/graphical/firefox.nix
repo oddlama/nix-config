@@ -151,8 +151,6 @@ in {
         "dom.push.enabled" = false; # no notifications, really...
         "dom.push.connection.enabled" = false;
         "dom.battery.enabled" = false; # you don't need to see my battery...
-        "dom.event.clipboardevents.enabled" = false; # the clipboard is mine, no info leak, except when i want to paste
-        # "dom.event.contextmenu.enabled" = false; # no disabling right-clicking..
       };
 
       search = {

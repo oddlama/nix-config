@@ -37,6 +37,10 @@
       zathura
     ];
 
+    # TODO nix repl cltr+del doesnt work
+    # TODO wrap neovim for kitty hist
+    # TODO neovim gitsigns toggle_deleted keybind
+    # TODO neovim gitsigns stage hunk shortcut
     # TODO neovim directtly opening file has different syntax
     # TODO neovim reopening file should continue at the previous position
     # TODO thunderbird doesn't use passwords from password command

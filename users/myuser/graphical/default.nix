@@ -37,6 +37,7 @@
       zathura
     ];
 
+    # TODO kitty terminfo missing with ssh root@localhost
     # TODO nix repl cltr+del doesnt work
     # TODO wrap neovim for kitty hist
     # TODO neovim gitsigns toggle_deleted keybind
@@ -59,8 +60,6 @@
     # TODO screenshot selection and scan qr and copy clipboard
     # TODO screenshot selection and ocr and copy clipboard
     # TODO sway shortcuts
-    # TODO kitty terminfo missing with ssh root@localhost
-    # TODO nvim coloscheme missing on reboot.... what state is missing?
     # TODO VP9 hardware video decoding blocklisted
     # TODO gpg switch to sk
     # TODO some font icons not showing neovim because removed from nerdfonts, replace with bertter .

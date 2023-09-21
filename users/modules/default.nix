@@ -1,5 +1,6 @@
 {...}: {
   imports = [
+    ./neovim.nix
     ./secrets.nix
     ./uid.nix
 

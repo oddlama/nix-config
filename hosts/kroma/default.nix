@@ -33,4 +33,11 @@
     gpg-connect-agent /bye
     export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
   '';
+
+  stylix.fonts.sizes = {
+    #desktop = 20;
+    #applications = 20;
+    terminal = 20;
+    #popups = 20;
+  };
 }

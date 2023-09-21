@@ -2,6 +2,17 @@
   description = " ❄️ oddlama's nix config and dotfiles";
 
   inputs = {
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.home-manager.follows = "home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    agenix-rekey = {
+      url = "github:oddlama/agenix-rekey";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     colmena = {
       url = "github:oddlama/colmena";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -22,6 +33,8 @@
       url = "github:oddlama/elewrap";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    flake-utils.url = "github:numtide/flake-utils";
 
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -77,18 +90,13 @@
       inputs.flake-utils.follows = "flake-utils";
     };
 
-    agenix = {
-      url = "github:ryantm/agenix";
+    stylix = {
+      url = "github:danth/stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    agenix-rekey = {
-      url = "github:oddlama/agenix-rekey";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     templates.url = "github:NixOS/templates";
-    flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs = {

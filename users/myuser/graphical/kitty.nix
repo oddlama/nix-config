@@ -1,12 +1,19 @@
-{pkgs, ...}: {
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
   home.sessionVariables = {
     TERMINFO_DIRS = "${pkgs.kitty.terminfo.outPath}/share/terminfo";
   };
+  stylix.targets.kitty.enable = true;
   programs.kitty = {
     enable = true;
     settings = {
-      font_family = "FiraCode Nerd Font";
-      font_size = 20;
+      bold_font = "${config.programs.kitty.font.name} Bold";
+      italic_font = "${config.programs.kitty.font.name} Italic";
+      bold_italic_font = "${config.programs.kitty.font.name} Bold Italic";
 
       # Do not wait for inherited child processes.
       close_on_child_death = "yes";
@@ -63,7 +70,10 @@
       "ctrl+shift+." = "change_font_size all -2.0";
       "ctrl+shift+," = "change_font_size all +2.0";
     };
-    extraConfig = ''
+    # XXX: mkForce to prevent stylix from appending theme.
+    # Fix this by making a correct theme that can be used.
+    # TODO aaaaaaaaaa
+    extraConfig = lib.mkForce ''
       # Use nvim as scrollback pager
       scrollback_pager nvim -u NONE -c "set nonumber nolist showtabline=0 foldcolumn=0 laststatus=0" -c "autocmd TermOpen * normal G" -c "silent write! /tmp/kitty_scrollback_buffer | te head -c-1 /tmp/kitty_scrollback_buffer; rm /tmp/kitty_scrollback_buffer; cat"
     '';

@@ -19,21 +19,21 @@
       background = "#090a0c";
       cursor = "#cccccc";
 
-      color0 = " #090a0c";
-      color8 = " #393e48";
-      color1 = " #b2555d";
-      color9 = " #e06c75";
-      color2 = " #81a566";
+      color0 = "#090a0c";
+      color8 = "#393e48";
+      color1 = "#b2555d";
+      color9 = "#e06c75";
+      color2 = "#81a566";
       color10 = "#98c379";
-      color3 = " #ccab6e";
+      color3 = "#ccab6e";
       color11 = "#e6c17c";
-      color4 = " #5395cc";
+      color4 = "#5395cc";
       color12 = "#61afef";
-      color5 = " #9378de";
+      color5 = "#9378de";
       color13 = "#c678dd";
-      color6 = " #56b6c2";
+      color6 = "#56b6c2";
       color14 = "#56b6c2";
-      color7 = " #979eab";
+      color7 = "#979eab";
       color15 = "#abb2bf";
 
       selection_foreground = "#282c34";

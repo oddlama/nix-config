@@ -3,12 +3,10 @@
   lib,
   ...
 }: {
-  options = {
-    home.uid = lib.mkOption {
-      type = lib.types.int;
-      example = 1000;
-      description = "The user's uid.";
-    };
+  options.home.uid = lib.mkOption {
+    type = lib.types.int;
+    example = 1000;
+    description = "The user's uid.";
   };
   config = {
     assertions = [

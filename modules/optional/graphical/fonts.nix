@@ -31,14 +31,16 @@
         </fontconfig>
       '';
       defaultFonts = {
-        sansSerif = lib.mkBefore ["Segoe UI"];
-        monospace = ["FiraCode Nerd Font"];
         emoji = ["Segoe UI Emoji" "Noto Fonts Emoji"];
+        monospace = ["FiraCode Nerd Font"];
+        sansSerif = lib.mkBefore ["Segoe UI"];
+        serif = ["Source Serif Pro"];
       };
     };
 
     packages = with pkgs; [
-      (nerdfonts.override {fonts = ["FiraCode"];})
+      (nerdfonts.override {fonts = ["FiraCode" "FiraMono" "SourceCodePro" "JetBrainsMono"];})
+      dejavu_fonts
       noto-fonts
       noto-fonts-cjk-sans
       noto-fonts-cjk-serif

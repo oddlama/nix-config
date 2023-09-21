@@ -131,8 +131,7 @@ return packer.startup(function(use)
 	-- Git integration
 	use "tpope/vim-fugitive"
 	use "sindrets/diffview.nvim"
-	-- FIXME: still broken and unusable
-	--use { "TimUntersberger/neogit", config = conf_setup "neogit" }
+	use { "TimUntersberger/neogit", config = conf_setup "neogit" }
 	-- Undo tree
 	use { "mbbill/undotree", config = conf_fn "undotree" }
 	-- Gpg integration

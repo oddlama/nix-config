@@ -36,7 +36,7 @@
 
   stylix.fonts.sizes = {
     #desktop = 20;
-    #applications = 20;
+    applications = 10;
     terminal = 20;
     #popups = 20;
   };

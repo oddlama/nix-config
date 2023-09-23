@@ -74,6 +74,8 @@ in {
         "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
         # Why the fuck can my search window make bell sounds
         "accessibility.typeaheadfind.enablesound" = false;
+        # Why the fuck can my search window make bell sounds
+        "general.autoScroll" = true;
 
         # Hardware acceleration
         # See https://github.com/elFarto/nvidia-vaapi-driver?tab=readme-ov-file#firefox
@@ -155,13 +157,30 @@ in {
 
       search = {
         force = true;
-        default = "DuckDuckGo";
-        order = ["DuckDuckGo" "Youtube" "Nix Packages" "GitHub" "HackerNews"];
+        default = "Kagi";
+        order = ["Kagi" "DuckDuckGo" "Youtube" "NixOS Options" "Nix Packages" "GitHub" "HackerNews"];
 
         engines = {
           "Bing".metaData.hidden = true;
           "Amazon.com".metaData.hidden = true;
           "Google".metaData.hidden = true;
+
+          "Kagi" = {
+            iconUpdateURL = "https://kagi.com/favicon.ico";
+            updateInterval = 24 * 60 * 60 * 1000;
+            definedAliases = ["@k"];
+            urls = [
+              {
+                template = "https://kagi.com/search";
+                params = [
+                  {
+                    name = "q";
+                    value = "{searchTerms}";
+                  }
+                ];
+              }
+            ];
+          };
 
           "YouTube" = {
             iconUpdateURL = "https://youtube.com/favicon.ico";
@@ -190,6 +209,26 @@ in {
                   {
                     name = "type";
                     value = "packages";
+                  }
+                  {
+                    name = "query";
+                    value = "{searchTerms}";
+                  }
+                ];
+              }
+            ];
+          };
+
+          "NixOS Options" = {
+            icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+            definedAliases = ["@no"];
+            urls = [
+              {
+                template = "https://search.nixos.org/options";
+                params = [
+                  {
+                    name = "channel";
+                    value = "unstable";
                   }
                   {
                     name = "query";

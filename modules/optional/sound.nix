@@ -10,6 +10,7 @@
   # > pw-top
   # Show actual used playback stream settings
   # > cat /proc/asound/card*/pcm*p/sub*/hw_params
+  # Compare resamplers on: https://src.infinitewave.ca/
 
   sound.enable = false; # ALSA
   hardware.pulseaudio.enable = lib.mkForce false;
@@ -34,16 +35,6 @@
         176400
         192000
       ];
-    };
-    # If resampling is required, use a higher quality. 15 is overkill and too cpu expensive without any obvious audible advantage
-    "pipewire/pipewire-pulse.conf.d/99-resample.conf".text = builtins.toJSON {
-      "stream.properties"."resample.quality" = 10;
-    };
-    "pipewire/client.conf.d/99-resample.conf".text = builtins.toJSON {
-      "stream.properties"."resample.quality" = 10;
-    };
-    "pipewire/client-rt.conf.d/99-resample.conf".text = builtins.toJSON {
-      "stream.properties"."resample.quality" = 10;
     };
   };
 }

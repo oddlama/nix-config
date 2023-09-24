@@ -26,7 +26,7 @@
     forceRekeyOnSystem = builtins.extraBuiltins.unsafeCurrentSystem;
     hostPubkey = config.node.secretsDir + "/host.pub";
     generatedSecretsDir = inputs.self.outPath + "/secrets/generated/${config.node.name}";
-    cacheDir = "\"\${XDG_CACHE_HOME:=$HOME/.cache}/agenix-rekey\"";
+    cacheDir = "/var/tmp/agenix-rekey/\"$UID\"";
   };
 
   age.generators.basic-auth = {

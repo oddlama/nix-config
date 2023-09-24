@@ -52,12 +52,12 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "dirtyRev": "8e853a2094472ac2665b453de41832f0f6cf0aa9-dirty",
-        "dirtyShortRev": "8e853a2-dirty",
-        "lastModified": 1695571453,
+        "lastModified": 1695572027,
         "narHash": "sha256-Qws2IEoO/L7YGzXyweL5VlgHaTWR4UY7Apkbxhihrzg=",
-        "type": "git",
-        "url": "file:///home/malte/projects/agenix-rekey"
+        "owner": "oddlama",
+        "repo": "agenix-rekey",
+        "rev": "0dbcb125b426050ff63e7453d051513ec063a352",
+        "type": "github"
       },
       "original": {
         "owner": "oddlama",

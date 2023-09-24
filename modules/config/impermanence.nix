@@ -90,32 +90,16 @@ in {
     hideMounts = true;
     directories =
       [
-        {
-          directory = "/var/lib/systemd";
-          user = "root";
-          group = "root";
-          mode = "0755";
-        }
-        {
-          directory = "/var/log";
-          user = "root";
-          group = "root";
-          mode = "0755";
-        }
-        #{ directory = "/tmp"; user = "root"; group = "root"; mode = "1777"; }
-        #{ directory = "/var/tmp"; user = "root"; group = "root"; mode = "1777"; }
-        {
-          directory = "/var/spool";
-          user = "root";
-          group = "root";
-          mode = "0755";
-        }
+        "/var/tmp/agenix-rekey"
+        "/var/lib/systemd"
+        "/var/log"
+        #{ directory = "/tmp"; mode = "1777"; }
+        #{ directory = "/var/tmp"; mode = "1777"; }
+        "/var/spool"
       ]
       ++ optionals config.networking.wireless.iwd.enable [
         {
           directory = "/var/lib/iwd";
-          user = "root";
-          group = "root";
           mode = "0700";
         }
       ];
@@ -132,12 +116,7 @@ in {
     ];
     directories =
       [
-        {
-          directory = "/var/lib/nixos";
-          user = "root";
-          group = "root";
-          mode = "0755";
-        }
+        "/var/lib/nixos"
       ]
       ++ optionals config.security.acme.acceptTerms [
         {
@@ -150,8 +129,6 @@ in {
       ++ optionals config.services.printing.enable [
         {
           directory = "/var/lib/cups";
-          user = "root";
-          group = "root";
           mode = "0700";
         }
       ]
@@ -238,16 +215,12 @@ in {
       ++ optionals config.services.adguardhome.enable [
         {
           directory = "/var/lib/private/AdGuardHome";
-          user = "root";
-          group = "root";
           mode = "0700";
         }
       ]
       ++ optionals config.services.esphome.enable [
         {
           directory = "/var/lib/private/esphome";
-          user = "root";
-          group = "root";
           mode = "0700";
         }
       ]

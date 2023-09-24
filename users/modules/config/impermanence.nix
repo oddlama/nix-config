@@ -12,6 +12,7 @@ in {
 
   home.persistence."/state".directories =
     [
+      ".cache/agenix-rekey" # agenix-rekey cache
       ".cache/fontconfig"
       ".cache/nix" # nix eval cache
       ".config/dconf" # some apps store their configuration using dconf

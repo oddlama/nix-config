@@ -11,6 +11,7 @@
     agenix-rekey = {
       url = "github:oddlama/agenix-rekey";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
     };
 
     colmena = {
@@ -127,6 +128,11 @@
         extraEncryptionPubkeys = [./secrets/backup.pub];
       };
 
+      agenix-rekey = agenix-rekey.configure {
+        userFlake = self;
+        inherit (self) nodes pkgs;
+      };
+
       inherit
         (import ./nix/hosts.nix inputs)
         colmena
@@ -160,6 +166,7 @@
           ++ import ./pkgs/default.nix
           ++ [
             devshell.overlays.default
+            agenix-rekey.overlays.default
           ];
       };
 
@@ -180,11 +187,8 @@
           .${system};
       };
 
-      # Define local apps and apps used for rekeying secrets
       # `nix run .#<app>`
-      apps =
-        agenix-rekey.defineApps self pkgs self.nodes
-        // import ./apps inputs system;
+      apps = import ./apps inputs system;
 
       # `nix flake check`
       checks.pre-commit-hooks = pre-commit-hooks.lib.${system}.run {
@@ -208,33 +212,37 @@
           nix # Always use the nix version from this flake's nixpkgs version, so that nix-plugins (below) doesn't fail because of different nix versions.
         ];
 
-        commands = with pkgs; [
+        commands = [
           {
             package = colmena.packages.${system}.colmena;
             help = "Build and deploy this nix config to nodes";
           }
           {
-            package = alejandra;
+            package = pkgs.agenix-rekey;
+            help = "Edit and rekey secrets";
+          }
+          {
+            package = pkgs.alejandra;
             help = "Format nix code";
           }
           {
-            package = statix;
+            package = pkgs.statix;
             help = "Lint nix code";
           }
           {
-            package = deadnix;
+            package = pkgs.deadnix;
             help = "Find unused expressions in nix code";
           }
           {
-            package = update-nix-fetchgit;
+            package = pkgs.update-nix-fetchgit;
             help = "Update fetcher hashes inside nix files";
           }
           {
-            package = nix-tree;
+            package = pkgs.nix-tree;
             help = "Interactively browse dependency graphs of Nix derivations";
           }
           {
-            package = nix-diff;
+            package = pkgs.nix-diff;
             help = "Explain why two Nix derivations differ";
           }
         ];

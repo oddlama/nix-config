@@ -37,6 +37,7 @@
       zathura
     ];
 
+    # TODO on neogit close do neotree update
     # TODO kitty terminfo missing with ssh root@localhost
     # TODO nix repl cltr+del doesnt work
     # TODO wrap neovim for kitty hist

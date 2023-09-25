@@ -83,28 +83,28 @@
       declare -A TOPLEVEL_STORE_PATHS
       for host in "''${HOSTS[@]}"; do
         toplevel="''${TOPLEVEL_FLAKE_PATHS["$host"]}"
-        echo "[1;36m    Building [m📦 configuration for [34m$host[m"
+        echo "[1;36m    Building [m📦 [34m$host[m"
         TOPLEVEL_STORE_PATHS["$host"]=$(nix build --no-link --print-out-paths "''${OPTIONS[@]}" "$toplevel") \
           || die "Failed to get derivation path for $host from ''${TOPLEVEL_FLAKE_PATHS["$host"]}"
         time_next
-        echo "[1;32m       Built [m✅ configuration for [34m$host[m [90min ''${T_LAST}s[m"
+        echo "[1;32m       Built [m✅ [34m$host[m [33m''${TOPLEVEL_STORE_PATHS["$host"]}[m [90min ''${T_LAST}s[m"
       done
 
       for host in "''${HOSTS[@]}"; do
         store_path="''${TOPLEVEL_STORE_PATHS["$host"]}"
-        echo "[1;36m     Copying [m➡️ to [34m$host[m"
+        echo "[1;36m     Copying [m➡️ [34m$host[m"
         nix copy --to "ssh-ng://$host" "$store_path"
         time_next
-        echo "[1;32m      Copied [m✅ [33m$store_path[m to [34m$host[m [90min ''${T_LAST}s[m"
+        echo "[1;32m      Copied [m✅ [34m$host[m [90min ''${T_LAST}s[m"
       done
 
       for host in "''${HOSTS[@]}"; do
         store_path="''${TOPLEVEL_STORE_PATHS["$host"]}"
-        echo "[1;36m    Applying [m⚙️ on [34m$host[m"
+        echo "[1;36m    Applying [m⚙️ [34m$host[m"
         ssh "$host" -- "$store_path"/bin/switch-to-configuration "$ACTION"
         nix copy --to "ssh-ng://$host" "$store_path"
         time_next
-        echo "[1;32m     Applied [m✅ on [34m$host[m [90min ''${T_LAST}s[m"
+        echo "[1;32m     Applied [m✅ [34m$host[m [90min ''${T_LAST}s[m"
       done
     '';
   };

@@ -2,6 +2,7 @@
   (import ./caddy.nix)
   (import ./oauth2-proxy)
   (_self: super: {
+    deploy = super.callPackage ./deploy.nix {};
     git-fuzzy = super.callPackage ./git-fuzzy {};
     kanidm-secret-manipulator = super.callPackage ./kanidm-secret-manipulator.nix {};
     segoe-ui-ttf = super.callPackage ./segoe-ui-ttf.nix {};

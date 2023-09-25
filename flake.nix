@@ -14,12 +14,6 @@
       inputs.flake-utils.follows = "flake-utils";
     };
 
-    colmena = {
-      url = "github:oddlama/colmena";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
-    };
-
     devshell = {
       url = "github:numtide/devshell";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -103,7 +97,6 @@
   outputs = {
     self,
     agenix-rekey,
-    colmena,
     devshell,
     flake-utils,
     nixos-generators,
@@ -135,7 +128,6 @@
 
       inherit
         (import ./nix/hosts.nix inputs)
-        colmena
         hosts
         microvmConfigurations
         nixosConfigurations
@@ -207,14 +199,13 @@
       # `nix develop`
       devShells.default = pkgs.devshell.mkShell {
         name = "nix-config";
-        packages = with pkgs; [
-          faketty # Used in my colmena patch to show progress, XXX: should theoretically be propagated automatically from the patch....
-          nix # Always use the nix version from this flake's nixpkgs version, so that nix-plugins (below) doesn't fail because of different nix versions.
+        packages = [
+          pkgs.nix # Always use the nix version from this flake's nixpkgs version, so that nix-plugins (below) doesn't fail because of different nix versions.
         ];
 
         commands = [
           {
-            package = colmena.packages.${system}.colmena;
+            package = pkgs.deploy;
             help = "Build and deploy this nix config to nodes";
           }
           {

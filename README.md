@@ -82,7 +82,7 @@ Afterwards:
 - Retrieve the new host identity by using `ssh-keyscan <host/ip> | grep -o 'ssh-ed25519.*' > hosts/<host>/secrets/host.pub`
 - (If the host has microvms, also retrieve their identities!)
 - Rekey the secrets for the new identity `nix run .#rekey`
-- Deploy again remotely via colmena
+- Deploy again
 
 #### Remote encrypted unlock
 

@@ -4,7 +4,7 @@
   ...
 }: {
   environment.etc."nixos/configuration.nix".source = pkgs.writeText "configuration.nix" ''
-    assert builtins.trace "This is a dummy config, use colmena!" false;
+    assert builtins.trace "This is a dummy config, please deploy via the flake!" false;
     { }
   '';
 
@@ -12,7 +12,7 @@
     settings = {
       auto-optimise-store = true;
       allowed-users = ["@wheel"];
-      trusted-users = ["root" "@wheel"];
+      trusted-users = ["root"];
       substituters = [
         "https://cache.nixos.org"
         "https://nix-community.cachix.org"

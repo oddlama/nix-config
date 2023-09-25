@@ -11,8 +11,6 @@ inputs: let
     nixosSystem
     ;
 
-  mapNixosConfigs = f: mapAttrs (_: f) self.nixosConfigurations;
-
   # Creates a new nixosSystem with the correct specialArgs, pkgs and name definition
   mkHost = name: system: let
     pkgs = self.pkgs.${system};
@@ -49,18 +47,6 @@ inputs: let
   # Process each nixosHosts declaration and generatea nixosSystem definitions
   nixosConfigurations = flip mapAttrs nixosHosts (name: hostCfg: mkHost name hostCfg.system);
 
-  # We now wrap nixosConfigurations so that colmena understands it
-  colmena =
-    {
-      meta = {
-        # Just a required dummy for colmena, overwritten on a per-node basis by nodeNixpkgs below.
-        nixpkgs = self.pkgs.x86_64-linux;
-        nodeNixpkgs = mapNixosConfigs (v: v.pkgs);
-        nodeSpecialArgs = mapNixosConfigs (v: v._module.specialArgs);
-      };
-    }
-    // mapNixosConfigs (v: {imports = v._module.args.modules;});
-
   # True NixOS nodes can define additional microvms (guest nodes) that are built
   # together with the true host. We collect all defined microvm nodes
   # from each node here to allow accessing any node via the unified attribute `nodes`.
@@ -70,7 +56,6 @@ inputs: let
     (node.config.meta.microvms.vms or {}));
 in {
   inherit
-    colmena
     hosts
     microvmConfigurations
     nixosConfigurations

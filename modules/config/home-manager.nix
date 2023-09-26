@@ -1,6 +1,7 @@
 {
   inputs,
   config,
+  minimal,
   ...
 }: {
   home-manager = {
@@ -13,6 +14,9 @@
         home.stateVersion = config.system.stateVersion;
       }
     ];
+    extraSpecialArgs = {
+      inherit minimal;
+    };
   };
 
   # Required even when using home-manager's zsh module since the /etc/profile load order

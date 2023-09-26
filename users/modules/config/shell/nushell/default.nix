@@ -1,4 +1,9 @@
 {
+  lib,
+  minimal,
+  ...
+}:
+lib.optionalAttrs (!minimal) {
   programs.nushell = {
     enable = true;
     configFile.source = ./config.nu;

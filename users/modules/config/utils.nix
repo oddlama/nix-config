@@ -1,4 +1,10 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  lib,
+  minimal,
+  ...
+}:
+lib.optionalAttrs (!minimal) {
   home = {
     packages = with pkgs; [
       bandwhich

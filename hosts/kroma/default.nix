@@ -1,4 +1,10 @@
-{inputs, ...}: {
+{
+  inputs,
+  lib,
+  minimal,
+  ...
+}:
+{
   imports = [
     inputs.nixos-hardware.nixosModules.common-cpu-amd
     inputs.nixos-hardware.nixosModules.common-cpu-amd-pstate
@@ -25,14 +31,16 @@
   ];
 
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod"];
-  boot.binfmt.emulatedSystems = ["aarch64-linux"];
-  graphical.gaming.enable = true;
-
+}
+// lib.optionalAttrs (!minimal) {
   # TODO goodbye once -sk keys.
   environment.shellInit = ''
     gpg-connect-agent /bye
     export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
   '';
+
+  boot.binfmt.emulatedSystems = ["aarch64-linux"];
+  graphical.gaming.enable = true;
 
   stylix.fonts.sizes = {
     #desktop = 20;

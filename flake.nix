@@ -131,6 +131,7 @@
         hosts
         microvmConfigurations
         nixosConfigurations
+        nixosConfigurationsMinimal
         ;
 
       # All nixosSystem instanciations are collected here, so that we can refer
@@ -141,11 +142,13 @@
 
       # For each true NixOS system, we want to expose an installer package that
       # can be used to do the initial setup on the node from a live environment.
+      # We use the minimal sibling configuration to reduce the amount of stuff
+      # we have to copy to the live system.
       inherit
         (foldl' recursiveUpdate {}
           (mapAttrsToList
             (import ./nix/generate-installer-package.nix inputs)
-            self.nixosConfigurations))
+            self.nixosConfigurationsMinimal))
         packages
         ;
     }

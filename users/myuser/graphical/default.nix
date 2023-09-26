@@ -37,6 +37,9 @@
       zathura
     ];
 
+    # TODO audible bell in qt pinentry drives me nuts
+    # TODO secureboot -> use pam yubikey login
+    # TODO keyboard stays lit on poweroff -> add systemd service to disable it on shutdown
     # TODO on neogit close do neotree update
     # TODO kitty terminfo missing with ssh root@localhost
     # TODO nix repl cltr+del doesnt work

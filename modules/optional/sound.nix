@@ -1,8 +1,10 @@
 {
   lib,
+  minimal,
   pkgs,
   ...
-}: {
+}:
+lib.optionalAttrs (!minimal) {
   # Helpful utilities:
   # Show pipewire devices and application overview or specifics
   # > wpctl status; wpctl inspect <id>

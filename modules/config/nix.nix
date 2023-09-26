@@ -44,18 +44,12 @@
       options = "--delete-older-than 90d";
     };
     # Define global flakes for this system
-    registry = {
+    registry = rec {
       nixpkgs.flake = inputs.nixpkgs;
-      p.flake = inputs.nixpkgs;
-      pkgs.flake = inputs.nixpkgs;
+      p = nixpkgs;
       templates.flake = inputs.templates;
     };
   };
 
-  system = {
-    extraSystemBuilderCmds = ''
-      ln -sv ${pkgs.path} $out/nixpkgs
-    '';
-    stateVersion = "23.11";
-  };
+  system.stateVersion = "23.11";
 }

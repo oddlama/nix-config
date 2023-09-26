@@ -3,12 +3,12 @@
 This is my personal nix config. It's still in the making, but this is what I got so far:
 
 - Secret rekeying, generation and bootstrapping using [agenix-rekey](https://github.com/oddlama/agenix-rekey)
-<!-- - Secure boot using [lanzaboote](https://github.com/nix-community/lanzaboote) -->
 - Remote-unlockable full disk encryption using ZFS on LUKS <!-- with automatic snapshots and backups -->
 - Automatic disk partitioning via [disko](https://github.com/nix-community/disko)
 - Support for repository-wide secrets at evaluation time (hides PII like MACs)
 - Automatic static wireguard mesh generation <!-- plus netbird for dynamic meshing -->
 - Opt-in persistence with [impermanence](https://github.com/nix-community/impermanence)
+<!-- - Secure boot using [lanzaboote](https://github.com/nix-community/lanzaboote) -->
 
 <!--
 Desktop machines:
@@ -23,7 +23,7 @@ XXX: todo, use details summary to show gallery of programs
 - aa
 -->
 
-Servers:
+Server related stuff: 
 
 - Log and system monitoring through [grafana](https://github.com/grafana/grafana) using
   - [influxdb2](https://github.com/influxdata/influxdb) and [telegraf](https://github.com/influxdata/telegraf) for metrics

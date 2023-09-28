@@ -51,5 +51,10 @@
     };
   };
 
-  system.stateVersion = "23.11";
+  system = {
+    extraSystemBuilderCmds = ''
+      ln -sv ${inputs.nixpkgs} $out/nixpkgs
+    '';
+    stateVersion = "23.11";
+  };
 }

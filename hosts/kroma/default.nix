@@ -31,6 +31,7 @@
   ];
 
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod"];
+  boot.binfmt.emulatedSystems = ["aarch64-linux"];
 }
 // lib.optionalAttrs (!minimal) {
   # TODO goodbye once -sk keys.
@@ -39,13 +40,12 @@
     export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
   '';
 
-  boot.binfmt.emulatedSystems = ["aarch64-linux"];
   graphical.gaming.enable = true;
 
   stylix.fonts.sizes = {
     #desktop = 20;
     applications = 10;
     terminal = 20;
-    #popups = 20;
+    popups = 20;
   };
 }

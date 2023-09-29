@@ -25,6 +25,7 @@ lib.optionalAttrs (!minimal) {
     DynamicUser = lib.mkForce false;
     User = "nixseparatedebuginfod";
     Group = "nixseparatedebuginfod";
+    PrivateTmp = true;
   };
   users = {
     groups.nixseparatedebuginfod = {};

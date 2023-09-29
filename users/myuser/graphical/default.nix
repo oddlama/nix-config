@@ -68,8 +68,13 @@
     # TODO gpg switch to sk
     # TODO some font icons not showing neovim because removed from nerdfonts, replace with bertter .
 
+    persistence."/state".directories = [
+      "Downloads" # config.xdg.userDirs.download (infinite recursion)
+    ];
+
     persistence."/persist".directories = [
       "projects"
+      "Pictures" # config.xdg.userDirs.pictures (infinite recursion)
     ];
   };
 

@@ -298,7 +298,6 @@ in {
 
   home.persistence."/state".directories = [
     ".cache/mozilla"
-    "Downloads"
   ];
 
   home.persistence."/persist".directories = [

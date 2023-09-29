@@ -58,10 +58,10 @@ in {
 
       settings = {
         # General
-        "intl.accept_languages" = "en-us,en";
+        "intl.accept_languages" = "en-US,en";
         "browser.startup.page" = 3; # Resume previous session on startup
         "browser.aboutConfig.showWarning" = false; # I sometimes know what I'm doing
-        "browser.ctrlTab.recentlyUsedOrder" = false; # Who want's that?
+        "browser.ctrlTab.sortByRecentlyUsed" = false; # (default) Who want's that?
         "browser.download.useDownloadDir" = false; # Ask where to save stuff
         "privacy.clearOnShutdown.history" = false; # We want to save history on exit
         # Hi-DPI
@@ -95,7 +95,7 @@ in {
         "privacy.userContext.enabled" = true;
         "privacy.userContext.ui.enabled" = true;
 
-        "browser.send_pings" = false; # Don't respect <a ping=...>
+        "browser.send_pings" = false; # (default) Don't respect <a ping=...>
 
         # This allows firefox devs changing options for a small amount of users to test out stuff.
         # Not with me please ...
@@ -106,29 +106,23 @@ in {
         "device.sensors.enabled" = false; # This isn't a phone
         "geo.enabled" = false; # Disable geolocation alltogether
 
-        # Enable certificate pinning via HPKP
-        "security.cert_pinning.hpkp.enabled" = true;
-
-        # Encrypted SNI (domain nanme) when using SSL
-        "network.security.esni.enabled" = true;
+        # ESNI is deprecated ECH is recommended
+        "network.dns.echconfig.enabled" = true;
 
         # Disable telemetry for privacy reasons
         "toolkit.telemetry.archive.enabled" = false;
-        "toolkit.telemetry.enabled" = false;
-        "toolkit.telemetry.prompted" = 2;
-        "toolkit.telemetry.rejected" = true;
+        "toolkit.telemetry.enabled" = false; # enforced by nixos
         "toolkit.telemetry.server" = "";
         "toolkit.telemetry.unified" = false;
         "extensions.webcompat-reporter.enabled" = false; # don't report compability problems to mozilla
         "datareporting.policy.dataSubmissionEnabled" = false;
         "datareporting.healthreport.uploadEnabled" = false;
         "browser.ping-centre.telemetry" = false;
-        "browser.urlbar.eventTelemetry.enabled" = false;
+        "browser.urlbar.eventTelemetry.enabled" = false; # (default)
 
         # Disable some useless stuff
         "extensions.pocket.enabled" = false; # disable pocket, save links, send tabs
         "extensions.abuseReport.enabled" = false; # don't show 'report abuse' in extensions
-        "extensions.fxmonitor.firstAlertShown" = false; # don't show advertisement for breach detection
         "extensions.formautofill.creditCards.enabled" = false; # don't auto-fill credit card information
         "identity.fxaccounts.enabled" = false; # disable firefox login
         "identity.fxaccounts.toolbar.enabled" = false;
@@ -147,7 +141,6 @@ in {
         # don't predict network requests
         "network.predictor.enabled" = false;
         "browser.urlbar.speculativeConnect.enabled" = false;
-        "browser.urlbar.usepreloadedtopurls.enabled" = false;
 
         # disable annoying web features
         "dom.push.enabled" = false; # no notifications, really...

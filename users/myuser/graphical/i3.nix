@@ -50,6 +50,31 @@ in {
           "t" = "exec ${cfg.terminal}";
           "asciicircum" = "exec ${cfg.menu}";
           "b" = "exec firefox";
+          "Shift+s" =
+            "exec --no-startup-id "
+            + toString (pkgs.writeShellScript "screenshot-area" ''
+              set -euo pipefail
+              umask 077
+              out="/tmp/screenshots.$UID/$(date +"%Y-%m-%dT%H:%M:%S%:z")-selection.png"
+              mkdir -p "$(dirname "$out")"
+              ${pkgs.maim}/bin/maim --color=.4,.7,1 --bordersize=1.0 --nodecorations=1 --hidecursor --format=png --quality=10 --noopengl --select "$out"
+              notification_id=$(${pkgs.libnotify}/bin/notify-send --icon="$out" --print-id --app-name "screenshot" "Screenshot Captured" "Copied to clipboard. Running OCR...")
+              ${pkgs.xclip}/bin/xclip -selection clipboard -t image/png < "$out"
+              ${pkgs.tesseract}/bin/tesseract "$out" -l eng+deu | ${pkgs.xclip}/bin/xclip -selection primary
+              ${pkgs.libnotify}/bin/notify-send --icon="$out" --replace-id="$notification_id" --app-name "screenshot" "Screenshot Captured" "Screenshot was copied to clipboard. OCR Content copied to primary."
+            '');
+          "F12" =
+            "exec --no-startup-id "
+            + toString (pkgs.writeShellScript "screenshot-screen" ''
+              set -euo pipefail
+              umask 077
+              out="${config.xdg.userDirs.pictures}/screenshots/$(date +"%Y-%m-%dT%H:%M:%S%:z")-fullscreen.png"
+              mkdir -p "$(dirname "$out")"
+              ${pkgs.maim}/bin/maim --hidecursor --format=png --quality=10 --noopengl "$out"
+              notification_id=$(${pkgs.libnotify}/bin/notify-send --icon="$out" --print-id --app-name "screenshot" "Screenshot Captured" "Saved to $out. Running OCR...")
+              ${pkgs.tesseract}/bin/tesseract "$out" -l eng+deu | ${pkgs.xclip}/bin/xclip -selection primary
+              ${pkgs.libnotify}/bin/notify-send --icon="$out" --replace-id="$notification_id" --app-name "screenshot" "Screenshot Captured" "Saved to $out. OCR Content copied to primary."
+            '');
 
           "Shift+r" = "reload";
           "q" = "kill";
@@ -64,8 +89,8 @@ in {
           "Shift+Up" = "move up";
           "Shift+Down" = "move down";
 
-          "s" = "splith";
-          "v" = "splitv";
+          "s" = "splitv";
+          "v" = "splith";
           "f" = "floating toggle";
           "Return" = "fullscreen toggle";
           "Space" = "focus mode_toggle";

@@ -58,10 +58,43 @@ in {
               out="/tmp/screenshots.$UID/$(date +"%Y-%m-%dT%H:%M:%S%:z")-selection.png"
               mkdir -p "$(dirname "$out")"
               ${pkgs.maim}/bin/maim --color=.4,.7,1 --bordersize=1.0 --nodecorations=1 --hidecursor --format=png --quality=10 --noopengl --select "$out"
-              notification_id=$(${pkgs.libnotify}/bin/notify-send --icon="$out" --print-id --app-name "screenshot" "Screenshot Captured" "Copied to clipboard. Running OCR...")
+              notification_id=$(${pkgs.libnotify}/bin/notify-send --icon="$out" --print-id --app-name "screenshot-area" "Screenshot Captured" "📋 copied to clipboard\n⌛ Running OCR...")
               ${pkgs.xclip}/bin/xclip -selection clipboard -t image/png < "$out"
-              ${pkgs.tesseract}/bin/tesseract "$out" -l eng+deu | ${pkgs.xclip}/bin/xclip -selection primary
-              ${pkgs.libnotify}/bin/notify-send --icon="$out" --replace-id="$notification_id" --app-name "screenshot" "Screenshot Captured" "Screenshot was copied to clipboard. OCR Content copied to primary."
+              if ${pkgs.tesseract}/bin/tesseract "$out" - -l eng+deu | ${pkgs.xclip}/bin/xclip -selection primary; then
+                ${pkgs.libnotify}/bin/notify-send --icon="$out" --replace-id="$notification_id" --app-name "screenshot-area" "Screenshot Captured" "📋 copied to clipboard\n✅ OCR (copied to primary)."
+              else
+                ${pkgs.libnotify}/bin/notify-send --icon="$out" --replace-id="$notification_id" --app-name "screenshot-area" "Screenshot Captured" "📋 copied to clipboard\n❌ Error while running OCR."
+              fi
+            '');
+          "F11" =
+            "exec --no-startup-id "
+            # TODO use writeShellApplication for shellcheck
+            # TODO --icon=some-qr-image
+            + toString (pkgs.writeShellScript "screenshot-area-scan-qr" ''
+              set -euo pipefail
+
+              # Create in-memory tmpfile
+              TMPFILE=$(mktemp)
+              exec 3<>"$TMPFILE"
+              rm "$TMPFILE" # still open in-memory as /dev/fd/3
+              TMPFILE=/dev/fd/3
+
+              if ${pkgs.maim}/bin/maim --color=.4,.7,1 --bordersize=1.0 --nodecorations=1 --hidecursor --format=png --quality=10 --noopengl --select \
+                | ${pkgs.zbar}/bin/zbarimg --xml - > "$TMPFILE"; then
+                N=$(${pkgs.yq}/bin/xq -r '.barcodes.source.index.symbol | if type == "array" then length else 1 end' < "$TMPFILE")
+                # Append codes Copy data separated by ---
+                DATA=$(${pkgs.yq}/bin/xq -r '.barcodes.source.index.symbol | if type == "array" then .[0].data else .data end' < "$TMPFILE")
+                for ((i=1;i<N;++i)); do
+                  DATA="$DATA"$'\n'"---"$'\n'"$(${pkgs.yq}/bin/xq -r ".barcodes.source.index.symbol[$i].data" < "$TMPFILE")"
+                done
+                ${pkgs.xclip}/bin/xclip -selection clipboard <<< "$DATA"
+                ${pkgs.libnotify}/bin/notify-send --app-name "screenshot-area-scan-qr" "QR Scan" "✅ $N codes detected\\n📋 copied ''${#DATA} bytes"
+              else
+                case "$?" in
+                  "4") ${pkgs.libnotify}/bin/notify-send --app-name "screenshot-area-scan-qr" "QR Scan" "❌ 0 codes detected" ;;
+                  *) ${pkgs.libnotify}/bin/notify-send --app-name "screenshot-area-scan-qr" "QR Scan" "❌ Error while processing image: zbarimg exited with code $?" ;;
+                esac
+              fi
             '');
           "F12" =
             "exec --no-startup-id "
@@ -71,9 +104,13 @@ in {
               out="${config.xdg.userDirs.pictures}/screenshots/$(date +"%Y-%m-%dT%H:%M:%S%:z")-fullscreen.png"
               mkdir -p "$(dirname "$out")"
               ${pkgs.maim}/bin/maim --hidecursor --format=png --quality=10 --noopengl "$out"
-              notification_id=$(${pkgs.libnotify}/bin/notify-send --icon="$out" --print-id --app-name "screenshot" "Screenshot Captured" "Saved to $out. Running OCR...")
-              ${pkgs.tesseract}/bin/tesseract "$out" -l eng+deu | ${pkgs.xclip}/bin/xclip -selection primary
-              ${pkgs.libnotify}/bin/notify-send --icon="$out" --replace-id="$notification_id" --app-name "screenshot" "Screenshot Captured" "Saved to $out. OCR Content copied to primary."
+              notification_id=$(${pkgs.libnotify}/bin/notify-send --icon="$out" --print-id --app-name "screenshot-screen" "Screenshot Captured" "💾 saved to $out\n⌛ Running OCR...")
+              ${pkgs.tesseract}/bin/tesseract "$out" - -l eng+deu | ${pkgs.xclip}/bin/xclip -selection primary
+              if ${pkgs.tesseract}/bin/tesseract "$out" - -l eng+deu | ${pkgs.xclip}/bin/xclip -selection primary; then
+                ${pkgs.libnotify}/bin/notify-send --icon="$out" --replace-id="$notification_id" --app-name "screenshot-screen" "Screenshot Captured" "💾 saved to $out\n✅ OCR (copied to primary)."
+              else
+                ${pkgs.libnotify}/bin/notify-send --icon="$out" --replace-id="$notification_id" --app-name "screenshot-screen" "Screenshot Captured" "💾 saved to $out\n❌ Error while running OCR."
+              fi
             '');
 
           "Shift+r" = "reload";

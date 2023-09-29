@@ -91,6 +91,7 @@ in {
     directories =
       [
         "/var/tmp/agenix-rekey"
+        "/var/tmp/nix-import-encrypted" # Decrypted repo-secrets can be kept
         "/var/lib/systemd"
         "/var/log"
         #{ directory = "/tmp"; mode = "1777"; }

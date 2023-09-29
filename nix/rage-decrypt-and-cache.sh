@@ -23,7 +23,8 @@ new_name="$(sha512sum "$file")"
 new_name="${new_name:0:32}-${basename//"/"/"%"}"
 
 # Derive the path where the decrypted file will be stored
-out="/tmp/nix-import-encrypted/$new_name"
+out="/var/tmp/nix-import-encrypted.$UID/$new_name"
+umask 077
 mkdir -p "$(dirname "$out")"
 
 # Decrypt only if necessary

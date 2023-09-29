@@ -55,8 +55,10 @@ in {
             + toString (pkgs.writeShellScript "screenshot-area" ''
               set -euo pipefail
               umask 077
+
               out="/tmp/screenshots.$UID/$(date +"%Y-%m-%dT%H:%M:%S%:z")-selection.png"
               mkdir -p "$(dirname "$out")"
+
               ${pkgs.maim}/bin/maim --color=.4,.7,1 --bordersize=1.0 --nodecorations=1 --hidecursor --format=png --quality=10 --noopengl --select "$out"
               notification_id=$(${pkgs.libnotify}/bin/notify-send --icon="$out" --print-id --app-name "screenshot-area" "Screenshot Captured" "📋 copied to clipboard\n⌛ Running OCR...")
               ${pkgs.xclip}/bin/xclip -selection clipboard -t image/png < "$out"
@@ -72,6 +74,7 @@ in {
             # TODO --icon=some-qr-image
             + toString (pkgs.writeShellScript "screenshot-area-scan-qr" ''
               set -euo pipefail
+              umask 077
 
               # Create in-memory tmpfile
               TMPFILE=$(mktemp)
@@ -101,16 +104,12 @@ in {
             + toString (pkgs.writeShellScript "screenshot-screen" ''
               set -euo pipefail
               umask 077
+
               out="${config.xdg.userDirs.pictures}/screenshots/$(date +"%Y-%m-%dT%H:%M:%S%:z")-fullscreen.png"
               mkdir -p "$(dirname "$out")"
+
               ${pkgs.maim}/bin/maim --hidecursor --format=png --quality=10 --noopengl "$out"
-              notification_id=$(${pkgs.libnotify}/bin/notify-send --icon="$out" --print-id --app-name "screenshot-screen" "Screenshot Captured" "💾 saved to $out\n⌛ Running OCR...")
-              ${pkgs.tesseract}/bin/tesseract "$out" - -l eng+deu | ${pkgs.xclip}/bin/xclip -selection primary
-              if ${pkgs.tesseract}/bin/tesseract "$out" - -l eng+deu | ${pkgs.xclip}/bin/xclip -selection primary; then
-                ${pkgs.libnotify}/bin/notify-send --icon="$out" --replace-id="$notification_id" --app-name "screenshot-screen" "Screenshot Captured" "💾 saved to $out\n✅ OCR (copied to primary)."
-              else
-                ${pkgs.libnotify}/bin/notify-send --icon="$out" --replace-id="$notification_id" --app-name "screenshot-screen" "Screenshot Captured" "💾 saved to $out\n❌ Error while running OCR."
-              fi
+              notification_id=$(${pkgs.libnotify}/bin/notify-send --icon="$out" --print-id --app-name "screenshot-screen" "Screenshot Captured" "💾 saved to $out")
             '');
 
           "Shift+r" = "reload";

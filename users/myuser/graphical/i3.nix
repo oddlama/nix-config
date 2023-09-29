@@ -15,6 +15,7 @@
   bindWithModifier = mapAttrs' (k: nameValuePair (cfg.modifier + "+" + k));
   cfg = config.xsession.windowManager.i3.config;
 in {
+  xsession.numlock.enable = true;
   xsession.windowManager.i3 = {
     enable = true;
     config = {

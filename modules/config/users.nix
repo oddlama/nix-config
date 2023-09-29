@@ -25,5 +25,6 @@
     rtkit = uidGid 984;
     gitea = uidGid 983;
     redis-paperless = uidGid 982;
+    nixseparatedebuginfod = uidGid 981;
   };
 }

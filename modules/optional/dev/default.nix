@@ -19,5 +19,19 @@ lib.optionalAttrs (!minimal) {
   nix.settings.extra-sandbox-paths = ["/var/tmp/agenix-rekey"];
 
   services.nixseparatedebuginfod.enable = true;
+  # We need a system-level user to be able to use nix.settings.allowed-users with it.
+  # TODO: remove once https://github.com/NixOS/nix/issues/9071 is fixed
+  systemd.services.nixseparatedebuginfod.serviceConfig = {
+    DynamicUser = lib.mkForce false;
+    User = "nixseparatedebuginfod";
+    Group = "nixseparatedebuginfod";
+  };
+  users = {
+    groups.nixseparatedebuginfod = {};
+    users.nixseparatedebuginfod = {
+      description = "nixseparatedebuginfod user";
+      group = "nixseparatedebuginfod";
+    };
+  };
   nix.settings.allowed-users = ["nixseparatedebuginfod"];
 }

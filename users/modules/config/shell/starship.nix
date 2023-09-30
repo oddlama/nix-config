@@ -13,7 +13,7 @@
         owner = "oddlama";
         repo = "starship";
         rev = "feat-more-dynamic-username-and-hostname";
-        hash = "sha256-me6GC1NTSEfdTdSbhwbmwMlzIhSmcs1PSUFCWu+2LG0=";
+        hash = "sha256-br1fpQPgclJcsm4INBZ+vk4/PtpnUCkWMHll0rjdGmQ=";
       };
     in
       pkgs.starship.overrideAttrs (_finalAttrs: previousAttrs: {

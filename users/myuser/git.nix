@@ -43,6 +43,7 @@
       init.defaultBranch = "main";
       merge.conflictstyle = "diff3";
       mergetool.prompt = true;
+      commit.gpgsign = true;
       pull.rebase = true;
       push.autoSetupRemote = true;
     };
@@ -51,7 +52,6 @@
       s = "status";
       tags = "tag -l";
       t = "tag -s -m ''";
-      rebase = "rebase --gpg-sign";
       fixup = ''!f() { TARGET=$(git rev-parse "$1"); git commit --fixup=$TARGET ''${@:2} && EDITOR=true git rebase -i --gpg-sign --autostash --autosquash $TARGET^; }; f'';
       # An alias that uses the previous commit message by default.
       # Useful when you mess up entering the signing password and git aborts.

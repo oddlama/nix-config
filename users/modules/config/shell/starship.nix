@@ -43,6 +43,7 @@
         "($rust )"
         "$time"
       ];
+      command_timeout = 60; # 60ms must be enough. I like a responsive prompt more than additional git information.
       username = {
         format = "[$user]($style) ";
         show_if_root = false;

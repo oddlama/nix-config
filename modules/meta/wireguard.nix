@@ -392,7 +392,7 @@ in {
         # TODO this is not yet implemented.
         # - is 0.0.0.0/0 also for valid for routing global ipv6?
         # - is 0.0.0.0/0 routing private spaces such as 192.168.1 ? that'd be baaad
-        # - force nodes to opt-in or allow nodes to opt-out? sometimes a node want's
+        # - force nodes to opt-in or allow nodes to opt-out? sometimes a node wants
         #   to use the network without routing additional stuff.
         # - allow specifying the route metric.
         routedAddresses = mkOption {

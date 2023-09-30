@@ -1,8 +1,9 @@
 {...}: {
   imports = [
-    ./neovim.nix
-    ./secrets.nix
+    ./deadd-notification-center.nix
     ./uid.nix
+    ./secrets.nix
+    ./neovim.nix
 
     ./config/htop.nix
     ./config/impermanence.nix

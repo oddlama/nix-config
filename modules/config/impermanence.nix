@@ -90,7 +90,10 @@ in {
     hideMounts = true;
     directories =
       [
-        "/var/tmp/agenix-rekey"
+        {
+          directory = "/var/tmp/agenix-rekey";
+          mode = "1777";
+        }
         "/var/tmp/nix-import-encrypted" # Decrypted repo-secrets can be kept
         "/var/lib/systemd"
         "/var/log"

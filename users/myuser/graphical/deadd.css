@@ -1,139 +1,199 @@
 /* Notification center */
 
-.blurredBG, #main_window, .blurredBG.low, .blurredBG.normal {
-    background: rgba(255, 255, 255, 0.5);
+.deadd-noti-center {
+	color: #ffffff;
 }
 
-.noti-center.time {
-    font-size: 32px;
+.blurredBG, #main_window, .blurredBG.low, .blurredBG.normal {
+	background: #000000;
 }
 
 /* Notifications */
 
-.notification.content {
-    margin-left: 15px;
-    margin-right: 15px;
-}
-
-.title {
-    font-weight: bold;
-    font-size: 16px;
-}
-
-.appname {
-    font-size: 12px;
-}
-
-.time {
-    font-size: 12px;
+.notificationInCenter, .notification.container {
+	background: #333;
+	border-radius: .825em;
+	padding: .75em;
+	margin-left: .25em;
+	margin-right: .25em;
+	margin-top: .25em;
+	margin-bottom: -.75em;
 }
 
 .blurredBG.notification {
-    background:  rgba(255, 255, 255, 0.4);
+	background: #333;
 }
 
-.blurredBG.notification.critical {
-    background: rgba(255, 0, 0, 0.5);
+.notificationInCenter > *, .notification > * {
+	margin: 0em;
 }
 
-.notificationInCenter.critical {
-    background: rgba(155, 0, 20, 0.5);
+.notification.appname, .in-center.appname {
+	color: #aaa;
+	font-weight: normal;
+	font-size: 1.125rem;
+}
+.notification.body, .in-center.body {
+	font-size: 1.5rem;
+	margin-bottom: .25em;
+	margin-top: .25em;
+	margin-left: 0em;
+}
+.notification.title, .in-center.title {
+	font-weight: bold;
+	font-size: 1.75rem;
+}
+.notification.image, .in-center.image {
+}
+.notification.icon, .in-center.icon {
+}
+.notification.actionbutton, .in-center.actionbutton {
 }
 
-/* Labels */
-
-label {
-    color: #322;
+.notification.scale, .in-center.scale {
+	margin-top: .25em;
+	margin-bottom: .25em;
+	margin-left: -.75em;
+	margin-right: -.75em;
 }
 
-label.notification {
-    color: #322;
+.notification.scale slider, .in-center.scale slider {
+	margin: -.375em;
+	min-width: 1.375em;
+	min-height: 1.375em;
 }
 
-label.critical {
-    color: #000;
+.notification.scale trough, .in-center.scale trough {
+	background-color: #111;
+	color: #111;
+	border-color: transparent;
+	border-radius: 1em;
 }
-.notificationInCenter label.critical {
-    color: #000;
+
+.notification.scale trough highlight, .in-center.scale trough highlight {
+	background-color: #f00;
+	color: #f00;
+	border-color: transparent;
+	border-radius: 1em;
+}
+
+.notification.appname {
+}
+.notification.body {
+}
+.notification.title {
+}
+.notification.image {
+	margin-left: -1em;
+	margin-right: 1em;
+}
+.notification.icon {
+}
+.notification.actionbutton {
+}
+
+.in-center {
+}
+.in-center.appname {
+}
+.in-center.body {
+}
+.in-center.title {
+}
+.in-center.time {
+	color: #777;
+	font-weight: bold;
+	font-size: 1.125rem;
+	font-family: normal;
+}
+.in-center.image {
+}
+.in-center.icon {
+}
+.in-center.button-close {
+}
+.in-center.actionbutton {
+}
+
+.noti-center.body {
+}
+.noti-center.time {
+	font-size: 4rem;
+	font-weight: normal;
+	margin-left: .25em;
+}
+.noti-center.date {
+	font-size: 2rem;
+	margin-left: .75em;
+}
+/* BUG: missing .noti-center class upstream */
+.deadd-noti-center.delete-all {
+	font-size: 2rem;
+}
+.noti-center.userbutton {
 }
 
 
 /* Buttons */
 
 button {
-    background: transparent;
-    color: #322;
-    border-radius: 3px;
-    border-width: 0px;
-    background-position: 0px 0px;
-    text-shadow: none;
+	background: transparent;
+	border-radius: 3px;
+	border-width: 0px;
+	background-position: 0px 0px;
+	text-shadow: none;
 }
 
 button:hover {
-    border-radius: 3px;
-    background: rgba(0, 20, 20, 0.2);
-    border-width: 0px;
-    border-top: transparent;
-    border-color: #f00;
-    color: #fee;
+	border-radius: 3px;
+	background: rgba(0, 20, 20, 0.2);
+	border-width: 0px;
+	border-top: transparent;
+	border-color: #f00;
 }
 
 
 /* Custom Buttons */
 
 .userbutton {
-    background: rgba(20,0,0, 0.15);
+	background: rgba(20,0,0, 0.15);
 }
 
 .userbuttonlabel {
-    color: #222;
-    font-size: 12px;
+	font-size: 12px;
 }
 
 .userbutton:hover {
-    background: rgba(20, 0, 0, 0.2);
+	background: rgba(20, 0, 0, 0.2);
 }
 
 .userbuttonlabel:hover {
-    color: #111;
 }
 
 button.buttonState1 {
-    background: rgba(20,0,0,0.5);
+	background: rgba(20,0,0,0.5);
 }
 
 .userbuttonlabel.buttonState1 {
-    color: #fff;
 }
 
 button.buttonState1:hover {
-    background: rgba(20,0,0, 0.4);
+	background: rgba(20,0,0, 0.4);
 }
 
 .userbuttonlabel.buttonState1:hover {
-    color: #111;
 }
 
 button.buttonState2 {
-    background: rgba(255,255,255,0.3);
+	background: rgba(255,255,255,0.3);
 }
 
 .userbuttonlabel.buttonState2 {
-    color: #111;
 }
 
 button.buttonState2:hover {
-    background: rgba(20,0,0, 0.3);
+	background: rgba(20,0,0, 0.3);
 }
 
 .userbuttonlabel.buttonState2:hover {
-    color: #000;
 }
-
-
-/* Images */
-
-image.deadd-noti-center.notification.image {
-    margin-left: 20px;
-}
-

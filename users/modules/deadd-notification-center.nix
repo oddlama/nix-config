@@ -60,13 +60,13 @@ in {
           config.xdg.configFile."deadd/deadd.yml".source
           config.xdg.configFile."deadd/deadd.css".source
         ];
-        Restart = "always";
-        RestartSec = "1sec";
       };
       Service = {
         Type = "dbus";
         BusName = "org.freedesktop.Notifications";
         ExecStart = "${cfg.package}/bin/deadd-notification-center";
+        Restart = "always";
+        RestartSec = "1sec";
       };
     };
   };

@@ -54,18 +54,19 @@ in {
       Install.WantedBy = ["graphical-session.target"];
       Unit = {
         Description = "Deadd Notification Center";
+        After = ["graphical-session-pre.target"];
         PartOf = ["graphical-session.target"];
-        After = ["graphical-session.target"];
         X-Restart-Triggers = [
           config.xdg.configFile."deadd/deadd.yml".source
           config.xdg.configFile."deadd/deadd.css".source
         ];
+        Restart = "always";
+        RestartSec = "1sec";
       };
       Service = {
         Type = "dbus";
         BusName = "org.freedesktop.Notifications";
         ExecStart = "${cfg.package}/bin/deadd-notification-center";
-        Restart = "on-failure";
       };
     };
   };

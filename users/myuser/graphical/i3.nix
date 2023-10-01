@@ -59,7 +59,7 @@ in {
               out="/tmp/screenshots.$UID/$(date +"%Y-%m-%dT%H:%M:%S%:z")-selection.png"
               mkdir -p "$(dirname "$out")"
 
-              ${pkgs.maim}/bin/maim --color=.4,.7,1 --bordersize=1.0 --nodecorations=1 --hidecursor --format=png --quality=10 --noopengl --select "$out"
+              ${pkgs.maim}/bin/maim --color=.4,.7,1,0.2 --bordersize=1.0 --nodecorations=1 --hidecursor --format=png --quality=10 --noopengl --select "$out"
               notification_id=$(${pkgs.libnotify}/bin/notify-send --icon="$out" --print-id --app-name "screenshot-area" "Screenshot Captured" "📋 copied to clipboard\n⌛ Running OCR...")
               ${pkgs.xclip}/bin/xclip -selection clipboard -t image/png < "$out"
               if ${pkgs.tesseract}/bin/tesseract "$out" - -l eng+deu | ${pkgs.xclip}/bin/xclip -selection primary; then

@@ -6,14 +6,7 @@
 }:
 lib.optionalAttrs (!minimal) {
   boot.blacklistedKernelModules = ["nouveau"];
-  services.xserver = {
-    videoDrivers = lib.mkForce ["nvidia"];
-    screenSection = ''
-      Option "metamodes" "nvidia-auto-select +0+0 {ForceFullCompositionPipeline=On}"
-      Option "AllowIndirectGLXProtocol" "off"
-      Option "TripleBuffer" "on"
-    '';
-  };
+  services.xserver.videoDrivers = lib.mkForce ["nvidia"];
 
   hardware = {
     nvidia = {

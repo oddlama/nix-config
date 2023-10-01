@@ -17,7 +17,6 @@
       # XXX: retest this in the future. Problems were flickering under gles, black screens and refresh issues under vulkan, black wine windows.
       # ./sway.nix
       ./i3.nix
-      ./picom.nix
     ]
     ++ lib.optionals nixosConfig.graphical.gaming.enable [
       ./games/bottles.nix

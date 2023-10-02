@@ -1,0 +1,18 @@
+[package]
+name = "i3-per-workspace-layout"
+version = "1.0.0"
+edition = "2021"
+authors = ["oddlama <oddlama@oddlama.org>"]
+description = "A helper utility to allow assigning a layout to each workspace in i3"
+license = "MIT"
+
+[dependencies]
+anyhow = "1.0.75"
+toml = "0.8.1"
+serde = { version = "1.0.171", features = ["derive"] }
+tokio = { version = "1.32.0", features = ["full"] }
+tokio-i3ipc = "0.16.0"
+clap = { version = "4.4.6", features = ["derive"] }
+tokio-stream = "0.1.14"
+flexi_logger = "0.27.2"
+log = "0.4.20"

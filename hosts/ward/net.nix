@@ -40,16 +40,18 @@ in {
       '';
     };
     "10-wan" = {
-      DHCP = "yes";
-      dhcpV4Config.UseDNS = false;
-      dhcpV6Config.UseDNS = false;
-      ipv6AcceptRAConfig.UseDNS = false;
-      #address = [
-      #  "192.168.178.2/24"
-      #  "fdee::1/64"
-      #];
-      #gateway = [
-      #];
+      #DHCP = "yes";
+      #dhcpV4Config.UseDNS = false;
+      #dhcpV6Config.UseDNS = false;
+      #ipv6AcceptRAConfig.UseDNS = false;
+      address = [
+        #"192.168.178.2/24"
+        #"fdee::1/64"
+        "192.168.1.183/22"
+      ];
+      gateway = [
+        "192.168.1.1/22"
+      ];
       matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.wan.mac;
       networkConfig.IPv6PrivacyExtensions = "yes";
       linkConfig.RequiredForOnline = "routable";

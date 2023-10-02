@@ -85,7 +85,9 @@ in {
         // bindWithModifier {
           "t" = "exec ${cfg.terminal}";
           "asciicircum" = "exec ${cfg.menu}";
-          "b" = "exec firefox";
+          # TODO only open if not already open
+          # TODO shortcut to open these from eww bar with 1 click
+          "b" = "exec firefox"; # TODO ; exec signal-desktop; exec discord
           "Shift+s" =
             "exec --no-startup-id "
             + toString (pkgs.writeShellScript "screenshot-area" ''
@@ -251,6 +253,7 @@ in {
         force = true;
         layouts = {
           "1" = "tabbed";
+          "5" = "tabbed";
           "7" = "tabbed";
           "8" = "tabbed";
           "9" = "tabbed";

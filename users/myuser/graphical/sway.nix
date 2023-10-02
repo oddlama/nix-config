@@ -120,7 +120,7 @@ in {
         assigns = {
           "9" = [
             {class = "^steam_app_";}
-            {app_id = "^Steam$";}
+            {app_id = "^steam$";}
             {class = "^steam$";}
           ];
         };

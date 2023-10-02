@@ -214,7 +214,7 @@ in {
         ];
         "5" = [
           {class = "^bottles$";}
-          {class = "^Steam$";}
+          {class = "^steam$";}
           {class = "^prismlauncher$";}
         ];
         "7" = [
@@ -245,7 +245,7 @@ in {
             }) ["7" "8" "9"];
         }
         .${nixosConfig.node.name}
-        or {};
+        or [];
     };
 
     extraConfig = let

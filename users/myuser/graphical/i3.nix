@@ -8,6 +8,7 @@
   inherit
     (lib)
     escapeShellArg
+    getExe
     mapAttrs'
     nameValuePair
     ;
@@ -27,6 +28,26 @@
       license = licenses.mit;
       maintainers = with maintainers; [oddlama];
       mainProgram = "i3-per-workspace-layout";
+    };
+  };
+
+  sway-overfocus = pkgs.rustPlatform.buildRustPackage rec {
+    pname = "sway-overfocus";
+    version = "1.0.0";
+
+    src = pkgs.fetchFromGitHub {
+      owner = "korreman";
+      repo = "sway-overfocus";
+      rev = "8c2a80fd111dcb9ce7e956b867c0d0180b13b649";
+      hash = "sha256-Rv4dTycB19c2JyQ0y5WpDpX15D2RhjKq2lPOyuK2Ki8=";
+    };
+    cargoHash = "sha256-mwPLroz7oE7NNdc/H/sH9mnXj3KyT75U55UE7tMyZMw=";
+
+    meta = with lib; {
+      description = "Better focus navigation for sway and i3";
+      license = licenses.mit;
+      maintainers = with maintainers; [oddlama];
+      mainProgram = "sway-overfocus";
     };
   };
 in {
@@ -130,25 +151,26 @@ in {
           "Shift+r" = "reload";
           "q" = "kill";
 
-          "Left" = "focus left";
-          "Right" = "focus right";
-          "Up" = "focus up";
-          "Down" = "focus down";
+          # Don't focus tabs
+          "Left" = "exec --no-startup-id ${getExe sway-overfocus} split-lt float-lt output-ls";
+          "Right" = "exec --no-startup-id ${getExe sway-overfocus} split-rt float-rt output-rs";
+          "Up" = "exec --no-startup-id ${getExe sway-overfocus} split-ut float-ut output-us";
+          "Down" = "exec --no-startup-id ${getExe sway-overfocus} split-dt float-dt output-ds";
+          "Tab" = "exec --no-startup-id ${getExe sway-overfocus} group-rw group-dw";
+          "Shift+Tab" = "exec --no-startup-id ${getExe sway-overfocus} group-lw group-uw";
 
           "Shift+Left" = "move left";
           "Shift+Right" = "move right";
           "Shift+Up" = "move up";
           "Shift+Down" = "move down";
 
+          "space" = "layout toggle tabbed splitv splith";
           "s" = "splitv";
           "v" = "splith";
           "f" = "floating toggle";
+          "Shift+f" = "focus mode_toggle";
           "Return" = "fullscreen toggle";
-          "Space" = "focus mode_toggle";
           "a" = "focus parent";
-          # "s" = "layout stacking";
-          # "w" = "layout tabbed";
-          # "e" = "layout toggle split";
 
           "Shift+Ctrl+q" = "exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'";
           "r" = "mode resize";
@@ -181,7 +203,7 @@ in {
       window.titlebar = false;
 
       floating.criteria = [
-        {class = "Pavucontrol";}
+        {class = "^Pavucontrol$";}
       ];
 
       assigns = {
@@ -195,7 +217,7 @@ in {
         ];
         "7" = [
           {class = "^obsidian$";}
-          {class = "^Discord$";}
+          {class = "^discord$";}
           {class = "^Signal$";}
           {class = "^TelegramDesktop$";}
         ];
@@ -226,15 +248,16 @@ in {
 
     extraConfig = let
       configLayouts = (pkgs.formats.toml {}).generate "per-workspace-layouts.toml" {
+        force = true;
         layouts = {
-          "1" = "stacking";
-          "7" = "stacking";
-          "8" = "stacking";
-          "9" = "stacking";
+          "1" = "tabbed";
+          "7" = "tabbed";
+          "8" = "tabbed";
+          "9" = "tabbed";
         };
       };
     in ''
-      exec_always --no-startup-id ${i3-per-workspace-layout}/bin/i3-per-workspace-layout --config ${configLayouts}
+      exec_always --no-startup-id ${getExe i3-per-workspace-layout} --config ${configLayouts}
     '';
   };
 

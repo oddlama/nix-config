@@ -4,6 +4,7 @@
   lib,
   pkgs,
   utils,
+  minimal,
   ...
 }: let
   inherit
@@ -93,6 +94,7 @@
         inherit (inputs.self) nodes;
         inherit (inputs.self.pkgs.${vmCfg.system}) lib;
         inherit inputs;
+        inherit minimal;
       };
       pkgs = inputs.self.pkgs.${vmCfg.system};
       inherit (vmCfg) autostart;

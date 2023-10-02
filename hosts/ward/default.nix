@@ -3,6 +3,7 @@
   inputs,
   lib,
   nodes,
+  minimal,
   ...
 }: {
   imports = [
@@ -62,17 +63,19 @@
       ];
     };
   in
-    lib.genAttrs [
-      "adguardhome"
-      "forgejo"
-      "grafana"
-      "influxdb"
-      "kanidm"
-      "loki"
-      "paperless"
-      "vaultwarden"
-    ]
-    defaultConfig;
+    lib.mkIf (!minimal) (
+      lib.genAttrs [
+        "adguardhome"
+        "forgejo"
+        "grafana"
+        "influxdb"
+        "kanidm"
+        "loki"
+        "paperless"
+        "vaultwarden"
+      ]
+      defaultConfig
+    );
 
   #ddclient = defineVm;
   #samba+wsdd = defineVm;

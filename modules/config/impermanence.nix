@@ -90,16 +90,11 @@ in {
     hideMounts = true;
     directories =
       [
-        {
-          directory = "/var/tmp/agenix-rekey";
-          mode = "1777";
-        }
-        "/var/tmp/nix-import-encrypted" # Decrypted repo-secrets can be kept
         "/var/lib/systemd"
         "/var/log"
+        "/var/spool"
         #{ directory = "/tmp"; mode = "1777"; }
         #{ directory = "/var/tmp"; mode = "1777"; }
-        "/var/spool"
       ]
       ++ optionals config.networking.wireless.iwd.enable [
         {

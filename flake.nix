@@ -92,6 +92,11 @@
     };
 
     templates.url = "github:NixOS/templates";
+
+    wired-notify = {
+      url = "github:Toqozz/wired-notify";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {

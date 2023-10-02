@@ -6,7 +6,7 @@
 }: {
   imports =
     [
-      ./deadd-notification-center.nix
+      ./wired-notify.nix
       ./discord.nix
       ./firefox.nix
       ./kitty.nix

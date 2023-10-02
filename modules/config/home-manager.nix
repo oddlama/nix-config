@@ -10,6 +10,7 @@
     verbose = true;
     sharedModules = [
       inputs.nix-index-database.hmModules.nix-index
+      inputs.wired-notify.homeManagerModules.default
       {
         home.stateVersion = config.system.stateVersion;
       }

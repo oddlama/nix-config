@@ -50,5 +50,6 @@
   nixpkgs.overlays = [
     inputs.microvm.overlay
     inputs.nixpkgs-wayland.overlay
+    inputs.wired-notify.overlays.default
   ];
 }

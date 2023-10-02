@@ -1,6 +1,5 @@
 {...}: {
   imports = [
-    ./deadd-notification-center.nix
     ./uid.nix
     ./secrets.nix
     ./neovim.nix

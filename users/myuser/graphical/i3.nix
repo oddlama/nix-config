@@ -14,6 +14,21 @@
 
   bindWithModifier = mapAttrs' (k: nameValuePair (cfg.modifier + "+" + k));
   cfg = config.xsession.windowManager.i3.config;
+
+  i3-per-workspace-layout = pkgs.rustPlatform.buildRustPackage rec {
+    pname = "i3-per-workspace-layout";
+    version = "1.0.0";
+
+    src = ./i3-per-workspace-layout;
+    cargoHash = "sha256-bO/ZTkQLCeJajiW7cZoEBIIWDCyxYp4rO6ulbcu21YQ=";
+
+    meta = with lib; {
+      description = "A helper utility to allow assigning a layout to each workspace in i3";
+      license = licenses.mit;
+      maintainers = with maintainers; [oddlama];
+      mainProgram = "i3-per-workspace-layout";
+    };
+  };
 in {
   xsession.numlock.enable = true;
   xsession.windowManager.i3 = {
@@ -130,7 +145,7 @@ in {
           "f" = "floating toggle";
           "Return" = "fullscreen toggle";
           "Space" = "focus mode_toggle";
-          # "a" = "focus parent";
+          "a" = "focus parent";
           # "s" = "layout stacking";
           # "w" = "layout tabbed";
           # "e" = "layout toggle split";
@@ -165,15 +180,62 @@ in {
 
       window.titlebar = false;
 
-      #assigns = {
-      #  "9" = [
-      #    {class = "^steam_app_";}
-      #    {app_id = "^Steam$";}
-      #    {class = "^steam$";}
-      #  ];
-      #};
+      floating.criteria = [
+        {class = "Pavucontrol";}
+      ];
+
+      assigns = {
+        "1" = [
+          {class = "^firefox$";}
+        ];
+        "5" = [
+          {class = "^bottles$";}
+          {class = "^Steam$";}
+          {class = "^prismlauncher$";}
+        ];
+        "7" = [
+          {class = "^obsidian$";}
+          {class = "^Discord$";}
+          {class = "^Signal$";}
+          {class = "^TelegramDesktop$";}
+        ];
+        "8" = [
+          {class = "^Spotify$";}
+        ];
+      };
       # TODO eww -> bars = [ ];
+
+      workspaceOutputAssign =
+        {
+          kroma = let
+            monitorMain = "DP-2";
+            monitorLeft = "DP-4";
+          in
+            map (x: {
+              workspace = x;
+              output = monitorMain;
+            }) ["1" "2" "3" "4" "5" "6"]
+            ++ map (x: {
+              workspace = x;
+              output = monitorLeft;
+            }) ["7" "8" "9"];
+        }
+        .${nixosConfig.node.name}
+        or {};
     };
+
+    extraConfig = let
+      configLayouts = (pkgs.formats.toml {}).generate "per-workspace-layouts.toml" {
+        layouts = {
+          "1" = "stacking";
+          "7" = "stacking";
+          "8" = "stacking";
+          "9" = "stacking";
+        };
+      };
+    in ''
+      exec_always --no-startup-id ${i3-per-workspace-layout}/bin/i3-per-workspace-layout --config ${configLayouts}
+    '';
   };
 
   programs.autorandr.enable = true;

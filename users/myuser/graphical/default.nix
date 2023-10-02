@@ -28,8 +28,9 @@
       appimage-run
       chromium
       feh
-      pinentry # For yubikey
       gamescope
+      pavucontrol
+      pinentry # For yubikey
       thunderbird
       xdg-utils
       xdragon
@@ -37,6 +38,7 @@
       zathura
     ];
 
+    # TODO pavucontrol shortcut or bar button
     # TODO audible bell in qt pinentry drives me nuts
     # TODO secureboot -> use pam yubikey login
     # TODO keyboard stays lit on poweroff -> add systemd service to disable it on shutdown

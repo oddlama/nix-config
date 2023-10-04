@@ -1,9 +1,4 @@
 {
-  config,
-  pkgs,
-  lib,
-  ...
-}: {
   services.xserver = {
     enable = true;
     dpi = 96;
@@ -28,8 +23,9 @@
   };
   services.autorandr.enable = true;
 
-  services.xserver.modules = lib.mkBefore [(pkgs.enableDebugging pkgs.xorg.xorgserver).out];
-  environment.etc."X11/xinit/xserverrc".source = lib.mkForce (pkgs.writeShellScript "xserverrc" ''
-    exec ${pkgs.enableDebugging pkgs.xorg.xorgserver}/bin/X ${toString config.services.xserver.displayManager.xserverArgs} "$@"
-  '');
+  # Enable for Xorg debugging
+  # services.xserver.modules = lib.mkBefore [(pkgs.enableDebugging pkgs.xorg.xorgserver).out];
+  # environment.etc."X11/xinit/xserverrc".source = lib.mkForce (pkgs.writeShellScript "xserverrc" ''
+  #   exec ${pkgs.enableDebugging pkgs.xorg.xorgserver}/bin/X ${toString config.services.xserver.displayManager.xserverArgs} "$@"
+  # '');
 }

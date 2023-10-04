@@ -68,7 +68,7 @@
     };
 
     nixseparatedebuginfod = {
-      url = "github:symphorien/nixseparatedebuginfod/466110a37e11a33a3551b44d9da5e323a8924cfa";
+      url = "github:symphorien/nixseparatedebuginfod";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };

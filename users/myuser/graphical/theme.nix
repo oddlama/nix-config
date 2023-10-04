@@ -1,6 +1,5 @@
 {
   config,
-  lib,
   nixosConfig,
   pkgs,
   ...
@@ -41,12 +40,6 @@
       package = pkgs.whitesur-icon-theme;
     };
 
-    # TODO test other themes
-    theme = lib.mkForce {
-      name = "WhiteSur-Dark-solid";
-      package = pkgs.whitesur-gtk-theme;
-    };
-
     gtk2.extraConfig = "gtk-application-prefer-dark-theme = true";
     gtk3.extraConfig = gtk34extraConfig;
     gtk4.extraConfig = gtk34extraConfig;
@@ -56,8 +49,12 @@
 
   qt = {
     enable = true;
-    platformTheme = "gtk";
+    style.name = "kvantum";
+    platformTheme = "qtct";
   };
+
+  xdg.configFile."Kvantum/kvantum.kvconfig".text = "theme=Base16Kvantum";
+  xdg.configFile."Kvantum/Base16Kvantum".source = ./Base16Kvantum;
 
   stylix = {
     inherit (nixosConfig.stylix) polarity base16Scheme;

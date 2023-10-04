@@ -1,9 +1,10 @@
 {pkgs, ...}: {
+  systemd.user.services.wired.Unit.ConditionEnvironment = "DISPLAY";
   services.wired = {
     enable = true;
     config = let
       format = pkgs.formats.ron {};
-      inherit (format.lib) struct;
+      inherit (format.lib) mkLiteral struct;
       unnamedStruct = struct "";
       Color = hex: struct "Color" {inherit hex;};
       Hook = struct "Hook";
@@ -34,8 +35,8 @@
             name = "general_root";
             parent = "";
             hook = Hook {
-              parent_anchor = "TR";
-              self_anchor = "TR";
+              parent_anchor = mkLiteral "TR";
+              self_anchor = mkLiteral "TR";
             };
             offset = Vec2 (-50) 50;
             render_criteria = [];
@@ -50,8 +51,8 @@
               border_color_paused = Color "#00000000";
               gap = Vec2 0.0 8.0;
               notification_hook = Hook {
-                parent_anchor = "BM";
-                self_anchor = "TM";
+                parent_anchor = mkLiteral "BM";
+                self_anchor = mkLiteral "TM";
               };
             });
           }
@@ -60,12 +61,12 @@
             name = "general_notification";
             parent = "general_root";
             hook = Hook {
-              parent_anchor = "TM";
-              self_anchor = "TM";
+              parent_anchor = mkLiteral "TM";
+              self_anchor = mkLiteral "TM";
             };
             offset = Vec2 0 0;
             params = struct "ImageBlock" (unnamedStruct {
-              image_type = "App";
+              image_type = mkLiteral "App";
               padding = Padding {
                 left = 40;
                 right = 40;
@@ -75,7 +76,7 @@
               rounding = 4.0;
               scale_width = 152;
               scale_height = 152;
-              filter_mode = "Lanczos3";
+              filter_mode = mkLiteral "Lanczos3";
             });
           }
 
@@ -83,14 +84,14 @@
             name = "general_summary";
             parent = "general_notification";
             hook = Hook {
-              parent_anchor = "BM";
-              self_anchor = "TM";
+              parent_anchor = mkLiteral "BM";
+              self_anchor = mkLiteral "TM";
             };
             offset = Vec2 0 12;
             params = struct "TextBlock" (unnamedStruct {
               text = "%s";
               font = "Arial Bold 16";
-              ellipsize = "End";
+              ellipsize = mkLiteral "End";
               color = Color "#000000";
               padding = Padding {
                 left = 0;
@@ -115,14 +116,14 @@
             name = "general_body";
             parent = "general_summary";
             hook = Hook {
-              parent_anchor = "BM";
-              self_anchor = "TM";
+              parent_anchor = mkLiteral "BM";
+              self_anchor = mkLiteral "TM";
             };
             offset = Vec2 0 0;
             params = struct "TextBlock" (unnamedStruct {
               text = "%b";
               font = "Arial Bold 16";
-              ellipsize = "End";
+              ellipsize = mkLiteral "End";
               color = Color "#000000";
               padding = Padding {
                 left = 0;
@@ -149,9 +150,9 @@
     {
           name: "app_root",
           parent: "",
-          hook: Hook { parent_anchor = "MM"; self_anchor = "MM"; };
+          hook: Hook { parent_anchor = mkLiteral "MM"; self_anchor = mkLiteral "MM"; };
           offset: Vec2(x: 0, y: 0),
-          render_criteria: [AppImage],
+          render_criteria: [mkLiteral "AppImage"],
           params: NotificationBlock((
                   monitor: 0,
                   border_width: 0,
@@ -162,14 +163,14 @@
                   border_color_critical: Color "#FF0000",
                   border_color_paused: Color "#00000000",
                   gap: Vec2(x: 0.0, y: 8.0),
-                  notification_hook: Hook { parent_anchor = "BM"; self_anchor = "TM"; };
+                  notification_hook: Hook { parent_anchor = mkLiteral "BM"; self_anchor = mkLiteral "TM"; };
           )),
       ),
 
       (
           name: "app_notification",
           parent: "app_root",
-          hook: Hook { parent_anchor = "TM"; self_anchor = "TM"; };
+          hook: Hook { parent_anchor = mkLiteral "TM"; self_anchor = mkLiteral "TM"; };
           offset: Vec2(x: 0, y: 0),
           params: ImageBlock((
                   image_type: App,
@@ -177,19 +178,19 @@
                   rounding: 4.0,
                   scale_width: 152,
                   scale_height: 152,
-                  filter_mode: "Lanczos3",
+                  filter_mode: mkLiteral "Lanczos3",
           )),
       ),
 
       (
           name: "app_summary",
           parent: "app_notification",
-          hook: Hook { parent_anchor = "BM"; self_anchor = "TM"; };
+          hook: Hook { parent_anchor = mkLiteral "BM"; self_anchor = mkLiteral "TM"; };
           offset: Vec2(x: 0, y: 12),
           params: TextBlock((
                   text: "%s",
                   font: "Arial Bold 16",
-                  ellipsize: End,
+                  ellipsize = mkLiteralEnd,
                   color: Color "#000000",
                   padding: Padding(left: 0, right: 0, top: 0, bottom: 0),
                   dimensions: (width: (min: -1, max: 185), height: (min: 0, max: 0)),
@@ -199,12 +200,12 @@
       (
           name: "app_body",
           parent: "app_summary",
-          hook: Hook { parent_anchor = "BM"; self_anchor = "TM"; };
+          hook: Hook { parent_anchor = mkLiteral "BM"; self_anchor = mkLiteral "TM"; };
           offset: Vec2(x: 0, y: 0),
           params: TextBlock((
                   text: "%b",
                   font: "Arial Bold 16",
-                  ellipsize: End,
+                  ellipsize = mkLiteralEnd,
                   color: Color "#000000",
                   padding: Padding(left: 0, right: 0, top: 0, bottom: 24),
                   dimensions: (width: (min: -1, max: 250), height: (min: 0, max: 0)),
@@ -214,9 +215,9 @@
       (
           name: "app_progress",
           parent: "app_notification",
-          hook: Hook { parent_anchor = "BM"; self_anchor = "TM"; };
+          hook: Hook { parent_anchor = mkLiteral "BM"; self_anchor = mkLiteral "TM"; };
           offset: Vec2(x: 0, y: 50),
-          render_criteria: [Progress],
+          render_criteria: [mkLiteral "Progress"],
           params: ProgressBlock((
                   padding: Padding(left: 0, right: 0, top: 0, bottom: 32),
                   border_width: 2,
@@ -233,10 +234,10 @@
       (
           name: "status_root",
           parent: "",
-          hook: Hook { parent_anchor = "TM"; self_anchor = "TM"; };
+          hook: Hook { parent_anchor = mkLiteral "TM"; self_anchor = mkLiteral "TM"; };
           offset: Vec2(x: 0.0, y: 60),
           # render_anti_criteria: [AppImage],
-          render_criteria: [HintImage],
+          render_criteria: [mkLiteral "HintImage"],
           params: NotificationBlock((
                   monitor: 0,
                   border_width: 0,
@@ -247,19 +248,19 @@
                   border_color_critical: Color "#FF0000",
                   border_color_paused: Color "#00000000",
                   gap: Vec2(x: 0.0, y: 8.0),
-                  notification_hook: Hook { parent_anchor = "BM"; self_anchor = "TM"; };
+                  notification_hook: Hook { parent_anchor = mkLiteral "BM"; self_anchor = mkLiteral "TM"; };
           )),
       ),
 
       (
           name: "status_notification",
           parent: "status_root",
-          hook: Hook { parent_anchor = "TL"; self_anchor = "TL"; };
+          hook: Hook { parent_anchor = mkLiteral "TL"; self_anchor = mkLiteral "TL"; };
           offset: Vec2(x: 0, y: 0),
           params: TextBlock((
                   text: "%s",
                   font: "Arial Bold 16",
-                  ellipsize: End,
+                  ellipsize = mkLiteralEnd,
                   color: Color "#000000",
                   padding: Padding(left: 8, right: 8, top: 8, bottom: 8),
                   dimensions: (width: (min: 400, max: 400), height: (min: 84, max: 0)),
@@ -269,12 +270,12 @@
       (
           name: "status_body",
           parent: "status_notification",
-          hook: Hook { parent_anchor = "ML"; self_anchor = "TL"; };
+          hook: Hook { parent_anchor = mkLiteral "ML"; self_anchor = mkLiteral "TL"; };
           offset: Vec2(x: 0, y: -24),
           params: TextBlock((
                   text: "%b",
                   font: "Arial 14",
-                  ellipsize: End,
+                  ellipsize = mkLiteralEnd,
                   color: Color "#000000",
                   padding: Padding(left: 8, right: 8, top: 8, bottom: 8),
                   dimensions: (width: (min: 400, max: 400), height: (min: 0, max: 84)),
@@ -284,7 +285,7 @@
       (
           name: "status_image",
           parent: "status_notification",
-          hook: Hook { parent_anchor = "TL"; self_anchor = "TR"; };
+          hook: Hook { parent_anchor = mkLiteral "TL"; self_anchor = mkLiteral "TR"; };
           offset: Vec2(x: 0, y: 0),
           params: ImageBlock((
                   image_type: Hint,
@@ -292,7 +293,7 @@
                   rounding: 4.0,
                   scale_width: 84,
                   scale_height: 84,
-                  filter_mode: "Lanczos3",
+                  filter_mode: mkLiteral "Lanczos3",
           )),
       ),
     */

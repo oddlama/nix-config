@@ -30,7 +30,7 @@
       feh
       gamescope
       pavucontrol
-      pinentry # For yubikey
+      pinentry-gnome # For yubikey, gnome = gtk3 variant
       thunderbird
       xdg-utils
       xdragon

@@ -23,7 +23,10 @@ lib.optionalAttrs (!minimal) {
       directory = "/var/tmp/agenix-rekey";
       mode = "1777";
     }
-    "/var/tmp/nix-import-encrypted" # Decrypted repo-secrets can be kept
+    {
+      directory = "/var/tmp/nix-import-encrypted"; # Decrypted repo-secrets can be kept
+      mode = "1777";
+    }
   ];
 
   services.nixseparatedebuginfod = {

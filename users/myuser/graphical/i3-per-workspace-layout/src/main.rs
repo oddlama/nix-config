@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Context, Result};
 use clap::Parser;
-use log::{debug, info};
+use log::{debug, info, warn};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -8,7 +8,7 @@ use tokio::{sync::mpsc, task::JoinHandle};
 use tokio_i3ipc::{
     event::{Event, Subscribe, WindowChange, WorkspaceChange},
     msg::Msg,
-    reply::{Node, NodeType},
+    reply::{Node, NodeLayout, NodeType},
     I3,
 };
 use tokio_stream::StreamExt;
@@ -33,7 +33,7 @@ struct Cli {
 #[derive(Debug, Serialize, Deserialize)]
 struct Config {
     /// The workspace -> layout associations
-    layouts: HashMap<String, String>,
+    layouts: HashMap<String, NodeLayout>,
 }
 
 fn find_workspace_for_window(tree: &Node, window_id: usize) -> Option<&Node> {
@@ -143,6 +143,22 @@ fn cmd_toggle_layout(config: &Config, workspace: &Node) -> Option<String> {
         // container inside of it. So if we haven't found a single container to modify,
         // we can operate on the workspace.
     }
+
+    // Don't do anything if the layout is already correct
+    if &con.layout == desired_layout {
+        return None
+    }
+
+    let desired_layout = match desired_layout {
+        NodeLayout::SplitH => "splith",
+        NodeLayout::SplitV => "splitv",
+        NodeLayout::Stacked => "stacked",
+        NodeLayout::Tabbed => "tabbed",
+        x => {
+            warn!("Encountered invalid layout in configuration: {:?}", x);
+            return None;
+        }
+    };
 
     debug!(
         "Changing layout of workspace {:?} to {} (modifying con_id={})",

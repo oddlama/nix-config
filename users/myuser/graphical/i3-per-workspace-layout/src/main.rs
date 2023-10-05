@@ -137,16 +137,16 @@ fn cmd_toggle_layout(config: &Config, workspace: &Node) -> Option<String> {
             return None;
         }
 
+        // Don't do anything if the layout is already correct
+        if &con.layout == desired_layout {
+            return None
+        }
+
         con = &con.nodes[0];
     } else {
         // Strangely enough, setting a layout on the workspace container will create a new
         // container inside of it. So if we haven't found a single container to modify,
         // we can operate on the workspace.
-    }
-
-    // Don't do anything if the layout is already correct
-    if &con.layout == desired_layout {
-        return None
     }
 
     let desired_layout = match desired_layout {

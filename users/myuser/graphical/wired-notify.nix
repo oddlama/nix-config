@@ -1,27 +1,186 @@
-{pkgs, ...}: {
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
   systemd.user.services.wired.Unit.ConditionEnvironment = "DISPLAY";
   services.wired = {
     enable = true;
     config = let
+      inherit (builtins) floor;
+
       format = pkgs.formats.ron {};
       inherit (format.lib) mkLiteral struct;
+
+      colors = lib.mapAttrs (_: Color) config.lib.stylix.colors.withHashtag;
+      inherit (config.stylix) fonts;
+
+      # A global scaling factor to apply to all notifications.
+      globalScale = 1.2;
+
+      # Ron format shorthands and helpers
       unnamedStruct = struct "";
       Color = hex: struct "Color" {inherit hex;};
       Hook = struct "Hook";
       Vec2 = x: y: struct "Vec2" {inherit x y;};
-      Padding = struct "Padding";
       ShortcutsConfig = struct "ShortcutsConfig";
+
+      mkVec2 = x: y: Vec2 (globalScale * x) (globalScale * y);
+
+      mkHook = parent_anchor: self_anchor:
+        Hook {
+          parent_anchor = mkLiteral parent_anchor;
+          self_anchor = mkLiteral self_anchor;
+        };
+
+      mkPaddingLrBt = left: right: bottom: top:
+        struct "Padding" {
+          left = globalScale * left;
+          right = globalScale * right;
+          bottom = globalScale * bottom;
+          top = globalScale * top;
+        };
+
+      mkDimensionsWH = minw: maxw: minh: maxh:
+        unnamedStruct {
+          width = unnamedStruct {
+            min = floor (globalScale * minw);
+            max = floor (globalScale * maxw);
+          };
+          height = unnamedStruct {
+            min = floor (globalScale * minh);
+            max = floor (globalScale * maxh);
+          };
+        };
+
+      # Reusable blocks
+      mkRootBlock = name: {
+        name = "${name}_root";
+        parent = "";
+        hook = mkHook "TR" "TR";
+        offset = mkVec2 (-50) 50;
+        render_criteria = [];
+        params = struct "NotificationBlock" (unnamedStruct {
+          monitor = 0;
+          border_width = globalScale * 2;
+          border_rounding = globalScale * 0;
+          background_color = colors.base00;
+          border_color = colors.base04;
+          border_color_low = colors.base04;
+          border_color_critical = colors.base08;
+          border_color_paused = colors.base09;
+          gap = mkVec2 0 8;
+          notification_hook = mkHook "BR" "TR";
+        });
+      };
+
+      mkTopBar = name: [
+        {
+          name = "${name}_app_icon";
+          parent = "${name}_root";
+          hook = mkHook "TL" "TL";
+          offset = mkVec2 0 0;
+          params = struct "ImageBlock" (unnamedStruct {
+            filter_mode = mkLiteral "Lanczos3";
+            image_type = mkLiteral "App";
+            min_height = floor (globalScale * 24);
+            min_width = floor (globalScale * 24);
+            padding = mkPaddingLrBt 16 (-8) 6 12;
+            rounding = globalScale * 12.0;
+            scale_height = floor (globalScale * 24);
+            scale_width = floor (globalScale * 24);
+          });
+        }
+        {
+          name = "${name}_app_name";
+          parent = "${name}_app_icon";
+          hook = mkHook "TR" "TL";
+          offset = mkVec2 0 0;
+          params = struct "TextBlock" (unnamedStruct {
+            color = colors.base05;
+            dimensions = mkDimensionsWH 350 350 28 28;
+            ellipsize = mkLiteral "End";
+            font = "${fonts.monospace.name} ${toString (globalScale * 14)}";
+            padding = mkPaddingLrBt 16 0 0 12;
+            text = "%n";
+          });
+        }
+        {
+          name = "${name}_time";
+          parent = "${name}_root";
+          hook = mkHook "TR" "TR";
+          offset = mkVec2 0 0;
+          params = struct "TextBlock" (unnamedStruct {
+            color = colors.base05;
+            dimensions = mkDimensionsWH 0 (-1) 28 28;
+            ellipsize = mkLiteral "End";
+            font = "${fonts.monospace.name} Bold ${toString (globalScale * 14)}";
+            padding = mkPaddingLrBt 0 16 4 12;
+            text = "%t(%a %H:%M)";
+          });
+        }
+      ];
+
+      mkBody = name: yoffset: [
+        {
+          name = "${name}_hint";
+          parent = "${name}_root";
+          hook = mkHook "TL" "TL";
+          offset = mkVec2 0 yoffset;
+          params = struct "ImageBlock" (unnamedStruct {
+            filter_mode = mkLiteral "Lanczos3";
+            image_type = mkLiteral "Hint";
+            padding = mkPaddingLrBt 12 0 12 12;
+            rounding = globalScale * 9;
+            scale_height = floor (globalScale * 120);
+            scale_width = floor (globalScale * 120);
+          });
+        }
+        {
+          name = "${name}_summary";
+          parent = "${name}_hint";
+          hook = mkHook "TR" "TL";
+          offset = mkVec2 0 12;
+          params = struct "TextBlock" (unnamedStruct {
+            text = "%s";
+            font = "${fonts.sansSerif.name} Bold ${toString (globalScale * 16)}";
+            ellipsize = mkLiteral "End";
+            color = colors.base06;
+            padding = mkPaddingLrBt 16 16 0 2;
+            dimensions = mkDimensionsWH 572 572 0 30;
+            dimensions_image_hint = mkDimensionsWH 440 440 0 30;
+            dimensions_image_both = mkDimensionsWH 440 440 0 30;
+          });
+        }
+        {
+          name = "${name}_body";
+          parent = "${name}_summary";
+          hook = mkHook "BL" "TL";
+          offset = mkVec2 0 12;
+          params = struct "TextBlock" (unnamedStruct {
+            text = "%b";
+            font = "${fonts.sansSerif.name} ${toString (globalScale * 16)}";
+            ellipsize = mkLiteral "End";
+            color = colors.base06;
+            padding = mkPaddingLrBt 16 16 12 0;
+            dimensions = mkDimensionsWH 572 572 0 80;
+            dimensions_image_hint = mkDimensionsWH 440 440 0 80;
+            dimensions_image_both = mkDimensionsWH 440 440 0 80;
+          });
+        }
+      ];
     in
       format.generate "wired.ron" (unnamedStruct {
         max_notifications = 10;
-        timeout = 4000;
+        timeout = 10000;
         poll_interval = 6; # 6ms ~= 166hz.
         history_length = 60;
         replacing_enabled = true;
         replacing_resets_timeout = true;
-        min_window_width = 500;
-        min_window_height = 100;
-        debug = true;
+        min_window_width = floor (globalScale * 600);
+        min_window_height = floor (globalScale * 120);
+        debug = false;
 
         # https://github.com/Toqozz/wired-notify/wiki/Shortcuts
         shortcuts = ShortcutsConfig {
@@ -30,272 +189,14 @@
           notification_action1 = 3; # middle click
         };
 
-        layout_blocks = map unnamedStruct [
-          {
-            name = "general_root";
-            parent = "";
-            hook = Hook {
-              parent_anchor = mkLiteral "TR";
-              self_anchor = mkLiteral "TR";
-            };
-            offset = Vec2 (-50) 50;
-            render_criteria = [];
-            params = struct "NotificationBlock" (unnamedStruct {
-              monitor = 0;
-              border_width = 0;
-              border_rounding = 8;
-              background_color = Color "#F5F5F5";
-              border_color = Color "#00000000";
-              border_color_low = Color "#00000000";
-              border_color_critical = Color "#FF0000";
-              border_color_paused = Color "#00000000";
-              gap = Vec2 0.0 8.0;
-              notification_hook = Hook {
-                parent_anchor = mkLiteral "BM";
-                self_anchor = mkLiteral "TM";
-              };
-            });
-          }
-
-          {
-            name = "general_notification";
-            parent = "general_root";
-            hook = Hook {
-              parent_anchor = mkLiteral "TM";
-              self_anchor = mkLiteral "TM";
-            };
-            offset = Vec2 0 0;
-            params = struct "ImageBlock" (unnamedStruct {
-              image_type = mkLiteral "App";
-              padding = Padding {
-                left = 40;
-                right = 40;
-                top = 40;
-                bottom = 8;
-              };
-              rounding = 4.0;
-              scale_width = 152;
-              scale_height = 152;
-              filter_mode = mkLiteral "Lanczos3";
-            });
-          }
-
-          {
-            name = "general_summary";
-            parent = "general_notification";
-            hook = Hook {
-              parent_anchor = mkLiteral "BM";
-              self_anchor = mkLiteral "TM";
-            };
-            offset = Vec2 0 12;
-            params = struct "TextBlock" (unnamedStruct {
-              text = "%s";
-              font = "Arial Bold 16";
-              ellipsize = mkLiteral "End";
-              color = Color "#000000";
-              padding = Padding {
-                left = 0;
-                right = 0;
-                top = 0;
-                bottom = 0;
-              };
-              dimensions = unnamedStruct {
-                width = unnamedStruct {
-                  min = -1;
-                  max = 185;
-                };
-                height = unnamedStruct {
-                  min = 0;
-                  max = 0;
-                };
-              };
-            });
-          }
-
-          {
-            name = "general_body";
-            parent = "general_summary";
-            hook = Hook {
-              parent_anchor = mkLiteral "BM";
-              self_anchor = mkLiteral "TM";
-            };
-            offset = Vec2 0 0;
-            params = struct "TextBlock" (unnamedStruct {
-              text = "%b";
-              font = "Arial Bold 16";
-              ellipsize = mkLiteral "End";
-              color = Color "#000000";
-              padding = Padding {
-                left = 0;
-                right = 0;
-                top = 0;
-                bottom = 24;
-              };
-              dimensions = unnamedStruct {
-                width = unnamedStruct {
-                  min = -1;
-                  max = 250;
-                };
-                height = unnamedStruct {
-                  min = 0;
-                  max = 0;
-                };
-              };
-            });
-          }
-        ];
+        layout_blocks = map unnamedStruct (lib.flatten [
+          (mkRootBlock "general"
+            // {
+              render_criteria = [];
+            })
+          (mkTopBar "general")
+          (mkBody "general" 36)
+        ]);
       });
-
-    /*
-    {
-          name: "app_root",
-          parent: "",
-          hook: Hook { parent_anchor = mkLiteral "MM"; self_anchor = mkLiteral "MM"; };
-          offset: Vec2(x: 0, y: 0),
-          render_criteria: [mkLiteral "AppImage"],
-          params: NotificationBlock((
-                  monitor: 0,
-                  border_width: 0,
-                  border_rounding: 8,
-                  background_color: Color "#F5F5F5",
-                  border_color: Color "#00000000",
-                  border_color_low: Color "#00000000",
-                  border_color_critical: Color "#FF0000",
-                  border_color_paused: Color "#00000000",
-                  gap: Vec2(x: 0.0, y: 8.0),
-                  notification_hook: Hook { parent_anchor = mkLiteral "BM"; self_anchor = mkLiteral "TM"; };
-          )),
-      ),
-
-      (
-          name: "app_notification",
-          parent: "app_root",
-          hook: Hook { parent_anchor = mkLiteral "TM"; self_anchor = mkLiteral "TM"; };
-          offset: Vec2(x: 0, y: 0),
-          params: ImageBlock((
-                  image_type: App,
-                  padding: Padding(left: 40, right: 40, top: 40, bottom: 8),
-                  rounding: 4.0,
-                  scale_width: 152,
-                  scale_height: 152,
-                  filter_mode: mkLiteral "Lanczos3",
-          )),
-      ),
-
-      (
-          name: "app_summary",
-          parent: "app_notification",
-          hook: Hook { parent_anchor = mkLiteral "BM"; self_anchor = mkLiteral "TM"; };
-          offset: Vec2(x: 0, y: 12),
-          params: TextBlock((
-                  text: "%s",
-                  font: "Arial Bold 16",
-                  ellipsize = mkLiteralEnd,
-                  color: Color "#000000",
-                  padding: Padding(left: 0, right: 0, top: 0, bottom: 0),
-                  dimensions: (width: (min: -1, max: 185), height: (min: 0, max: 0)),
-          )),
-      ),
-
-      (
-          name: "app_body",
-          parent: "app_summary",
-          hook: Hook { parent_anchor = mkLiteral "BM"; self_anchor = mkLiteral "TM"; };
-          offset: Vec2(x: 0, y: 0),
-          params: TextBlock((
-                  text: "%b",
-                  font: "Arial Bold 16",
-                  ellipsize = mkLiteralEnd,
-                  color: Color "#000000",
-                  padding: Padding(left: 0, right: 0, top: 0, bottom: 24),
-                  dimensions: (width: (min: -1, max: 250), height: (min: 0, max: 0)),
-          )),
-      ),
-
-      (
-          name: "app_progress",
-          parent: "app_notification",
-          hook: Hook { parent_anchor = mkLiteral "BM"; self_anchor = mkLiteral "TM"; };
-          offset: Vec2(x: 0, y: 50),
-          render_criteria: [mkLiteral "Progress"],
-          params: ProgressBlock((
-                  padding: Padding(left: 0, right: 0, top: 0, bottom: 32),
-                  border_width: 2,
-                  border_rounding: 2,
-                  border_color: Color "#000000",
-                  fill_rounding: 1,
-                  background_color: Color "#00000000",
-                  fill_color: Color "#000000",
-                  width: -1.0,
-                  height: 30.0,
-          )),
-      ),
-
-      (
-          name: "status_root",
-          parent: "",
-          hook: Hook { parent_anchor = mkLiteral "TM"; self_anchor = mkLiteral "TM"; };
-          offset: Vec2(x: 0.0, y: 60),
-          # render_anti_criteria: [AppImage],
-          render_criteria: [mkLiteral "HintImage"],
-          params: NotificationBlock((
-                  monitor: 0,
-                  border_width: 0,
-                  border_rounding: 8,
-                  background_color: Color "#F5F5F5",
-                  border_color: Color "#00000000",
-                  border_color_low: Color "#00000000",
-                  border_color_critical: Color "#FF0000",
-                  border_color_paused: Color "#00000000",
-                  gap: Vec2(x: 0.0, y: 8.0),
-                  notification_hook: Hook { parent_anchor = mkLiteral "BM"; self_anchor = mkLiteral "TM"; };
-          )),
-      ),
-
-      (
-          name: "status_notification",
-          parent: "status_root",
-          hook: Hook { parent_anchor = mkLiteral "TL"; self_anchor = mkLiteral "TL"; };
-          offset: Vec2(x: 0, y: 0),
-          params: TextBlock((
-                  text: "%s",
-                  font: "Arial Bold 16",
-                  ellipsize = mkLiteralEnd,
-                  color: Color "#000000",
-                  padding: Padding(left: 8, right: 8, top: 8, bottom: 8),
-                  dimensions: (width: (min: 400, max: 400), height: (min: 84, max: 0)),
-          )),
-      ),
-
-      (
-          name: "status_body",
-          parent: "status_notification",
-          hook: Hook { parent_anchor = mkLiteral "ML"; self_anchor = mkLiteral "TL"; };
-          offset: Vec2(x: 0, y: -24),
-          params: TextBlock((
-                  text: "%b",
-                  font: "Arial 14",
-                  ellipsize = mkLiteralEnd,
-                  color: Color "#000000",
-                  padding: Padding(left: 8, right: 8, top: 8, bottom: 8),
-                  dimensions: (width: (min: 400, max: 400), height: (min: 0, max: 84)),
-          )),
-      ),
-
-      (
-          name: "status_image",
-          parent: "status_notification",
-          hook: Hook { parent_anchor = mkLiteral "TL"; self_anchor = mkLiteral "TR"; };
-          offset: Vec2(x: 0, y: 0),
-          params: ImageBlock((
-                  image_type: Hint,
-                  padding: Padding(left: 8, right: 0, top: 8, bottom: 8),
-                  rounding: 4.0,
-                  scale_width: 84,
-                  scale_height: 84,
-                  filter_mode: mkLiteral "Lanczos3",
-          )),
-      ),
-    */
   };
 }

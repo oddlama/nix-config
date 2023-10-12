@@ -25,6 +25,9 @@
       Hook = struct "Hook";
       Vec2 = x: y: struct "Vec2" {inherit x y;};
       ShortcutsConfig = struct "ShortcutsConfig";
+      And = struct "And";
+      Or = struct "Or";
+      Not = struct "Not";
 
       mkVec2 = x: y: Vec2 (globalScale * x) (globalScale * y);
 
@@ -74,109 +77,102 @@
         });
       };
 
-      mkTopBar = name: [
-        {
-          name = "${name}_app_icon";
-          parent = "${name}_root";
-          hook = mkHook "TL" "TL";
-          offset = mkVec2 0 0;
-          params = struct "ImageBlock" (unnamedStruct {
-            filter_mode = mkLiteral "Lanczos3";
-            image_type = mkLiteral "App";
-            min_height = floor (globalScale * 24);
-            min_width = floor (globalScale * 24);
-            padding = mkPaddingLrBt 16 (-8) 6 12;
-            rounding = globalScale * 12.0;
-            scale_height = floor (globalScale * 24);
-            scale_width = floor (globalScale * 24);
-          });
-        }
-        {
-          name = "${name}_app_name";
-          parent = "${name}_app_icon";
-          hook = mkHook "TR" "TL";
-          offset = mkVec2 0 0;
-          params = struct "TextBlock" (unnamedStruct {
-            color = colors.base05;
-            dimensions = mkDimensionsWH 350 350 28 28;
-            ellipsize = mkLiteral "End";
-            font = "${fonts.monospace.name} ${toString (globalScale * 14)}";
-            padding = mkPaddingLrBt 16 0 0 12;
-            text = "%n";
-          });
-        }
-        {
-          name = "${name}_time";
-          parent = "${name}_root";
-          hook = mkHook "TR" "TR";
-          offset = mkVec2 0 0;
-          params = struct "TextBlock" (unnamedStruct {
-            color = colors.base05;
-            dimensions = mkDimensionsWH 0 (-1) 28 28;
-            ellipsize = mkLiteral "End";
-            font = "${fonts.monospace.name} Bold ${toString (globalScale * 14)}";
-            padding = mkPaddingLrBt 0 16 4 12;
-            text = "%t(%a %H:%M)";
-          });
-        }
-      ];
-
-      mkBody = name: yOffset: [
-        {
-          name = "${name}_hint";
-          parent = "${name}_root";
-          hook = mkHook "TL" "TL";
-          offset = mkVec2 0 yOffset;
-          params = struct "ImageBlock" (unnamedStruct {
-            filter_mode = mkLiteral "Lanczos3";
-            image_type = mkLiteral "Hint";
-            padding = mkPaddingLrBt 12 0 12 12;
-            rounding = globalScale * 9;
-            scale_height = floor (globalScale * 128);
-            scale_width = floor (globalScale * 128);
-          });
-        }
-        {
-          name = "${name}_summary";
-          parent = "${name}_hint";
-          hook = mkHook "TR" "TL";
-          offset = mkVec2 0 0;
-          params = struct "TextBlock" (unnamedStruct {
-            text = "%s";
-            font = "${fonts.sansSerif.name} Bold ${toString (globalScale * 16)}";
-            ellipsize = mkLiteral "End";
-            color = colors.base06;
-            padding = mkPaddingLrBt 16 16 0 8;
-            dimensions = mkDimensionsWH 580 580 0 30;
-            dimensions_image_hint = mkDimensionsWH 440 440 0 30;
-            dimensions_image_both = mkDimensionsWH 440 440 0 30;
-          });
-        }
-        {
-          name = "${name}_body";
-          parent = "${name}_summary";
-          hook = mkHook "BL" "TL";
-          offset = mkVec2 0 12;
-          render_criteria = [(mkLiteral "Body")];
-          params = struct "TextBlock" (unnamedStruct {
-            text = "%b";
-            font = "${fonts.sansSerif.name} ${toString (globalScale * 16)}";
-            ellipsize = mkLiteral "End";
-            color = colors.base06;
-            padding = mkPaddingLrBt 16 16 12 0;
-            dimensions = mkDimensionsWH 580 580 0 88;
-            dimensions_image_hint = mkDimensionsWH 440 440 0 88;
-            dimensions_image_both = mkDimensionsWH 440 440 0 88;
-          });
-        }
-      ];
-
-      mkProgress = name: yOffset: extra:
-        map (x: x // extra) [
+      mkTopBar = name: extra:
+        map (x: extra // x) [
           {
-            name = "${name}_progress_${toString yOffset}_text";
+            name = "${name}_app_image";
             parent = "${name}_root";
             hook = mkHook "TL" "TL";
+            offset = mkVec2 0 0;
+            params = struct "ImageBlock" (unnamedStruct {
+              filter_mode = mkLiteral "Lanczos3";
+              image_type = mkLiteral "App";
+              min_height = floor (globalScale * 24);
+              min_width = floor (globalScale * 24);
+              padding = mkPaddingLrBt 16 (-8) 6 12;
+              rounding = globalScale * 12.0;
+              scale_height = floor (globalScale * 24);
+              scale_width = floor (globalScale * 24);
+            });
+          }
+          {
+            name = "${name}_app_name";
+            parent = "${name}_app_image";
+            hook = mkHook "TR" "TL";
+            offset = mkVec2 0 0;
+            params = struct "TextBlock" (unnamedStruct {
+              color = colors.base05;
+              dimensions = mkDimensionsWH 350 350 28 28;
+              ellipsize = mkLiteral "End";
+              font = "${fonts.monospace.name} ${toString (globalScale * 14)}";
+              padding = mkPaddingLrBt 16 0 0 12;
+              text = "%n";
+            });
+          }
+        ];
+
+      mkBody = name: ident: yOffset: summaryRightPadding: extra:
+        map (x: extra // x) [
+          {
+            name = "${name}_${ident}_hint";
+            parent = "${name}_root";
+            hook = mkHook "TL" "TL";
+            offset = mkVec2 0 yOffset;
+            params = struct "ImageBlock" (unnamedStruct {
+              filter_mode = mkLiteral "Lanczos3";
+              image_type = mkLiteral "Hint";
+              padding = mkPaddingLrBt 12 0 12 12;
+              rounding = globalScale * 9;
+              scale_height = floor (globalScale * 128);
+              scale_width = floor (globalScale * 128);
+            });
+          }
+          {
+            name = "${name}_${ident}_summary";
+            parent = "${name}_${ident}_hint";
+            hook = mkHook "TR" "TL";
+            offset = mkVec2 0 0;
+            params = struct "TextBlock" (unnamedStruct {
+              text = "%s";
+              font = "${fonts.sansSerif.name} Bold ${toString (globalScale * 16)}";
+              ellipsize = mkLiteral "End";
+              color = colors.base06;
+              padding = mkPaddingLrBt 16 (summaryRightPadding + 16) 0 8;
+              dimensions = mkDimensionsWH (580 - summaryRightPadding) (580 - summaryRightPadding) 0 30;
+              dimensions_image_hint = mkDimensionsWH 440 440 0 30;
+              dimensions_image_both = mkDimensionsWH 440 440 0 30;
+            });
+          }
+          {
+            name = "${name}_${ident}_body";
+            parent = "${name}_${ident}_summary";
+            hook = mkHook "BL" "TL";
+            offset = mkVec2 0 12;
+            render_criteria = [
+              (And [
+                (Or extra.render_criteria)
+                (mkLiteral "Body")
+              ])
+            ];
+            params = struct "TextBlock" (unnamedStruct {
+              text = "%b";
+              font = "${fonts.sansSerif.name} ${toString (globalScale * 16)}";
+              ellipsize = mkLiteral "End";
+              color = colors.base06;
+              padding = mkPaddingLrBt 16 16 12 0;
+              dimensions = mkDimensionsWH 580 580 0 88;
+              dimensions_image_hint = mkDimensionsWH 440 440 0 88;
+              dimensions_image_both = mkDimensionsWH 440 440 0 88;
+            });
+          }
+        ];
+
+      mkProgress = name: parent: yOffset: extra:
+        map (x: extra // x) [
+          {
+            name = "${name}_progress_${parent}_text";
+            parent = "${name}_${parent}";
+            hook = mkHook "BL" "TL";
             offset = mkVec2 0 0;
             params = struct "TextBlock" (unnamedStruct {
               text = "%p%";
@@ -189,9 +185,9 @@
             });
           }
           {
-            name = "${name}_progress_${toString yOffset}";
-            parent = "${name}_root";
-            hook = mkHook "TL" "TL";
+            name = "${name}_progress_${parent}_bar";
+            parent = "${name}_${parent}";
+            hook = mkHook "BL" "TL";
             offset = mkVec2 0 0;
             params = struct "ProgressBlock" (unnamedStruct {
               width = globalScale * 520;
@@ -226,29 +222,85 @@
         };
 
         layout_blocks = let
-          # Progress for body or hint-image notifications
-          # must be much closer to the bottom
-          bottomProgressCriteria = struct "Or" [
-            (mkLiteral "Body")
-            (mkLiteral "HintImage")
+          criterionHasTopBar = And [
+            (mkLiteral "AppImage")
+            (Not (Or [
+              (struct "AppName" "")
+              (struct "AppName" "notify-send")
+            ]))
           ];
         in
           map unnamedStruct (lib.flatten [
             (mkRootBlock "general")
-            (mkTopBar "general")
-            (mkBody "general" 36)
-            (mkProgress "general" 180 {
-              render_criteria = [
-                (struct "And" [
-                  (mkLiteral "Progress")
-                  bottomProgressCriteria
-                ])
-              ];
+            # Time is always shown in the top right corner.
+            {
+              name = "general_time";
+              parent = "general_root";
+              hook = mkHook "TR" "TR";
+              offset = mkVec2 0 0;
+              params = struct "TextBlock" (unnamedStruct {
+                color = colors.base05;
+                dimensions = mkDimensionsWH 0 (-1) 28 28;
+                ellipsize = mkLiteral "End";
+                font = "${fonts.monospace.name} Bold ${toString (globalScale * 14)}";
+                padding = mkPaddingLrBt 0 16 4 12;
+                text = "%t(%a %H:%M)";
+              });
+            }
+            # Top bar for app image, name and time, but only
+            # if there is an app name or image.
+            (mkTopBar "general" {
+              render_criteria = [criterionHasTopBar];
             })
-            (mkProgress "general" 80 {
-              render_criteria = [(mkLiteral "Progress")];
-              render_anti_criteria = [bottomProgressCriteria];
+            # if no top bar present: A body with no offset and a summary padding to the right (to not overlay the time)
+            (mkBody "general" "notop" 0 24 {
+              render_criteria = [(Not criterionHasTopBar)];
             })
+            # if top bar present: A body with matching y offset and no summary padding to the right
+            (mkBody "general" "withtop" 36 0 {
+              render_criteria = [criterionHasTopBar];
+            })
+            # We unfortunately need to duplicate each layout that has the body, summary or hint as
+            # a parent, since each name must be unique and we cannot select the correct parent dynamically.
+            (lib.flip map ["notop" "withtop"] (parent: let
+              parentCriterion =
+                if parent == "withtop"
+                then criterionHasTopBar
+                else (Not criterionHasTopBar);
+            in [
+              (mkProgress "general" "${parent}_hint" 0 {
+                render_criteria = [
+                  (And [
+                    parentCriterion
+                    (mkLiteral "Progress")
+                    (mkLiteral "HintImage")
+                  ])
+                ];
+              })
+              (mkProgress "general" "${parent}_body" 0 {
+                render_criteria = [
+                  (And [
+                    parentCriterion
+                    (mkLiteral "Progress")
+                    (mkLiteral "Body")
+                    (Not (mkLiteral "HintImage"))
+                  ])
+                ];
+              })
+              (mkProgress "general" "${parent}_summary" 9 {
+                render_criteria = [
+                  (And [
+                    parentCriterion
+                    (mkLiteral "Progress")
+                    (mkLiteral "Summary")
+                    (Not (Or [
+                      (mkLiteral "Body")
+                      (mkLiteral "HintImage")
+                    ]))
+                  ])
+                ];
+              })
+            ]))
           ]);
       });
   };

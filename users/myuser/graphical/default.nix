@@ -29,6 +29,7 @@
       chromium
       feh
       gamescope
+      obsidian
       pavucontrol
       pinentry-gnome # For yubikey, gnome = gtk3 variant
       thunderbird
@@ -77,6 +78,7 @@
     persistence."/persist".directories = [
       "projects"
       "Pictures" # config.xdg.userDirs.pictures (infinite recursion)
+      ".config/obsidian"
     ];
   };
 

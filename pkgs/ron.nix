@@ -86,6 +86,8 @@
     entriesStr =
       if value ? _ronType
       then specialType indent value
+      else if builtins.isList value
+      then list newIndent value
       else let
         entries = mapAttrsToList toEntry value;
         entriesStrSpace = concatStringsSep ", " entries;

@@ -209,7 +209,7 @@
           # Each mkProgress includes a button bar. But if no progress is included in a notification,
           # those won't be rendered, so we have to define bars for non-progress notifications.
           # (And yes, we need 3 because we cannot have duplicate names or dynamic parents)
-          ++ (mkButtonBar name "${ident}_hint" {
+          ++ (mkButtonBar name "${ident}_hint" 0 {
             render_criteria = [
               (And (extra.render_criteria
                 ++ [
@@ -218,7 +218,7 @@
                 ]))
             ];
           })
-          ++ (mkButtonBar name "${ident}_body" {
+          ++ (mkButtonBar name "${ident}_body" (-8) {
             render_criteria = [
               (And (extra.render_criteria
                 ++ [
@@ -228,7 +228,7 @@
                 ]))
             ];
           })
-          ++ (mkButtonBar name "${ident}_summary" {
+          ++ (mkButtonBar name "${ident}_summary" 0 {
             render_criteria = [
               (And (extra.render_criteria
                 ++ [
@@ -279,45 +279,92 @@
               });
             }
           ]
-          ++ (mkButtonBar name "progress_${parent}_text" extra)
+          ++ (mkButtonBar name "progress_${parent}_text" (
+              /*
+              ignore bottom end padding
+              */
+              -8
+            )
+            extra)
         );
 
-      mkButtonBar = name: parent: extra:
-        map (x: extra // x) [
+      mkButtonBar = name: parent: yOffset: extra:
+        map (x: extra // x) (lib.flatten [
           {
-            name = "${name}_action_0_for_${parent}";
+            name = "${name}_button_bar_for_${parent}";
             parent = "${name}_${parent}";
             hook = mkHook "BL" "TL";
-            offset = mkVec2 0 0;
+            offset = mkVec2 0 yOffset;
             render_criteria = [
               (And (extra.render_criteria
                 ++ [
                   (Or [
                     (struct "ActionOther" 0)
-                    #(struct "ActionOther" 1)
-                    #(struct "ActionOther" 2)
-                    #(struct "ActionOther" 3)
+                    (struct "ActionOther" 1)
+                    (struct "ActionOther" 2)
+                    (struct "ActionOther" 3)
+                    (struct "ActionOther" 4)
+                    (struct "ActionOther" 5)
                   ])
                 ]))
             ];
-            params = struct "ButtonBlock" (unnamedStruct {
-              text = "%a";
-              font = "${fonts.monospace.name} Bold ${toString (globalScale * 14)}";
-              ellipsize = mkLiteral "End";
-              action = struct "OtherAction" 0;
-              text_color = colors.base06;
-              text_color_hovered = colors.base06;
-              background_color = colors.base01;
-              background_color_hovered = colors.base02;
-              border_color = colors.base04;
-              border_color_hovered = colors.base0F;
-              border_rounding = globalScale * 0;
-              border_width = globalScale * 2;
-              padding = mkPaddingLrBt 12 16 12 0;
-              dimensions = mkDimensionsWH 144 48 24 24;
+            params = struct "TextBlock" (unnamedStruct {
+              text = "";
+              font = "${fonts.monospace.name} ${toString (globalScale * 14)}";
+              color = colors.base06;
+              padding = mkPaddingLrBt 0 0 0 0;
+              dimensions = mkDimensionsWH 568 568 56 48;
             });
           }
-        ];
+          (lib.flip map [0 1 2 3 4 5] (
+            i:
+              lib.optionalAttrs (i == 0) {
+                parent = "${name}_button_bar_for_${parent}";
+                hook = mkHook "TL" "TL";
+                offset = mkVec2 16 12;
+              }
+              // lib.optionalAttrs (i != 0) {
+                parent = "${name}_action_${toString (i - 1)}_for_${parent}";
+                hook = mkHook "TR" "TL";
+                offset = mkVec2 8 0;
+              }
+              // {
+                name = "${name}_action_${toString i}_for_${parent}";
+                render_criteria = [
+                  (
+                    And (extra.render_criteria
+                      ++ [
+                        (struct "ActionOther" i)
+                      ])
+                  )
+                ];
+                params = struct "ButtonBlock" (unnamedStruct {
+                  text = "%a";
+                  font = "${fonts.monospace.name} Bold ${toString (globalScale * 14)}";
+                  ellipsize = mkLiteral "End";
+                  action = struct "OtherAction" i;
+                  text_color = colors.base06;
+                  text_color_hovered = colors.base06;
+                  background_color = colors.base01;
+                  background_color_hovered = colors.base02;
+                  border_color = colors.base04;
+                  border_color_hovered = colors.base0F;
+                  border_rounding = globalScale * 0;
+                  border_width = globalScale * 2;
+                  padding = mkPaddingLrBt 8 8 4 4;
+                  # Technically distribute like below, but we'll just allow more even
+                  # if it breaks when having > 4 max length buttons, because it probably
+                  # never happens and looks a lot better this way.
+                  dimensions = mkDimensionsWH 32 144 24 24;
+                  # dimensions = mkDimensionsWH 32 ((
+                  #   568 /* available width */
+                  #   - 2 * 16 /* padding lr */
+                  #   - (/* count actions */ 6 - 1) * 8 /* padding between */
+                  # ) / /* count actions */ 6) 24 24;
+                });
+              }
+          ))
+        ]);
     in
       format.generate "wired.ron" (unnamedStruct {
         max_notifications = 10;

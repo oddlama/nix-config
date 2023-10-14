@@ -39,6 +39,7 @@
       zathura
     ];
 
+    # TODO make screenshot copy work even if notification fails (set -e does its thing here)
     # TODO pavucontrol shortcut or bar button
     # TODO audible bell in qt pinentry drives me nuts
     # TODO secureboot -> use pam yubikey login

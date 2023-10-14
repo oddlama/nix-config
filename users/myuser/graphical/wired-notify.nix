@@ -141,7 +141,7 @@
                 font = "${fonts.sansSerif.name} Bold ${toString (globalScale * 16)}";
                 ellipsize = mkLiteral "End";
                 color = colors.base06;
-                padding = mkPaddingLrBt 16 16 0 8;
+                padding = mkPaddingLrBt 16 16 12 8;
                 dimensions = mkDimensionsWH (maxWFull - summaryRightPadding) (maxWFull - summaryRightPadding) 0 30;
                 dimensions_image_hint = mkDimensionsWH (maxWImg - summaryRightPadding) (maxWImg - summaryRightPadding) 0 30;
                 dimensions_image_both = mkDimensionsWH (maxWImg - summaryRightPadding) (maxWImg - summaryRightPadding) 0 30;
@@ -151,7 +151,7 @@
               name = "${name}_${ident}_body";
               parent = "${name}_${ident}_summary";
               hook = mkHook "BL" "TL";
-              offset = mkVec2 0 12;
+              offset = mkVec2 0 0;
               render_criteria = [
                 (And [
                   (Or extra.render_criteria)
@@ -163,7 +163,7 @@
                 font = "${fonts.sansSerif.name} ${toString (globalScale * 16)}";
                 ellipsize = mkLiteral "End";
                 color = colors.base06;
-                padding = mkPaddingLrBt 16 16 12 0;
+                padding = mkPaddingLrBt 16 16 12 (-4);
                 dimensions = mkDimensionsWH maxWFull maxWFull 0 88;
                 dimensions_image_hint = mkDimensionsWH maxWImg maxWImg 0 88;
                 dimensions_image_both = mkDimensionsWH maxWImg maxWImg 0 88;
@@ -174,7 +174,7 @@
           # on the specific name for the parent, which cannot be changed dynamically.
           # So each call to mkBody creates these progress bars which only differ in
           # their parent :/
-          ++ (mkProgress name "${ident}_hint" 0 {
+          ++ (mkProgress name "${ident}_hint" (-4) {
             render_criteria = [
               (And (extra.render_criteria
                 ++ [
@@ -193,7 +193,7 @@
                 ]))
             ];
           })
-          ++ (mkProgress name "${ident}_summary" 9 {
+          ++ (mkProgress name "${ident}_summary" 0 {
             render_criteria = [
               (And (extra.render_criteria
                 ++ [
@@ -209,7 +209,7 @@
           # Each mkProgress includes a button bar. But if no progress is included in a notification,
           # those won't be rendered, so we have to define bars for non-progress notifications.
           # (And yes, we need 3 because we cannot have duplicate names or dynamic parents)
-          ++ (mkButtonBar name "${ident}_hint" 0 {
+          ++ (mkButtonBar name "${ident}_hint" {
             render_criteria = [
               (And (extra.render_criteria
                 ++ [
@@ -218,7 +218,7 @@
                 ]))
             ];
           })
-          ++ (mkButtonBar name "${ident}_body" (-8) {
+          ++ (mkButtonBar name "${ident}_body" {
             render_criteria = [
               (And (extra.render_criteria
                 ++ [
@@ -228,7 +228,7 @@
                 ]))
             ];
           })
-          ++ (mkButtonBar name "${ident}_summary" 0 {
+          ++ (mkButtonBar name "${ident}_summary" {
             render_criteria = [
               (And (extra.render_criteria
                 ++ [
@@ -279,22 +279,16 @@
               });
             }
           ]
-          ++ (mkButtonBar name "progress_${parent}_text" (
-              /*
-              ignore bottom end padding
-              */
-              -8
-            )
-            extra)
+          ++ (mkButtonBar name "progress_${parent}_text" extra)
         );
 
-      mkButtonBar = name: parent: yOffset: extra:
+      mkButtonBar = name: parent: extra:
         map (x: extra // x) (lib.flatten [
           {
             name = "${name}_button_bar_for_${parent}";
             parent = "${name}_${parent}";
             hook = mkHook "BL" "TL";
-            offset = mkVec2 0 yOffset;
+            offset = mkVec2 0 0;
             render_criteria = [
               (And (extra.render_criteria
                 ++ [
@@ -313,7 +307,7 @@
               font = "${fonts.monospace.name} ${toString (globalScale * 14)}";
               color = colors.base06;
               padding = mkPaddingLrBt 0 0 0 0;
-              dimensions = mkDimensionsWH 568 568 56 48;
+              dimensions = mkDimensionsWH 568 568 44 44;
             });
           }
           (lib.flip map [0 1 2 3 4 5] (
@@ -321,7 +315,7 @@
               lib.optionalAttrs (i == 0) {
                 parent = "${name}_button_bar_for_${parent}";
                 hook = mkHook "TL" "TL";
-                offset = mkVec2 16 12;
+                offset = mkVec2 16 0;
               }
               // lib.optionalAttrs (i != 0) {
                 parent = "${name}_action_${toString (i - 1)}_for_${parent}";
@@ -374,7 +368,7 @@
         replacing_enabled = true;
         replacing_resets_timeout = true;
         min_window_width = floor (globalScale * 600);
-        min_window_height = floor (globalScale * 60);
+        min_window_height = floor (globalScale * 20);
         debug = false;
 
         # https://github.com/Toqozz/wired-notify/wiki/Shortcuts

@@ -61,6 +61,18 @@ show "With buttons and body" long_body actions_5
 
 show "With everything" long_body app_discord image_1 slider_25 actions_5
 
+show "Volume" --hint=string:image-path:$HOME/Downloads/Speaker_Icon.svg \
+	-h int:value:69 \
+	-h "string:wired-tag:indicator" \
+	-h "string:wired-note:volume"
+
+sleep 5
+
+show "Brightness" --hint=string:image-path:$HOME/Downloads/brightness.svg \
+	-h int:value:69 \
+	-h "string:wired-tag:indicator" \
+	-h "string:wired-note:brightness"
+
 #for summary in \
 #	"Short summary" \
 #	"Long summary, it will be truncated because it is really really long" \

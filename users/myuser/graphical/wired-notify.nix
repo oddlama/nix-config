@@ -57,26 +57,6 @@
           };
         };
 
-      # Reusable blocks
-      mkRootBlock = name: {
-        name = "${name}_root";
-        parent = "";
-        hook = mkHook "TR" "TR";
-        offset = Vec2 (-50) 50; # Vec2 instead of mkVec2 to not apply scaling.
-        params = struct "NotificationBlock" (unnamedStruct {
-          monitor = 0;
-          border_width = globalScale * 2;
-          border_rounding = globalScale * 0;
-          background_color = colors.base00;
-          border_color = colors.base04;
-          border_color_low = colors.base04;
-          border_color_critical = colors.base08;
-          border_color_paused = colors.base09;
-          gap = mkVec2 0 8;
-          notification_hook = mkHook "BR" "TR";
-        });
-      };
-
       mkTopBar = name: extra:
         map (x: extra // x) [
           {
@@ -267,14 +247,14 @@
               hook = mkHook "BL" "TL";
               offset = mkVec2 0 0;
               params = struct "ProgressBlock" (unnamedStruct {
-                width = globalScale * 510;
+                width = globalScale * 524;
                 height = globalScale * 12;
                 border_width = 0.0;
-                border_rounding = globalScale * 6;
+                border_rounding = globalScale * 4;
                 border_color = colors.base03;
                 background_color = colors.base03;
                 fill_color = colors.base0D;
-                fill_rounding = globalScale * 6;
+                fill_rounding = globalScale * 4;
                 padding = mkPaddingLrBt 68 16 12 (yOffset + 8);
               });
             }
@@ -304,7 +284,7 @@
             ];
             params = struct "TextBlock" (unnamedStruct {
               text = "";
-              font = "${fonts.monospace.name} ${toString (globalScale * 14)}";
+              font = "${fonts.monospace.name} 1";
               color = colors.base06;
               padding = mkPaddingLrBt 0 0 0 0;
               dimensions = mkDimensionsWH 568 568 44 44;
@@ -359,6 +339,43 @@
               }
           ))
         ]);
+
+      mkIndicatorValue = name: ident: parent: extra: textParamsExtra: progressParamsExtra:
+        map (x: extra // x) (lib.flatten [
+          {
+            name = "${name}_${ident}_value_text";
+            parent = "${name}_${parent}";
+            hook = mkHook "BM" "TM";
+            offset = mkVec2 0 0;
+            params = struct "TextBlock" (unnamedStruct ({
+                text = "%p%";
+                font = "${fonts.monospace.name} Bold ${toString (globalScale * 18)}";
+                align = mkLiteral "Center";
+                color = colors.base06;
+                padding = mkPaddingLrBt 0 0 12 0;
+                dimensions = mkDimensionsWH 64 64 32 32;
+              }
+              // textParamsExtra));
+          }
+          {
+            name = "${name}_${ident}_value_bar";
+            parent = "${name}_${ident}_value_text";
+            hook = mkHook "BM" "TM";
+            offset = mkVec2 0 0;
+            params = struct "ProgressBlock" (unnamedStruct ({
+                width = globalScale * 0.90 * 384;
+                height = globalScale * 16;
+                border_width = 0.0;
+                border_rounding = globalScale * 6;
+                border_color = colors.base03;
+                background_color = colors.base03;
+                fill_color = colors.base0F;
+                fill_rounding = globalScale * 6;
+                padding = mkPaddingLrBt 0 0 0 0;
+              }
+              // progressParamsExtra));
+          }
+        ]);
     in
       format.generate "wired.ron" (unnamedStruct {
         max_notifications = 10;
@@ -367,7 +384,7 @@
         history_length = 60;
         replacing_enabled = true;
         replacing_resets_timeout = true;
-        min_window_width = floor (globalScale * 600);
+        min_window_width = floor (globalScale * 20);
         min_window_height = floor (globalScale * 20);
         debug = false;
 
@@ -389,13 +406,50 @@
           ];
         in
           map unnamedStruct (lib.flatten [
-            (mkRootBlock "general")
+            # Root block for normal notifications
+            {
+              name = "general_root";
+              parent = "";
+              hook = mkHook "TR" "TR";
+              offset = Vec2 (-50) 50; # Vec2 instead of mkVec2 to not apply scaling.
+              render_criteria = [
+                (Not (Or [
+                  (struct "Tag" "indicator")
+                ]))
+              ];
+              params = struct "NotificationBlock" (unnamedStruct {
+                monitor = 0;
+                border_width = globalScale * 2;
+                border_rounding = globalScale * 0;
+                background_color = colors.base00;
+                border_color = colors.base04;
+                border_color_low = colors.base04;
+                border_color_critical = colors.base08;
+                border_color_paused = colors.base09;
+                gap = mkVec2 0 8;
+                notification_hook = mkHook "BR" "TR";
+              });
+            }
+            # Dummy text that enforces minimum window size
+            {
+              name = "general_size";
+              parent = "general_root";
+              hook = mkHook "TL" "TL";
+              offset = Vec2 0 0;
+              params = struct "TextBlock" (unnamedStruct {
+                text = "";
+                font = "${fonts.monospace.name} 1";
+                color = colors.base06;
+                padding = mkPaddingLrBt 0 0 0 0;
+                dimensions = mkDimensionsWH 600 600 1 1;
+              });
+            }
             # Time is always shown in the top right corner.
             {
               name = "general_time";
               parent = "general_root";
-              hook = mkHook "TR" "TR";
-              offset = mkVec2 0 0;
+              hook = mkHook "TL" "TL";
+              offset = mkVec2 (600 - 100) 0;
               params = struct "TextBlock" (unnamedStruct {
                 color = colors.base05;
                 dimensions = mkDimensionsWH 100 100 28 28;
@@ -418,6 +472,115 @@
             (mkBody "general" "withtop" 36 0 {
               render_criteria = [criterionHasTopBar];
             })
+
+            # Root block for brightness/volume indicators
+            {
+              name = "indicator_root";
+              parent = "";
+              hook = mkHook "MM" "MM";
+              offset = Vec2 0 0; # Vec2 instead of mkVec2 to not apply scaling.
+              render_criteria = [
+                (And [
+                  (struct "Tag" "indicator")
+                ])
+              ];
+              params = struct "NotificationBlock" (unnamedStruct {
+                monitor = 0;
+                border_width = globalScale * 2;
+                border_rounding = globalScale * 0;
+                background_color = colors.base00;
+                border_color = colors.base04;
+                border_color_low = colors.base04;
+                border_color_critical = colors.base08;
+                border_color_paused = colors.base09;
+                gap = mkVec2 0 0;
+                notification_hook = mkHook "MM" "MM";
+              });
+            }
+            # Dummy text that enforces minimum window size
+            {
+              name = "indicator_size";
+              parent = "indicator_root";
+              hook = mkHook "TL" "TL";
+              offset = Vec2 0 0;
+              params = struct "TextBlock" (unnamedStruct {
+                text = "";
+                font = "${fonts.monospace.name} 1";
+                color = colors.base06;
+                padding = mkPaddingLrBt 0 0 0 0;
+                dimensions = mkDimensionsWH 384 384 384 384;
+              });
+            }
+            {
+              name = "indicator_summary";
+              parent = "indicator_size";
+              hook = mkHook "TM" "TM";
+              offset = mkVec2 0 0;
+              params = struct "TextBlock" (unnamedStruct {
+                text = "%s";
+                font = "${fonts.sansSerif.name} Bold ${toString (globalScale * 18)}";
+                align = mkLiteral "Center";
+                color = colors.base06;
+                padding = mkPaddingLrBt 0 0 8 8;
+                dimensions = mkDimensionsWH 300 300 32 32;
+              });
+            }
+            {
+              name = "indicator_hint";
+              parent = "indicator_summary";
+              hook = mkHook "BM" "TM";
+              offset = mkVec2 0 0;
+              params = struct "ImageBlock" (unnamedStruct {
+                filter_mode = mkLiteral "Lanczos3";
+                image_type = mkLiteral "Hint";
+                min_height = floor (globalScale * 180);
+                min_width = floor (globalScale * 180);
+                padding = mkPaddingLrBt 0 0 (35 + 8) 35;
+                rounding = globalScale * 9;
+                scale_height = floor (globalScale * 180);
+                scale_width = floor (globalScale * 180);
+              });
+            }
+            (
+              mkIndicatorValue "indicator" "anything" "hint" {
+                render_criteria = [
+                  (Not (Or [
+                    (struct "Note" "brightness")
+                    (struct "Note" "volume")
+                  ]))
+                ];
+              }
+              # text extra
+              {}
+              # progress extra
+              {}
+            )
+            (mkIndicatorValue "indicator" "brightness" "hint" {
+                render_criteria = [
+                  (And [
+                    (struct "Note" "brightness")
+                  ])
+                ];
+              }
+              # text extra
+              {}
+              # progress extra
+              {
+                fill_color = colors.base0A;
+              })
+            (mkIndicatorValue "indicator" "volume" "hint" {
+                render_criteria = [
+                  (And [
+                    (struct "Note" "volume")
+                  ])
+                ];
+              }
+              # text extra
+              {}
+              # progress extra
+              {
+                fill_color = colors.base0B;
+              })
           ]);
       });
   };

@@ -11,7 +11,7 @@ app_discord=(
 	"--icon=/run/current-system/etc/profiles/per-user/$USER/share/pixmaps/discord.png"
 )
 
-image_1=("--hint=string:image-path:$HOME/Downloads/wallpaper.png")
+image_1=("--hint=string:image-path:$HOME/Downloads/img.jpg")
 
 urgency_low=("--urgency=low")
 urgency_normal=("--urgency=normal")

@@ -1316,16 +1316,15 @@
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1697115341,
+        "lastModified": 1697336859,
         "narHash": "sha256-1R8lPIH82OgrBchW5RGkJMB0NzH9cChljmGOFLoS748=",
-        "owner": "oddlama",
+        "owner": "Toqozz",
         "repo": "wired-notify",
-        "rev": "cca2314431a88027fa44eade3fbf42f28ce9bfbc",
+        "rev": "0fe5cc4682c30b178dfb2c9c0e3ad19d20d0bc6f",
         "type": "github"
       },
       "original": {
-        "owner": "oddlama",
-        "ref": "feat-not-render-criterion",
+        "owner": "Toqozz",
         "repo": "wired-notify",
         "type": "github"
       }

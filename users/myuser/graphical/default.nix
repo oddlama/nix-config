@@ -9,6 +9,7 @@
       ./wired-notify.nix
       ./discord.nix
       ./firefox.nix
+      ./flameshot.nix
       ./kitty.nix
       ./signal.nix
       ./theme.nix

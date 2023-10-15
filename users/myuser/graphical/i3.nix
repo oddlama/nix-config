@@ -91,6 +91,7 @@ in {
           "Shift+s" = "exec --no-startup-id ${getExe pkgs.scripts.screenshot-area}";
           "F11" = "exec --no-startup-id ${getExe pkgs.scripts.screenshot-area-scan-qr}";
           "F12" = "exec --no-startup-id ${getExe pkgs.scripts.screenshot-screen}";
+          "Print" = "exec --no-startup-id env QT_AUTO_SCREEN_SCALE_FACTOR=0 QT_SCREEN_SCALE_FACTORS='' ${getExe pkgs.flameshot} gui";
 
           "Shift+r" = "reload";
           "q" = "kill";
@@ -203,7 +204,6 @@ in {
       };
     in ''
       exec_always --no-startup-id ${getExe i3-per-workspace-layout} --config ${configLayouts}
-      for_window [class="^flameshot$"] floating enable, border none
     '';
   };
 

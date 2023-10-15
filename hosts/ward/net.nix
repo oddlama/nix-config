@@ -95,19 +95,15 @@ in {
     };
   };
 
-  # TODO mkForce nftables
   networking.nftables.firewall = {
-    zones = lib.mkForce {
+    snippets.nnf-icmp.ipv6Types = ["mld-listener-query" "nd-router-solicit"];
+
+    zones = {
       untrusted.interfaces = ["wan"];
       lan.interfaces = ["lan-self"];
     };
 
-    rules = lib.mkForce {
-      icmp = {
-        # accept ipv6 router solicit and multicast listener discovery query
-        extraLines = ["ip6 nexthdr icmpv6 icmpv6 type { mld-listener-query, nd-router-solicit } accept"];
-      };
-
+    rules = {
       masquerade = {
         from = ["lan"];
         to = ["untrusted"];

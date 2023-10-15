@@ -46,10 +46,7 @@ in {
     };
   };
 
-  # TODO mkForce nftables
   networking.nftables.firewall = {
-    zones = lib.mkForce {
-      untrusted.interfaces = ["lan1"];
-    };
+    zones.untrusted.interfaces = ["lan1"];
   };
 }

@@ -60,17 +60,11 @@
     );
   in
     lib.mkIf (mdnsInterfaces != []) {
-      # TODO mkForce nftables
-      zones = lib.mkForce {
-        mdns.interfaces = mdnsInterfaces;
-      };
-
-      rules = lib.mkForce {
-        mdns-to-local = {
-          from = ["mdns"];
-          to = ["local"];
-          allowedUDPPorts = [5353];
-        };
+      zones.mdns.interfaces = mdnsInterfaces;
+      rules.mdns-to-local = {
+        from = ["mdns"];
+        to = ["local"];
+        allowedUDPPorts = [5353];
       };
     };
 }

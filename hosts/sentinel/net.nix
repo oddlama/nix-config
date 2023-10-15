@@ -1,8 +1,4 @@
-{
-  config,
-  lib,
-  ...
-}: {
+{config, ...}: {
   networking.hostId = config.repo.secrets.local.networking.hostId;
   networking.domain = config.repo.secrets.local.personalDomain;
 
@@ -35,19 +31,16 @@
     };
   };
 
-  # TODO mkForce nftables
   networking.nftables.firewall = {
-    zones = lib.mkForce {
+    zones = {
       untrusted.interfaces = ["wan"];
       proxy-sentinel.interfaces = ["proxy-sentinel"];
     };
-    rules = lib.mkForce {
-      # Allow accessing nginx through the proxy
-      proxy-sentinel-to-local = {
-        from = ["proxy-sentinel"];
-        to = ["local"];
-        allowedTCPPorts = [80 443];
-      };
+    # Allow accessing nginx through the proxy
+    rules.proxy-sentinel-to-local = {
+      from = ["proxy-sentinel"];
+      to = ["local"];
+      allowedTCPPorts = [80 443];
     };
   };
 

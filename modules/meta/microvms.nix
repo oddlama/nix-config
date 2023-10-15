@@ -190,11 +190,8 @@
             };
           };
 
-        # TODO mkForce nftables
         networking.nftables.firewall = {
-          zones = mkForce {
-            untrusted.interfaces = [vmCfg.networking.mainLinkName];
-          };
+          zones.untrusted.interfaces = [vmCfg.networking.mainLinkName];
         };
 
         meta.wireguard = mkIf vmCfg.localWireguard {

@@ -20,7 +20,6 @@
     mapAttrsToList
     mdDoc
     mergeToplevelConfigs
-    mkForce
     mkIf
     mkOption
     net
@@ -134,11 +133,9 @@
       [wgCfg.server.port];
 
     # Open the port in the given nftables rule if specified
-    # TODO mkForce nftables
-    networking.nftables.firewall.rules = mkForce (
+    networking.nftables.firewall.rules =
       optionalAttrs (isServer && wgCfg.server.openFirewallRules != [])
-      (genAttrs wgCfg.server.openFirewallRules (_: {allowedUDPPorts = [wgCfg.server.port];}))
-    );
+      (genAttrs wgCfg.server.openFirewallRules (_: {allowedUDPPorts = [wgCfg.server.port];}));
 
     age.secrets =
       concatAttrs (map

@@ -1,8 +1,4 @@
-{
-  config,
-  lib,
-  ...
-}: {
+{config, ...}: {
   networking = {
     inherit (config.repo.secrets.local.networking) hostId;
     wireless.iwd.enable = true;
@@ -37,8 +33,6 @@
   };
 
   networking.nftables.firewall = {
-    zones = lib.mkForce {
-      untrusted.interfaces = ["lan1" "wlan1"];
-    };
+    zones.untrusted.interfaces = ["lan1" "wlan1"];
   };
 }

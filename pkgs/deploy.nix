@@ -101,7 +101,7 @@
       for host in "''${HOSTS[@]}"; do
         store_path="''${TOPLEVEL_STORE_PATHS["$host"]}"
         echo "[1;36m    Applying [m⚙️ [34m$host[m"
-        prev_system=$(ssh "$host" -- readlink /nix/var/nix/profiles/system)
+        prev_system=$(ssh "$host" -- readlink -e /nix/var/nix/profiles/system)
         ssh "$host" -- /run/current-system/sw/bin/nix-env --profile /nix/var/nix/profiles/system --set "$store_path"
         ssh "$host" -- "$store_path"/bin/switch-to-configuration "$ACTION"
         if [[ -n "$prev_system" ]]; then

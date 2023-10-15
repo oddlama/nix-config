@@ -1,6 +1,6 @@
-inputs: self: super: let
+inputs: _final: prev: let
   inherit
-    (super.lib)
+    (prev.lib)
     concatMapStrings
     escapeShellArg
     filter
@@ -71,7 +71,7 @@ inputs: self: super: let
   hexToDec = v: foldl' (acc: x: acc * 16 + hexLiteralValues.${x}) 0 (stringToCharacters v);
 in {
   lib =
-    super.lib
+    prev.lib
     // {
       inherit
         concatAttrs

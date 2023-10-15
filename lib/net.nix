@@ -1,4 +1,4 @@
-inputs: self: super: let
+inputs: final: prev: let
   inherit
     (inputs.nixpkgs.lib)
     all
@@ -22,7 +22,7 @@ inputs: self: super: let
     ;
 
   inherit
-    (self.lib)
+    (final.lib)
     hexToDec
     pow
     ;
@@ -37,7 +37,7 @@ inputs: self: super: let
     .lib
     .net;
 in {
-  lib = recursiveUpdate super.lib {
+  lib = recursiveUpdate prev.lib {
     net = recursiveUpdate (removeAttrs libNet ["types"]) {
       cidr = rec {
         # host :: (ip | mac | integer) -> cidr -> ip

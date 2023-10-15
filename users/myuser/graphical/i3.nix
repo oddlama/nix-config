@@ -88,67 +88,9 @@ in {
           # TODO only open if not already open
           # TODO shortcut to open these from eww bar with 1 click
           "b" = "exec firefox"; # TODO ; exec signal-desktop; exec discord
-          "Shift+s" =
-            "exec --no-startup-id "
-            + toString (pkgs.writeShellScript "screenshot-area" ''
-              set -euo pipefail
-              umask 077
-
-              out="/tmp/screenshots.$UID/$(date +"%Y-%m-%dT%H:%M:%S%:z")-selection.png"
-              mkdir -p "$(dirname "$out")"
-
-              ${pkgs.maim}/bin/maim --color=.4,.7,1,0.2 --bordersize=1.0 --nodecorations=1 --hidecursor --format=png --quality=10 --noopengl --select "$out"
-              notification_id=$(${pkgs.libnotify}/bin/notify-send --icon="$out" --print-id --app-name "screenshot-area" "Screenshot Captured" "📋 copied to clipboard\n⌛ Running OCR...")
-              ${pkgs.xclip}/bin/xclip -selection clipboard -t image/png < "$out"
-              if ${pkgs.tesseract}/bin/tesseract "$out" - -l eng+deu | ${pkgs.xclip}/bin/xclip -selection primary; then
-                ${pkgs.libnotify}/bin/notify-send --icon="$out" --replace-id="$notification_id" --app-name "screenshot-area" "Screenshot Captured" "📋 copied to clipboard\n✅ OCR (copied to primary)."
-              else
-                ${pkgs.libnotify}/bin/notify-send --icon="$out" --replace-id="$notification_id" --app-name "screenshot-area" "Screenshot Captured" "📋 copied to clipboard\n❌ Error while running OCR."
-              fi
-            '');
-          "F11" =
-            "exec --no-startup-id "
-            # TODO use writeShellApplication for shellcheck
-            # TODO --icon=some-qr-image
-            + toString (pkgs.writeShellScript "screenshot-area-scan-qr" ''
-              set -euo pipefail
-              umask 077
-
-              # Create in-memory tmpfile
-              TMPFILE=$(mktemp)
-              exec 3<>"$TMPFILE"
-              rm "$TMPFILE" # still open in-memory as /dev/fd/3
-              TMPFILE=/dev/fd/3
-
-              if ${pkgs.maim}/bin/maim --color=.4,.7,1 --bordersize=1.0 --nodecorations=1 --hidecursor --format=png --quality=10 --noopengl --select \
-                | ${pkgs.zbar}/bin/zbarimg --xml - > "$TMPFILE"; then
-                N=$(${pkgs.yq}/bin/xq -r '.barcodes.source.index.symbol | if type == "array" then length else 1 end' < "$TMPFILE")
-                # Append codes Copy data separated by ---
-                DATA=$(${pkgs.yq}/bin/xq -r '.barcodes.source.index.symbol | if type == "array" then .[0].data else .data end' < "$TMPFILE")
-                for ((i=1;i<N;++i)); do
-                  DATA="$DATA"$'\n'"---"$'\n'"$(${pkgs.yq}/bin/xq -r ".barcodes.source.index.symbol[$i].data" < "$TMPFILE")"
-                done
-                ${pkgs.xclip}/bin/xclip -selection clipboard <<< "$DATA"
-                ${pkgs.libnotify}/bin/notify-send --app-name "screenshot-area-scan-qr" "QR Scan" "✅ $N codes detected\\n📋 copied ''${#DATA} bytes"
-              else
-                case "$?" in
-                  "4") ${pkgs.libnotify}/bin/notify-send --app-name "screenshot-area-scan-qr" "QR Scan" "❌ 0 codes detected" ;;
-                  *) ${pkgs.libnotify}/bin/notify-send --app-name "screenshot-area-scan-qr" "QR Scan" "❌ Error while processing image: zbarimg exited with code $?" ;;
-                esac
-              fi
-            '');
-          "F12" =
-            "exec --no-startup-id "
-            + toString (pkgs.writeShellScript "screenshot-screen" ''
-              set -euo pipefail
-              umask 077
-
-              out="${config.xdg.userDirs.pictures}/screenshots/$(date +"%Y-%m-%dT%H:%M:%S%:z")-fullscreen.png"
-              mkdir -p "$(dirname "$out")"
-
-              ${pkgs.maim}/bin/maim --hidecursor --format=png --quality=10 --noopengl "$out"
-              notification_id=$(${pkgs.libnotify}/bin/notify-send --icon="$out" --print-id --app-name "screenshot-screen" "Screenshot Captured" "💾 saved to $out")
-            '');
+          "Shift+s" = "exec --no-startup-id ${getExe pkgs.scripts.screenshot-area}";
+          "F11" = "exec --no-startup-id ${getExe pkgs.scripts.screenshot-area-scan-qr}";
+          "F12" = "exec --no-startup-id ${getExe pkgs.scripts.screenshot-screen}";
 
           "Shift+r" = "reload";
           "q" = "kill";
@@ -261,7 +203,37 @@ in {
       };
     in ''
       exec_always --no-startup-id ${getExe i3-per-workspace-layout} --config ${configLayouts}
+      for_window [class="^flameshot$"] floating enable, border none
     '';
+  };
+
+  systemd.user = {
+    targets.i3-session = {
+      Unit = {
+        Description = "i3 session";
+        Documentation = ["man:systemd.special(7)"];
+        BindsTo = ["graphical-session.target"];
+        Wants = ["graphical-session-pre.target"];
+        After = ["graphical-session-pre.target"];
+      };
+    };
+    services = {
+      #feh = {
+      #  Unit = {
+      #    Description = "feh background";
+      #    PartOf = [ "i3-session.target" ];
+      #    After = [ "xrandr.service" "picom.service" ];
+      #  };
+      #  Service = {
+      #    ExecStart = "${pkgs.feh}/bin/feh --bg-fill ${config.xdg.dataHome}/wall.png";
+      #    RemainAfterExit = true;
+      #    Type = "oneshot";
+      #  };
+      #  Install.WantedBy = [ "i3-session.target" ];
+      #};
+      wired.Install.WantedBy = lib.mkForce ["i3-session.target"];
+      flameshot.Install.WantedBy = lib.mkForce ["i3-session.target"];
+    };
   };
 
   programs.autorandr.enable = true;

@@ -1,4 +1,4 @@
-inputs: self: super: let
+inputs: final: prev: let
   inherit
     (inputs.nixpkgs.lib)
     assertMsg
@@ -19,21 +19,21 @@ inputs: self: super: let
     ;
 
   inherit
-    (self.lib)
+    (final.lib)
     net
     concatAttrs
     types
     ;
 
   inherit
-    (self.lib.secrets)
+    (final.lib.secrets)
     rageDecryptArgs
     ;
 
   inherit (inputs.self) nodes;
 in {
   lib =
-    super.lib
+    prev.lib
     // {
       wireguard = wgName: let
         # Returns the given node's wireguard configuration of this network

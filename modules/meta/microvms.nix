@@ -102,6 +102,8 @@
         imports = cfg.commonImports ++ vmCfg.modules;
         node.name = vmCfg.nodeName;
 
+        # TODO needed because of https://github.com/NixOS/nixpkgs/issues/102137
+        environment.noXlibs = mkForce false;
         lib.microvm.mac = mac;
 
         microvm = {

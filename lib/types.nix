@@ -1,4 +1,4 @@
-inputs: _self: super: let
+inputs: _final: prev: let
   inherit
     (inputs.nixpkgs.lib)
     all
@@ -39,7 +39,7 @@ inputs: _self: super: let
   # automatically be coerced to the given type when merged.
   lazyOf = type: types.coercedTo (lazyValueOf type) (x: x._lazyValue) type;
 in {
-  lib = recursiveUpdate super.lib {
+  lib = recursiveUpdate prev.lib {
     types = {
       inherit
         isLazyValue

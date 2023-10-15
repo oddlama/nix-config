@@ -1,6 +1,6 @@
-_inputs: _self: super: {
+_inputs: _final: prev: {
   lib =
-    super.lib
+    prev.lib
     // {
       disko = {
         gpt = {

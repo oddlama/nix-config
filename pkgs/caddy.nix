@@ -1,6 +1,6 @@
-self: super: let
+_final: prev: let
   inherit
-    (self.lib)
+    (prev.lib)
     escapeShellArg
     concatMapStrings
     flip
@@ -20,9 +20,9 @@ self: super: let
         version,
       }: "go get ${escapeShellArg name}@${escapeShellArg version}\n");
   in
-    super.caddy.override {
+    prev.caddy.override {
       buildGoModule = args:
-        super.buildGoModule (args
+        prev.buildGoModule (args
           // {
             inherit vendorHash;
             passthru.plugins = plugins;
@@ -44,5 +44,5 @@ in {
   #   ];
   #   vendorHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
   # }
-  caddy = super.caddy.overrideAttrs (_: {passthru.withPackages = make-custom-caddy;});
+  caddy = prev.caddy.overrideAttrs (_: {passthru.withPackages = make-custom-caddy;});
 }

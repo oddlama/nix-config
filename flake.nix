@@ -94,7 +94,7 @@
     templates.url = "github:NixOS/templates";
 
     wired-notify = {
-      url = "github:Toqozz/wired-notify";
+      url = "github:oddlama/wired-notify/feat-not-render-criterion";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -239,6 +239,10 @@
           {
             package = pkgs.nix-tree;
             help = "Interactively browse dependency graphs of Nix derivations";
+          }
+          {
+            package = pkgs.nvd;
+            help = "Diff two nix toplevels and show which packages were upgraded";
           }
           {
             package = pkgs.nix-diff;

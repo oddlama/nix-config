@@ -1197,15 +1197,16 @@
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1683104317,
-        "narHash": "sha256-TfPrY+sqCKfRiBhO3oz0t/i9IGcTuGGQMKhkD+LpMys=",
-        "owner": "Toqozz",
+        "lastModified": 1697115341,
+        "narHash": "sha256-1R8lPIH82OgrBchW5RGkJMB0NzH9cChljmGOFLoS748=",
+        "owner": "oddlama",
         "repo": "wired-notify",
-        "rev": "73bb26863ed3272e0d524424685bd53a70db25e4",
+        "rev": "cca2314431a88027fa44eade3fbf42f28ce9bfbc",
         "type": "github"
       },
       "original": {
-        "owner": "Toqozz",
+        "owner": "oddlama",
+        "ref": "feat-not-render-criterion",
         "repo": "wired-notify",
         "type": "github"
       }

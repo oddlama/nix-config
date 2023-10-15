@@ -9,7 +9,6 @@
     attrNames
     flip
     mdDoc
-    mkForce
     mkIf
     mkMerge
     mkOption
@@ -53,7 +52,7 @@ in {
     }));
 
     networking.nftables.firewall = mkMerge (flip map (attrNames cfg) (proxy: {
-      zones = mkForce {
+      zones = {
         # Parent zone for the whole interface
         ${cfg.${proxy}.nicName}.interfaces = [cfg.${proxy}.nicName];
         # Subzone to specifically target the proxy host
@@ -64,17 +63,15 @@ in {
         };
       };
 
-      rules = mkForce {
-        "${proxy}-to-local" = {
-          from = [proxy];
-          to = ["local"];
+      rules."${proxy}-to-local" = {
+        from = [proxy];
+        to = ["local"];
 
-          inherit
-            (cfg.${proxy})
-            allowedTCPPorts
-            allowedUDPPorts
-            ;
-        };
+        inherit
+          (cfg.${proxy})
+          allowedTCPPorts
+          allowedUDPPorts
+          ;
       };
     }));
   };

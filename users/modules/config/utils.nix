@@ -15,6 +15,7 @@ lib.optionalAttrs (!minimal) {
       killall
       ncdu
       neofetch
+      nvd
       rage
       rclone
       ripgrep

@@ -105,7 +105,7 @@
         ssh "$host" -- /run/current-system/sw/bin/nix-env --profile /nix/var/nix/profiles/system --set "$store_path"
         ssh "$host" -- "$store_path"/bin/switch-to-configuration "$ACTION"
         if [[ -n "$prev_system" ]]; then
-          ssh "$host" -- nvd diff "$prev_system" "$store_path"
+          ssh "$host" -- nvd --color always diff "$prev_system" "$store_path"
         fi
         time_next
         echo "[1;32m     Applied [m✅ [34m$host[m [90min ''${T_LAST}s[m"

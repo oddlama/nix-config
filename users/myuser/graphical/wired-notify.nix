@@ -547,6 +547,7 @@
                   (Not (Or [
                     (struct "Note" "brightness")
                     (struct "Note" "volume")
+                    (struct "Note" "volume-overdrive")
                   ]))
                 ];
               }
@@ -576,10 +577,28 @@
                 ];
               }
               # text extra
-              {}
+              {
+                text = "%b";
+              }
               # progress extra
               {
                 fill_color = colors.base0B;
+              })
+            (mkIndicatorValue "indicator" "volume_overdrive" "hint" {
+                render_criteria = [
+                  (And [
+                    (struct "Note" "volume-overdrive")
+                  ])
+                ];
+              }
+              # text extra
+              {
+                text = "%b";
+              }
+              # progress extra
+              {
+                background_color = colors.base0B;
+                fill_color = colors.base0A;
               })
           ]);
       });

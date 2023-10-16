@@ -66,13 +66,10 @@ in {
 
       keybindings =
         {
-          "XF86AudioRaiseVolume" = "exec --no-startup-id wpctl set-sink-volume @DEFAULT_SINK@ +5%";
-          "XF86AudioLowerVolume" = "exec --no-startup-id wpctl set-sink-volume @DEFAULT_SINK@ -5%";
-          "XF86AudioMute" = "exec --no-startup-id wpctl set-sink-mute @DEFAULT_SINK@ toggle";
-          "XF86AudioMicMute" = "exec --no-startup-id wpctl set-source-mute @DEFAULT_SOURCE@ toggle";
-
-          #"Print" = "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot copy area";
-          #"${mod}+Print" = "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot save area";
+          "XF86AudioRaiseVolume" = "exec --no-startup-id ${getExe pkgs.scripts.volume} set-volume @DEFAULT_AUDIO_SINK@ 5%+";
+          "XF86AudioLowerVolume" = "exec --no-startup-id ${getExe pkgs.scripts.volume} set-volume @DEFAULT_AUDIO_SINK@ 5%-";
+          "XF86AudioMute" = "exec --no-startup-id ${getExe pkgs.scripts.volume} set-mute @DEFAULT_AUDIO_SINK@ toggle";
+          "XF86AudioMicMute" = "exec --no-startup-id ${getExe pkgs.scripts.volume} set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
         }
         # // optionalAttrs useBacklight {
         #   "XF86MonBrightnessUp" = "exec ${pkgs.light}/bin/light -A 5";

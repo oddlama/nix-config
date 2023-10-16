@@ -188,22 +188,31 @@ in {
         }
         .${nixosConfig.node.name}
         or [];
-    };
 
-    extraConfig = let
-      configLayouts = (pkgs.formats.toml {}).generate "per-workspace-layouts.toml" {
-        force = true;
-        layouts = {
-          "1" = "tabbed";
-          "5" = "tabbed";
-          "7" = "tabbed";
-          "8" = "tabbed";
-          "9" = "tabbed";
+      startup = let
+        configLayouts = (pkgs.formats.toml {}).generate "per-workspace-layouts.toml" {
+          force = true;
+          layouts = {
+            "1" = "tabbed";
+            "5" = "tabbed";
+            "7" = "tabbed";
+            "8" = "tabbed";
+            "9" = "tabbed";
+          };
         };
-      };
-    in ''
-      exec_always --no-startup-id ${getExe i3-per-workspace-layout} --config ${configLayouts}
-    '';
+      in [
+        {
+          command = "${pkgs.systemd}/bin/systemctl --user import-environment DISPLAY; ${pkgs.systemd}/bin/systemctl --user start i3-session.target";
+          always = false;
+          notification = false;
+        }
+        {
+          command = "${getExe i3-per-workspace-layout} --config ${configLayouts}";
+          always = false;
+          notification = false;
+        }
+      ];
+    };
   };
 
   systemd.user = {

@@ -70,11 +70,12 @@ in {
           "XF86AudioLowerVolume" = "exec --no-startup-id ${getExe pkgs.scripts.volume} set-volume @DEFAULT_AUDIO_SINK@ 5%-";
           "XF86AudioMute" = "exec --no-startup-id ${getExe pkgs.scripts.volume} set-mute @DEFAULT_AUDIO_SINK@ toggle";
           "XF86AudioMicMute" = "exec --no-startup-id ${getExe pkgs.scripts.volume} set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
+          "XF86AudioPlay" = "exec --no-startup-id ${getExe pkgs.playerctl} play-pause";
+          "XF86AudioNext" = "exec --no-startup-id ${getExe pkgs.playerctl} next";
+          "XF86AudioPrev" = "exec --no-startup-id ${getExe pkgs.playerctl} previous";
+          "XF86MonBrightnessUp" = "exec --no-startup-id ${getExe pkgs.scripts.brightness} set +5%";
+          "XF86MonBrightnessDown" = "exec --no-startup-id ${getExe pkgs.scripts.brightness} set 5%-";
         }
-        # // optionalAttrs useBacklight {
-        #   "XF86MonBrightnessUp" = "exec ${pkgs.light}/bin/light -A 5";
-        #   "XF86MonBrightnessDown" = "exec ${pkgs.light}/bin/light -U 5";
-        # }
         // {
           "Menu" = "exec ${cfg.menu}";
         }

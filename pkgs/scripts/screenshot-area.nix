@@ -22,7 +22,10 @@ writeShellApplication {
     export QT_SCREEN_SCALE_FACTORS=""
 
     # Use sponge to create the file on success only
-    ${lib.getExe flameshot} gui --raw | ${moreutils}/bin/sponge "$out"
+    if ${lib.getExe flameshot} gui --raw 2>&1 1> >(${moreutils}/bin/sponge "$out") | grep -q "flameshot: info:.*aborted."; then
+      exit 1
+    fi
+
     ${xclip}/bin/xclip -selection clipboard -t image/png < "$out"
     action=$(${libnotify}/bin/notify-send \
       "📷 Screenshot captured" "📋 copied to clipboard" \

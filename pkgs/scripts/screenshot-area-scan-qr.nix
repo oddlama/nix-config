@@ -36,7 +36,7 @@ writeShellApplication {
       ${xclip}/bin/xclip -selection clipboard <<< "$DATA"
       ${libnotify}/bin/notify-send \
         "🔍 QR Code scan" "✅ $N codes detected\n📋 copied ''${#DATA} bytes" \
-        --hint="string:image-path:"${./assets/qr-scan.svg} \
+        --hint="string:image-path:"${./assets/qr-scan.png} \
         --hint="string:wired-tag:screenshot-$date" \
         || true
     else
@@ -44,14 +44,14 @@ writeShellApplication {
         "4")
           ${libnotify}/bin/notify-send \
             "🔍 QR Code scan" "❌ 0 codes detected" \
-            --hint="string:image-path:"${./assets/qr-scan.svg} \
+            --hint="string:image-path:"${./assets/qr-scan.png} \
             --hint="string:wired-tag:screenshot-$date" \
             || true
           ;;
         *)
           ${libnotify}/bin/notify-send \
             "🔍 QR Code scan" "❌ Error while processing image: zbarimg exited with code $?" \
-            --hint="string:image-path:"${./assets/qr-scan.svg} \
+            --hint="string:image-path:"${./assets/qr-scan.png} \
             --hint="string:wired-tag:screenshot-$date" \
             || true
           ;;

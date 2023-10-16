@@ -9,6 +9,7 @@ lib.optionalAttrs (!minimal) {
     packages = with pkgs; [
       bandwhich
       btop
+      delta
       fd
       file
       hexyl

@@ -102,8 +102,10 @@
         store_path="''${TOPLEVEL_STORE_PATHS["$host"]}"
         echo "[1;36m    Applying [m⚙️ [34m$host[m"
         prev_system=$(ssh "$host" -- readlink -e /nix/var/nix/profiles/system)
-        ssh "$host" -- /run/current-system/sw/bin/nix-env --profile /nix/var/nix/profiles/system --set "$store_path"
-        ssh "$host" -- "$store_path"/bin/switch-to-configuration "$ACTION"
+        ssh "$host" -- /run/current-system/sw/bin/nix-env --profile /nix/var/nix/profiles/system --set "$store_path" \
+          || die "Failed to set system profile"
+        ssh "$host" -- "$store_path"/bin/switch-to-configuration "$ACTION" \
+          || echo "Error while activating new system" >&2
         if [[ -n "$prev_system" ]]; then
           ssh "$host" -- nvd --color always diff "$prev_system" "$store_path"
         fi

@@ -1,7 +1,9 @@
 {
+  lib,
   writeShellApplication,
+  flameshot,
   libnotify,
-  maim,
+  moreutils,
 }:
 writeShellApplication {
   name = "screenshot-screen";
@@ -9,12 +11,14 @@ writeShellApplication {
     set -euo pipefail
     umask 077
 
-    out="''${XDG_PICTURES_DIR-$HOME/Pictures}/screenshots/$(date +"%Y-%m-%dT%H:%M:%S%:z")-fullscreen.png"
+    date=$(date +"%Y-%m-%dT%H:%M:%S%:z")
+    out="''${XDG_PICTURES_DIR-$HOME/Pictures}/screenshots/$date-fullscreen.png"
     mkdir -p "$(dirname "$out")"
 
-    ${maim}/bin/maim --hidecursor --format=png --quality=10 --noopengl "$out"
+    ${lib.getExe flameshot} full --raw | ${moreutils}/bin/sponge "$out"
     ${libnotify}/bin/notify-send \
       "📷 Screenshot captured" "💾 Saved to $out" \
+      --hint="string:wired-tag:screenshot-$date" \
       || true
   '';
 }

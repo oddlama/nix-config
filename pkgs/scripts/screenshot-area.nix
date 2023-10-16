@@ -1,9 +1,11 @@
 {
+  lib,
   writeShellApplication,
+  flameshot,
   libnotify,
-  xclip,
+  moreutils,
   tesseract,
-  maim,
+  xclip,
 }:
 writeShellApplication {
   name = "screenshot-area";
@@ -15,8 +17,12 @@ writeShellApplication {
     out="''${XDG_PICTURES_DIR-$HOME/Pictures}/screenshots/$date-selection.png"
     mkdir -p "$(dirname "$out")"
 
-    ${maim}/bin/maim --color=.4,.7,1,0.2 --bordersize=1.0 --nodecorations=1 \
-      --hidecursor --format=png --quality=10 --noopengl --select "$out"
+    # Always use native scaling to ensure flameshot is fullscreen across monitors
+    export QT_AUTO_SCREEN_SCALE_FACTOR=0
+    export QT_SCREEN_SCALE_FACTORS=""
+
+    # Use sponge to create the file on success only
+    ${lib.getExe flameshot} gui --raw | ${moreutils}/bin/sponge "$out"
     ${xclip}/bin/xclip -selection clipboard -t image/png < "$out"
     action=$(${libnotify}/bin/notify-send \
       "📷 Screenshot captured" "📋 copied to clipboard" \

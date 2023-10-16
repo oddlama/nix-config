@@ -90,7 +90,8 @@ in {
           "b" = "exec firefox"; # TODO ; exec signal-desktop; exec discord
           "Shift+s" = "exec --no-startup-id ${getExe pkgs.scripts.screenshot-area}";
           "F11" = "exec --no-startup-id ${getExe pkgs.scripts.screenshot-area-scan-qr}";
-          "F12" = "exec --no-startup-id ${getExe pkgs.scripts.screenshot-screen}";
+          # Exlicitly without --no-startup-id to show the spinner
+          "F12" = "exec ${getExe pkgs.scripts.screenshot-screen}";
           "Print" = "exec --no-startup-id env QT_AUTO_SCREEN_SCALE_FACTOR=0 QT_SCREEN_SCALE_FACTORS='' ${getExe pkgs.flameshot} gui";
 
           "Shift+r" = "reload";

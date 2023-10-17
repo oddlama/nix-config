@@ -88,10 +88,10 @@
     ProtectHostname = true;
     # Would re-mount paths ignored by temporary root
     #ProtectSystem = "strict";
-    ProtectControlGroups = true;
+    # ProtectControlGroups = true; # needed for restarter script
     ProtectKernelLogs = true;
     ProtectKernelModules = true;
-    ProtectKernelTunables = true;
+    # ProtectKernelTunables = true; # needed for restarter script
     ProtectProc = "invisible";
     RestrictAddressFamilies = [];
     RestrictNamespaces = true;

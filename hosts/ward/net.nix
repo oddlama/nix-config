@@ -47,11 +47,9 @@ in {
       address = [
         "192.168.178.7/24"
         #"fdee::1/64"
-        #"192.168.1.183/22"
       ];
       gateway = [
-        "192.168.178.1/24"
-        #"192.168.1.1/22"
+        "192.168.178.1"
       ];
       matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.wan.mac;
       networkConfig.IPv6PrivacyExtensions = "yes";

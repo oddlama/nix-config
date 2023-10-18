@@ -27,8 +27,6 @@ in {
         }
         // v));
 
-  # TODO dont send html setting
-
   programs.thunderbird = {
     enable = true;
 

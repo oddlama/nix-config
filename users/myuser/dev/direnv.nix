@@ -18,5 +18,6 @@
 
   home.persistence."/state".directories = [
     ".local/share/direnv"
+    ".cache/direnv"
   ];
 }

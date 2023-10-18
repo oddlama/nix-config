@@ -3,6 +3,7 @@
   inputs,
   lib,
   minimal,
+  pkgs,
   ...
 }: let
   inherit
@@ -32,6 +33,9 @@ in
     config = {
       # Needed for gtk
       programs.dconf.enable = true;
+      # Required for gnome3 pinentry
+      services.dbus.packages = [pkgs.gcr];
+
       stylix = {
         # I want to choose what to style myself.
         autoEnable = false;

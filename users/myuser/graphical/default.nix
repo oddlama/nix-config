@@ -40,10 +40,11 @@
       zathura
     ];
 
+    # TODO yubikey pinentry is curses but should be graphical
+    # TODO test different pinentrys (pinentry gtk?)
     # TODO wrap thunderbird bin and set LC_ALL=de_DE.UTF-8 because thunderbird uses wrong date and time formatting with C.UTF-8
     # TODO make screenshot copy work even if notification fails (set -e does its thing here)
     # TODO pavucontrol shortcut or bar button
-    # TODO audible bell in qt pinentry drives me nuts
     # TODO secureboot -> use pam yubikey login
     # TODO keyboard stays lit on poweroff -> add systemd service to disable it on shutdown
     # TODO on neogit close do neotree update
@@ -56,9 +57,7 @@
     # TODO neovim reopening file should continue at the previous position
     # TODO thunderbird doesn't use passwords from password command
     # TODO rotating wallpaper
-    # TODO yubikey pinentry is curses but should be graphical
     # TODO accounts.concats accounts.calendar
-    # TODO test different pinentrys (pinentry gtk?)
     # TODO agenix rekey edit secret should create temp files with same extension
     # TODO mod+f1-4 for left monitor?
     # TODO autostart signal, firefox (both windows), etc.

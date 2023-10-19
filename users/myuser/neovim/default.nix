@@ -3,23 +3,27 @@
   pkgs,
   ...
 }: {
-  programs.neovim-custom.package = let
-    nvimConfig =
-      pkgs.neovimUtils.makeNeovimConfig {
-        wrapRc = false;
-        withPython3 = true;
-        withRuby = true;
-        withNodeJs = true;
-        #extraPython3Packages = p: [];
-        #plugins = [
-        #  { plugin = pkgs.; config = ''''; optional = false; }
-        #];
-      }
-      // {
-        wrapperArgs = ["--add-flags" "--clean -u ${./aaa/init.lua}"];
-      };
-  in
-    pkgs.wrapNeovimUnstable pkgs.neovim-unwrapped nvimConfig;
+  programs.neovim-custom = {
+    config = {
+      withPython3 = false;
+      withRuby = false;
+      withNodeJs = false;
+      #extraPython3Packages = p: [];
+      plugins = with pkgs.vimPlugins; [
+        {
+          plugin = neo-tree-nvim;
+          config =
+            /*
+            lua
+            */
+            ''
+              require("neo-tree").setup {}
+            '';
+        }
+      ];
+    };
+    init = builtins.readFile ./aaa/init.lua;
+  };
 
   home.packages = let
     nvimConfig = pkgs.neovimUtils.makeNeovimConfig {
@@ -36,5 +40,4 @@
     "nvim/init.lua".source = ./init.lua;
     "nvim/lua".source = ./lua;
   };
-  home.sessionVariables.E = "${config.programs.neovim-custom.package}/bin/nvim";
 }

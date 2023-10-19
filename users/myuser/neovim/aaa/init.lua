@@ -33,7 +33,12 @@ opt.title = false -- Sets the window title
 --opt.titlestring = "%t%( %M%)%( (%{expand(\"%:~:.:h\")})%) - nvim" -- The format for the window title
 
 -- Hide line numbers in terminal windows
-vim.api.nvim_exec([[au BufEnter term://* setlocal nonumber]], false)
+vim.api.nvim_create_autocmd("BufEnter", {
+	pattern = "term://*",
+	callback = function()
+		vim.bo.number = false
+	end,
+})
 
 ----------------------------------------------------------------------------------------------------
 -- Editing behavior

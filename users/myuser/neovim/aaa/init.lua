@@ -54,9 +54,10 @@ opt.shiftwidth = 4
 opt.softtabstop = 4
 opt.shiftround = true -- Round indentation commands to next multiple of shiftwidth
 
-opt.formatoptions = "rqj" -- r = insert comment leader when hitting <Enter> in insert mode
+-- r = insert comment leader when hitting <Enter> in insert mode
 -- q = allow explicit formatting with gq
 -- j = remove comment leaders when joining lines if it makes sense
+opt.formatoptions = "rqj"
 
 opt.virtualedit = "all" -- Allow the curser to be positioned on cells that have no actual character;
 -- Like moving beyond EOL or on any visual 'space' of a tab character

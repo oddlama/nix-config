@@ -65,7 +65,6 @@
     # TODO sway shortcuts
     # TODO VP9 hardware video decoding blocklisted
     # TODO gpg switch to sk
-    # TODO some font icons not showing neovim because removed from nerdfonts, replace with bertter .
 
     persistence."/state".directories = [
       "Downloads" # config.xdg.userDirs.download (infinite recursion)

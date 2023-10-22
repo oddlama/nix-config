@@ -8,6 +8,7 @@
 }: let
   inherit
     (lib)
+    mkIf
     mkOption
     types
     optionalAttrs
@@ -31,6 +32,12 @@ in
     ];
 
     config = {
+      # For Star Citizen. See https://github.com/starcitizen-lug/knowledge-base/wiki for more info.
+      boot.kernel.sysctl = mkIf config.graphical.gaming.enable {
+        "vm.max_map_count" = 16777216;
+        "fs.file-max" = 524288;
+      };
+
       # Needed for gtk
       programs.dconf.enable = true;
       # Required for gnome3 pinentry

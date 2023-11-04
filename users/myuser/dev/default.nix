@@ -4,6 +4,10 @@
     ./gdb.nix
   ];
 
+  persistence."/state".directories = [
+    ".cargo"
+  ];
+
   home = {
     extraOutputsToInstall = ["man" "doc" "devdoc"];
     packages = with pkgs; [

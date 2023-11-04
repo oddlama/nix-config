@@ -16,7 +16,7 @@
       }
     ];
     extraSpecialArgs = {
-      inherit minimal;
+      inherit inputs minimal;
     };
   };
 

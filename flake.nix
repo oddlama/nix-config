@@ -1,5 +1,5 @@
 {
-  description = " ❄️ oddlama's nix config and dotfiles";
+  description = "❄️ oddlama's nix config and dotfiles";
 
   inputs = {
     agenix = {
@@ -71,6 +71,13 @@
       url = "github:symphorien/nixseparatedebuginfod";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
+    };
+
+    nixvim = {
+      url = "github:nix-community/nixvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
+      inputs.pre-commit-hooks.follows = "pre-commit-hooks";
     };
 
     microvm = {

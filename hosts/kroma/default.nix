@@ -39,6 +39,7 @@
     gpg-connect-agent /bye
     export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
   '';
+  networking.extraHosts = "127.0.0.1 modules-cdn.eac-prod.on.epicgames.com";
 
   graphical.gaming.enable = true;
 

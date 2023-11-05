@@ -26,5 +26,6 @@
     gitea = uidGid 983;
     redis-paperless = uidGid 982;
     nixseparatedebuginfod = uidGid 981;
+    msr = uidGid 980;
   };
 }

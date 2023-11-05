@@ -25,7 +25,7 @@
   #  init = builtins.readFile ./aaa/init.lua;
   #};
 
-  home.shellAliases.nixvim = lib.getExe (pkgs.nixvim.makeNixvimWithModule {
+  home.shellAliases.nixvim = lib.getExe (pkgs.nixvim.makeNixvim {
     package = pkgs.neovim-unwrapped.overrideAttrs (_final: prev: {
       nativeBuildInputs = (prev.nativeBuildInputs or []) ++ [pkgs.makeWrapper];
       postInstall =

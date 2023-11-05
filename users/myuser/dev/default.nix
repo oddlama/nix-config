@@ -4,11 +4,11 @@
     ./gdb.nix
   ];
 
-  persistence."/state".directories = [
-    ".cargo"
-  ];
-
   home = {
+    persistence."/state".directories = [
+      ".cargo"
+    ];
+
     extraOutputsToInstall = ["man" "doc" "devdoc"];
     packages = with pkgs; [
       git-lfs

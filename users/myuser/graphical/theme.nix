@@ -4,14 +4,6 @@
   pkgs,
   ...
 }: {
-  home.pointerCursor = {
-    gtk.enable = true;
-    x11.enable = true;
-    package = pkgs.bibata-cursors;
-    name = "Bibata-Modern-Ice";
-    size = 24;
-  };
-
   xresources.properties = {
     "Xft.hinting" = true;
     "Xft.antialias" = true;
@@ -59,5 +51,11 @@
   stylix = {
     inherit (nixosConfig.stylix) polarity base16Scheme;
     targets.gtk.enable = true;
+
+    cursor = {
+      package = pkgs.bibata-cursors;
+      name = "Bibata-Modern-Ice";
+      # size = 24;
+    };
   };
 }

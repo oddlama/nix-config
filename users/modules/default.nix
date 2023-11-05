@@ -2,11 +2,10 @@
   imports = [
     ./uid.nix
     ./secrets.nix
-    ./neovim.nix
 
     ./config/htop.nix
     ./config/impermanence.nix
-    ./config/manpager
+    ./config/manpager.nix
     ./config/neovim.nix
     ./config/shell
     ./config/utils.nix

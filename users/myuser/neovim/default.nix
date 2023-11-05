@@ -3,37 +3,8 @@
   pkgs,
   ...
 }: {
-  #programs.neovim-custom = {
-  #  config = {
-  #    withPython3 = false;
-  #    withRuby = false;
-  #    withNodeJs = false;
-  #    #extraPython3Packages = p: [];
-  #    plugins = with pkgs.vimPlugins; [
-  #      {
-  #        plugin = neo-tree-nvim;
-  #        config =
-  #          /*
-  #          lua
-  #          */
-  #          ''
-  #            require("neo-tree").setup {}
-  #          '';
-  #      }
-  #    ];
-  #  };
-  #  init = builtins.readFile ./aaa/init.lua;
-  #};
-
   home.shellAliases.nixvim = lib.getExe (pkgs.nixvim.makeNixvim {
-    package = pkgs.neovim-unwrapped.overrideAttrs (_final: prev: {
-      nativeBuildInputs = (prev.nativeBuildInputs or []) ++ [pkgs.makeWrapper];
-      postInstall =
-        (prev.postInstall or "")
-        + ''
-          wrapProgram $out/bin/nvim --add-flags "--clean"
-        '';
-    });
+    package = pkgs.neovim-clean;
 
     colorschemes = {
       catppuccin = {
@@ -157,6 +128,9 @@
       extraPython3Packages = p: with p; [openai];
     };
   in [(pkgs.wrapNeovimUnstable pkgs.neovim-unwrapped nvimConfig)];
+
+  home.sessionVariables.EDITOR = "nvim";
+  home.shellAliases.vimdiff = "nvim -d";
 
   xdg.configFile = {
     "nvim/ftplugin".source = ./ftplugin;

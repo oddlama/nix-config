@@ -21,7 +21,7 @@
     version = "1.0.0";
 
     src = ./i3-per-workspace-layout;
-    cargoHash = "sha256-bO/ZTkQLCeJajiW7cZoEBIIWDCyxYp4rO6ulbcu21YQ=";
+    cargoHash = "sha256-SThuQB1O3RSBIfY3W8By9mL5tZ4aY4XSSgNXlG7TWDQ=";
 
     meta = with lib; {
       description = "A helper utility to allow assigning a layout to each workspace in i3";

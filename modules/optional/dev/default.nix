@@ -30,10 +30,5 @@ lib.optionalAttrs (!minimal) {
     }
   ];
 
-  services.nixseparatedebuginfod = {
-    enable = true;
-    # We need a system-level user to be able to use nix.settings.allowed-users with it.
-    # TODO: remove once https://github.com/NixOS/nix/issues/9071 is fixed
-    allowUser = true;
-  };
+  services.nixseparatedebuginfod.enable = true;
 }

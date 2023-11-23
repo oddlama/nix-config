@@ -1,16 +1,22 @@
 # TODO whichkey
+# TODO vim illuminate
 # TODO alpha menu
 # TODO keybinds
-# TODO window select
+# TODO dap dapui
 # TODO neotree left darker
 # TODO neotree focsed shows lualine wrongly (full instead of nothing)
 # TODO lualine inactive ------ is ugly
+# TODO move lines. gomove again?
+# TODO vim-wordmotion vs https://github.com/chrisgrieser/nvim-various-textobjs
+# TODO blankline cur indent too bright
 {
   lib,
   pkgs,
   ...
 }: {
+  # TODO use programs.nixvim? and split stuff a little.
   home.shellAliases.nixvim = lib.getExe (pkgs.nixvim.makeNixvim {
+    # TODO away once we are ready to switch (prevents shada and undohist currently)
     package = pkgs.neovim-clean;
 
     # TODO for wayland:
@@ -31,6 +37,7 @@
       };
     };
 
+    luaLoader.enable = true;
     globals.mapleader = ",";
 
     # Hide line numbers in terminal windows
@@ -38,13 +45,26 @@
       {
         event = ["BufEnter" "BufWinEnter"];
         pattern = ["term://*"];
-        callback = {
-          __raw = ''
-            function()
-              vim.bo.number = false
-            end
-          '';
-        };
+        callback.__raw = ''
+          function()
+            vim.bo.number = false
+          end
+        '';
+      }
+      {
+        event = ["WinEnter"];
+        pattern = ["*"];
+        callback.__raw = ''
+          function()
+            pcall(function()
+              if vim.bo.buftype == "nofile" or vim.bo.buftype == "help" then
+                vim.cmd "DisableWhitespace"
+              else
+                vim.cmd "EnableWhitespace"
+              end
+            end)
+          end
+        '';
       }
     ];
 
@@ -112,23 +132,134 @@
     };
 
     keymaps = let
-      withDefaults = lib.recursiveUpdate {
+      keymap = mode: key: action: desc: {
+        inherit action key mode;
         options = {
           silent = true;
-          noremap = true;
+          inherit desc;
         };
       };
-    in
-      map withDefaults [
-        {
-          action = "<C-]>";
-          key = "<CR>";
-          mode = ["n"];
-          options.desc = "Jump to tag under cursor";
-        }
-      ];
+    in [
+      # -------------------------------------------------------------------------------------------------
+      # General
+      # -------------------------------------------------------------------------------------------------
 
-    luaLoader.enable = true;
+      # Shift + <up/down> scroll with cursor locked to position
+      (keymap ["n" "v"] "<S-Down>" "<C-e>" "")
+      (keymap ["n" "v"] "<S-Up>" "<C-y>" "")
+      (keymap ["i"] "<S-Down>" "<C-x><C-e>" "")
+      (keymap ["i"] "<S-Up>" "<C-x><C-y>" "")
+
+      # Shift + Alt + <arrow keys> change the current window size
+      (keymap ["n"] "<M-S-Up>" ":resize -2<CR>" "")
+      (keymap ["n"] "<M-S-Down>" ":resize +2<CR>" "")
+      (keymap ["n"] "<M-S-Left>" ":vertical resize -2<CR>" "")
+      (keymap ["n"] "<M-S-Right>" ":vertical resize +2<CR>" "")
+
+      # Allow exiting terminal mode
+      (keymap ["t"] "<C-w><Esc>" "<C-\\><C-n>" "")
+      # Allow C-w in terminal mode
+      (keymap ["t"] "<C-w>" "<C-\\><C-n><C-w>" "")
+
+      # Open fixed size terminal window at the bottom
+      (keymap ["n"] "<leader><CR>" ":belowright new | setlocal wfh | resize 10 | terminal<CR>" "")
+
+      # -------------------------------------------------------------------------------------------------
+      # Language server
+      # -------------------------------------------------------------------------------------------------
+
+      (keymap ["n"] "gD" "<cmd>lua vim.lsp.buf.declaration()<CR>" "")
+      (keymap ["n"] "gd" "<cmd>lua require('telescope.builtin').lsp_definitions()<CR>" "")
+      (keymap ["n"] "K" "<cmd>lua vim.lsp.buf.hover()<CR>" "")
+      (keymap ["n"] "gi" "<cmd>lua require('telescope.builtin').lsp_implementations()<CR>" "")
+      (keymap ["n"] "<C-k>" "<cmd>lua vim.lsp.buf.signature_help()<CR>" "")
+      (keymap ["n"] "<leader>wa" "<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>" "")
+      (keymap ["n"] "<leader>wr" "<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>" "")
+      (keymap ["n"] "<leader>wl" "<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>" "")
+      (keymap ["n"] "gt" "<cmd>lua require('telescope.builtin').lsp_type_definitions()<CR>" "")
+      (keymap ["n"] "<leader>r" "<cmd>lua vim.lsp.buf.rename()<CR>" "")
+      (keymap ["n"] "<leader>a" "<cmd>lua vim.lsp.buf.code_action()<CR>" "")
+      (keymap ["n"] "gr" "<cmd>lua require('telescope.builtin').lsp_references()<CR>" "")
+      (keymap ["n"] "gl" "<cmd>lua vim.diagnostic.open_float()<CR>" "")
+      (keymap ["n"] "[d" "<cmd>lua vim.diagnostic.goto_prev()<CR>" "")
+      (keymap ["n"] "]d" "<cmd>lua vim.diagnostic.goto_next()<CR>" "")
+      (keymap ["n"] "<leader>q" "<cmd>lua vim.diagnostic.setloclist()<CR>" "")
+      (keymap ["n"] "<leader>f" "<cmd>lua vim.lsp.buf.format { async = true }<CR>" "")
+
+      # -------------------------------------------------------------------------------------------------
+      # Plugin: Easy Align
+      # -------------------------------------------------------------------------------------------------
+
+      (keymap ["n"] "<leader>A" "<Plug>(EasyAlign)" "")
+      (keymap ["v"] "<leader>A" "<Plug>(EasyAlign)" "")
+
+      # -------------------------------------------------------------------------------------------------
+      # Plugin: Undotree
+      # -------------------------------------------------------------------------------------------------
+
+      (keymap ["n"] "<leader>u" ":UndotreeToggle<CR>" "")
+
+      # -------------------------------------------------------------------------------------------------
+      # Plugin: Better Whitespace
+      # -------------------------------------------------------------------------------------------------
+
+      (keymap ["n"] "<leader>$" ":StripWhitespace<CR>" "")
+
+      # -------------------------------------------------------------------------------------------------
+      # Plugin: Neotree
+      # -------------------------------------------------------------------------------------------------
+
+      # Mappings to open the tree / find the current file
+      (keymap ["n"] "<leader>t" ":Neotree toggle<CR>" "")
+      (keymap ["n"] "<leader>T" ":Neotree reveal<CR>" "")
+      (keymap ["n"] "<leader>G" ":Neotree float git_status<CR>" "")
+      (keymap ["n"] "<leader>b" ":Neotree float buffers<CR>" "")
+
+      # -------------------------------------------------------------------------------------------------
+      # Plugin: Sandwich
+      # -------------------------------------------------------------------------------------------------
+
+      (keymap ["n" "v"] "m" "<Plug>(operator-sandwich-add)" "")
+      (keymap ["n" "v"] "M" "<Plug>(operator-sandwich-delete)" "")
+      (keymap ["n" "v"] "C-m" "<Plug>(operator-sandwich-replace)" "")
+
+      # -------------------------------------------------------------------------------------------------
+      # Plugin: gomove
+      # -------------------------------------------------------------------------------------------------
+
+      #(keymap ["n"] "<M-Left>"  "<Plug>GoNSMLeft" "")
+      #(keymap ["n"] "<M-Down>"  "<Plug>GoNSMDown" "")
+      #(keymap ["n"] "<M-Up>"    "<Plug>GoNSMUp" "")
+      #(keymap ["n"] "<M-Right>" "<Plug>GoNSMRight" "")
+
+      (keymap ["x"] "<M-Left>" "<Plug>GoVSMLeft" "")
+      (keymap ["x"] "<M-Down>" "<Plug>GoVSMDown" "")
+      (keymap ["x"] "<M-Up>" "<Plug>GoVSMUp" "")
+      (keymap ["x"] "<M-Right>" "<Plug>GoVSMRight" "")
+
+      #(keymap ["n"] "<S-M-Left>"  "<Plug>GoNSDLeft" "")
+      #(keymap ["n"] "<S-M-Down>"  "<Plug>GoNSDDown" "")
+      #(keymap ["n"] "<S-M-Up>"    "<Plug>GoNSDUp" "")
+      #(keymap ["n"] "<S-M-Right>" "<Plug>GoNSDRight" "")
+
+      (keymap ["x"] "<S-M-Left>" "<Plug>GoVSDLeft" "")
+      (keymap ["x"] "<S-M-Down>" "<Plug>GoVSDDown" "")
+      (keymap ["x"] "<S-M-Up>" "<Plug>GoVSDUp" "")
+      (keymap ["x"] "<S-M-Right>" "<Plug>GoVSDRight" "")
+
+      # -------------------------------------------------------------------------------------------------
+      # Plugin: wordmotion
+      # -------------------------------------------------------------------------------------------------
+
+      (keymap ["x" "o"] "ie" "<Plug>WordMotion_iw" "")
+
+      # -------------------------------------------------------------------------------------------------
+      # Plugin: textcase
+      # -------------------------------------------------------------------------------------------------
+
+      # TODO: ... keybinds + telescope integration
+    ];
+
     plugins = {
       # -------------------------------------------------------------------------------------------------
       # Library plugins
@@ -181,18 +312,11 @@
       # Line indentation markers
       indent-blankline.enable = true;
 
-      # Show invalid whitespace
-      # TODO use { "ntpeters/vim-better-whitespace", config = conf_fn "better-whitespace" }
-
       # Rainbow parentheses
       rainbow-delimiters.enable = true;
 
-      # Replace built-in LSP prompts and windows
-      # TODO use { "stevearc/dressing.nvim", config = conf_setup "dressing" }
       # Status updates for LSP progress in right bottom corner.
       fidget.enable = true;
-      # Show latex math equations
-      # TODO use { "jbyuki/nabla.nvim", config = conf_fn "nabla" }
       # Show colors
       nvim-colorizer.enable = true;
 
@@ -205,7 +329,7 @@
 
       treesitter = {
         enable = true;
-        folding = true;
+        # TODO (autocmd * zR needed) folding = true;
         indent = true;
 
         incrementalSelection = {
@@ -242,24 +366,10 @@
       # Editing
       # -------------------------------------------------------------------------------------------------
 
-      # Multicursor
-      # TODO use { "mg979/vim-visual-multi" }
       # Commenting
       comment-nvim.enable = true;
-      # Modify Surrounding things like parenthesis and quotes
-      # TODO use { "machakann/vim-sandwich", config = conf_fn "sandwich" }
       # Extend vim's "%" key
       vim-matchup.enable = true;
-      # Align
-      # TODO use "junegunn/vim-easy-align"
-      # Move blocks
-      # TODO use { "booperlv/nvim-gomove", config = conf_setup "gomove" }
-      # Case changer
-      # TODO use "johmsalas/text-case.nvim"
-      # camelcase (and similar) word motions and textobjects
-      # TODO use { "chaoren/vim-wordmotion", config = conf_fn "wordmotion" }
-      # Respect editor-config files
-      # TODO use { "gpanders/editorconfig.nvim" }
 
       # ----------------------------------------------------------------------------------------------------
       # Functionality
@@ -273,9 +383,8 @@
       };
 
       # Startup screen
-      # TODO use { "goolord/alpha-nvim", config = conf_module "alpha" }
-      # Window Picker
-      # TODO use { "s1n7ax/nvim-window-picker", tag = "v1.*", config = conf_setup "window-picker" }
+      alpha.enable = true;
+
       # Filebrowser
       neo-tree = {
         enable = true;
@@ -338,9 +447,6 @@
         windowLayout = 4;
       };
 
-      # Gpg integration
-      # TODO use "jamessan/vim-gnupg"
-
       # -------------------------------------------------------------------------------------------------
       # Git
       # -------------------------------------------------------------------------------------------------
@@ -351,13 +457,13 @@
       # Git commands
       fugitive.enable = true;
 
+      diffview.enable = true;
+
       # Manage git from within neovim
       neogit = {
         enable = true;
         disableBuiltinNotifications = true;
       };
-
-      diffview.enable = true;
 
       # -------------------------------------------------------------------------------------------------
       # Completion
@@ -554,7 +660,7 @@
               Table = "",
               Object = "󰅩",
               Tag = "",
-              Array = "[]",
+              Array = "󰅪",
               Boolean = "",
               Number = "",
               Null = "󰟢",
@@ -581,19 +687,44 @@
       # Miscellaneous
       # -------------------------------------------------------------------------------------------------
 
-      # TODO use { "folke/trouble.nvim", config = conf_setup "trouble" }
       # Quickfix menu
       trouble.enable = true;
       # Highlight certain keywords
       todo-comments.enable = true;
       # TODO use { "liuchengxu/vista.vim", cmd = "Vista" }
+      which-key.enable = true;
     };
 
     extraPlugins = with pkgs.vimPlugins; [
+      telescope-ui-select-nvim
       nvim-web-devicons
       nvim-window-picker
-      telescope-ui-select-nvim
+      # Replace built-in LSP prompts and windows
+      dressing-nvim
+      # Multicursor
+      vim-visual-multi
+      # Show invalid whitespace
+      vim-better-whitespace
+      # Show latex math equations
+      nabla-nvim
+      # Modify Surrounding things like parenthesis and quotes
+      vim-sandwich
+      # TODO mini.align better?
+      vim-easy-align
+      # Case changer
+      text-case-nvim
+      # camelcase (and similar) word motions and textobjects
+      vim-wordmotion
+      # Gpg integration
+      vim-gnupg
     ];
+
+    extraConfigLuaPre = ''
+      vim.g.operator_sandwich_no_default_key_mappings = 1
+      vim.g.textobj_sandwich_no_default_key_mappings = 1
+
+      vim.g.wordmotion_nomap = 1
+    '';
 
     extraConfigLuaPost = ''
       require("nvim-web-devicons").setup {
@@ -642,14 +773,28 @@
 
       require("window-picker").setup {
         hint = "floating-big-letter",
-        selection_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
         filter_rules = {
           bo = {
             filetype = { "neo-tree", "neo-tree-popup", "notify", "quickfix" },
             buftype = { "terminal", "quickfix", "prompt" },
           },
         },
-        other_win_hl_color = "#4493c8",
+        floating_big_letter = {
+          font = "ansi-shadow",
+        },
+        selection_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        show_prompt = false,
+      }
+
+      require("dressing").setup {
+        input = {
+          prefer_width = 80,
+          max_width = { 140, 0.9 },
+          min_width = { 80, 0.6 },
+          win_options = {
+            winblend = 0,
+          },
+        },
       }
     '';
   });

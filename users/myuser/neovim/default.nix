@@ -1,6 +1,5 @@
 # TODO whichkey
 # TODO vim illuminate
-# TODO alpha menu
 # TODO keybinds
 # TODO dap dapui
 # TODO neotree left darker
@@ -22,20 +21,21 @@
     # TODO for wayland:
     # clipboard.providers.wl-copy.enable = true;
 
-    colorschemes.catppuccin = {
-      enable = true;
-      flavour = "mocha";
-      integrations = {
-        dap.enabled = true;
-        dap.enable_ui = true;
-        fidget = true;
-        indent_blankline = {
-          enabled = true;
-          colored_indent_levels = true;
-        };
-        native_lsp.enabled = true;
-      };
-    };
+    #colorschemes.catppuccin = {
+    #  enable = true;
+    #  flavour = "mocha";
+    #  integrations = {
+    #    dap.enabled = true;
+    #    dap.enable_ui = true;
+    #    fidget = true;
+    #    indent_blankline = {
+    #      enabled = true;
+    #      colored_indent_levels = true;
+    #    };
+    #    native_lsp.enabled = true;
+    #  };
+    #};
+    #colorschemes.onedark.enable = true;
 
     luaLoader.enable = true;
     globals.mapleader = ",";
@@ -123,10 +123,13 @@
       selection = "old"; # Do not include line ends in past the-line selections
       smartindent = true; # Use smart auto indenting for all file types
 
-      timeoutlen = 20; # Only wait 20 milliseconds for characters to arrive (see :help timeout)
-      ttimeoutlen = 20;
-      timeout = false; # Disable timeout, but enable ttimeout (only timeout on keycodes)
+      # Wait 500 milliseconds for characters to arrive in a mapped sequence.
+      # Afterwards, which-key will be opened
+      timeout = true;
+      timeoutlen = 500;
+      # Wait 20 (instead of 50) milliseconds for characters to arrive in the TUI.
       ttimeout = true;
+      ttimeoutlen = 20;
 
       grepprg = "rg --vimgrep --smart-case --follow"; # Replace grep with ripgrep
     };
@@ -383,7 +386,49 @@
       };
 
       # Startup screen
-      alpha.enable = true;
+      alpha = {
+        enable = true;
+        layout = let
+          padding = val: {
+            type = "padding";
+            inherit val;
+          };
+        in [
+          (padding 2)
+          {
+            opts = {
+              hl = "Type";
+              position = "center";
+            };
+            type = "text";
+            val = [
+              "  ███╗   ██╗██╗██╗  ██╗██╗   ██╗██╗███╗   ███╗  "
+              "  ████╗  ██║██║╚██╗██╔╝██║   ██║██║████╗ ████║  "
+              "  ██╔██╗ ██║██║ ╚███╔╝ ██║   ██║██║██╔████╔██║  "
+              "  ██║╚██╗██║██║ ██╔██╗ ╚██╗ ██╔╝██║██║╚██╔╝██║  "
+              "  ██║ ╚████║██║██╔╝ ██╗ ╚████╔╝ ██║██║ ╚═╝ ██║  "
+              "  ╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝  ╚═══╝  ╚═╝╚═╝     ╚═╝  "
+            ];
+          }
+          (padding 2)
+          {
+            type = "group";
+            opts.spacing = 1;
+            val = [
+              {
+                command = ":enew<CR>";
+                desc = "  New file";
+                shortcut = "e";
+              }
+              {
+                command = ":qa<CR>";
+                desc = "󰅙  Quit Neovim";
+                shortcut = "q";
+              }
+            ];
+          }
+        ];
+      };
 
       # Filebrowser
       neo-tree = {
@@ -489,13 +534,13 @@
           cssls.enable = true;
           html.enable = true;
           lua-ls.enable = true;
-          # TODO handeled by rust-tools? rust-analyzer = {
-          # TODO handeled by rust-tools?   enable = true;
-          # TODO handeled by rust-tools?   settings = {
-          # TODO handeled by rust-tools?     checkOnSave = true;
-          # TODO handeled by rust-tools?     check.command = "clippy";
-          # TODO handeled by rust-tools?   };
-          # TODO handeled by rust-tools? };
+          rust-analyzer = {
+            enable = true;
+            settings = {
+              checkOnSave = true;
+              check.command = "clippy";
+            };
+          };
           nil_ls = {
             enable = true;
             settings = {
@@ -696,6 +741,8 @@
     };
 
     extraPlugins = with pkgs.vimPlugins; [
+      # navarasu's one dark
+      onedark-nvim
       telescope-ui-select-nvim
       nvim-web-devicons
       nvim-window-picker
@@ -717,6 +764,8 @@
       vim-wordmotion
       # Gpg integration
       vim-gnupg
+      # TODO temporary
+      vim-startuptime
     ];
 
     extraConfigLuaPre = ''
@@ -724,6 +773,75 @@
       vim.g.textobj_sandwich_no_default_key_mappings = 1
 
       vim.g.wordmotion_nomap = 1
+    '';
+
+    extraConfigLua = ''
+      local onedark = require "onedark"
+      onedark.setup {
+        toggle_style_key = "<nop>",
+        colors = {
+          fg = "#abb2bf",
+          black = "#181a1f",
+          bg0 = "#1e222a",
+          bg1 = "#252931",
+          bg2 = "#282c34",
+          bg3 = "#353b45",
+          bg_d = "#191c21",
+          bg_blue = "#73b8f1",
+          bg_yellow = "#ebd09c",
+
+          dark_cyan = "#2b6f77",
+          dark_red = "#993939",
+          dark_yellow = "#93691d",
+
+          grey = "#42464e",
+          grey_fg = "#565c64",
+          grey_fg2 = "#6f737b",
+          light_grey = "#6f737b",
+          baby_pink = "#de8c92",
+          pink = "#ff75a0",
+          nord_blue = "#81a1c1",
+          sun = "#ebcb8b",
+          light_purple = "#de98fd",
+          dark_purple = "#c882e7",
+          teal = "#519aba",
+          dark_pink = "#fca2aa",
+          light_blue = "#a3b8ef",
+          vibrant_green = "#7eca9c",
+
+          red = "#e06c75",
+          orange = "#d19a66",
+          yellow = "#e5c07b",
+          green = "#98c379",
+          cyan = "#56b6c2",
+          blue = "#61afef",
+          purple = "#c678dd",
+
+          diff_add = "#31392b",
+          diff_delete = "#382b2c",
+          diff_change = "#1c3448",
+          diff_text = "#2c5372",
+        },
+        highlights = {
+          CursorLine = { bg = "$bg0" },
+          FloatBorder = { fg = "$blue" },
+          NeoTreeTabActive = { fg = "$fg", bg = "$bg_d" },
+          NeoTreeTabInactive = { fg = "$grey", bg = "$black" },
+          NeoTreeTabSeparatorActive = { fg = "$black", bg = "$black" },
+          NeoTreeTabSeparatorInactive = { fg = "$black", bg = "$black" },
+          NeoTreeWinSeparator = { fg = "$bg_d", bg = "$bg_d" },
+          NeoTreeVertSplit = { fg = "$bg_d", bg = "$bg_d" },
+          VisualMultiMono = { fg = "$purple", bg = "$diff_change" },
+          VisualMultiExtend = { bg = "$diff_change" },
+          VisualMultiCursor = { fg = "$purple", bg = "$diff_change" },
+          VisualMultiInsert = { fg = "$blue", bg = "$diff_change" },
+        },
+      }
+      vim.g.VM_Mono_hl = "VisualMultiMono"
+      vim.g.VM_Extend_hl = "VisualMultiExtend"
+      vim.g.VM_Cursor_hl = "VisualMultiCursor"
+      vim.g.VM_Insert_hl = "VisualMultiInsert"
+      onedark.load()
     '';
 
     extraConfigLuaPost = ''

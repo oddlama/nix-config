@@ -27,5 +27,6 @@
     redis-paperless = uidGid 982;
     nixseparatedebuginfod = uidGid 981;
     msr = uidGid 980;
+    fwupd-refresh = uidGid 979;
   };
 }

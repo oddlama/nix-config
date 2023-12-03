@@ -43,6 +43,18 @@ in
       # Required for gnome3 pinentry
       services.dbus.packages = [pkgs.gcr];
 
+      xdg.portal = {
+        enable = true;
+        xdgOpenUsePortal = true;
+        config.common = {
+          default = ["gtk"];
+          "org.freedesktop.impl.portal.Secret" = [
+            "gnome-keyring"
+          ];
+        };
+        extraPortals = [pkgs.xdg-desktop-portal-gtk];
+      };
+
       stylix = {
         # I want to choose what to style myself.
         autoEnable = false;

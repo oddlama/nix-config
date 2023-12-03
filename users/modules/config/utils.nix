@@ -24,6 +24,8 @@ lib.optionalAttrs (!minimal) {
       rsync
       sd
       tree
+      unzip
+      zip
       wget
     ];
   };

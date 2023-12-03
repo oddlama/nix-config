@@ -13,7 +13,6 @@
     concatMapStrings
     concatStringsSep
     duplicates
-    escapeShellArg
     filter
     genAttrs
     head
@@ -25,7 +24,6 @@
     net
     optionalAttrs
     optionals
-    removeSuffix
     stringLength
     types
     wireguard

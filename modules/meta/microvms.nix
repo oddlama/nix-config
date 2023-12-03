@@ -38,7 +38,7 @@
   microvmConfig = vmName: vmCfg: {
     # Add the required datasets to the disko configuration of the machine
     disko.devices.zpool = mkIf vmCfg.zfs.enable {
-      ${vmCfg.zfs.pool}.datasets."${vmCfg.zfs.dataset}" =
+      ${vmCfg.zfs.pool}.datasets.${vmCfg.zfs.dataset} =
         disko.zfs.filesystem vmCfg.zfs.mountpoint;
     };
 

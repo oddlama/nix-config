@@ -16,7 +16,7 @@
   bindWithModifier = mapAttrs' (k: nameValuePair (cfg.modifier + "+" + k));
   cfg = config.xsession.windowManager.i3.config;
 
-  i3-per-workspace-layout = pkgs.rustPlatform.buildRustPackage rec {
+  i3-per-workspace-layout = pkgs.rustPlatform.buildRustPackage {
     pname = "i3-per-workspace-layout";
     version = "1.0.0";
 
@@ -31,7 +31,7 @@
     };
   };
 
-  sway-overfocus = pkgs.rustPlatform.buildRustPackage rec {
+  sway-overfocus = pkgs.rustPlatform.buildRustPackage {
     pname = "sway-overfocus";
     version = "1.0.0";
 
@@ -202,7 +202,7 @@ in {
         };
       in [
         {
-          command = "${pkgs.systemd}/bin/systemctl --user import-environment DISPLAY; ${pkgs.systemd}/bin/systemctl --user start i3-session.target";
+          command = "${pkgs.systemd}/bin/systemctl --user start i3-session.target";
           always = false;
           notification = false;
         }
@@ -288,10 +288,11 @@ in {
     if test -z "$DBUS_SESSION_BUS_ADDRESS"; then
       eval $(dbus-launch --exit-with-session --sh-syntax)
     fi
-    systemctl --user import-environment DISPLAY XAUTHORITY
 
+    export DESKTOP_SESSION=i3
+    systemctl --user import-environment PATH DISPLAY XAUTHORITY DESKTOP_SESSION XDG_CONFIG_DIRS XDG_DATA_DIRS XDG_RUNTIME_DIR XDG_SESSION_ID DBUS_SESSION_BUS_ADDRESS
     if command -v dbus-update-activation-environment >/dev/null 2>&1; then
-      dbus-update-activation-environment DISPLAY XAUTHORITY
+      dbus-update-activation-environment --systemd --all
     fi
 
     autorandr -c

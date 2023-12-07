@@ -21,7 +21,7 @@ in {
     default = {};
     description = mdDoc ''
       Each entry here will setup a wireguard network that connects via the
-      given node and adds appropriate firewall zones. There will a zone for
+      given node and adds appropriate firewall zones. There will be a zone for
       the interface and one for the proxy server specifically. A corresponding
       rule `''${name}-to-local` will be created to easily expose services to the proxy.
     '';

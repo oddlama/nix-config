@@ -9,9 +9,7 @@
 }: let
   inherit
     (lib)
-    any
     attrNames
-    attrValues
     disko
     escapeShellArg
     makeBinPath
@@ -25,11 +23,9 @@
     mkOption
     net
     optional
-    optionalAttrs
     types
     ;
 
-  parentConfig = config;
   cfg = config.meta.microvms;
   nodeName = config.node.name;
   inherit (cfg) vms;
@@ -98,7 +94,7 @@
       };
       pkgs = inputs.self.pkgs.${vmCfg.system};
       inherit (vmCfg) autostart;
-      config = {config, ...}: {
+      config = {
         imports = cfg.commonImports ++ vmCfg.modules;
         node.name = vmCfg.nodeName;
 
@@ -165,49 +161,24 @@
 
         networking.renameInterfacesByMac.${vmCfg.networking.mainLinkName} = mac;
 
-        systemd.network.networks =
-          {
-            "10-${vmCfg.networking.mainLinkName}" = {
-              matchConfig.MACAddress = mac;
-              DHCP = "yes";
-              dhcpV4Config.UseDNS = false;
-              dhcpV6Config.UseDNS = false;
-              ipv6AcceptRAConfig.UseDNS = false;
-              networkConfig = {
-                IPv6PrivacyExtensions = "yes";
-                MulticastDNS = true;
-                IPv6AcceptRA = true;
-              };
-              linkConfig.RequiredForOnline = "routable";
+        systemd.network.networks = {
+          "10-${vmCfg.networking.mainLinkName}" = {
+            matchConfig.MACAddress = mac;
+            DHCP = "yes";
+            dhcpV4Config.UseDNS = false;
+            dhcpV6Config.UseDNS = false;
+            ipv6AcceptRAConfig.UseDNS = false;
+            networkConfig = {
+              IPv6PrivacyExtensions = "yes";
+              MulticastDNS = true;
+              IPv6AcceptRA = true;
             };
-          }
-          // optionalAttrs vmCfg.localWireguard {
-            # Remove requirement for the wireguard interface to come online,
-            # to allow microvms to be deployed more easily (otherwise they
-            # would not come online if the private key wasn't rekeyed yet).
-            # FIXME ideally this would be conditional at runtime if the
-            # agenix activation had an error, but this is not trivial.
-            ${parentConfig.meta.wireguard."${nodeName}-local-vms".unitConfName} = {
-              linkConfig.RequiredForOnline = "no";
-            };
+            linkConfig.RequiredForOnline = "routable";
           };
+        };
 
         networking.nftables.firewall = {
           zones.untrusted.interfaces = [vmCfg.networking.mainLinkName];
-        };
-
-        meta.wireguard = mkIf vmCfg.localWireguard {
-          "${nodeName}-local-vms" = {
-            server = {
-              host =
-                if config.networking.domain == null
-                then "${config.networking.hostName}.local"
-                else config.networking.fqdn;
-              inherit (cfg.networking.wireguard) port;
-              openFirewallRules = ["untrusted-to-local"];
-            };
-            linkName = "local-vms";
-          };
         };
       };
     };
@@ -318,12 +289,6 @@ in {
             description = mdDoc "Whether this VM should be started automatically with the host";
           };
 
-          localWireguard = mkOption {
-            type = types.bool;
-            default = false;
-            description = mdDoc "Whether this VM should be connected to a local wireguard network with other VMs (that opt-in here) on the same host.";
-          };
-
           system = mkOption {
             type = types.str;
             description = mdDoc "The system that this microvm should use";
@@ -339,25 +304,5 @@ in {
     };
   };
 
-  config = mkIf (vms != {}) (
-    {
-      # Define a local wireguard server to communicate with vms securely
-      meta.wireguard = mkIf (any (x: x.localWireguard) (attrValues vms)) {
-        "${nodeName}-local-vms" = {
-          server = {
-            host =
-              if config.networking.domain == null
-              then "${config.networking.hostName}.local"
-              else config.networking.fqdn;
-            inherit (cfg.networking.wireguard) openFirewallRules port;
-            reservedAddresses = [cfg.networking.wireguard.cidrv4 cfg.networking.wireguard.cidrv6];
-          };
-          linkName = "local-vms";
-          ipv4 = net.cidr.host 1 cfg.networking.wireguard.cidrv4;
-          ipv6 = net.cidr.host 1 cfg.networking.wireguard.cidrv6;
-        };
-      };
-    }
-    // mergeToplevelConfigs ["disko" "microvm" "systemd"] (mapAttrsToList microvmConfig vms)
-  );
+  config = mkIf (vms != {}) (mergeToplevelConfigs ["disko" "microvm" "systemd"] (mapAttrsToList microvmConfig vms));
 }

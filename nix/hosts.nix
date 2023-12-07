@@ -49,8 +49,8 @@ inputs: let
   nixosConfigurationsMinimal = flip mapAttrs nixosHosts (mkHost {minimal = true;});
 
   # True NixOS nodes can define additional microvms (guest nodes) that are built
-  # together with the true host. We collect all defined microvm nodes
-  # from each node here to allow accessing any node via the unified attribute `nodes`.
+  # together with it. We collect all defined microvm nodes from each node here
+  # to allow accessing any node via the unified attribute `nodes`.
   microvmConfigurations = flip concatMapAttrs self.nixosConfigurations (_: node:
     mapAttrs'
     (vm: def: nameValuePair def.nodeName node.config.microvm.vms.${vm}.config)

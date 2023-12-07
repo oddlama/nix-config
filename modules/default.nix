@@ -16,7 +16,6 @@
     ./config/impermanence.nix
     ./config/inputrc.nix
     ./config/issue.nix
-    ./config/microvms.nix
     ./config/net.nix
     ./config/nftables.nix
     ./config/nix.nix

@@ -33,7 +33,7 @@
     mkIf
     mkMerge
     mkOption
-    mkPackageOptionMD
+    mkPackageOption
     optional
     optionals
     subtractLists
@@ -272,7 +272,7 @@ in {
     enableServer = mkEnableOption (mdDoc "the Kanidm server");
     enablePam = mkEnableOption (mdDoc "the Kanidm PAM and NSS integration");
 
-    package = mkPackageOptionMD pkgs "kanidm" {};
+    package = mkPackageOption pkgs "kanidm" {};
 
     provision = {
       enable = mkEnableOption "provisioning of systems (oauth2), groups and users";

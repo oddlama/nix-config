@@ -14,6 +14,7 @@
 
     ../../modules/optional/hardware/physical.nix
     ../../modules/optional/hardware/nvidia.nix
+    ../../modules/optional/hardware/bluetooth.nix
 
     ../../modules
     ../../modules/optional/boot-efi.nix

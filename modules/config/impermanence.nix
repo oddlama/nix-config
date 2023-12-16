@@ -117,6 +117,14 @@ in {
       [
         "/var/lib/nixos"
       ]
+      ++ optionals config.hardware.bluetooth.enable [
+        {
+          directory = "/var/lib/bluetooth";
+          #user = "acme";
+          #group = "acme";
+          #mode = "0755";
+        }
+      ]
       ++ optionals config.security.acme.acceptTerms [
         {
           directory = "/var/lib/acme";

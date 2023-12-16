@@ -44,6 +44,7 @@
   # services.telegraf.extraConfig.inputs.github = {};
 
   meta.microvms.commonImports = [
+    ../../modules
     ./microvms/common.nix
   ];
 

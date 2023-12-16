@@ -48,6 +48,39 @@
     ./microvms/common.nix
   ];
 
+  #guests.adguardhome = {
+  #  backend = "microvm";
+  #  microvm = {
+  #    system = "x86_64-linux";
+  #    autostart = true;
+  #  };
+  #  zfs = {
+  #    enable = true;
+  #    pool = "rpool";
+  #  };
+  #  modules = [ ./guests/adguardhome.nix ];
+  #};
+
+  guests = let
+    mkMicrovm = system: module: {
+      backend = "microvm";
+      microvm = {
+        system = "x86_64-linux";
+        autostart = true;
+      };
+      zfs = {
+        enable = true;
+        pool = "rpool";
+      };
+      modules = [
+        ../../modules
+        module
+      ];
+    };
+  in {
+    adguardhome = mkMicrovm "x86_64-linux" ./guests/adguardhome.nix;
+  };
+
   meta.microvms.vms = let
     defaultConfig = name: {
       system = "x86_64-linux";

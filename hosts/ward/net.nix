@@ -127,7 +127,6 @@ in {
   meta.microvms.networking = {
     baseMac = config.repo.secrets.local.networking.interfaces.lan.mac;
     macvtapInterface = "lan";
-    wireguard.openFirewallRules = ["lan-to-local"];
   };
 
   # Allow accessing influx

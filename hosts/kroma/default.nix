@@ -42,6 +42,9 @@
   '';
   networking.extraHosts = "127.0.0.1 modules-cdn.eac-prod.on.epicgames.com";
 
+  systemd.services."systemd-networkd".environment.SYSTEMD_LOG_LEVEL = "debug";
+  systemd.services."systemd-resolved".environment.SYSTEMD_LOG_LEVEL = "debug";
+
   graphical.gaming.enable = true;
 
   stylix.fonts.sizes = {
@@ -50,4 +53,7 @@
     terminal = 20;
     popups = 20;
   };
+
+  nix.settings.trusted-substituters = ["https://ai.cachix.org"];
+  nix.settings.trusted-public-keys = ["ai.cachix.org-1:N9dzRK+alWwoKXQlnn0H6aUx0lU/mspIoz8hMvGvbbc="];
 }

@@ -97,10 +97,17 @@ in {
     }
   ];
 
-  options.node.type = mkOption {
-    type = types.enum ["host" "microvm" "container"];
-    description = "The type of this machine.";
-    default = "host";
+  options.node = {
+    type = mkOption {
+      type = types.enum ["host" "microvm" "container"];
+      description = "The type of this machine.";
+      default = "host";
+    };
+
+    guestName = mkOption {
+      type = types.str;
+      description = "The base name of this machine without the parent's name. Only defined if this is a guest.";
+    };
   };
 
   options.containers = mkOption {

@@ -56,6 +56,6 @@
   # TODO See https://github.com/ryantm/agenix/pull/187.
   system.activationScripts = lib.mkIf (config.age.secrets != {}) {
     removeAgenixLink.text = "[[ ! -L /run/agenix ]] && [[ -d /run/agenix ]] && rm -rf /run/agenix";
-    activationScripts.agenixNewGeneration.deps = ["removeAgenixLink"];
+    agenixNewGeneration.deps = ["removeAgenixLink"];
   };
 }

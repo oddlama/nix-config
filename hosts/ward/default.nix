@@ -67,7 +67,7 @@
       modules = [
         ../../modules
         ./guests/common.nix
-        ({config, ...}: {node.secretsDir = ./secrets + "/${config.node.name}";})
+        ({config, ...}: {node.secretsDir = ./secrets + "/${config.node.guestName}";})
         mainModule
       ];
     };

@@ -11,7 +11,6 @@
     concatStringsSep
     duplicates
     mapAttrsToList
-    mkIf
     mkOption
     types
     ;

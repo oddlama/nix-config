@@ -1,7 +1,6 @@
-guestName: guestCfg: {lib, ...}: let
+_guestName: guestCfg: {lib, ...}: let
   inherit (lib) mkForce;
 in {
-  node.guestName = guestName;
   node.name = guestCfg.nodeName;
   node.type = guestCfg.backend;
 

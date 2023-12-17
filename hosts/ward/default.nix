@@ -58,22 +58,26 @@
   #};
 
   guests = let
-    mkGuest = mainModule: {
+    mkGuest = guestName: {
       autostart = true;
-      zfs = {
-        enable = true;
+      zfs."/state" = {
         pool = "rpool";
+        dataset = "local/guests/${guestName}";
+      };
+      zfs."/persist" = {
+        pool = "rpool";
+        dataset = "safe/guests/${guestName}";
       };
       modules = [
         ../../modules
         ./guests/common.nix
-        ({config, ...}: {node.secretsDir = ./secrets + "/${config.node.guestName}";})
-        mainModule
+        ./guests/${guestName}.nix
+        {node.secretsDir = ./secrets/${guestName};}
       ];
     };
 
-    mkMicrovm = system: mainModule:
-      mkGuest mainModule
+    mkMicrovm = system: guestName:
+      mkGuest guestName
       // {
         backend = "microvm";
         microvm = {
@@ -82,23 +86,26 @@
         };
       };
 
-    mkContainer = mainModule:
-      mkGuest mainModule
-      // {
-        backend = "container";
-        container.macvlan = "lan";
-      };
-  in
-    lib.mkIf (!minimal) {
-      adguardhome = mkContainer ./guests/adguardhome.nix;
-      forgejo = mkContainer ./guests/forgejo.nix;
-      grafana = mkContainer ./guests/grafana.nix;
-      influxdb = mkContainer ./guests/influxdb.nix;
-      kanidm = mkContainer ./guests/kanidm.nix;
-      loki = mkContainer ./guests/loki.nix;
-      paperless = mkContainer ./guests/paperless.nix;
-      vaultwarden = mkContainer ./guests/vaultwarden.nix;
+    mkContainer = guestName: {
+      ${guestName} =
+        mkGuest guestName
+        // {
+          backend = "container";
+          container.macvlan = "lan";
+        };
     };
+  in
+    lib.mkIf (!minimal) (
+      {}
+      // mkContainer "adguardhome"
+      // mkContainer "forgejo"
+      // mkContainer "grafana"
+      // mkContainer "influxdb"
+      // mkContainer "kanidm"
+      // mkContainer "loki"
+      // mkContainer "paperless"
+      // mkContainer "vaultwarden"
+    );
 
   #ddclient = defineVm;
   #samba+wsdd = defineVm;

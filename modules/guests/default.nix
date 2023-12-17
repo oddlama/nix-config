@@ -14,8 +14,9 @@
     escapeShellArg
     makeBinPath
     mapAttrsToList
+    mkMerge
     mergeToplevelConfigs
-    mkEnableOption
+    flip
     mkIf
     mkOption
     types
@@ -26,57 +27,56 @@
   # Configuration required on the host for a specific guest
   defineGuest = guestName: guestCfg: {
     # Add the required datasets to the disko configuration of the machine
-    disko.devices.zpool = mkIf guestCfg.zfs.enable {
-      ${guestCfg.zfs.pool}.datasets.${guestCfg.zfs.dataset} =
-        disko.zfs.filesystem guestCfg.zfs.mountpoint;
-    };
+    disko.devices.zpool = mkMerge (flip map (attrValues guestCfg.zfs) (zfsCfg: {
+      ${zfsCfg.pool}.datasets.${zfsCfg.dataset} =
+        disko.zfs.filesystem zfsCfg.hostMountpoint;
+    }));
 
     # Ensure that the zfs dataset exists before it is mounted.
-    systemd.services = let
-      fsMountUnit = "${utils.escapeSystemdPath guestCfg.zfs.mountpoint}.mount";
-    in
-      mkIf guestCfg.zfs.enable {
-        # Ensure that the zfs dataset exists before it is mounted.
-        "zfs-ensure-${utils.escapeSystemdPath guestCfg.zfs.mountpoint}" = {
-          wantedBy = [fsMountUnit];
-          before = [fsMountUnit];
-          after = [
-            "zfs-import-${utils.escapeSystemdPath guestCfg.zfs.pool}.service"
-            "zfs-mount.target"
-          ];
-          unitConfig.DefaultDependencies = "no";
-          serviceConfig.Type = "oneshot";
-          script = let
-            poolDataset = "${guestCfg.zfs.pool}/${guestCfg.zfs.dataset}";
-            diskoDataset = config.disko.devices.zpool.${guestCfg.zfs.pool}.datasets.${guestCfg.zfs.dataset};
-          in ''
-            export PATH=${makeBinPath [pkgs.zfs]}":$PATH"
-            if ! zfs list -H -o type ${escapeShellArg poolDataset} &>/dev/null ; then
-              ${diskoDataset._create}
-            fi
-          '';
-        };
-
-        # Ensure that the zfs dataset has the correct permissions when mounted
-        "zfs-chown-${utils.escapeSystemdPath guestCfg.zfs.mountpoint}" = {
-          after = [fsMountUnit];
-          unitConfig.DefaultDependencies = "no";
-          serviceConfig.Type = "oneshot";
-          script = ''
-            chmod 700 ${escapeShellArg guestCfg.zfs.mountpoint}
-          '';
-        };
-
-        "microvm@${guestName}" = mkIf (guestCfg.backend == "microvm") {
-          requires = [fsMountUnit "zfs-chown-${utils.escapeSystemdPath guestCfg.zfs.mountpoint}.service"];
-          after = [fsMountUnit "zfs-chown-${utils.escapeSystemdPath guestCfg.zfs.mountpoint}.service"];
-        };
-
-        "container@${guestName}" = mkIf (guestCfg.backend == "container") {
-          requires = [fsMountUnit "zfs-chown-${utils.escapeSystemdPath guestCfg.zfs.mountpoint}.service"];
-          after = [fsMountUnit "zfs-chown-${utils.escapeSystemdPath guestCfg.zfs.mountpoint}.service"];
-        };
+    systemd.services = mkMerge (flip map (attrValues guestCfg.zfs) (zfsCfg: let
+      fsMountUnit = "${utils.escapeSystemdPath zfsCfg.hostMountpoint}.mount";
+    in {
+      # Ensure that the zfs dataset exists before it is mounted.
+      "zfs-ensure-${utils.escapeSystemdPath zfsCfg.hostMountpoint}" = {
+        wantedBy = [fsMountUnit];
+        before = [fsMountUnit];
+        after = [
+          "zfs-import-${utils.escapeSystemdPath zfsCfg.pool}.service"
+          "zfs-mount.target"
+        ];
+        unitConfig.DefaultDependencies = "no";
+        serviceConfig.Type = "oneshot";
+        script = let
+          poolDataset = "${zfsCfg.pool}/${zfsCfg.dataset}";
+          diskoDataset = config.disko.devices.zpool.${zfsCfg.pool}.datasets.${zfsCfg.dataset};
+        in ''
+          export PATH=${makeBinPath [pkgs.zfs]}":$PATH"
+          if ! zfs list -H -o type ${escapeShellArg poolDataset} &>/dev/null ; then
+            ${diskoDataset._create}
+          fi
+        '';
       };
+
+      # Ensure that the zfs dataset has the correct permissions when mounted
+      "zfs-chown-${utils.escapeSystemdPath zfsCfg.hostMountpoint}" = {
+        after = [fsMountUnit];
+        unitConfig.DefaultDependencies = "no";
+        serviceConfig.Type = "oneshot";
+        script = ''
+          chmod 700 ${escapeShellArg zfsCfg.hostMountpoint}
+        '';
+      };
+
+      "microvm@${guestName}" = mkIf (guestCfg.backend == "microvm") {
+        requires = [fsMountUnit "zfs-chown-${utils.escapeSystemdPath zfsCfg.hostMountpoint}.service"];
+        after = [fsMountUnit "zfs-chown-${utils.escapeSystemdPath zfsCfg.hostMountpoint}.service"];
+      };
+
+      "container@${guestName}" = mkIf (guestCfg.backend == "container") {
+        requires = [fsMountUnit "zfs-chown-${utils.escapeSystemdPath zfsCfg.hostMountpoint}.service"];
+        after = [fsMountUnit "zfs-chown-${utils.escapeSystemdPath zfsCfg.hostMountpoint}.service"];
+      };
+    }));
 
     microvm.vms.${guestName} =
       mkIf (guestCfg.backend == "microvm") (import ./microvm.nix guestName guestCfg attrs);
@@ -97,17 +97,10 @@ in {
     }
   ];
 
-  options.node = {
-    type = mkOption {
-      type = types.enum ["host" "microvm" "container"];
-      description = "The type of this machine.";
-      default = "host";
-    };
-
-    guestName = mkOption {
-      type = types.str;
-      description = "The base name of this machine without the parent's name. Only defined if this is a guest.";
-    };
+  options.node.type = mkOption {
+    type = types.enum ["host" "microvm" "container"];
+    description = "The type of this machine.";
+    default = "host";
   };
 
   options.containers = mkOption {
@@ -126,11 +119,11 @@ in {
   options.guests = mkOption {
     default = {};
     description = "Defines the actual vms and handles the necessary base setup for them.";
-    type = types.attrsOf (types.submodule ({name, ...}: {
+    type = types.attrsOf (types.submodule (submod: {
       options = {
         nodeName = mkOption {
           type = types.str;
-          default = "${nodeName}-${name}";
+          default = "${nodeName}-${submod.config._module.args.name}";
           description = ''
             The name of the resulting node. By default this will be a compound name
             of the host's name and the vm's name to avoid name clashes. Can be
@@ -175,25 +168,37 @@ in {
           };
         };
 
-        zfs = {
-          enable = mkEnableOption "persistent data on separate zfs dataset";
+        zfs = mkOption {
+          description = "zfs datasets to mount into the guest";
+          default = {};
+          type = types.attrsOf (types.submodule (zfsSubmod: {
+            options = {
+              pool = mkOption {
+                type = types.str;
+                description = "The host's zfs pool on which the dataset resides";
+              };
 
-          pool = mkOption {
-            type = types.str;
-            description = "The host's zfs pool on which the dataset resides";
-          };
+              dataset = mkOption {
+                type = types.str;
+                example = "safe/guests/mycontainer";
+                description = "The host's dataset that should be used for this mountpoint (will automatically be created, including parent datasets)";
+              };
 
-          dataset = mkOption {
-            type = types.str;
-            default = "safe/guests/${name}";
-            description = "The host's dataset that should be used for this vm's state (will automatically be created, parent dataset must exist)";
-          };
+              hostMountpoint = mkOption {
+                type = types.path;
+                default = "/guests/${submod.config._module.args.name}${zfsSubmod.config._module.args.name}";
+                example = "/guests/mycontainer/persist";
+                description = "The host's mountpoint for the guest's dataset";
+              };
 
-          mountpoint = mkOption {
-            type = types.str;
-            default = "/guests/${name}";
-            description = "The host's mountpoint for the vm's dataset (will be shared via virtiofs as /persist in the vm)";
-          };
+              guestMountpoint = mkOption {
+                type = types.path;
+                default = zfsSubmod.config._module.args.name;
+                example = "/persist";
+                description = "The mountpoint inside the guest.";
+              };
+            };
+          }));
         };
 
         autostart = mkOption {

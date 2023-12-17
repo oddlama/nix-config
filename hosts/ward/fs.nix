@@ -26,7 +26,7 @@
           datasets =
             defaultZfsDatasets
             // {
-              "safe/vms" = unmountable;
+              "safe/guests" = unmountable;
             };
         };
     };

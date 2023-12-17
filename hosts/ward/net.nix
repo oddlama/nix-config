@@ -14,14 +14,14 @@ in {
   };
 
   # Create a MACVTAP for ourselves too, so that we can communicate with
-  # other taps on the same interface.
+  # our guests on the same interface.
   systemd.network.netdevs."10-lan-self" = {
     netdevConfig = {
       Name = "lan-self";
-      Kind = "macvtap";
+      Kind = "macvlan";
     };
     extraConfig = ''
-      [MACVTAP]
+      [MACVLAN]
       Mode=bridge
     '';
   };
@@ -36,7 +36,7 @@ in {
       linkConfig.RequiredForOnline = "carrier";
       extraConfig = ''
         [Network]
-        MACVTAP=lan-self
+        MACVLAN=lan-self
       '';
     };
     "10-wan" = {

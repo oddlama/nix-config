@@ -48,17 +48,24 @@ inputs: let
   nixosConfigurations = flip mapAttrs nixosHosts (mkHost {minimal = false;});
   nixosConfigurationsMinimal = flip mapAttrs nixosHosts (mkHost {minimal = true;});
 
-  # True NixOS nodes can define additional microvms (guest nodes) that are built
-  # together with it. We collect all defined microvm nodes from each node here
+  # True NixOS nodes can define additional guest nodes that are built
+  # together with it. We collect all defined guests from each node here
   # to allow accessing any node via the unified attribute `nodes`.
-  microvmConfigurations = flip concatMapAttrs self.nixosConfigurations (_: node:
-    mapAttrs'
-    (vm: def: nameValuePair def.nodeName node.config.microvm.vms.${vm}.config)
-    (node.config.meta.microvms.vms or {}));
+  guestConfigs = flip concatMapAttrs self.nixosConfigurations (_: node:
+    flip mapAttrs' (node.config.guests or {}) (guestName: guestDef:
+      nameValuePair guestDef.nodeName (
+        if guestDef.backend == "microvm"
+        then node.config.microvm.vms.${guestName}.config
+        else {
+          # We can only access the .config part of nixosSystem here unfortunately,
+          # since the rest is not exposed by the nixos module.
+          inherit (node.config.containers.${guestName}) config;
+        }
+      )));
 in {
   inherit
     hosts
-    microvmConfigurations
+    guestConfigs
     nixosConfigurations
     nixosConfigurationsMinimal
     ;

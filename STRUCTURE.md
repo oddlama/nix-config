@@ -13,8 +13,8 @@ Make sure to utilize the github search if you know what you need!
   - `host.pub` This host's public key (retrieved after initial setup). Used to rekey secrets so the host can access them at runtime.
   - `local.nix.age` Repository-wide local secrets. Decrypted on import, see `modules/repo/secrets.nix` for more information.
 
-  Some hosts define microvms that run as virtualized guests. Their configuration is usually just a single file
-  stored in `microvms/<vm>.nix`. Their secrets are usually stored in a subfolder of the host's secrets.
+  Some hosts define guests that run as containerized or virtualized guests. Their configuration is usually just a single file
+  stored in `guests/<name>.nix`. Their secrets are usually stored in a subfolder of the host's secrets folder.
 
 - `lib/` contains extra library functions that are needed throughout the config.
 

@@ -43,17 +43,13 @@
   # TODO track my github stats
   # services.telegraf.extraConfig.inputs.github = {};
 
-  meta.microvms.commonImports = [
-    ../../modules
-    ./microvms/common.nix
-  ];
-
   #guests.adguardhome = {
   #  backend = "microvm";
   #  microvm = {
   #    system = "x86_64-linux";
-  #    autostart = true;
+  #    macvtapInterface = "lan";
   #  };
+  #  autostart = true;
   #  zfs = {
   #    enable = true;
   #    pool = "rpool";
@@ -62,53 +58,47 @@
   #};
 
   guests = let
-    mkMicrovm = system: module: {
-      backend = "microvm";
-      microvm = {
-        system = "x86_64-linux";
-        autostart = true;
-      };
-      zfs = {
-        enable = true;
-        pool = "rpool";
-      };
-      modules = [
-        ../../modules
-        module
-      ];
-    };
-  in {
-    adguardhome = mkMicrovm "x86_64-linux" ./guests/adguardhome.nix;
-  };
-
-  meta.microvms.vms = let
-    defaultConfig = name: {
-      system = "x86_64-linux";
+    mkGuest = mainModule: {
       autostart = true;
       zfs = {
         enable = true;
         pool = "rpool";
       };
       modules = [
-        # XXX: this could be interpolated in-place but statix has a bug https://github.com/nerdypepper/statix/issues/75
-        (./microvms + "/${name}.nix")
-        {node.secretsDir = ./secrets + "/${name}";}
+        ../../modules
+        ./guests/common.nix
+        ({config, ...}: {node.secretsDir = ./secrets + "/${config.node.name}";})
+        mainModule
       ];
     };
+
+    mkMicrovm = system: mainModule:
+      mkGuest mainModule
+      // {
+        backend = "microvm";
+        microvm = {
+          system = "x86_64-linux";
+          macvtapInterface = "lan";
+        };
+      };
+
+    mkContainer = mainModule:
+      mkGuest mainModule
+      // {
+        backend = "container";
+        container.macvlan = "lan";
+      };
   in
-    lib.mkIf (!minimal) (
-      lib.genAttrs [
-        "adguardhome"
-        "forgejo"
-        "grafana"
-        "influxdb"
-        "kanidm"
-        "loki"
-        "paperless"
-        "vaultwarden"
-      ]
-      defaultConfig
-    );
+    lib.mkIf (!minimal) {
+      adguardhome = mkContainer ./guests/adguardhome.nix;
+      forgejo = mkContainer ./guests/forgejo.nix;
+      grafana = mkContainer ./guests/grafana.nix;
+      influxdb = mkContainer ./guests/influxdb.nix;
+      kanidm = mkContainer ./guests/kanidm.nix;
+      loki = mkContainer ./guests/loki.nix;
+      paperless = mkContainer ./guests/paperless.nix;
+      vaultwarden = mkContainer ./guests/vaultwarden.nix;
+    };
 
   #ddclient = defineVm;
   #samba+wsdd = defineVm;

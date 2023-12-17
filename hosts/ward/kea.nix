@@ -45,12 +45,12 @@ in {
               data = net.cidr.host 1 lanCidrv4;
             }
           ];
-          reservations = [
-            {
-              hw-address = nodes.ward-adguardhome.config.lib.microvm.mac;
-              ip-address = dnsIp;
-            }
-          ];
+          # TODO reservations = [
+          # TODO   {
+          # TODO     hw-address = nodes.ward-adguardhome.config.lib.microvm.mac;
+          # TODO     ip-address = dnsIp;
+          # TODO   }
+          # TODO ];
         }
       ];
     };

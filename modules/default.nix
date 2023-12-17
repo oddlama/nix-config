@@ -25,8 +25,9 @@
     ./config/system.nix
     ./config/users.nix
 
+    ./guests
+
     ./meta/kanidm.nix
-    ./meta/microvms.nix
     ./meta/nginx.nix
     ./meta/oauth2-proxy.nix
     ./meta/promtail.nix

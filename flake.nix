@@ -141,14 +141,14 @@
       inherit
         (import ./nix/hosts.nix inputs)
         hosts
-        microvmConfigurations
+        guestConfigs
         nixosConfigurations
         nixosConfigurationsMinimal
         ;
 
       # All nixosSystem instanciations are collected here, so that we can refer
       # to any system via nodes.<name>
-      nodes = self.nixosConfigurations // self.microvmConfigurations;
+      nodes = self.nixosConfigurations // self.guestConfigs;
       # Add a shorthand to easily target toplevel derivations
       "@" = mapAttrs (_: v: v.config.system.build.toplevel) self.nodes;
 

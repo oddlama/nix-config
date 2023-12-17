@@ -124,11 +124,6 @@ in {
     };
   };
 
-  meta.microvms.networking = {
-    baseMac = config.repo.secrets.local.networking.interfaces.lan.mac;
-    macvtapInterface = "lan";
-  };
-
   # Allow accessing influx
   meta.wireguard.proxy-sentinel.client.via = "sentinel";
 }

@@ -30,7 +30,7 @@ Server related stuff:
   - [loki](https://github.com/grafana/loki) and [promtail](https://grafana.com/docs/loki/latest/clients/promtail/) for logs
 - Single-Sign-On for all services using oauth2 via [kanidm](https://github.com/kanidm/kanidm)
 - Zoned nftables firewall via [nixos-nftables-firewall](https://github.com/thelegy/nixos-nftables-firewall)
-- Service isolation using [microvms](https://github.com/astro/microvm.nix) <!-- XXX: where possible, otherwise oci-containers -->
+- Service isolation using nixos-containers and [microvms](https://github.com/astro/microvm.nix)
 <!--
 XXX: todo, use details summary to show gallery of services
 
@@ -43,7 +43,7 @@ XXX: todo, use details summary to show gallery of services
 ---|---|---|---
 💻 | nom | Gigabyte AERO 15-W8 (i7-8750H) | My laptop and my main portable development machine <sub>Framework when?</sub>
 🖥️ | kroma | PC (AMD Ryzen 9 5900X) | Main workstation and development machine, also for some occasional gaming
-🖥️ | ward | ODROID H3 | Energy efficient SBC for my home firewall and some lightweight services using microvms.
+🖥️ | ward | ODROID H3 | Energy efficient SBC for my home firewall and some lightweight services using containers and microvms.
 🥔 | zackbiene | ODROID N2+ | ARM SBC for home automation, isolating the sketchy stuff from my main network
 ☁️  | envoy | Hetzner Cloud server | Mailserver
 ☁️  | sentinel | Hetzner Cloud server | Proxies and protects my local services
@@ -123,7 +123,7 @@ Afterwards:
 
 - Run `install-system` in the live environment and reboot
 - Retrieve the new host identity by using `ssh-keyscan <host/ip> | grep -o 'ssh-ed25519.*' > hosts/<host>/secrets/host.pub`
-- (If the host has microvms, also retrieve their identities!)
+- (If the host has guests, also retrieve their identities!)
 - Rekey the secrets for the new identity `nix run .#rekey`
 - Deploy again
 

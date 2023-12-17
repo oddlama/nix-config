@@ -6,9 +6,8 @@
   sentinelCfg = nodes.sentinel.config;
   paperlessDomain = "paperless.${sentinelCfg.repo.secrets.local.personalDomain}";
 in {
-  microvm.mem = 1024 * 12;
-  # XXX: increase once real hardware is used
-  microvm.vcpu = 4;
+  # XXX: remove microvm.mem = 1024 * 12;
+  # XXX: remove microvm.vcpu = 4;
 
   meta.wireguard-proxy.sentinel.allowedTCPPorts = [
     config.services.paperless.port

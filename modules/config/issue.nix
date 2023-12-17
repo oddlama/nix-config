@@ -9,6 +9,6 @@
       ''This is \e{cyan}\n\e{reset} [\e{lightblue}\l\e{reset}] (\s \m \r)''
     ]
     # Disabled for guests because of frequent redraws (-> pushed to syslog on the host)
-    ++ lib.optional (!config.guests.isGuest) ''\e{halfbright}\4\e{reset} \e{halfbright}\6\e{reset}''
+    ++ lib.optional (config.node.type == "host") ''\e{halfbright}\4\e{reset} \e{halfbright}\6\e{reset}''
     ++ [""]);
 }

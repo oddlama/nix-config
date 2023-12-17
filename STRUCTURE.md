@@ -26,13 +26,11 @@ Make sure to utilize the github search if you know what you need!
     These just add configuration unconditionally and don't expose any further options.
   - `modules/optional/` contains configuration that is only needed sometimes, and which should
     be included explicitly by hosts that require it.
-  - `modules/meta/` contains meta-modules that simplify the option interface of existing options.
+  - `modules/*` contains regular modules and meta-modules that simplify the option interface of existing options.
     I use this for stuff that I don't need on all my hosts and that may require different settings
     for each host while sharing a common basis.
     Some of these are "meta" in the sense that they depend on their own definitions on multiple hosts (wireguard).
     These are probably as opinionated as stuff in `modules/config/` but may be a little more general.
-    The `wireguard` module would even be a candidate for extraction to a separate flake, together with the related apps.
-  - `modules/*/` regular modules related to <xyz>, similar structure as in `nixpkgs/nixos/modules`
 
 - `nix/` library functions and flake plumbing
   - `generate-installer-package.nix` Helper package that that will be available in our iso images. This provides the `install-system` command that will do a full install including partitioning.

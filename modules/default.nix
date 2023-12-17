@@ -27,25 +27,20 @@
 
     ./guests
 
-    # TODO merge as ./*
-    ./meta/kanidm.nix
-    ./meta/nginx.nix
-    ./meta/oauth2-proxy.nix
-    ./meta/promtail.nix
-    ./meta/telegraf.nix
-    ./meta/wireguard.nix
-    ./meta/wireguard-proxy.nix
-
-    ./networking/interface-naming.nix
-    ./networking/provided-domains.nix
-
-    ./repo/distributed-config.nix
-    ./repo/meta.nix
-    ./repo/secrets.nix
-
-    ./security/acme-wildcard.nix
-
-    ./system/deterministic-ids.nix
+    ./acme-wildcard.nix
+    ./deterministic-ids.nix
+    ./distributed-config.nix
+    ./interface-naming.nix
+    ./kanidm.nix
+    ./meta.nix
+    ./nginx.nix
+    ./oauth2-proxy.nix
+    ./promtail.nix
+    ./provided-domains.nix
+    ./secrets.nix
+    ./telegraf.nix
+    ./wireguard-proxy.nix
+    ./wireguard.nix
   ];
 
   nixpkgs.overlays = [

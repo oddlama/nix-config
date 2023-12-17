@@ -4,7 +4,8 @@
     lualine = {
       enable = true;
       extensions = ["fzf" "nvim-dap-ui" "symbols-outline" "trouble" "neo-tree" "quickfix" "fugitive"];
-      componentSeparators = null;
+      componentSeparators.left = null;
+      componentSeparators.right = null;
       # componentSeparators.left = "|";
       # componentSeparators.right = "|";
       # sectionSeparators.left = "";

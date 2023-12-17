@@ -52,16 +52,16 @@ inputs: let
   # together with it. We collect all defined guests from each node here
   # to allow accessing any node via the unified attribute `nodes`.
   guestConfigs = flip concatMapAttrs self.nixosConfigurations (_: node:
-    flip mapAttrs' (node.config.guests or {}) (guestName: guestDef:
-      nameValuePair guestDef.nodeName (
-        if guestDef.backend == "microvm"
-        then node.config.microvm.vms.${guestName}.config
-        else {
-          # We can only access the .config part of nixosSystem here unfortunately,
-          # since the rest is not exposed by the nixos module.
-          inherit (node.config.containers.${guestName}) config;
-        }
-      )));
+    flip mapAttrs' (node.config.guests or {}) (
+      guestName: guestDef:
+        nameValuePair guestDef.nodeName
+        (
+          if guestDef.backend == "microvm"
+          then node.config.microvm.vms.${guestName}.config
+          else node.config.containers.${guestName}
+        )
+        .nixosConfiguration
+    ));
 in {
   inherit
     hosts

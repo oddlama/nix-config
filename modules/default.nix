@@ -27,6 +27,7 @@
 
     ./guests
 
+    # TODO merge as ./*
     ./meta/kanidm.nix
     ./meta/nginx.nix
     ./meta/oauth2-proxy.nix

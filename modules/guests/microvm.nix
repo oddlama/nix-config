@@ -18,7 +18,6 @@ guestName: guestCfg: {
   mac = (net.mac.assignMacs "02:01:27:00:00:00" 24 [] (attrNames config.guests)).${guestName};
 in {
   specialArgs = {
-    parentNode = config;
     inherit (inputs.self) nodes;
     inherit (inputs.self.pkgs.${guestCfg.microvm.system}) lib;
     inherit inputs;
@@ -77,7 +76,7 @@ in {
         };
     };
 
-    # FIXME this should be changed in microvm.nix to mkDefault in oder to not require mkForce here
+    # FIXME this should be changed in microvm.nix to mkDefault in order to not require mkForce here
     fileSystems."/state".neededForBoot = mkForce true;
     fileSystems."/persist".neededForBoot = mkForce true;
 

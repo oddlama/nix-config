@@ -103,6 +103,19 @@ in {
     default = "host";
   };
 
+  options.containers = mkOption {
+    type = types.attrsOf (types.submodule (submod: {
+      options.nixosConfiguration = mkOption {
+        type = types.unspecified;
+        default = null;
+        description = "Set this to the result of a `nixosSystem` invocation to use it as the guest system. This will set the `path` option for you.";
+      };
+      config = mkIf (submod.config.nixosConfiguration != null) {
+        path = submod.config.nixosConfiguration.config.system.build.toplevel;
+      };
+    }));
+  };
+
   options.guests = mkOption {
     default = {};
     description = "Defines the actual vms and handles the necessary base setup for them.";

@@ -15,7 +15,7 @@ guestName: guestCfg: {
     substring
     ;
 
-  initialLinkName = "mv-${(substring 0 13 (builtins.hashString "sha256" guestName))}";
+  initialLinkName = "mv-${(substring 0 12 (builtins.hashString "sha256" guestName))}";
 in {
   autoStart = guestCfg.autostart;
   macvlans = ["${guestCfg.container.macvlan}:${initialLinkName}"];

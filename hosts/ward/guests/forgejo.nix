@@ -61,6 +61,15 @@ in {
   # Recommended by forgejo: https://forgejo.org/docs/latest/admin/recommendations/#git-over-ssh
   services.openssh.settings.AcceptEnv = "GIT_PROTOCOL";
 
+  environment.persistence."/persist".directories = [
+    {
+      directory = config.services.gitea.stateDir;
+      user = "gitea";
+      group = "gitea";
+      mode = "0700";
+    }
+  ];
+
   services.gitea = {
     enable = true;
     package = pkgs.forgejo;

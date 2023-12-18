@@ -80,6 +80,15 @@ in {
     };
   };
 
+  environment.persistence."/persist".directories = [
+    {
+      directory = "/var/lib/kanidm";
+      user = "kanidm";
+      group = "kanidm";
+      mode = "0700";
+    }
+  ];
+
   services.kanidm = {
     enableServer = true;
     serverSettings = {

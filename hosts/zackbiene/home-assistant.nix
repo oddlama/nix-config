@@ -9,6 +9,15 @@
 in {
   meta.wireguard-proxy.sentinel.allowedTCPPorts = [80];
 
+  environment.persistence."/persist".directories = [
+    {
+      directory = config.services.home-assistant.configDir;
+      user = "hass";
+      group = "hass";
+      mode = "0700";
+    }
+  ];
+
   services.home-assistant = {
     enable = true;
     extraComponents = [

@@ -1,5 +1,8 @@
 {pkgs, ...}: {
   environment.systemPackages = with pkgs; [bluetuith];
+  environment.persistence."/persist".directories = [
+    "/var/lib/bluetooth"
+  ];
 
   hardware.bluetooth = {
     enable = true;

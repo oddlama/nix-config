@@ -46,6 +46,15 @@ in {
     };
   };
 
+  # TODO environment.persistence."/persist".directories = [
+  # TODO   {
+  # TODO     directory = "/var/lib/???";
+  # TODO     user = "???";
+  # TODO     group = "???";
+  # TODO     mode = "0700";
+  # TODO   }
+  # TODO ];
+
   services.paperless = {
     enable = true;
     address = "0.0.0.0";

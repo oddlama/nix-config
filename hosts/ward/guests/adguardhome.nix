@@ -34,6 +34,13 @@ in {
     };
   };
 
+  environment.persistence."/persist".directories = [
+    {
+      directory = "/var/lib/private/AdGuardHome";
+      mode = "0700";
+    }
+  ];
+
   networking.firewall = {
     allowedTCPPorts = [53];
     allowedUDPPorts = [53];

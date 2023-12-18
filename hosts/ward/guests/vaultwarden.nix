@@ -18,6 +18,15 @@ in {
     group = "vaultwarden";
   };
 
+  environment.persistence."/persist".directories = [
+    {
+      directory = "/var/lib/vaultwarden";
+      user = "vaultwarden";
+      group = "vaultwarden";
+      mode = "0700";
+    }
+  ];
+
   nodes.sentinel = {
     networking.providedDomains.vaultwarden = vaultwardenDomain;
 

@@ -117,14 +117,6 @@ in {
       [
         "/var/lib/nixos"
       ]
-      ++ optionals config.hardware.bluetooth.enable [
-        {
-          directory = "/var/lib/bluetooth";
-          #user = "acme";
-          #group = "acme";
-          #mode = "0755";
-        }
-      ]
       ++ optionals config.security.acme.acceptTerms [
         {
           directory = "/var/lib/acme";
@@ -139,103 +131,11 @@ in {
           mode = "0700";
         }
       ]
-      ++ optionals config.services.fail2ban.enable [
-        {
-          directory = "/var/lib/fail2ban";
-          user = "fail2ban";
-          group = "fail2ban";
-          mode = "0750";
-        }
-      ]
       ++ optionals config.services.postgresql.enable [
         {
           directory = "/var/lib/postgresql";
           user = "postgres";
           group = "postgres";
-          mode = "0700";
-        }
-      ]
-      ++ optionals config.services.gitea.enable [
-        {
-          directory = config.services.gitea.stateDir;
-          user = "gitea";
-          group = "gitea";
-          mode = "0700";
-        }
-      ]
-      ++ optionals config.services.caddy.enable [
-        {
-          directory = config.services.caddy.dataDir;
-          user = "caddy";
-          group = "caddy";
-          mode = "0700";
-        }
-      ]
-      ++ optionals config.services.loki.enable [
-        {
-          directory = "/var/lib/loki";
-          user = "loki";
-          group = "loki";
-          mode = "0700";
-        }
-      ]
-      ++ optionals config.services.grafana.enable [
-        {
-          directory = config.services.grafana.dataDir;
-          user = "grafana";
-          group = "grafana";
-          mode = "0700";
-        }
-      ]
-      ++ optionals config.services.kanidm.enableServer [
-        {
-          directory = "/var/lib/kanidm";
-          user = "kanidm";
-          group = "kanidm";
-          mode = "0700";
-        }
-      ]
-      ++ optionals config.services.vaultwarden.enable [
-        {
-          directory = "/var/lib/vaultwarden";
-          user = "vaultwarden";
-          group = "vaultwarden";
-          mode = "0700";
-        }
-      ]
-      ++ optionals config.services.influxdb2.enable [
-        {
-          directory = "/var/lib/influxdb2";
-          user = "influxdb2";
-          group = "influxdb2";
-          mode = "0700";
-        }
-      ]
-      ++ optionals config.services.telegraf.enable [
-        {
-          directory = "/var/lib/telegraf";
-          user = "telegraf";
-          group = "telegraf";
-          mode = "0700";
-        }
-      ]
-      ++ optionals config.services.adguardhome.enable [
-        {
-          directory = "/var/lib/private/AdGuardHome";
-          mode = "0700";
-        }
-      ]
-      ++ optionals config.services.esphome.enable [
-        {
-          directory = "/var/lib/private/esphome";
-          mode = "0700";
-        }
-      ]
-      ++ optionals config.services.home-assistant.enable [
-        {
-          directory = config.services.home-assistant.configDir;
-          user = "hass";
-          group = "hass";
           mode = "0700";
         }
       ];

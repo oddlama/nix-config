@@ -68,6 +68,15 @@ in {
     group = "influxdb2";
   };
 
+  environment.persistence."/persist".directories = [
+    {
+      directory = "/var/lib/influxdb2";
+      user = "influxdb2";
+      group = "influxdb2";
+      mode = "0700";
+    }
+  ];
+
   services.influxdb2 = {
     enable = true;
     settings = {

@@ -75,6 +75,15 @@ in {
     };
   };
 
+  environment.persistence."/persist".directories = [
+    {
+      directory = config.services.grafana.dataDir;
+      user = "grafana";
+      group = "grafana";
+      mode = "0700";
+    }
+  ];
+
   services.grafana = {
     enable = true;
     settings = {

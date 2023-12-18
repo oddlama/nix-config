@@ -1,4 +1,11 @@
 {config, ...}: {
+  environment.persistence."/persist".directories = [
+    {
+      directory = "/var/lib/private/esphome";
+      mode = "0700";
+    }
+  ];
+
   services.esphome = {
     enable = true;
     enableUnixSocket = true;

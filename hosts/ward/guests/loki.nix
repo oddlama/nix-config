@@ -52,6 +52,15 @@ in {
     };
   };
 
+  environment.persistence."/persist".directories = [
+    {
+      directory = "/var/lib/loki";
+      user = "loki";
+      group = "loki";
+      mode = "0700";
+    }
+  ];
+
   services.loki = let
     lokiDir = "/var/lib/loki";
   in {

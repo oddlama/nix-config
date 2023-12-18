@@ -177,6 +177,15 @@ in {
       '';
     };
 
+    environment.persistence."/persist".directories = [
+      {
+        directory = "/var/lib/telegraf";
+        user = "telegraf";
+        group = "telegraf";
+        mode = "0700";
+      }
+    ];
+
     systemd.services.telegraf = {
       path = [
         # Make sensors refer to the correct wrapper

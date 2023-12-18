@@ -23,6 +23,7 @@
       username = config.users.users.root.name;
 
       packages = with pkgs; [
+        neovim
         wireguard-tools
       ];
     };

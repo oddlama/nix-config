@@ -12,6 +12,7 @@ in {
 
   systemd.network.networks = {
     "10-${guestCfg.networking.mainLinkName}" = {
+      matchConfig.Name = guestCfg.networking.mainLinkName;
       DHCP = "yes";
       dhcpV4Config.UseDNS = false;
       dhcpV6Config.UseDNS = false;

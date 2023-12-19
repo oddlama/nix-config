@@ -9,23 +9,30 @@
   inherit
     (lib)
     attrValues
-    any
+    attrsToList
     disko
     escapeShellArg
-    makeBinPath
-    mapAttrsToList
-    mkMerge
-    mergeToplevelConfigs
     flip
+    groupBy
+    listToAttrs
+    makeBinPath
+    mapAttrs
+    mapAttrsToList
+    mergeToplevelConfigs
     mkIf
+    mkMerge
     mkOption
     types
     ;
 
+  backends = ["microvm" "container"];
   nodeName = config.node.name;
+  guestsByBackend =
+    lib.genAttrs backends (_: {})
+    // mapAttrs (_: listToAttrs) (groupBy (x: x.value.backend) (attrsToList config.guests));
 
   # Configuration required on the host for a specific guest
-  defineGuest = guestName: guestCfg: {
+  defineGuest = _guestName: guestCfg: {
     # Add the required datasets to the disko configuration of the machine
     disko.devices.zpool = mkMerge (flip map (attrValues guestCfg.zfs) (zfsCfg: {
       ${zfsCfg.pool}.datasets.${zfsCfg.dataset} =
@@ -56,33 +63,43 @@
           fi
         '';
       };
-
-      # Ensure that the zfs dataset has the correct permissions when mounted
-      "zfs-chown-${utils.escapeSystemdPath zfsCfg.hostMountpoint}" = {
-        after = [fsMountUnit];
-        unitConfig.DefaultDependencies = "no";
-        serviceConfig.Type = "oneshot";
-        script = ''
-          chmod 700 ${escapeShellArg zfsCfg.hostMountpoint}
-        '';
-      };
-
-      "microvm@${guestName}" = mkIf (guestCfg.backend == "microvm") {
-        requires = [fsMountUnit "zfs-chown-${utils.escapeSystemdPath zfsCfg.hostMountpoint}.service"];
-        after = [fsMountUnit "zfs-chown-${utils.escapeSystemdPath zfsCfg.hostMountpoint}.service"];
-      };
-
-      "container@${guestName}" = mkIf (guestCfg.backend == "container") {
-        requires = [fsMountUnit "zfs-chown-${utils.escapeSystemdPath zfsCfg.hostMountpoint}.service"];
-        after = [fsMountUnit "zfs-chown-${utils.escapeSystemdPath zfsCfg.hostMountpoint}.service"];
-      };
     }));
+  };
 
-    microvm.vms.${guestName} =
-      mkIf (guestCfg.backend == "microvm") (import ./microvm.nix guestName guestCfg attrs);
+  defineMicrovm = guestName: guestCfg: {
+    # Ensure that the zfs dataset exists before it is mounted.
+    systemd.services."microvm@${guestName}" = let
+      fsMountUnits =
+        map
+        (x: "${utils.escapeSystemdPath x.hostMountpoint}.mount")
+        (attrValues guestCfg.zfs);
+    in {
+      requires = fsMountUnits;
+      after = fsMountUnits;
+    };
 
-    containers.${guestName} =
-      mkIf (guestCfg.backend == "container") (import ./container.nix guestName guestCfg attrs);
+    microvm.vms.${guestName} = import ./microvm.nix guestName guestCfg attrs;
+  };
+
+  defineContainer = guestName: guestCfg: {
+    # Ensure that the zfs dataset exists before it is mounted.
+    systemd.services."container@${guestName}" = let
+      fsMountUnits =
+        map
+        (x: "${utils.escapeSystemdPath x.hostMountpoint}.mount")
+        (attrValues guestCfg.zfs);
+    in {
+      requires = fsMountUnits;
+      after = fsMountUnits;
+      # Don't use the notify service type. Using exec will always consider containers
+      # started immediately and donesn't wait until the container is fully booted.
+      # Containers should behave like independent machines, and issues inside the container
+      # will unnecessarily lock up the service on the host otherwise.
+      # This causes issues on system activation.
+      serviceConfig.Type = lib.mkForce "exec";
+    };
+
+    containers.${guestName} = import ./container.nix guestName guestCfg attrs;
   };
 in {
   imports = [
@@ -90,10 +107,7 @@ in {
     inputs.microvm.nixosModules.host
     # This is opt-out, so we can't put this into the mkIf below
     {
-      microvm.host.enable =
-        any
-        (guestCfg: guestCfg.backend == "microvm")
-        (attrValues config.guests);
+      microvm.host.enable = guestsByBackend.microvm != {};
     }
   ];
 
@@ -132,7 +146,7 @@ in {
         };
 
         backend = mkOption {
-          type = types.enum ["microvm" "container"];
+          type = types.enum backends;
           description = ''
             Determines how the guest will be hosted. You can currently choose
             between microvm based deployment, or nixos containers.
@@ -216,7 +230,16 @@ in {
     }));
   };
 
-  config =
-    mkIf (config.guests != {})
-    (mergeToplevelConfigs ["containers" "disko" "microvm" "systemd"] (mapAttrsToList defineGuest config.guests));
+  config = mkIf (config.guests != {}) (
+    mkMerge [
+      {
+        systemd.tmpfiles.rules = [
+          "d /guests 0700 root root -"
+        ];
+      }
+      (mergeToplevelConfigs ["disko" "systemd"] (mapAttrsToList defineGuest config.guests))
+      (mergeToplevelConfigs ["containers" "systemd"] (mapAttrsToList defineContainer guestsByBackend.container))
+      (mergeToplevelConfigs ["microvm" "systemd"] (mapAttrsToList defineMicrovm guestsByBackend.microvm))
+    ]
+  );
 }

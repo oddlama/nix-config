@@ -109,7 +109,9 @@ in {
   environment.persistence."/persist" = {
     hideMounts = true;
     files = [
-      "/etc/machine-id"
+      # For ephemeral nixos-containers we cannot link the /etc/machine-id file,
+      # because it will be generated based on a stable container uuid.
+      (lib.mkIf (!config.boot.isContainer) "/etc/machine-id")
       "/etc/ssh/ssh_host_ed25519_key"
       "/etc/ssh/ssh_host_ed25519_key.pub"
     ];

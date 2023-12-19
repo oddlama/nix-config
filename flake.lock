@@ -869,16 +869,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1702426831,
-        "narHash": "sha256-p6tRcvYFNrPSwjIdH+hLxRPJZwxILRpEZw3skK+CDsU=",
-        "owner": "thelegy",
+        "lastModified": 1703019250,
+        "narHash": "sha256-Ykp/kh2tF33sVsiEYdIVssIi1gepN+TGnjZsabycJbo=",
+        "owner": "oddlama",
         "repo": "nixos-nftables-firewall",
-        "rev": "89174e90eb29ab99273f22cd21509b21da6a4c2e",
+        "rev": "f5b43e40755f7519085236980ad971025db8985f",
         "type": "github"
       },
       "original": {
-        "owner": "thelegy",
-        "ref": "opt-in-rules",
+        "owner": "oddlama",
         "repo": "nixos-nftables-firewall",
         "type": "github"
       }

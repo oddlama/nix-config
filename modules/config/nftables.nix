@@ -29,6 +29,7 @@
       enable = true;
       localZoneName = "local";
       snippets = {
+        nnf-common.enable = false;
         nnf-conntrack.enable = true;
         nnf-drop.enable = true;
         nnf-loopback.enable = true;

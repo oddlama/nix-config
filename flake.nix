@@ -56,7 +56,7 @@
     };
 
     nixos-nftables-firewall = {
-      url = "github:thelegy/nixos-nftables-firewall/opt-in-rules";
+      url = "github:oddlama/nixos-nftables-firewall";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

@@ -12,15 +12,12 @@ guestName: guestCfg: {
     flip
     mapAttrs'
     nameValuePair
-    substring
     ;
-
-  initialLinkName = "mv-${(substring 0 12 (builtins.hashString "sha256" guestName))}";
 in {
   ephemeral = true;
   privateNetwork = true;
   autoStart = guestCfg.autostart;
-  macvlans = ["${guestCfg.container.macvlan}:${initialLinkName}"];
+  macvlans = ["${guestCfg.container.macvlan}:${guestCfg.networking.mainLinkName}"];
   extraFlags = [
     "--uuid=${builtins.substring 0 32 (builtins.hashString "sha256" guestName)}"
   ];
@@ -63,14 +60,6 @@ in {
               device = zfsCfg.guestMountpoint;
               options = ["bind"];
             });
-
-          # Rename the network interface to our liking
-          systemd.network.links = {
-            "01-${guestCfg.networking.mainLinkName}" = {
-              matchConfig.Name = initialLinkName;
-              linkConfig.Name = guestCfg.networking.mainLinkName;
-            };
-          };
         }
         (import ./common-guest-config.nix guestName guestCfg)
       ]

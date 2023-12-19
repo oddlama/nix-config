@@ -31,6 +31,12 @@
     lib.genAttrs backends (_: {})
     // mapAttrs (_: listToAttrs) (groupBy (x: x.value.backend) (attrsToList config.guests));
 
+  # List the necessary mount units for the given guest
+  fsMountUnitsFor = guestCfg:
+    map
+    (x: "${utils.escapeSystemdPath x.hostMountpoint}.mount")
+    (attrValues guestCfg.zfs);
+
   # Configuration required on the host for a specific guest
   defineGuest = _guestName: guestCfg: {
     # Add the required datasets to the disko configuration of the machine
@@ -43,7 +49,6 @@
     systemd.services = mkMerge (flip map (attrValues guestCfg.zfs) (zfsCfg: let
       fsMountUnit = "${utils.escapeSystemdPath zfsCfg.hostMountpoint}.mount";
     in {
-      # Ensure that the zfs dataset exists before it is mounted.
       "zfs-ensure-${utils.escapeSystemdPath zfsCfg.hostMountpoint}" = {
         wantedBy = [fsMountUnit];
         before = [fsMountUnit];
@@ -68,14 +73,9 @@
 
   defineMicrovm = guestName: guestCfg: {
     # Ensure that the zfs dataset exists before it is mounted.
-    systemd.services."microvm@${guestName}" = let
-      fsMountUnits =
-        map
-        (x: "${utils.escapeSystemdPath x.hostMountpoint}.mount")
-        (attrValues guestCfg.zfs);
-    in {
-      requires = fsMountUnits;
-      after = fsMountUnits;
+    systemd.services."microvm@${guestName}" = {
+      requires = fsMountUnitsFor guestCfg;
+      after = fsMountUnitsFor guestCfg;
     };
 
     microvm.vms.${guestName} = import ./microvm.nix guestName guestCfg attrs;
@@ -83,19 +83,15 @@
 
   defineContainer = guestName: guestCfg: {
     # Ensure that the zfs dataset exists before it is mounted.
-    systemd.services."container@${guestName}" = let
-      fsMountUnits =
-        map
-        (x: "${utils.escapeSystemdPath x.hostMountpoint}.mount")
-        (attrValues guestCfg.zfs);
-    in {
-      requires = fsMountUnits;
-      after = fsMountUnits;
+    systemd.services."container@${guestName}" = {
+      requires = fsMountUnitsFor guestCfg;
+      after = fsMountUnitsFor guestCfg;
       # Don't use the notify service type. Using exec will always consider containers
       # started immediately and donesn't wait until the container is fully booted.
       # Containers should behave like independent machines, and issues inside the container
       # will unnecessarily lock up the service on the host otherwise.
-      # This causes issues on system activation.
+      # This causes issues on system activation or when containers take longer to start
+      # than TimeoutStartSec.
       serviceConfig.Type = lib.mkForce "exec";
     };
 
@@ -162,7 +158,7 @@ in {
 
           macvtapInterface = mkOption {
             type = types.str;
-            description = "The host macvtap interface to which the microvm should be attached";
+            description = "The host interface to which the microvm should be attached via macvtap";
           };
         };
 
@@ -174,12 +170,15 @@ in {
           };
         };
 
-        networking = {
-          mainLinkName = mkOption {
-            type = types.str;
-            default = "wan";
-            description = "The main ethernet link name inside of the VM";
-          };
+        networking.mainLinkName = mkOption {
+          type = types.str;
+          description = "The main ethernet link name inside of the guest. For containers, this cannot be named similar to an existing interface on the host.";
+          default =
+            if submod.config.backend == "microvm"
+            then submod.config.microvm.macvtapInterface
+            else if submod.config.backend == "container"
+            then "mv-${submod.config.container.macvlan}"
+            else throw "Invalid backend";
         };
 
         zfs = mkOption {

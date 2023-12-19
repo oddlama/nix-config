@@ -1,7 +1,6 @@
 {
   lib,
   utils,
-  nodes,
   ...
 }: let
   inherit (lib) net;
@@ -22,7 +21,7 @@ in {
       renew-timer = 1000;
       rebind-timer = 2000;
       interfaces-config = {
-        # XXX: why does this bind other macvtaps?
+        # XXX: BUG: why does this bind other macvtaps?
         interfaces = ["lan-self"];
         service-sockets-max-retries = -1;
       };

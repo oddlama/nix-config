@@ -10,20 +10,18 @@ in {
     gc.automatic = mkForce false;
   };
 
-  systemd.network.networks = {
-    "10-${guestCfg.networking.mainLinkName}" = {
-      matchConfig.Name = guestCfg.networking.mainLinkName;
-      DHCP = "yes";
-      dhcpV4Config.UseDNS = false;
-      dhcpV6Config.UseDNS = false;
-      ipv6AcceptRAConfig.UseDNS = false;
-      networkConfig = {
-        IPv6PrivacyExtensions = "yes";
-        MulticastDNS = true;
-        IPv6AcceptRA = true;
-      };
-      linkConfig.RequiredForOnline = "routable";
+  systemd.network.networks."10-${guestCfg.networking.mainLinkName}" = {
+    matchConfig.Name = guestCfg.networking.mainLinkName;
+    DHCP = "yes";
+    dhcpV4Config.UseDNS = false;
+    dhcpV6Config.UseDNS = false;
+    ipv6AcceptRAConfig.UseDNS = false;
+    networkConfig = {
+      IPv6PrivacyExtensions = "yes";
+      MulticastDNS = true;
+      IPv6AcceptRA = true;
     };
+    linkConfig.RequiredForOnline = "routable";
   };
 
   networking.nftables.firewall = {

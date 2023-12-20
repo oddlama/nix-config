@@ -43,20 +43,6 @@
   # TODO track my github stats
   # services.telegraf.extraConfig.inputs.github = {};
 
-  #guests.adguardhome = {
-  #  backend = "microvm";
-  #  microvm = {
-  #    system = "x86_64-linux";
-  #    macvtapInterface = "lan";
-  #  };
-  #  autostart = true;
-  #  zfs = {
-  #    enable = true;
-  #    pool = "rpool";
-  #  };
-  #  modules = [ ./guests/adguardhome.nix ];
-  #};
-
   guests = let
     mkGuest = guestName: {
       autostart = true;

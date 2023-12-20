@@ -149,15 +149,15 @@
     # Wait for the kanidm server to come online
     count=0
     while ! test -e /run/kanidmd/sock; do
+      sleep 0.1
       if [ "$count" -eq 600 ]; then
         echo "Tried for 60 seconds, giving up..."
         exit 1
       fi
-      if ! kill -0 "$MAINPID"; then
+      if [[ ! -d "/proc/$MAINPID" ]]; then
         echo "Main server died, giving up..."
         exit 1
       fi
-      sleep 0.1
       count=$((count++))
     done
 
@@ -195,11 +195,14 @@
       KANIDM_PASSWORD_IDM="$(< ${escapeShellArg cfg.provision.idmAdminPasswordFile})"
     fi
 
-    # Login to admin and idm_admin
-    export TMPDIR=$(mktemp -d)
-    trap 'rm -rf $TMPDIR' EXIT
     # Set $HOME so kanidm can save the token temporarily
+    export TMPDIR=$(mktemp -d)
+    mkdir -p "$TMPDIR"/{.config,.cache}
+    touch "$TMPDIR/.config/kanidm"
+    trap 'rm -rf $TMPDIR' EXIT
     export HOME=$TMPDIR
+
+    # Login to admin and idm_admin
     KANIDM_PASSWORD=$KANIDM_PASSWORD_ADMIN ${cfg.package}/bin/kanidm login --name admin \
       || { echo "kanidm provision: Failed to login as admin, see kanidm logs." >&2; exit 1; }
     KANIDM_PASSWORD=$KANIDM_PASSWORD_IDM ${cfg.package}/bin/kanidm login --name idm_admin \

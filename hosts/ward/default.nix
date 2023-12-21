@@ -1,4 +1,5 @@
 {
+  config,
   inputs,
   lib,
   nodes,
@@ -62,15 +63,18 @@
       ];
     };
 
-    mkMicrovm = system: guestName:
-      mkGuest guestName
-      // {
-        backend = "microvm";
-        microvm = {
-          system = "x86_64-linux";
-          macvtapInterface = "lan";
+    mkMicrovm = guestName: {
+      ${guestName} =
+        mkGuest guestName
+        // {
+          backend = "microvm";
+          microvm = {
+            system = "x86_64-linux";
+            macvtap = "lan";
+            baseMac = config.repo.secrets.local.networking.interfaces.lan.mac;
+          };
         };
-      };
+    };
 
     mkContainer = guestName: {
       ${guestName} =
@@ -83,7 +87,7 @@
   in
     lib.mkIf (!minimal) (
       {}
-      // mkContainer "adguardhome"
+      // mkMicrovm "adguardhome"
       // mkContainer "forgejo"
       // mkContainer "grafana"
       // mkContainer "influxdb"

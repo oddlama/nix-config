@@ -8,20 +8,16 @@ guestName: guestCfg: {
 }: let
   inherit
     (lib)
-    attrNames
+    flip
+    mapAttrsToList
     mkDefault
     mkForce
-    net
-    optional
     ;
-
-  mac = (net.mac.assignMacs "02:01:27:00:00:00" 24 [] (attrNames config.guests)).${guestName};
 in {
   specialArgs = {
     inherit (inputs.self) nodes;
     inherit (inputs.self.pkgs.${guestCfg.microvm.system}) lib;
-    inherit inputs;
-    inherit minimal;
+    inherit inputs minimal;
   };
   pkgs = inputs.self.pkgs.${guestCfg.microvm.system};
   inherit (guestCfg) autostart;
@@ -30,7 +26,7 @@ in {
 
     # TODO needed because of https://github.com/NixOS/nixpkgs/issues/102137
     environment.noXlibs = mkForce false;
-    lib.microvm.mac = mac;
+    lib.microvm.mac = guestCfg.microvm.mac;
 
     microvm = {
       hypervisor = mkDefault "qemu";
@@ -43,9 +39,9 @@ in {
         {
           type = "macvtap";
           id = "vm-${guestName}";
-          inherit mac;
+          inherit (guestCfg.microvm) mac;
           macvtap = {
-            link = guestCfg.microvm.macvtapInterface;
+            link = guestCfg.microvm.macvtap;
             mode = "bridge";
           };
         }
@@ -60,41 +56,22 @@ in {
             tag = "ro-store";
             proto = "virtiofs";
           }
-          {
-            source = "/state/guests/${guestName}";
-            mountPoint = "/state";
-            tag = "state";
+        ]
+        ++ flip mapAttrsToList guestCfg.zfs (
+          _: zfsCfg: {
+            source = zfsCfg.hostMountpoint;
+            mountPoint = zfsCfg.guestMountpoint;
+            tag = lib.replaceStrings ["/"] ["_"] zfsCfg.hostMountpoint;
             proto = "virtiofs";
           }
-        ]
-        # Mount persistent data from the host
-        ++ optional guestCfg.zfs.enable {
-          source = guestCfg.zfs.mountpoint;
-          mountPoint = "/persist";
-          tag = "persist";
-          proto = "virtiofs";
-        };
+        );
     };
-
-    # FIXME this should be changed in microvm.nix to mkDefault in order to not require mkForce here
-    fileSystems."/state".neededForBoot = mkForce true;
-    fileSystems."/persist".neededForBoot = mkForce true;
 
     # Add a writable store overlay, but since this is always ephemeral
     # disable any store optimization from nix.
     microvm.writableStoreOverlay = "/nix/.rw-store";
-    nix = {
-      settings.auto-optimise-store = mkForce false;
-      optimise.automatic = mkForce false;
-      gc.automatic = mkForce false;
-    };
 
-    networking.renameInterfacesByMac.${guestCfg.networking.mainLinkName} = mac;
-
-    systemd.network.networks = {
-      "10-${guestCfg.networking.mainLinkName}" = {
-        matchConfig.MACAddress = mac;
-      };
-    };
+    networking.renameInterfacesByMac.${guestCfg.networking.mainLinkName} = guestCfg.microvm.mac;
+    systemd.network.networks."10-${guestCfg.networking.mainLinkName}".matchConfig.MACAddress = guestCfg.microvm.mac;
   };
 }

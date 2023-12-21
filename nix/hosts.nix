@@ -54,13 +54,11 @@ inputs: let
   guestConfigs = flip concatMapAttrs self.nixosConfigurations (_: node:
     flip mapAttrs' (node.config.guests or {}) (
       guestName: guestDef:
-        nameValuePair guestDef.nodeName
-        (
+        nameValuePair guestDef.nodeName (
           if guestDef.backend == "microvm"
           then node.config.microvm.vms.${guestName}.config
-          else node.config.containers.${guestName}
+          else node.config.containers.${guestName}.nixosConfiguration
         )
-        .nixosConfiguration
     ));
 in {
   inherit

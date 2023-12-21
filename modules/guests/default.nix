@@ -8,6 +8,7 @@
 } @ attrs: let
   inherit
     (lib)
+    attrNames
     attrValues
     attrsToList
     disko
@@ -22,6 +23,7 @@
     mkIf
     mkMerge
     mkOption
+    net
     types
     ;
 
@@ -156,9 +158,24 @@ in {
             description = "The system that this microvm should use";
           };
 
-          macvtapInterface = mkOption {
+          macvtap = mkOption {
             type = types.str;
             description = "The host interface to which the microvm should be attached via macvtap";
+          };
+
+          baseMac = mkOption {
+            type = types.net.mac;
+            description = "The base mac address from which the guest's mac will be derived. Only the second and third byte are used, so for 02:XX:YY:ZZ:ZZ:ZZ, this specifies XX and YY, while Zs are generated automatically. Not used if the mac is set directly.";
+            default = "02:01:27:00:00:00";
+          };
+
+          mac = mkOption {
+            type = types.net.mac;
+            description = "The MAC address for the guest's macvtap interface";
+            default = let
+              base = "02:${lib.substring 3 5 submod.config.microvm.baseMac}:00:00:00";
+            in
+              (net.mac.assignMacs base 24 [] (attrNames config.guests)).${submod.config._module.args.name};
           };
         };
 
@@ -175,7 +192,7 @@ in {
           description = "The main ethernet link name inside of the guest. For containers, this cannot be named similar to an existing interface on the host.";
           default =
             if submod.config.backend == "microvm"
-            then submod.config.microvm.macvtapInterface
+            then submod.config.microvm.macvtap
             else if submod.config.backend == "container"
             then "mv-${submod.config.container.macvlan}"
             else throw "Invalid backend";

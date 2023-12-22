@@ -23,7 +23,7 @@
       [[ -e ${config.age.secrets.initrd_host_ed25519_key.path} ]] \
         || ${pkgs.openssh}/bin/ssh-keygen -t ed25519 -N "" -f ${config.age.secrets.initrd_host_ed25519_key.path}
     '';
-    deps = ["agenixInstall"];
+    deps = ["agenixInstall" "users"];
   };
   system.activationScripts.agenixChown.deps = ["agenixEnsureInitrdHostkey"];
 }

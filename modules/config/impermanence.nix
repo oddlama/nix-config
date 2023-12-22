@@ -85,7 +85,7 @@ in {
 
   # State that should be kept across reboots, but is otherwise
   # NOT important information in any way that needs to be backed up.
-  fileSystems."/state".neededForBoot = lib.mkForce true;
+  fileSystems."/state".neededForBoot = true;
   environment.persistence."/state" = {
     hideMounts = true;
     directories =
@@ -105,7 +105,7 @@ in {
   };
 
   # State that should be kept forever, and backed up accordingly.
-  fileSystems."/persist".neededForBoot = lib.mkForce true;
+  fileSystems."/persist".neededForBoot = true;
   environment.persistence."/persist" = {
     hideMounts = true;
     files = [

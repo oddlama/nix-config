@@ -20,7 +20,7 @@
 
   installer-package = pkgs.symlinkJoin {
     name = "installer-package-${nodeName}";
-    paths = with pkgs; [
+    paths = [
       disko-script
       disko-mount
       disko-format

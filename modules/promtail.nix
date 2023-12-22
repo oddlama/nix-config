@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  minimal,
   nodes,
   ...
 }: let
@@ -23,7 +24,7 @@ in {
     };
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf (!minimal && cfg.enable) {
     age.secrets.promtail-loki-basic-auth-password = {
       generator.script = "alnum";
       mode = "440";

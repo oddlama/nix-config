@@ -71,7 +71,7 @@ in {
           _: zfsCfg: {
             source = zfsCfg.hostMountpoint;
             mountPoint = zfsCfg.guestMountpoint;
-            tag = lib.replaceStrings ["/"] ["_"] zfsCfg.hostMountpoint;
+            tag = builtins.substring 0 16 (builtins.hashString "sha256" zfsCfg.hostMountpoint);
             proto = "virtiofs";
           }
         );

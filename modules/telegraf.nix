@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  minimal,
   nodes,
   pkgs,
   ...
@@ -56,7 +57,7 @@ in {
     };
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf (!minimal && cfg.enable) {
     nodes.${cfg.influxdb2.node} = {
       # Mirror the original secret on the influx host
       age.secrets."telegraf-influxdb-token-${config.node.name}" = {

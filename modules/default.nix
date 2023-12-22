@@ -5,6 +5,7 @@
     inputs.agenix.nixosModules.default
     inputs.disko.nixosModules.disko
     inputs.elewrap.nixosModules.default
+    inputs.extra-modules.nixosModules.default
     inputs.home-manager.nixosModules.default
     inputs.impermanence.nixosModules.impermanence
     inputs.nixos-nftables-firewall.nixosModules.default
@@ -30,7 +31,6 @@
     ./acme-wildcard.nix
     ./deterministic-ids.nix
     ./distributed-config.nix
-    ./interface-naming.nix
     ./kanidm.nix
     ./meta.nix
     ./nginx.nix

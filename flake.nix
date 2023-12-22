@@ -29,6 +29,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    extra-modules = {
+      url = "github:oddlama/nixos-extra-modules";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
+    };
+
     flake-utils.url = "github:numtide/flake-utils";
 
     home-manager = {

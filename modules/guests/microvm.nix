@@ -32,7 +32,12 @@ in {
       hypervisor = mkDefault "qemu";
 
       # Give them some juice by default
-      mem = mkDefault (2 * 1024);
+      # TODO
+      mem = mkDefault 1024;
+
+      # Add a writable store overlay, but since this is always ephemeral
+      # disable any store optimization from nix.
+      writableStoreOverlay = "/nix/.rw-store";
 
       # MACVTAP bridge to the host's network
       interfaces = [
@@ -66,10 +71,6 @@ in {
           }
         );
     };
-
-    # Add a writable store overlay, but since this is always ephemeral
-    # disable any store optimization from nix.
-    microvm.writableStoreOverlay = "/nix/.rw-store";
 
     networking.renameInterfacesByMac.${guestCfg.networking.mainLinkName} = guestCfg.microvm.mac;
     systemd.network.networks."10-${guestCfg.networking.mainLinkName}".matchConfig.MACAddress = guestCfg.microvm.mac;

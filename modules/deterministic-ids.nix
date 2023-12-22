@@ -9,7 +9,6 @@
     flip
     mapAttrsToList
     mkDefault
-    mdDoc
     mkIf
     mkOption
     types
@@ -20,7 +19,7 @@ in {
   options = {
     users.deterministicIds = mkOption {
       default = {};
-      description = mdDoc ''
+      description = ''
         Maps a user or group name to its expected uid/gid values. If a user/group is
         used on the system without specifying a uid/gid, this module will assign the
         corresponding ids defined here, or show an error if the definition is missing.
@@ -30,12 +29,12 @@ in {
           uid = mkOption {
             type = types.nullOr types.int;
             default = null;
-            description = mdDoc "The uid to assign if it is missing in `users.users.<name>`.";
+            description = "The uid to assign if it is missing in `users.users.<name>`.";
           };
           gid = mkOption {
             type = types.nullOr types.int;
             default = null;
-            description = mdDoc "The gid to assign if it is missing in `users.groups.<name>`.";
+            description = "The gid to assign if it is missing in `users.groups.<name>`.";
           };
         };
       });

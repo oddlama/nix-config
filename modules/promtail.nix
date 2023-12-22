@@ -7,7 +7,6 @@
 }: let
   inherit
     (lib)
-    mdDoc
     mkEnableOption
     mkIf
     mkOption
@@ -17,10 +16,10 @@
   cfg = config.meta.promtail;
 in {
   options.meta.promtail = {
-    enable = mkEnableOption (mdDoc "promtail to push logs to a loki instance.");
+    enable = mkEnableOption "promtail to push logs to a loki instance.";
     proxy = mkOption {
       type = types.str;
-      description = mdDoc "The node name of the proxy server which provides the https loki api endpoint.";
+      description = "The node name of the proxy server which provides the https loki api endpoint.";
     };
   };
 

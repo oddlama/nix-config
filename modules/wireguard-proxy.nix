@@ -8,7 +8,6 @@
     (lib)
     attrNames
     flip
-    mdDoc
     mkIf
     mkMerge
     mkOption
@@ -19,7 +18,7 @@
 in {
   options.meta.wireguard-proxy = mkOption {
     default = {};
-    description = mdDoc ''
+    description = ''
       Each entry here will setup a wireguard network that connects via the
       given node and adds appropriate firewall zones. There will be a zone for
       the interface and one for the proxy server specifically. A corresponding
@@ -30,17 +29,17 @@ in {
         nicName = mkOption {
           type = types.str;
           default = "proxy-${name}";
-          description = mdDoc "The name for the created wireguard network and its interface";
+          description = "The name for the created wireguard network and its interface";
         };
         allowedTCPPorts = mkOption {
           type = types.listOf types.int;
           default = [];
-          description = mdDoc "Convenience option to allow incoming TCP connections from the proxy server (just the server, not the entire network).";
+          description = "Convenience option to allow incoming TCP connections from the proxy server (just the server, not the entire network).";
         };
         allowedUDPPorts = mkOption {
           type = types.listOf types.int;
           default = [];
-          description = mdDoc "Convenience option to allow incoming UDP connections from the proxy server (just the server, not the entire network).";
+          description = "Convenience option to allow incoming UDP connections from the proxy server (just the server, not the entire network).";
         };
       };
     }));

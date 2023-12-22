@@ -6,7 +6,6 @@
   inherit
     (lib)
     concatStringsSep
-    mdDoc
     mkDefault
     mkEnableOption
     mkIf
@@ -18,27 +17,27 @@
   cfg = config.meta.oauth2_proxy;
 in {
   options.meta.oauth2_proxy = {
-    enable = mkEnableOption (mdDoc "oauth2 proxy");
+    enable = mkEnableOption "oauth2 proxy";
 
     cookieDomain = mkOption {
       type = types.str;
-      description = mdDoc "The domain under which to store the credential cookie, and to which redirects will be allowed.";
+      description = "The domain under which to store the credential cookie, and to which redirects will be allowed.";
     };
 
     portalDomain = mkOption {
       type = types.str;
-      description = mdDoc "A domain on which to setup the oauth2 callback.";
+      description = "A domain on which to setup the oauth2 callback.";
     };
   };
 
   options.services.nginx.virtualHosts = mkOption {
     type = types.attrsOf (types.submodule ({config, ...}: {
       options.oauth2 = {
-        enable = mkEnableOption (mdDoc "access protection of this resource using oauth2_proxy.");
+        enable = mkEnableOption "access protection of this resource using oauth2_proxy.";
         allowedGroups = mkOption {
           type = types.listOf types.str;
           default = [];
-          description = mdDoc ''
+          description = ''
             A list of groups that are allowed to access this resource, or the
             empty list to allow any authenticated client.
           '';

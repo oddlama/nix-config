@@ -9,7 +9,6 @@
     assertMsg
     literalExpression
     mapAttrs
-    mdDoc
     mkOption
     types
     ;
@@ -42,7 +41,7 @@ in {
       default = {};
       type = types.attrsOf types.path;
       example = literalExpression "{ local = ./secrets.nix.age; }";
-      description = mdDoc ''
+      description = ''
         This file manages the origin for this machine's repository-secrets. Anything that is
         technically not a secret in the classical sense (i.e. that it has to be protected
         after it has been deployed), but something you want to keep secret from the public;

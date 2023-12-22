@@ -10,7 +10,6 @@
     genAttrs
     hasInfix
     head
-    mdDoc
     mkIf
     mkOption
     removeSuffix
@@ -21,7 +20,7 @@ in {
     default = [];
     example = ["example.org"];
     type = types.listOf types.str;
-    description = mdDoc ''
+    description = ''
       All domains for which a wildcard certificate will be generated.
       This will define the given `security.acme.certs` and set `extraDomainNames` correctly,
       but does not fill any options such as credentials or dnsProvider. These have to be set
@@ -34,7 +33,7 @@ in {
       options.useACMEWildcardHost = mkOption {
         type = types.bool;
         default = false;
-        description = mdDoc ''Automatically set useACMEHost with the correct wildcard domain for the virtualHosts's main domain.'';
+        description = ''Automatically set useACMEHost with the correct wildcard domain for the virtualHosts's main domain.'';
       };
       config = let
         # This retrieves all matching wildcard certs that would include

@@ -12,7 +12,6 @@
     ../../modules/optional/hardware/physical.nix
 
     ../../modules
-    ../../modules/optional/boot-efi.nix
     ../../modules/optional/initrd-ssh.nix
     ../../modules/optional/dev
     ../../modules/optional/graphical
@@ -26,6 +25,7 @@
     ./net.nix
   ];
 
+  boot.mode = "efi";
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod"];
 
   console = {

@@ -3,7 +3,6 @@
     ../../modules/optional/hardware/hetzner-cloud.nix
 
     ../../modules
-    ../../modules/optional/boot-bios.nix
     ../../modules/optional/initrd-ssh.nix
     ../../modules/optional/zfs.nix
 
@@ -13,6 +12,7 @@
     ./oauth2.nix
   ];
 
+  boot.mode = "bios";
   users.groups.acme.members = ["nginx"];
   services.nginx.enable = true;
 

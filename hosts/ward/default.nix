@@ -13,7 +13,6 @@
     ../../modules/optional/hardware/physical.nix
 
     ../../modules
-    ../../modules/optional/boot-efi.nix
     ../../modules/optional/initrd-ssh.nix
     ../../modules/optional/zfs.nix
 
@@ -22,6 +21,7 @@
     ./kea.nix
   ];
 
+  boot.mode = "efi";
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" "r8169"];
 
   meta.promtail = {

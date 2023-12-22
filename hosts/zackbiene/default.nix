@@ -11,7 +11,6 @@ in {
     ../../modules/optional/hardware/odroid-n2plus.nix
 
     ../../modules
-    ../../modules/optional/boot-efi.nix
     ../../modules/optional/initrd-ssh.nix
     ../../modules/optional/zfs.nix
 
@@ -25,6 +24,7 @@ in {
     #./zigbee2mqtt.nix
   ];
 
+  boot.mode = "efi";
   users.groups.acme.members = ["nginx"];
   services.nginx.enable = true;
 

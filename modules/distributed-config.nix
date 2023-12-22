@@ -19,6 +19,7 @@
 
   nodeName = config.node.name;
 in {
+  # TODO expose exactly what we can configure! not everything
   options.nodes = mkOption {
     default = {};
     description = mdDoc "Allows extending the configuration of other machines.";

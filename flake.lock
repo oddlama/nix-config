@@ -405,11 +405,11 @@
         "pre-commit-hooks": "pre-commit-hooks_3"
       },
       "locked": {
-        "lastModified": 1703205251,
-        "narHash": "sha256-V8Uxy/g6WRn+ISgBHjs0IY9ZGqjovguNp2FZ2aL+Oqg=",
+        "lastModified": 1703206032,
+        "narHash": "sha256-hCuX9y1lUwa8Ck0jruebL2YLhwnDunav/uiIp9EvmNc=",
         "owner": "oddlama",
         "repo": "nixos-extra-modules",
-        "rev": "42374eff1f3ca895d631789e38c04f3f10318abb",
+        "rev": "073a8ae3b34ed85619dd22bba0d4fb6b6e8e14d1",
         "type": "github"
       },
       "original": {

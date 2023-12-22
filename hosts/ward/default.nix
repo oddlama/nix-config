@@ -94,6 +94,7 @@
       // mkContainer "kanidm"
       // mkContainer "loki"
       // mkContainer "paperless"
+      // mkContainer "radicale"
       // mkContainer "vaultwarden"
     );
 

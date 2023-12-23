@@ -48,7 +48,7 @@ in {
     enable = true;
     influxdb2 = {
       domain = sentinelCfg.networking.providedDomains.influxdb;
-      organization = "servers";
+      organization = "machines";
       bucket = "telegraf";
       node = "ward-influxdb";
     };

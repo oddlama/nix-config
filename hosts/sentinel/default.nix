@@ -28,7 +28,7 @@
     scrapeSensors = false;
     influxdb2 = {
       domain = config.networking.providedDomains.influxdb;
-      organization = "servers";
+      organization = "machines";
       bucket = "telegraf";
       node = "ward-influxdb";
     };

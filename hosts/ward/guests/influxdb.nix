@@ -91,7 +91,7 @@ in {
         passwordFile = config.age.secrets.influxdb-admin-password.path;
         tokenFile = config.age.secrets.influxdb-admin-token.path;
       };
-      organizations.servers.buckets.telegraf = {};
+      organizations.machines.buckets.telegraf = {};
     };
   };
 

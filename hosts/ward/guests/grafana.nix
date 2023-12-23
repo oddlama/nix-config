@@ -42,7 +42,7 @@ in {
       group = "influxdb2";
     };
 
-    services.influxdb2.provision.organization.servers.auths."grafana servers:telegraf (${config.node.name})" = {
+    services.influxdb2.provision.organizations.machines.auths."grafana machines:telegraf (${config.node.name})" = {
       readBuckets = ["telegraf"];
       writeBuckets = ["telegraf"];
       tokenFile = nodes.ward-influxdb.config.age.secrets."grafana-influxdb-token-${config.node.name}".path;
@@ -132,14 +132,14 @@ in {
       enable = true;
       datasources.settings.datasources = [
         {
-          name = "InfluxDB (servers)";
+          name = "InfluxDB (machines)";
           type = "influxdb";
           access = "proxy";
           url = "https://${sentinelCfg.networking.providedDomains.influxdb}";
           orgId = 1;
           secureJsonData.token = "$__file{${config.age.secrets.grafana-influxdb-token.path}}";
           jsonData.version = "Flux";
-          jsonData.organization = "servers";
+          jsonData.organization = "machines";
           jsonData.defaultBucket = "telegraf";
         }
         # TODO duplicate above influxdb source (with scoped read tokens??) for each organization

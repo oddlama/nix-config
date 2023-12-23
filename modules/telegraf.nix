@@ -66,7 +66,7 @@ in {
         group = "influxdb2";
       };
 
-      services.influxdb2.provision.organization.servers.auths."telegraf (${config.node.name})" = {
+      services.influxdb2.provision.organizations.machines.auths."telegraf (${config.node.name})" = {
         readBuckets = ["telegraf"];
         writeBuckets = ["telegraf"];
         tokenFile = nodes.${cfg.influxdb2.node}.config.age.secrets."telegraf-influxdb-token-${config.node.name}".path;

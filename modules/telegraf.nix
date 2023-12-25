@@ -58,6 +58,13 @@ in {
   };
 
   config = mkIf (!minimal && cfg.enable) {
+    assertions = [
+      {
+        assertion = !config.boot.isContainer;
+        message = "Containers don't support telegraf because memlock is not enabled.";
+      }
+    ];
+
     nodes.${cfg.influxdb2.node} = {
       # Mirror the original secret on the influx host
       age.secrets."telegraf-influxdb-token-${config.node.name}" = {
@@ -135,7 +142,9 @@ in {
             kernel_vmstat = {};
             linux_sysctl_fs = {};
             mem = {};
-            net = {};
+            net = {
+              ignore_protocol_stats = true;
+            };
             netstat = {};
             nstat = {};
             processes = {};

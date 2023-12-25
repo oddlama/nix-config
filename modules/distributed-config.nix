@@ -8,40 +8,62 @@
     (lib)
     attrNames
     concatMap
+    concatStringsSep
+    foldl'
     getAttrFromPath
+    mkMerge
     mkOption
     mkOptionType
-    mkMerge
-    hasAttrByPath
+    optionals
+    recursiveUpdate
+    setAttrByPath
     types
     ;
 
   nodeName = config.node.name;
+  mkForwardedOption = path:
+    mkOption {
+      type = mkOptionType {
+        name = "Same type that the receiving option `${concatStringsSep "." path}` normally accepts.";
+        merge = _loc: defs:
+          builtins.filter
+          (x: builtins.isAttrs x -> ((x._type or "") != "__distributed_config_empty"))
+          (map (x: x.value) defs);
+      };
+      default = {_type = "__distributed_config_empty";};
+      description = ''
+        Anything specified here will be forwarded to `${concatStringsSep "." path}`
+        on the given node. Forwarding happens as-is to the raw values,
+        so validity can only be checked on the receiving node.
+      '';
+    };
+
+  forwardedOptions = [
+    ["age" "secrets"]
+    ["networking" "providedDomains"]
+    ["services" "nginx" "upstreams"]
+    ["services" "nginx" "virtualHosts"]
+    ["services" "influxdb2" "provision" "organizations"]
+    ["services" "kanidm" "provision" "groups"]
+    ["services" "kanidm" "provision" "systems" "oauth2"]
+  ];
+
+  attrsForEachOption = f: foldl' (acc: path: recursiveUpdate acc (setAttrByPath path (f path))) {} forwardedOptions;
 in {
-  # TODO expose exactly what we can configure! not everything
   options.nodes = mkOption {
+    description = "Options forwareded to the given node.";
     default = {};
-    description = "Allows extending the configuration of other machines.";
-    type = types.attrsOf (mkOptionType {
-      name = "Toplevel NixOS config";
-      merge = _loc: map (x: x.value);
+    type = types.attrsOf (types.submodule {
+      options = attrsForEachOption mkForwardedOption;
     });
   };
 
   config = let
-    allNodes = attrNames nodes;
-    foreignConfigs = concatMap (n: nodes.${n}.config.nodes.${nodeName} or []) allNodes;
-    mergeFromOthers = path:
-      mkMerge (map
-        (x: (getAttrFromPath path x))
-        (lib.filter (x: (hasAttrByPath path x)) foreignConfigs));
-  in {
-    age.secrets = mergeFromOthers ["age" "secrets"];
-    networking.providedDomains = mergeFromOthers ["networking" "providedDomains"];
-    services.nginx.upstreams = mergeFromOthers ["services" "nginx" "upstreams"];
-    services.nginx.virtualHosts = mergeFromOthers ["services" "nginx" "virtualHosts"];
-    services.influxdb2.provision.organizations = mergeFromOthers ["services" "influxdb2" "provision" "organizations"];
-    services.kanidm.provision.groups = mergeFromOthers ["services" "kanidm" "provision" "groups"];
-    services.kanidm.provision.systems.oauth2 = mergeFromOthers ["services" "kanidm" "provision" "systems" "oauth2"];
-  };
+    getConfig = path: otherNode: let
+      cfg = nodes.${otherNode}.config.nodes.${nodeName} or null;
+    in
+      optionals (cfg != null) (getAttrFromPath path cfg);
+    mergeConfigFromOthers = path: mkMerge (concatMap (getConfig path) (attrNames nodes));
+  in
+    attrsForEachOption mergeConfigFromOthers;
 }

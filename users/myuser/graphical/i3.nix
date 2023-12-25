@@ -54,6 +54,7 @@ in {
   xsession.numlock.enable = true;
   xsession.windowManager.i3 = {
     enable = true;
+    enableSystemdTarget = true;
     config = {
       modifier = "Mod4";
       terminal = "kitty";
@@ -202,11 +203,6 @@ in {
         };
       in [
         {
-          command = "${pkgs.systemd}/bin/systemctl --user start i3-session.target";
-          always = false;
-          notification = false;
-        }
-        {
           command = "${getExe i3-per-workspace-layout} --config ${configLayouts}";
           always = false;
           notification = false;
@@ -215,33 +211,9 @@ in {
     };
   };
 
-  systemd.user = {
-    targets.i3-session = {
-      Unit = {
-        Description = "i3 session";
-        Documentation = ["man:systemd.special(7)"];
-        BindsTo = ["graphical-session.target"];
-        Wants = ["graphical-session-pre.target"];
-        After = ["graphical-session-pre.target"];
-      };
-    };
-    services = {
-      #feh = {
-      #  Unit = {
-      #    Description = "feh background";
-      #    PartOf = [ "i3-session.target" ];
-      #    After = [ "xrandr.service" "picom.service" ];
-      #  };
-      #  Service = {
-      #    ExecStart = "${pkgs.feh}/bin/feh --bg-fill ${config.xdg.dataHome}/wall.png";
-      #    RemainAfterExit = true;
-      #    Type = "oneshot";
-      #  };
-      #  Install.WantedBy = [ "i3-session.target" ];
-      #};
-      wired.Install.WantedBy = lib.mkForce ["i3-session.target"];
-      flameshot.Install.WantedBy = lib.mkForce ["i3-session.target"];
-    };
+  systemd.user.services = {
+    wired.Install.WantedBy = lib.mkForce ["i3-session.target"];
+    flameshot.Install.WantedBy = lib.mkForce ["i3-session.target"];
   };
 
   programs.autorandr.enable = true;
@@ -283,6 +255,8 @@ in {
     # Make QT apps bigger
     QT_SCREEN_SCALE_FACTORS = 2;
   };
+
+  xsession.wallpapers.enable = true;
 
   home.file.".xinitrc".text = ''
     if test -z "$DBUS_SESSION_BUS_ADDRESS"; then

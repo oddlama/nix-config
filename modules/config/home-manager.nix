@@ -9,9 +9,10 @@
     useUserPackages = true;
     verbose = true;
     sharedModules = [
+      inputs.extra-modules.homeManagerModules.default
       inputs.nix-index-database.hmModules.nix-index
-      inputs.wired-notify.homeManagerModules.default
       inputs.nixvim.homeManagerModules.nixvim
+      inputs.wired-notify.homeManagerModules.default
       {
         home.stateVersion = config.system.stateVersion;
       }

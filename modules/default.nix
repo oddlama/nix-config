@@ -33,7 +33,6 @@
     ./distributed-config.nix
     ./kanidm.nix
     ./meta.nix
-    ./nginx.nix
     ./oauth2-proxy.nix
     ./promtail.nix
     ./provided-domains.nix

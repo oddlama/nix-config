@@ -405,11 +405,11 @@
         "pre-commit-hooks": "pre-commit-hooks_3"
       },
       "locked": {
-        "lastModified": 1703523999,
-        "narHash": "sha256-pKuYDvGYo6ufevbylNo6P6qjwrUHk0ENpFXrP7KU/wY=",
+        "lastModified": 1703537346,
+        "narHash": "sha256-uHS8w7HzkPyPh4K2L0U13A0IUeSI9yugYXgK8xz+CyA=",
         "owner": "oddlama",
         "repo": "nixos-extra-modules",
-        "rev": "bc948ad1abed5eef3f8a10f5b44dc5bcd94d725a",
+        "rev": "4daf3ffd02f7cfb1c9a3c8c95bec21dd078ab26f",
         "type": "github"
       },
       "original": {
@@ -1137,11 +1137,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1703185304,
-        "narHash": "sha256-CKsV786NBB8fuls4vyKGTfOz9bkpAn2lh8PKL8YLZ+M=",
+        "lastModified": 1703435563,
+        "narHash": "sha256-BDnoVc9Kvc9wo9lt8GC0kkqwLedP7lnBBdh1UHl4cPw=",
         "owner": "nix-community",
         "repo": "nixvim",
-        "rev": "43d20e833267ffd026af692060fb344960930fe1",
+        "rev": "c11158c73e9a488d803356127a54af8101fc0051",
         "type": "github"
       },
       "original": {

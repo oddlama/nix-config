@@ -27,6 +27,7 @@ in {
   boot.mode = "efi";
   users.groups.acme.members = ["nginx"];
   services.nginx.enable = true;
+  services.nginx.recommendedSetup = true;
 
   security.acme = {
     acceptTerms = true;

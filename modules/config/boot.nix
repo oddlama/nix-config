@@ -14,7 +14,7 @@
       };
 
       # NOTE: Add "rd.systemd.unit=rescue.target" to debug initrd
-      kernelParams = ["log_buf_len=10M"];
+      kernelParams = ["log_buf_len=16M"]; # must be {power of two}[KMG]
       tmp.useTmpfs = true;
 
       loader.timeout = lib.mkDefault 2;

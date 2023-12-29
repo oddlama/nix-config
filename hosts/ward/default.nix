@@ -88,6 +88,7 @@
     lib.mkIf (!minimal) (
       {}
       // mkMicrovm "adguardhome"
+      // mkMicrovm "samba"
       // mkContainer "forgejo"
       // mkContainer "grafana"
       // mkContainer "influxdb"

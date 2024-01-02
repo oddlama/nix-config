@@ -1,5 +1,20 @@
-{lib, ...}: {
+{
+  config,
+  lib,
+  ...
+}: let
+  smbUsers = config.repo.secrets.local.samba.users;
+  smbGroups = config.repo.secrets.local.samba.groups;
+in {
+  age.secrets."samba-passdb.tdb" = {
+    rekeyFile = config.node.secretsDir + "/samba-passdb.tdb.age";
+    mode = "600";
+  };
+
   services.samba = {
+    enable = true;
+    openFirewall = true;
+
     # Disable Samba's nmbd, because we don't want to reply to NetBIOS over IP
     # requests, since all of our clients hardcode the server shares.
     enableNmbd = false;
@@ -21,9 +36,17 @@
       # Allow access to local network and TODO: wireguard
       "hosts allow = 192.168.1.0/22 192.168.100.0/24"
 
+      # Set sane logging options
+      "log level = 0 auth:2 passdb:2"
+      "log file = /dev/null"
+      "max log size = 0"
+      "logging = systemd"
+
       # TODO: allow based on wireguard ip without username and password
       # Users always have to login with an account and are never mapped
       # to a guest account.
+      "passdb backend = tdbsam:${config.age.secrets."samba-passdb.tdb".path}"
+      "server role = standalone"
       "guest account = nobody"
       "map to guest = never"
 
@@ -50,20 +73,23 @@
       "fruit:delete_empty_adfiles = yes"
     ];
     shares = let
-      mkShare = path: {
-        inherit path;
-        public = "no";
-        writable = "yes";
-        "create mask" = "0660";
-        "directory mask" = "0770";
-        "force create mode" = "0660";
-        "force directory mode" = "0770";
-        "acl allow execute always" = "yes";
-      };
+      mkShare = path: cfg:
+        {
+          inherit path;
+          public = "no";
+          writable = "yes";
+          "create mask" = "0770";
+          "directory mask" = "0770";
+          # "force create mode" = "0660";
+          # "force directory mode" = "0770";
+          #"acl allow execute always" = "yes";
+        }
+        // cfg;
 
       mkGroupShare = group:
         mkShare "/shares/groups/${group}" {
           "valid users" = "@${group}";
+          "force user" = "family";
           "force group" = group;
         };
 
@@ -71,9 +97,27 @@
         mkShare "/shares/users/${user}" {
           "valid users" = user;
         };
-    in {
-      family = mkGroupShare "family";
-      myuser = mkUserShare "myuser";
-    };
+    in
+      {}
+      // lib.mapAttrs (name: _: mkUserShare name) smbUsers
+      // lib.mapAttrs (name: _: mkGroupShare name) smbGroups;
   };
+
+  users.users = let
+    mkUser = name: id: groups: {
+      isNormalUser = true;
+      uid = id;
+      group = name;
+      extraGroups = groups;
+      createHome = false;
+      home = "/var/empty";
+      useDefaultShell = false;
+      autoSubUidGidRange = false;
+    };
+  in
+    {}
+    // lib.mapAttrs (name: cfg: mkUser name cfg.id cfg.groups) smbUsers
+    // lib.mapAttrs (name: cfg: mkUser name cfg.id []) smbGroups;
+
+  users.groups = lib.mapAttrs (_: cfg: {gid = cfg.id;}) (smbUsers // smbGroups);
 }

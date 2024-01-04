@@ -34,7 +34,7 @@ in {
     group = "grafana";
   };
 
-  nodes.ward-influxdb = {
+  nodes.sire-influxdb = {
     # Mirror the original secret on the influx host
     age.secrets."grafana-influxdb-token-${config.node.name}" = {
       inherit (config.age.secrets.grafana-influxdb-token) rekeyFile;
@@ -45,7 +45,7 @@ in {
     services.influxdb2.provision.organizations.machines.auths."grafana machines:telegraf (${config.node.name})" = {
       readBuckets = ["telegraf"];
       writeBuckets = ["telegraf"];
-      tokenFile = nodes.ward-influxdb.config.age.secrets."grafana-influxdb-token-${config.node.name}".path;
+      tokenFile = nodes.sire-influxdb.config.age.secrets."grafana-influxdb-token-${config.node.name}".path;
     };
   };
 

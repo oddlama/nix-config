@@ -3,8 +3,6 @@
 If you are interested in parts of my configuration, you probably want to examine the contents of `users/`, `modules/` and `hosts/`.
 Make sure to utilize the github search if you know what you need!
 
-- `apps/` Additional runnable actions for flake maintenance, like showing wireguard QR codes.
-
 - `hosts/<hostname>` contains the top-level configuration for `<hostname>`.
   Follow the imports from there to see what it entails.
 

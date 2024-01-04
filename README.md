@@ -1,4 +1,8 @@
-# About
+[Hosts](#hosts) \| [Programs](#programs--services) \| [Structure](./STRUCTURE.md)
+
+![2024-01-04T21:24:51+01:00-fullscreen](https://github.com/oddlama/nix-config/assets/31919558/f473b473-0715-4323-89f2-5a79140ba54c)
+
+## ❄️  My NixOS Configuration
 
 This is my personal nix config. It's still in the making, but this is what I got so far:
 
@@ -17,68 +21,55 @@ Desktop machines:
 - System-wide theme using [stylix](https://github.com/danth/stylix)
 -->
 
-<!--
-XXX: todo, use details summary to show gallery of programs
-
-- aa
--->
-
-Server related stuff: 
+Server related stuff:
 
 - Log and system monitoring through [grafana](https://github.com/grafana/grafana) using
   - [influxdb2](https://github.com/influxdata/influxdb) and [telegraf](https://github.com/influxdata/telegraf) for metrics
   - [loki](https://github.com/grafana/loki) and [promtail](https://grafana.com/docs/loki/latest/clients/promtail/) for logs
 - Single-Sign-On for all services using oauth2 via [kanidm](https://github.com/kanidm/kanidm)
 - Zoned nftables firewall via [nixos-nftables-firewall](https://github.com/thelegy/nixos-nftables-firewall)
-- Service isolation using nixos-containers and [microvms](https://github.com/astro/microvm.nix)
-<!--
-XXX: todo, use details summary to show gallery of services
-
-- aa
--->
+- Service isolation using [microvms](https://github.com/astro/microvm.nix) and nixos-containers
 
 ## Hosts
 
-|  | Name | Type | Purpose
----|---|---|---
-💻 | nom | Gigabyte AERO 15-W8 (i7-8750H) | My laptop and my main portable development machine <sub>Framework when?</sub>
-🖥️ | kroma | PC (AMD Ryzen 9 5900X) | Main workstation and development machine, also for some occasional gaming
-🖥️ | ward | ODROID H3 | Energy efficient SBC for my home firewall and some lightweight services using containers and microvms.
-🥔 | zackbiene | ODROID N2+ | ARM SBC for home automation, isolating the sketchy stuff from my main network
-☁️  | envoy | Hetzner Cloud server | Mailserver
-☁️  | sentinel | Hetzner Cloud server | Proxies and protects my local services
+|  | Type | Name | Hardware | Purpose
+---|---|---|---|---
+💻 | Laptop | nom | Gigabyte AERO 15-W8 (i7-8750H) | My laptop and my main portable development machine <sub>Framework when?</sub>
+🖥️ | Desktop | kroma | PC (AMD Ryzen 9 5900X) | Main workstation and development machine, also for some occasional gaming
+🖥️ | Server | ward | ODROID H3 | Energy efficient SBC for my home firewall and some lightweight services using containers and microvms.
+🖥️ | Server | sire | Threadripper 1950X | Home media server and data storage. Runs all services as microvms.
+🥔 | Server | zackbiene | ODROID N2+ | ARM SBC for home automation, isolating the sketchy stuff from my main network
+☁️  | VPS | sentinel | Hetzner Cloud server | Proxies and protects my local services
+☁️  | VPS | envoy | Hetzner Cloud server | Mailserver (WIP, still on gentoo)
 
-<!-- 🖥️ home server -->
+## Programs & Services
 
-<sub>
-not yet nixified: my main development machine, the powerful home server, and some services (still in transition from gentoo :/)
-</sub>
-
-## Programs
+#### Desktop Programs
 
 |   |   |
 |---|---|
 **Shell** | zsh <!--& [nushell](https://github.com/nushell/nushell)--> with [starship](https://github.com/starship/starship), fzf plugins and sqlite history
 **Terminal** | [kitty](https://github.com/kovidgoyal/kitty)
-**Editor** | [neovim](https://github.com/neovim/neovim)
+**Editor** | [neovim](https://github.com/neovim/neovim) via [nixvim](https://github.com/nix-community/nixvim)
 **WM** | [sway](https://github.com/swaywm/sway) & [i3](https://github.com/i3/i3) (still need X11 for gaming)
+**Browser** | [Firefox](https://www.mozilla.org/en-US/firefox/new/)
+**Notifications** | [wired-notify](https://github.com/Toqozz/wired-notify)
+**Screenshots** | [Flameshot](https://github.com/flameshot-org/flameshot) with custom [QR code detection](./pkgs/scripts/screenshot-area-scan-qr.nix) and [OCR to clipboard](./pkgs/scripts/screenshot-area.nix)
+**Gaming** | [Steam](https://store.steampowered.com/) and [Bottles](https://github.com/bottlesdevs/Bottles)
 
-<!-- XXX: add icons
-
-## Self-hosted Services
+#### Services
 
 |   |   |
 |---|---|
-- Vaultwarden
-- Adguard Home
-- Forgjeo
-- Grafana
-- Immich
-- Kanidm
-- Loki
-- Paperless
-- Influxdb
--->
+**Git** | Forgejo
+**SSO** | Kanidm
+**Logs** | Loki
+**Time Series DB** | Influxdb
+**Monitoring** | Grafana
+**DNS AdBlock** | AdGuard Home
+**Passwords** | Vaultwarden
+**Photos** | Immich
+**Documents** | Paperless
 
 ## Structure
 
@@ -89,13 +80,11 @@ but here's a quick breakdown of the what you will find where.
 
 |   |   |
 |---|---|
-`apps/` | runnable actions for flake maintenance
 `hosts/<hostname>` | top-level configuration for `<hostname>`
 `lib/` | library functions overlayed on top of `nixpkgs.lib`
 `modules/config/` | global configuration for all hosts
 `modules/optional/` | optional configuration included by hosts
-`modules/meta/` | simplified setup for existing modules and cross-host config
-`modules/*/` | classical reusable configuration modules
+`modules/*` | classical reusable configuration modules
 `nix/` | library functions and flake plumbing
 `pkgs/` | Custom packages and scripts
 `secrets/` | Global secrets and age identities
@@ -111,7 +100,7 @@ but here's a quick breakdown of the what you will find where.
 - Create hosts/<name>
 - Fill net.nix
 - Fill fs.nix (you need to know the device /dev/by-id paths in advance for partitioning to work!)
-- Run generate-secrets
+- Run `agenix generate` and `agenix rekey` (create's dummy secrets for initial deploy)
 
 #### Initial deploy
 

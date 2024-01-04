@@ -200,9 +200,6 @@
           .${system};
       };
 
-      # `nix run .#<app>`
-      apps = import ./apps inputs system;
-
       # `nix flake check`
       checks.pre-commit-hooks = pre-commit-hooks.lib.${system}.run {
         src = cleanSource ./.;

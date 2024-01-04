@@ -4,28 +4,45 @@
   ...
 }: {
   disko.devices = {
-    disk = {
-      m2-ssd = {
-        type = "disk";
-        device = "/dev/disk/by-id/${config.repo.secrets.local.disk.m2-ssd}";
-        content = with lib.disko.gpt; {
-          type = "table";
-          format = "gpt";
-          partitions = [
-            (partEfi "efi" "0%" "1GiB")
-            (partSwap "swap" "1GiB" "17GiB")
-            (partLuksZfs "rpool" "17GiB" "100%")
-          ];
+    disk =
+      {
+        m2-ssd-1 = {
+          type = "disk";
+          device = "/dev/disk/by-id/${config.repo.secrets.local.disk.m2-ssd-1}";
+          content = with lib.disko.gpt; {
+            type = "table";
+            format = "gpt";
+            partitions = [
+              (partEfi "efi" "0%" "1GiB")
+              (partLuksZfs "rpool" "1GiB" "100%")
+            ];
+          };
         };
-      };
-    };
+        m2-ssd-2 = {
+          type = "disk";
+          device = "/dev/disk/by-id/${config.repo.secrets.local.disk.m2-ssd-2}";
+          content = lib.disko.content.luksZfs "rpool";
+        };
+      }
+      // lib.genAttrs config.repo.secrets.local.disk.hdds-tank (disk: {
+        type = "disk";
+        device = "/dev/disk/by-id/${disk}";
+        content = lib.disko.content.luksZfs "tank";
+      });
     zpool = with lib.disko.zfs; {
       rpool = mkZpool {
+        mode = "mirror";
         datasets =
           impermanenceZfsDatasets
           // {
             "safe/guests" = unmountable;
           };
+      };
+      tank = mkZpool {
+        mode = "raidz1";
+        datasets = {
+          "safe/guests" = unmountable;
+        };
       };
     };
   };
@@ -58,6 +75,7 @@
           filesystems = {
             "rpool/local/state<" = true;
             "rpool/safe<" = true;
+            "tank/safe<" = true;
           };
           snapshotting = {
             type = "periodic";
@@ -96,4 +114,5 @@
   };
 
   boot.initrd.luks.devices.enc-rpool.allowDiscards = true;
+  boot.initrd.luks.devices.enc-tank.allowDiscards = true;
 }

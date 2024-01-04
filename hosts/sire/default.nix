@@ -18,11 +18,10 @@
 
     ./fs.nix
     ./net.nix
-    ./kea.nix
   ];
 
   boot.mode = "efi";
-  boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "e1000e" "alx"];
+  boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" "r8169"];
 
   meta.promtail = {
     enable = true;
@@ -88,10 +87,14 @@
   in
     lib.mkIf (!minimal) (
       {}
-      // mkMicrovm "adguardhome"
-      // mkMicrovm "forgejo"
-      // mkMicrovm "kanidm"
-      // mkMicrovm "radicale"
-      // mkMicrovm "vaultwarden"
+      // mkMicrovm "samba"
+      // mkMicrovm "grafana"
+      // mkMicrovm "influxdb"
+      // mkMicrovm "loki"
+      // mkMicrovm "paperless"
+      #// mkMicrovm "minecraft"
+      #// mkMicrovm "immich"
+      #// mkMicrovm "firefly"
+      #// mkMicrovm "fasten-health"
     );
 }

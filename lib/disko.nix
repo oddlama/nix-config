@@ -1,8 +1,19 @@
-_inputs: _final: prev: {
+_inputs: final: prev: {
   lib =
     prev.lib
     // {
       disko = {
+        content = {
+          luksZfs = name: {
+            type = "luks";
+            name = "enc-${name}";
+            extraOpenArgs = ["--allow-discards"];
+            content = {
+              type = "zfs";
+              pool = name;
+            };
+          };
+        };
         gpt = {
           partGrub = name: start: end: {
             inherit name start end;
@@ -30,19 +41,11 @@ _inputs: _final: prev: {
           partLuksZfs = name: start: end: {
             inherit start end;
             name = "enc-${name}";
-            content = {
-              type = "luks";
-              name = "enc-${name}";
-              extraOpenArgs = ["--allow-discards"];
-              content = {
-                type = "zfs";
-                pool = name;
-              };
-            };
+            content = final.lib.disko.content.luksZfs name;
           };
         };
         zfs = rec {
-          defaultZpoolOptions = {
+          mkZpool = prev.lib.recursiveUpdate {
             type = "zpool";
             rootFsOptions = {
               compression = "zstd";
@@ -57,7 +60,7 @@ _inputs: _final: prev: {
             options.ashift = "12";
           };
 
-          defaultZfsDatasets = {
+          impermanenceZfsDatasets = {
             "local" = unmountable;
             "local/root" =
               filesystem "/"

@@ -31,7 +31,7 @@
       #};
     };
     zpool = with lib.disko.zfs; {
-      rpool = defaultZpoolOptions // {datasets = defaultZfsDatasets;};
+      rpool = mkZpool {datasets = impermanenceZfsDatasets;};
     };
   };
 

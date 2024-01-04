@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  lanCidrv4 = "192.168.100.0/24";
+  lanCidrv4 = "192.168.1.0/24";
   lanCidrv6 = "fd10::/64";
 in {
   networking.hostId = config.repo.secrets.local.networking.hostId;
@@ -44,13 +44,8 @@ in {
       #dhcpV4Config.UseDNS = false;
       #dhcpV6Config.UseDNS = false;
       #ipv6AcceptRAConfig.UseDNS = false;
-      address = [
-        "192.168.178.7/24"
-        #"fdee::1/64"
-      ];
-      gateway = [
-        "192.168.178.1"
-      ];
+      address = ["192.168.178.2/24"];
+      gateway = ["192.168.178.1"];
       matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.wan.mac;
       networkConfig.IPv6PrivacyExtensions = "yes";
       linkConfig.RequiredForOnline = "routable";

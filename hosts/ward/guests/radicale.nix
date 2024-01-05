@@ -32,6 +32,12 @@ in {
     };
   };
 
+  age.secrets.radicale-users = {
+    rekeyFile = config.node.secretsDir + "/radicale-users.age";
+    mode = "440";
+    group = "radicale";
+  };
+
   environment.persistence."/persist".directories = [
     {
       directory = "/var/lib/radicale";
@@ -49,7 +55,7 @@ in {
       };
       auth = {
         type = "htpasswd";
-        htpasswd_filename = "/etc/radicale/users";
+        htpasswd_filename = config.age.secrets.radicale-users.path;
         htpasswd_encryption = "bcrypt";
       };
       storage = {

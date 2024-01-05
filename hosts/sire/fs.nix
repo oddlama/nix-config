@@ -2,32 +2,34 @@
   config,
   lib,
   ...
-}: {
+}: let
+  inherit (config.repo.secrets.local) disks;
+in {
   disko.devices = {
     disk =
       {
-        m2-ssd-1 = {
+        ${disks.m2-ssd-1} = {
           type = "disk";
-          device = "/dev/disk/by-id/${config.repo.secrets.local.disk.m2-ssd-1}";
+          device = "/dev/disk/by-id/${disks.m2-ssd-1}";
           content = with lib.disko.gpt; {
             type = "table";
             format = "gpt";
             partitions = [
               (partEfi "efi" "0%" "1GiB")
-              (partLuksZfs "rpool" "1GiB" "100%")
+              (partLuksZfs disks.m2-ssd-1 "rpool" "1GiB" "100%")
             ];
           };
         };
-        m2-ssd-2 = {
+        ${disks.m2-ssd-2} = {
           type = "disk";
-          device = "/dev/disk/by-id/${config.repo.secrets.local.disk.m2-ssd-2}";
-          content = lib.disko.content.luksZfs "rpool";
+          device = "/dev/disk/by-id/${disks.m2-ssd-2}";
+          content = lib.disko.content.luksZfs disks.m2-ssd-2 "rpool";
         };
       }
-      // lib.genAttrs config.repo.secrets.local.disk.hdds-tank (disk: {
+      // lib.genAttrs disks.hdds-storage (disk: {
         type = "disk";
         device = "/dev/disk/by-id/${disk}";
-        content = lib.disko.content.luksZfs "tank";
+        content = lib.disko.content.luksZfs disk "storage";
       });
     zpool = with lib.disko.zfs; {
       rpool = mkZpool {
@@ -38,7 +40,7 @@
             "safe/guests" = unmountable;
           };
       };
-      tank = mkZpool {
+      storage = mkZpool {
         mode = "raidz1";
         datasets = {
           "safe/guests" = unmountable;
@@ -75,7 +77,7 @@
           filesystems = {
             "rpool/local/state<" = true;
             "rpool/safe<" = true;
-            "tank/safe<" = true;
+            "storage/safe<" = true;
           };
           snapshotting = {
             type = "periodic";
@@ -112,7 +114,4 @@
       ];
     };
   };
-
-  boot.initrd.luks.devices.enc-rpool.allowDiscards = true;
-  boot.initrd.luks.devices.enc-tank.allowDiscards = true;
 }

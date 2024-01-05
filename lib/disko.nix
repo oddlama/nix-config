@@ -4,13 +4,13 @@ _inputs: final: prev: {
     // {
       disko = {
         content = {
-          luksZfs = name: {
+          luksZfs = luksName: pool: {
             type = "luks";
-            name = "enc-${name}";
-            extraOpenArgs = ["--allow-discards"];
+            name = "${pool}_${luksName}";
+            settings.allowDiscards = true;
             content = {
               type = "zfs";
-              pool = name;
+              inherit pool;
             };
           };
         };
@@ -38,10 +38,10 @@ _inputs: final: prev: {
               randomEncryption = true;
             };
           };
-          partLuksZfs = name: start: end: {
+          partLuksZfs = luksName: pool: start: end: {
             inherit start end;
-            name = "enc-${name}";
-            content = final.lib.disko.content.luksZfs name;
+            name = "${pool}_${luksName}";
+            content = final.lib.disko.content.luksZfs luksName pool;
           };
         };
         zfs = rec {

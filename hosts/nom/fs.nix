@@ -2,23 +2,25 @@
   config,
   lib,
   ...
-}: {
+}: let
+  inherit (config.repo.secrets.local) disks;
+in {
   disko.devices = {
     disk = {
-      m2-ssd = {
+      ${disks.m2-ssd} = {
         type = "disk";
-        device = "/dev/disk/by-id/${config.repo.secrets.local.disk.m2-ssd}";
+        device = "/dev/disk/by-id/${disks.m2-ssd}";
         content = with lib.disko.gpt; {
           type = "table";
           format = "gpt";
           partitions = [
-            (partLuksZfs "rpool" "0%" "100%")
+            (partLuksZfs disks.m2-ssd "rpool" "0%" "100%")
           ];
         };
       };
-      boot-ssd = {
+      ${disks.boot-ssd} = {
         type = "disk";
-        device = "/dev/disk/by-id/${config.repo.secrets.local.disk.boot-ssd}";
+        device = "/dev/disk/by-id/${disks.boot-ssd}";
         content = with lib.disko.gpt; {
           type = "table";
           format = "gpt";
@@ -33,6 +35,4 @@
       rpool = mkZpool {datasets = impermanenceZfsDatasets;};
     };
   };
-
-  boot.initrd.luks.devices.enc-rpool.allowDiscards = true;
 }

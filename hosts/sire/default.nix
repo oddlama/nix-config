@@ -44,14 +44,19 @@
   # services.telegraf.extraConfig.inputs.github = {};
 
   guests = let
-    mkGuest = guestName: {
+    mkGuest = guestName: {enableStorageDataset ? false, ...}: {
       autostart = true;
       zfs."/state" = {
+        # TODO make one option out of that? and split into two readonly options automatically?
         pool = "rpool";
         dataset = "local/guests/${guestName}";
       };
       zfs."/persist" = {
         pool = "rpool";
+        dataset = "safe/guests/${guestName}";
+      };
+      zfs."/storage" = lib.mkIf enableStorageDataset {
+        pool = "storage";
         dataset = "safe/guests/${guestName}";
       };
       modules = [
@@ -62,9 +67,9 @@
       ];
     };
 
-    mkMicrovm = guestName: {
+    mkMicrovm = guestName: opts: {
       ${guestName} =
-        mkGuest guestName
+        mkGuest guestName opts
         // {
           backend = "microvm";
           microvm = {
@@ -76,9 +81,9 @@
     };
 
     # deadnix: skip
-    mkContainer = guestName: {
+    mkContainer = guestName: opts: {
       ${guestName} =
-        mkGuest guestName
+        mkGuest guestName opts
         // {
           backend = "container";
           container.macvlan = "lan";
@@ -87,11 +92,11 @@
   in
     lib.mkIf (!minimal) (
       {}
-      // mkMicrovm "samba"
-      // mkMicrovm "grafana"
-      // mkMicrovm "influxdb"
-      // mkMicrovm "loki"
-      // mkMicrovm "paperless"
+      // mkMicrovm "samba" {enableStorageDataset = true;}
+      // mkMicrovm "grafana" {}
+      // mkMicrovm "influxdb" {}
+      // mkMicrovm "loki" {}
+      // mkMicrovm "paperless" {}
       #// mkMicrovm "minecraft"
       #// mkMicrovm "immich"
       #// mkMicrovm "firefly"

@@ -1,6 +1,7 @@
 {
   lib,
   utils,
+  nodes,
   ...
 }: let
   inherit (lib) net;
@@ -44,12 +45,12 @@ in {
               data = net.cidr.host 1 lanCidrv4;
             }
           ];
-          # TODO reservations = [
-          # TODO   {
-          # TODO     hw-address = nodes.ward-adguardhome.config.lib.microvm.mac;
-          # TODO     ip-address = dnsIp;
-          # TODO   }
-          # TODO ];
+          reservations = [
+            {
+              hw-address = nodes.ward-adguardhome.config.lib.microvm.mac;
+              ip-address = dnsIp;
+            }
+          ];
         }
       ];
     };

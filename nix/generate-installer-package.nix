@@ -16,6 +16,7 @@
     nixos-install --no-root-password --system ${nodeAttrs.config.system.build.toplevel}
 
     echo "Done!"
+    echo "[33mDONT FORGET TO EXPORT YOUR ZFS POOL(S)![m"
   '';
 
   installer-package = pkgs.symlinkJoin {

@@ -13,14 +13,14 @@
         owner = "oddlama";
         repo = "starship";
         rev = "feat-more-dynamic-username-and-hostname";
-        hash = "sha256-br1fpQPgclJcsm4INBZ+vk4/PtpnUCkWMHll0rjdGmQ=";
+        hash = "sha256-OFuTiIflGTpB8dRn1hj31/TyDAp8ZXX9CrznN3R1nU0=";
       };
     in
       pkgs.starship.overrideAttrs (_finalAttrs: previousAttrs: {
         inherit src;
         cargoDeps = previousAttrs.cargoDeps.overrideAttrs (_: {
           inherit src;
-          outputHash = "sha256-L4N55ghbPsBrESRK0vHGDSDytFCnib7ghoMKnWFIZvw=";
+          outputHash = "sha256-oPjmUknQ9Z+0qxphOMuf2Zkg8ou0cbkKSl04IfQNxz8=";
         });
       });
     settings = {

@@ -22,7 +22,7 @@
   ];
 
   boot.mode = "efi";
-  boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "e1000e" "alx"];
+  boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" "r8169"];
 
   meta.promtail = {
     enable = true;

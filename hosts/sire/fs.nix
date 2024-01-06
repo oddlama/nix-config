@@ -49,6 +49,8 @@ in {
     };
   };
 
+  boot.initrd.systemd.services."zfs-import-storage".after = ["cryptsetup.target"];
+
   services.zrepl = {
     enable = true;
     settings = {

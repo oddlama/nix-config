@@ -50,6 +50,10 @@ in {
               hw-address = nodes.ward-adguardhome.config.lib.microvm.mac;
               ip-address = dnsIp;
             }
+            {
+              hw-address = nodes.sire-samba.config.lib.microvm.mac;
+              ip-address = net.cidr.host 10 lanCidrv4;
+            }
           ];
         }
       ];

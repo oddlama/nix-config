@@ -11,6 +11,24 @@ in {
     mode = "600";
   };
 
+  fileSystems."/storage".neededForBoot = true;
+  environment.persistence."/storage" = {
+    hideMounts = true;
+    directories =
+      lib.flip lib.mapAttrsToList smbUsers (name: _: {
+        directory = "/shares/users/${name}";
+        user = name;
+        group = name;
+        mode = "0750";
+      })
+      ++ lib.flip lib.mapAttrsToList smbGroups (name: _: {
+        directory = "/shares/groups/${name}";
+        user = name;
+        group = name;
+        mode = "0750";
+      });
+  };
+
   services.samba = {
     enable = true;
     openFirewall = true;
@@ -34,7 +52,7 @@ in {
       # Deny access to all hosts by default.
       "hosts deny = 0.0.0.0/0"
       # Allow access to local network and TODO: wireguard
-      "hosts allow = 192.168.1.0/22 192.168.100.0/24"
+      "hosts allow = 192.168.1.0/24"
 
       # Set sane logging options
       "log level = 0 auth:2 passdb:2"
@@ -78,11 +96,11 @@ in {
           inherit path;
           public = "no";
           writable = "yes";
-          "create mask" = "0770";
-          "directory mask" = "0770";
+          "create mask" = "0740";
+          "directory mask" = "0750";
           # "force create mode" = "0660";
           # "force directory mode" = "0770";
-          #"acl allow execute always" = "yes";
+          "acl allow execute always" = "yes";
         }
         // cfg;
 

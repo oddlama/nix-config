@@ -4,7 +4,7 @@
   boot.initrd.systemd.network = {
     enable = true;
     networks."10-lan" = {
-      address = ["192.168.1.2"];
+      address = ["192.168.1.2/24"];
       matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.lan.mac;
       networkConfig = {
         IPv6PrivacyExtensions = "yes";
@@ -41,7 +41,7 @@
       '';
     };
     "20-lan-self" = {
-      address = ["192.168.1.2"];
+      address = ["192.168.1.2/24"];
       matchConfig.Name = "lan-self";
       networkConfig = {
         IPv6PrivacyExtensions = "yes";

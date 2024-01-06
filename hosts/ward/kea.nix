@@ -6,7 +6,7 @@
 }: let
   inherit (lib) net;
   lanCidrv4 = "192.168.1.0/24";
-  dnsIp = net.cidr.host 2 lanCidrv4;
+  dnsIp = net.cidr.host 3 lanCidrv4;
 in {
   # TODO make meta.kea module?
   # TODO reserve by default using assignIps algo?

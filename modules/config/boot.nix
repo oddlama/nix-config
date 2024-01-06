@@ -11,6 +11,7 @@
         emergencyAccess = config.repo.secrets.global.root.hashedPassword;
         # TODO good idea? targets.emergency.wants = ["network.target" "sshd.service"];
         extraBin.ip = "${pkgs.iproute2}/bin/ip";
+        extraBin.ping = "${pkgs.iputils}/bin/ping";
       };
 
       # NOTE: Add "rd.systemd.unit=rescue.target" to debug initrd

@@ -31,7 +31,7 @@
       domain = config.networking.providedDomains.influxdb;
       organization = "machines";
       bucket = "telegraf";
-      node = "ward-influxdb";
+      node = "sire-influxdb";
     };
   };
 }

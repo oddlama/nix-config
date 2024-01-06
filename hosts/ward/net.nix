@@ -73,12 +73,12 @@ in {
       #  SubnetId = "auto";
       #};
       # Provide a DNS resolver
-      ipv6SendRAConfig = {
-        EmitDNS = true;
-        # TODO change to self later
-        #DNS = lib.net.cidr.host 1 net.lan.ipv6cidr;
-        DNS = ["2606:4700:4700::1111" "2001:4860:4860::8888"];
-      };
+      # TODO ipv6SendRAConfig = {
+      # TODO   EmitDNS = true;
+      # TODO   # TODO change to self later
+      # TODO   #DNS = lib.net.cidr.host 1 net.lan.ipv6cidr;
+      # TODO   DNS = ["2606:4700:4700::1111" "2001:4860:4860::8888"];
+      # TODO };
       linkConfig.RequiredForOnline = "routable";
     };
     # Remaining macvtap interfaces should not be touched.

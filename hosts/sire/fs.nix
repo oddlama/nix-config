@@ -41,7 +41,7 @@ in {
           };
       };
       storage = mkZpool {
-        mode = "raidz1";
+        mode = "raidz";
         datasets = {
           "safe/guests" = unmountable;
         };

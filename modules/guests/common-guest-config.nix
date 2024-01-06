@@ -1,8 +1,17 @@
-_guestName: guestCfg: {lib, ...}: let
+_guestName: guestCfg: {
+  config,
+  lib,
+  ...
+}: let
   inherit (lib) mkForce;
 in {
   node.name = guestCfg.nodeName;
   node.type = guestCfg.backend;
+
+  # Set early hostname too, so we can associate those logs to this host and don't get "localhost" entries in loki
+  boot.kernelParams = lib.mkIf (!config.boot.isContainer) [
+    "systemd.hostname=${config.networking.hostName}"
+  ];
 
   nix = {
     settings.auto-optimise-store = mkForce false;

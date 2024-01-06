@@ -29,10 +29,10 @@ in {
     lib.microvm.mac = guestCfg.microvm.mac;
 
     microvm = {
-      hypervisor = mkDefault "cloud-hypervisor";
+      hypervisor = mkDefault "qemu";
 
       # Give them some juice by default
-      mem = mkDefault 2048;
+      mem = mkDefault (1024 + 2048);
 
       # Add a writable store overlay, but since this is always ephemeral
       # disable any store optimization from nix.

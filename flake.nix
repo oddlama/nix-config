@@ -152,18 +152,6 @@
         nixosConfigurationsMinimal
         ;
 
-      # XXX: WIP: only testing
-      d2diag = let
-        inherit
-          (nixpkgs.lib)
-          attrValues
-          concatLines
-          ;
-      in
-        self.pkgs.x86_64-linux.writeText "test.d2" (
-          concatLines (map (x: x.config.d2diag.text) (attrValues self.nixosConfigurations))
-        );
-
       # All nixosSystem instanciations are collected here, so that we can refer
       # to any system via nodes.<name>
       nodes = self.nixosConfigurations // self.guestConfigs;
@@ -193,6 +181,12 @@
             devshell.overlays.default
             agenix-rekey.overlays.default
           ];
+      };
+
+      # XXX: WIP: only testing
+      topology = import ./generate-topology.nix {
+        inherit pkgs;
+        nixosConfigurations = self.nodes;
       };
 
       # For each major system, we provide a customized installer image that

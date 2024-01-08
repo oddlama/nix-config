@@ -72,6 +72,8 @@ in {
     };
 
     networking.renameInterfacesByMac.${guestCfg.networking.mainLinkName} = guestCfg.microvm.mac;
-    systemd.network.networks."10-${guestCfg.networking.mainLinkName}".matchConfig.MACAddress = guestCfg.microvm.mac;
+    systemd.network.networks."10-${guestCfg.networking.mainLinkName}".matchConfig = mkForce {
+      MACAddress = guestCfg.microvm.mac;
+    };
   };
 }

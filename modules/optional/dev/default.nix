@@ -1,5 +1,4 @@
 {
-  inputs,
   pkgs,
   lib,
   minimal,
@@ -7,7 +6,6 @@
 }:
 lib.optionalAttrs (!minimal) {
   imports = [
-    inputs.nixseparatedebuginfod.nixosModules.default
     ./documentation.nix
     ./embedded.nix
     ./yubikey.nix

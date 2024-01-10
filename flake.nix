@@ -73,16 +73,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nixseparatedebuginfod = {
-      url = "github:symphorien/nixseparatedebuginfod";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
-    };
-
     nixvim = {
       url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
       inputs.pre-commit-hooks.follows = "pre-commit-hooks";
     };
 
@@ -263,6 +256,22 @@
           {
             package = pkgs.nix-diff;
             help = "Explain why two Nix derivations differ";
+          }
+          {
+            package = pkgs.nix-output-monitor;
+            help = "Nix Output Monitor (a drop alternative for `nix` which shows a build graph)";
+          }
+          {
+            package = pkgs.writeShellApplication {
+              name = "build";
+              text = ''
+                set -euo pipefail
+                [[ "$#" -eq 1 ]] \
+                  || { echo "usage: build <host>" >&2; exit 1; }
+                nom build --no-link --print-out-paths --show-trace .#nodes."$1".config.system.build.toplevel
+              '';
+            };
+            help = "Build a host configuration";
           }
         ];
 

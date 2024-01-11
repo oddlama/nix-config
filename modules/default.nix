@@ -5,7 +5,7 @@
     inputs.agenix.nixosModules.default
     inputs.disko.nixosModules.disko
     inputs.elewrap.nixosModules.default
-    inputs.extra-modules.nixosModules.default
+    inputs.nixos-extra-modules.nixosModules.default
     inputs.home-manager.nixosModules.default
     inputs.impermanence.nixosModules.impermanence
     inputs.nixos-nftables-firewall.nixosModules.default

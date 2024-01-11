@@ -75,6 +75,7 @@ Server related stuff:
 
 If you are interested in parts of my configuration,
 you probably want to examine the contents of `users/`, `modules/` and `hosts/`.
+Also, a lot of interesting modules have been moved to [nixos-extra-modules](https://github.com/oddlama/nixos-extra-modules), a separate repository specifically for reusable stuff.
 The full structure of this flake is described in [STRUCTURE.md](./STRUCTURE.md),
 but here's a quick breakdown of the what you will find where.
 

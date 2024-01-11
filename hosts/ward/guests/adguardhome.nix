@@ -77,6 +77,31 @@ in {
           "2001:4860:4860::8844"
         ];
         dhcp.enabled = false;
+        # Undo the /etc/hosts entry so we don't answer with the internal
+        # wireguard address for influxdb
+        rewrites = [
+          {
+            domain = sentinelCfg.networking.providedDomains.influxdb;
+            answer = sentinelCfg.repo.secrets.local.personalDomain;
+          }
+        ];
+        filters = [
+          {
+            name = "AdGuard DNS filter";
+            url = "https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt";
+            enabled = true;
+          }
+          {
+            name = "AdaAway Default Blocklist";
+            url = "https://adaway.org/hosts.txt";
+            enabled = true;
+          }
+          {
+            name = "OISD (Big)";
+            url = "https://big.oisd.nl";
+            enabled = true;
+          }
+        ];
       };
     };
   };

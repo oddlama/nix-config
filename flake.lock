@@ -331,10 +331,10 @@
     "devshell_3": {
       "inputs": {
         "nixpkgs": [
-          "extra-modules",
+          "nixos-extra-modules",
           "nixpkgs"
         ],
-        "systems": "systems_6"
+        "systems": "systems_7"
       },
       "locked": {
         "lastModified": 1701787589,
@@ -391,32 +391,6 @@
       "original": {
         "owner": "oddlama",
         "repo": "elewrap",
-        "type": "github"
-      }
-    },
-    "extra-modules": {
-      "inputs": {
-        "devshell": "devshell_3",
-        "flake-utils": [
-          "flake-utils"
-        ],
-        "lib-net": "lib-net",
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "pre-commit-hooks": "pre-commit-hooks_3"
-      },
-      "locked": {
-        "lastModified": 1704938286,
-        "narHash": "sha256-/uv+N2v5ixqYz7SG8R5GWOTdrNKboHEp85BR5Jdz6qE=",
-        "owner": "oddlama",
-        "repo": "nixos-extra-modules",
-        "rev": "c55f465ba1f369852ab4122a9fa42c85b4a571de",
-        "type": "github"
-      },
-      "original": {
-        "owner": "oddlama",
-        "repo": "nixos-extra-modules",
         "type": "github"
       }
     },
@@ -630,7 +604,7 @@
     },
     "flake-utils_4": {
       "inputs": {
-        "systems": "systems_7"
+        "systems": "systems_6"
       },
       "locked": {
         "lastModified": 1701680307,
@@ -743,7 +717,7 @@
     "gitignore_3": {
       "inputs": {
         "nixpkgs": [
-          "extra-modules",
+          "nixos-extra-modules",
           "pre-commit-hooks",
           "nixpkgs"
         ]
@@ -991,6 +965,32 @@
       "original": {
         "owner": "nix-community",
         "repo": "nixpkgs.lib",
+        "type": "github"
+      }
+    },
+    "nixos-extra-modules": {
+      "inputs": {
+        "devshell": "devshell_3",
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "lib-net": "lib-net",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "pre-commit-hooks": "pre-commit-hooks_3"
+      },
+      "locked": {
+        "lastModified": 1704938286,
+        "narHash": "sha256-/uv+N2v5ixqYz7SG8R5GWOTdrNKboHEp85BR5Jdz6qE=",
+        "owner": "oddlama",
+        "repo": "nixos-extra-modules",
+        "rev": "c55f465ba1f369852ab4122a9fa42c85b4a571de",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oddlama",
+        "repo": "nixos-extra-modules",
         "type": "github"
       }
     },
@@ -1271,12 +1271,12 @@
       "inputs": {
         "flake-compat": "flake-compat_4",
         "flake-utils": [
-          "extra-modules",
+          "nixos-extra-modules",
           "flake-utils"
         ],
         "gitignore": "gitignore_3",
         "nixpkgs": [
-          "extra-modules",
+          "nixos-extra-modules",
           "nixpkgs"
         ],
         "nixpkgs-stable": "nixpkgs-stable_3"
@@ -1328,12 +1328,12 @@
         "devshell": "devshell_2",
         "disko": "disko",
         "elewrap": "elewrap",
-        "extra-modules": "extra-modules",
         "flake-utils": "flake-utils_4",
         "home-manager": "home-manager",
         "impermanence": "impermanence",
         "microvm": "microvm",
         "nix-index-database": "nix-index-database",
+        "nixos-extra-modules": "nixos-extra-modules",
         "nixos-generators": "nixos-generators",
         "nixos-hardware": "nixos-hardware",
         "nixos-nftables-firewall": "nixos-nftables-firewall",

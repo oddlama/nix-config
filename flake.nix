@@ -29,12 +29,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    extra-modules = {
-      url = "github:oddlama/nixos-extra-modules";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
-    };
-
     flake-utils.url = "github:numtide/flake-utils";
 
     home-manager = {
@@ -44,9 +38,21 @@
 
     impermanence.url = "github:nix-community/impermanence";
 
+    microvm = {
+      url = "github:astro/microvm.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
+    };
+
     nix-index-database = {
       url = "github:Mic92/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nixos-extra-modules = {
+      url = "github:oddlama/nixos-extra-modules";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
     };
 
     nixos-hardware.url = "github:NixOS/nixos-hardware";
@@ -74,12 +80,6 @@
       inputs.pre-commit-hooks.follows = "pre-commit-hooks";
     };
 
-    microvm = {
-      url = "github:astro/microvm.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
-    };
-
     pre-commit-hooks = {
       url = "github:cachix/pre-commit-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -104,7 +104,7 @@
     self,
     agenix-rekey,
     devshell,
-    extra-modules,
+    nixos-extra-modules,
     flake-utils,
     nixos-generators,
     nixpkgs,
@@ -167,7 +167,7 @@
           import ./lib inputs
           ++ import ./pkgs/default.nix
           ++ [
-            extra-modules.overlays.default
+            nixos-extra-modules.overlays.default
             devshell.overlays.default
             agenix-rekey.overlays.default
           ];

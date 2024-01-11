@@ -59,7 +59,12 @@
         ../../modules
         ./guests/common.nix
         ./guests/${guestName}.nix
-        {node.secretsDir = ./secrets/${guestName};}
+        {
+          node.secretsDir = ./secrets/${guestName};
+          networking.nftables.firewall = {
+            zones.untrusted.interfaces = [config.guests.${guestName}.networking.mainLinkName];
+          };
+        }
       ];
     };
 
@@ -73,6 +78,11 @@
             macvtap = "lan";
             baseMac = config.repo.secrets.local.networking.interfaces.lan.mac;
           };
+          extraSpecialArgs = {
+            inherit (inputs.self) nodes;
+            inherit (inputs.self.pkgs.x86_64-linux) lib;
+            inherit inputs minimal;
+          };
         };
     };
 
@@ -83,6 +93,9 @@
         // {
           backend = "container";
           container.macvlan = "lan";
+          extraSpecialArgs = {
+            inherit lib nodes inputs minimal;
+          };
         };
     };
   in

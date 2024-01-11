@@ -44,11 +44,6 @@
 
     impermanence.url = "github:nix-community/impermanence";
 
-    lib-net = {
-      url = "https://gist.github.com/duairc/5c9bb3c922e5d501a1edb9e7b3b845ba/archive/3885f7cd9ed0a746a9d675da6f265d41e9fd6704.tar.gz";
-      flake = false;
-    };
-
     nix-index-database = {
       url = "github:Mic92/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -109,6 +104,7 @@
     self,
     agenix-rekey,
     devshell,
+    extra-modules,
     flake-utils,
     nixos-generators,
     nixpkgs,
@@ -171,6 +167,7 @@
           import ./lib inputs
           ++ import ./pkgs/default.nix
           ++ [
+            extra-modules.overlays.default
             devshell.overlays.default
             agenix-rekey.overlays.default
           ];

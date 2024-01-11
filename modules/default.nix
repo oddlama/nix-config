@@ -26,8 +26,6 @@
     ./config/system.nix
     ./config/users.nix
 
-    ./guests
-
     ./acme-wildcard.nix
     ./deterministic-ids.nix
     ./distributed-config.nix
@@ -45,7 +43,6 @@
   ];
 
   nixpkgs.overlays = [
-    inputs.microvm.overlay
     inputs.nixpkgs-wayland.overlay
     inputs.nixvim.overlays.default
     inputs.wired-notify.overlays.default

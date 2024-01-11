@@ -400,17 +400,18 @@
         "flake-utils": [
           "flake-utils"
         ],
+        "lib-net": "lib-net",
         "nixpkgs": [
           "nixpkgs"
         ],
         "pre-commit-hooks": "pre-commit-hooks_3"
       },
       "locked": {
-        "lastModified": 1704474098,
-        "narHash": "sha256-qeSqlbSQAhvtcBsn0SUpAiGwAqVLMbxOkm6NX+NHNPI=",
+        "lastModified": 1704938286,
+        "narHash": "sha256-/uv+N2v5ixqYz7SG8R5GWOTdrNKboHEp85BR5Jdz6qE=",
         "owner": "oddlama",
         "repo": "nixos-extra-modules",
-        "rev": "7013e9116ddfde2e39a16b6ae8c26d869e2dbe98",
+        "rev": "c55f465ba1f369852ab4122a9fa42c85b4a571de",
         "type": "github"
       },
       "original": {
@@ -1331,7 +1332,6 @@
         "flake-utils": "flake-utils_4",
         "home-manager": "home-manager",
         "impermanence": "impermanence",
-        "lib-net": "lib-net",
         "microvm": "microvm",
         "nix-index-database": "nix-index-database",
         "nixos-generators": "nixos-generators",

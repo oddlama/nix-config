@@ -59,7 +59,7 @@ in {
     enable = true;
     address = "0.0.0.0";
     passwordFile = config.age.secrets.paperless-admin-password.path;
-    extraConfig = {
+    settings = {
       PAPERLESS_URL = "https://${paperlessDomain}";
       PAPERLESS_CONSUMER_ENABLE_BARCODES = true;
       PAPERLESS_CONSUMER_ENABLE_ASN_BARCODE = true;

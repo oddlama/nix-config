@@ -82,7 +82,7 @@ in {
     settings = {
       actions = {
         ENABLED = true;
-        DEFAULT_ACTIONS_URL = "https://gitea.com";
+        DEFAULT_ACTIONS_URL = "github";
       };
       database = {
         SQLITE_JOURNAL_MODE = "WAL";
@@ -111,7 +111,7 @@ in {
       };
       # packages.ENABLED = true;
       repository = {
-        DEFAULT_PRIVATE = false;
+        DEFAULT_PRIVATE = "private";
         ENABLE_PUSH_CREATE_USER = true;
         ENABLE_PUSH_CREATE_ORG = true;
       };

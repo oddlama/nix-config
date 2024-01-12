@@ -18,9 +18,8 @@ in {
         persist = true;
         type = "memfile";
       };
-      valid-lifetime = 4000;
-      renew-timer = 1000;
-      rebind-timer = 2000;
+      valid-lifetime = 86400;
+      renew-timer = 3600;
       interfaces-config = {
         # XXX: BUG: why does this bind other macvtaps?
         interfaces = ["lan-self"];

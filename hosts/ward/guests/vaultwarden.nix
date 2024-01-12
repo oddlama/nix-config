@@ -9,7 +9,6 @@
 in {
   meta.wireguard-proxy.sentinel.allowedTCPPorts = [
     config.services.vaultwarden.config.rocketPort
-    config.services.vaultwarden.config.websocketPort
   ];
 
   age.secrets.vaultwarden-env = {
@@ -38,13 +37,6 @@ in {
           keepalive 2;
         '';
       };
-      upstreams.vaultwarden-websocket = {
-        servers."${config.meta.wireguard.proxy-sentinel.ipv4}:${toString config.services.vaultwarden.config.websocketPort}" = {};
-        extraConfig = ''
-          zone vaultwarden-websocket 64k;
-          keepalive 2;
-        '';
-      };
       virtualHosts.${vaultwardenDomain} = {
         forceSSL = true;
         useACMEWildcardHost = true;
@@ -52,14 +44,6 @@ in {
           client_max_body_size 256M;
         '';
         locations."/".proxyPass = "http://vaultwarden";
-        locations."/notifications/hub" = {
-          proxyPass = "http://vaultwarden-websocket";
-          proxyWebsockets = true;
-        };
-        locations."/notifications/hub/negotiate" = {
-          proxyPass = "http://vaultwarden";
-          proxyWebsockets = true;
-        };
       };
     };
   };
@@ -73,9 +57,6 @@ in {
       useSyslog = true;
       webVaultEnabled = true;
 
-      websocketEnabled = true;
-      websocketAddress = "0.0.0.0";
-      websocketPort = 3012;
       rocketAddress = "0.0.0.0";
       rocketPort = 8012;
 

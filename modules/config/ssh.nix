@@ -5,6 +5,7 @@
     # because we rely on ssh key generation for agenix
     startWhenNeeded = lib.mkForce false;
     authorizedKeysFiles = lib.mkForce ["/etc/ssh/authorized_keys.d/%u"];
+    sftpServerExecutable = "internal-sftp";
     settings = {
       PasswordAuthentication = false;
       KbdInteractiveAuthentication = false;

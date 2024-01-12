@@ -11,6 +11,37 @@ in {
     mode = "600";
   };
 
+  services.openssh = {
+    # You really have to hate them. Thanks Brother ADS-4300N.
+    settings = {
+      Macs = ["hmac-sha2-512"];
+      HostkeyAlgorithms = "+ssh-rsa";
+      PubkeyAcceptedAlgorithms = "+ssh-rsa";
+    };
+    # We need an RSA key for network attached printers and scanners
+    # that fucking can't be bothered to support sensible stuff
+    hostKeys = [
+      {
+        bits = 4096;
+        path = "/etc/ssh/ssh_host_rsa_key";
+        type = "rsa";
+      }
+    ];
+
+    # Allow SFTP for scanner in /shares/groups/scanner
+    extraConfig = ''
+      Match User scanner
+        ForceCommand internal-sftp
+        AllowTcpForwarding no
+        PermitTunnel no
+    '';
+  };
+
+  environment.persistence."/persist".files = [
+    "/etc/ssh/ssh_host_rsa_key"
+    "/etc/ssh/ssh_host_rsa_key.pub"
+  ];
+
   fileSystems."/storage".neededForBoot = true;
   environment.persistence."/storage" = {
     hideMounts = true;
@@ -133,9 +164,18 @@ in {
       autoSubUidGidRange = false;
     };
   in
-    {}
-    // lib.mapAttrs (name: cfg: mkUser name cfg.id cfg.groups) smbUsers
-    // lib.mapAttrs (name: cfg: mkUser name cfg.id []) smbGroups;
+    lib.mkMerge [
+      (
+        {}
+        // lib.mapAttrs (name: cfg: mkUser name cfg.id cfg.groups) smbUsers
+        // lib.mapAttrs (name: cfg: mkUser name cfg.id []) smbGroups
+      )
+      {
+        scanner.openssh.authorizedKeys.keys = [
+          "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDJcWkqM2gXM9MJoKggCMpXLBJvgPP0fuoIO3UNy4h4uFzyDqMKAADjaJHCqyIQPq/s5vATVmuu4GQyajkc7Y3fBg/2rvAACzFx/2ufK2M4dkdDcYOX6kyNZL7XiJRmLfUR2cqda3P3bQxapkdfIOWfPQQJUAnYlVvUaIShoBxYw5HXRTr2jR5UAklfIRWZOmx07WKC6dZG5MIm1Luun5KgvqQmzQ9ErL5tz/Oi5pPdK30kdkS5WdeWD6KwL78Ff4KfC0DVTO0zb/C7WyKk4ZLu+UKCLHXDTzE4lhBAu6mSUfJ5nQhmdLdKg6Gvh1St/vRcsDJOZqEFBVn35/oK974l root@ADS_4300N_BRN000EC691D285"
+        ];
+      }
+    ];
 
   users.groups = lib.mapAttrs (_: cfg: {gid = cfg.id;}) (smbUsers // smbGroups);
 }

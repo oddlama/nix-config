@@ -24,19 +24,19 @@
     ];
 
   home = {
-    packages = with pkgs; [
-      appimage-run
-      chromium
-      feh
-      gamescope
-      obsidian
-      pavucontrol
-      pinentry-gnome # For yubikey, gnome = gtk3 variant
-      thunderbird
-      xdg-utils
-      xdragon
-      yt-dlp
-      zathura
+    packages = [
+      pkgs.appimage-run
+      pkgs.chromium
+      pkgs.feh
+      pkgs.gamescope
+      pkgs.obsidian
+      pkgs.pavucontrol
+      pkgs.pinentry-gnome # For yubikey, gnome = gtk3 variant
+      pkgs.thunderbird
+      pkgs.xdg-utils
+      pkgs.xdragon
+      pkgs.yt-dlp
+      pkgs.zathura
     ];
 
     # TODO yubikey pinentry is curses but should be graphical

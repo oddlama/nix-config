@@ -149,6 +149,7 @@ in {
 
       floating.criteria = [
         {class = "^Pavucontrol$";}
+        #{class = "^awakened-poe-trade$";}
       ];
 
       assigns = {

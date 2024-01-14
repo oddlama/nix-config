@@ -5,6 +5,58 @@
 }: let
   smbUsers = config.repo.secrets.local.samba.users;
   smbGroups = config.repo.secrets.local.samba.groups;
+
+  mkPersistent = persistRoot: directory: owner: {
+    ${persistRoot}.directories = [
+      {
+        inherit directory;
+        user = owner;
+        group = owner;
+        mode = "0750";
+      }
+    ];
+  };
+
+  mkShare = id: path: cfg: {
+    ${id} =
+      {
+        inherit path;
+        public = "no";
+        writable = "yes";
+        "create mask" = "0740";
+        "directory mask" = "0750";
+        "acl allow execute always" = "yes";
+      }
+      // cfg;
+  };
+
+  mkGroupShares = group: {enableBunker ? false, ...}:
+    [
+      (mkShare group "/shares/groups/${group}" {
+        "valid users" = "@${group}";
+        "force user" = group;
+        "force group" = group;
+      })
+    ]
+    ++ lib.optional enableBunker (
+      mkShare "${group}-bunker" "/shares/groups/${group}-bunker" {
+        "valid users" = "@${group}";
+        "force user" = group;
+        "force group" = group;
+      }
+    );
+
+  mkUserShares = user: {enableBunker ? false, ...}:
+    [
+      (mkShare user "/shares/users/${user}" {
+        "valid users" = user;
+      })
+    ]
+    ++ lib.optional enableBunker (
+      mkShare "${user}-bunker" "/shares/users/${user}-bunker" {
+        "valid users" = user;
+      }
+    );
 in {
   age.secrets."samba-passdb.tdb" = {
     rekeyFile = config.node.secretsDir + "/samba-passdb.tdb.age";
@@ -37,28 +89,32 @@ in {
     '';
   };
 
-  environment.persistence."/persist".files = [
-    "/etc/ssh/ssh_host_rsa_key"
-    "/etc/ssh/ssh_host_rsa_key.pub"
-  ];
-
   fileSystems."/storage".neededForBoot = true;
-  environment.persistence."/storage" = {
-    hideMounts = true;
-    directories =
-      lib.flip lib.mapAttrsToList smbUsers (name: _: {
-        directory = "/shares/users/${name}";
-        user = name;
-        group = name;
-        mode = "0750";
-      })
-      ++ lib.flip lib.mapAttrsToList smbGroups (name: _: {
-        directory = "/shares/groups/${name}";
-        user = name;
-        group = name;
-        mode = "0750";
-      });
-  };
+  fileSystems."/bunker".neededForBoot = true;
+  environment.persistence = lib.mkMerge ([
+      {
+        "/persist".files = [
+          "/etc/ssh/ssh_host_rsa_key"
+          "/etc/ssh/ssh_host_rsa_key.pub"
+        ];
+      }
+    ]
+    ++ lib.flatten (
+      lib.flip lib.mapAttrsToList smbUsers (
+        name: {enableBunker ? false, ...}:
+          [(mkPersistent "/storage" "/shares/users/${name}" name)]
+          ++ lib.optional enableBunker (
+            mkPersistent "/bunker" "/shares/users/${name}-bunker" name
+          )
+      )
+      ++ lib.flip lib.mapAttrsToList smbGroups (
+        name: {enableBunker ? false, ...}:
+          [(mkPersistent "/storage" "/shares/groups/${name}" name)]
+          ++ lib.optional enableBunker (
+            mkPersistent "/bunker" "/shares/groups/${name}-bunker" name
+          )
+      )
+    ));
 
   services.samba = {
     enable = true;
@@ -121,35 +177,10 @@ in {
       "fruit:wipe_intentionally_left_blank_rfork = yes"
       "fruit:delete_empty_adfiles = yes"
     ];
-    shares = let
-      mkShare = path: cfg:
-        {
-          inherit path;
-          public = "no";
-          writable = "yes";
-          "create mask" = "0740";
-          "directory mask" = "0750";
-          # "force create mode" = "0660";
-          # "force directory mode" = "0770";
-          "acl allow execute always" = "yes";
-        }
-        // cfg;
-
-      mkGroupShare = group:
-        mkShare "/shares/groups/${group}" {
-          "valid users" = "@${group}";
-          "force user" = group;
-          "force group" = group;
-        };
-
-      mkUserShare = user:
-        mkShare "/shares/users/${user}" {
-          "valid users" = user;
-        };
-    in
-      {}
-      // lib.mapAttrs (name: _: mkUserShare name) smbUsers
-      // lib.mapAttrs (name: _: mkGroupShare name) smbGroups;
+    shares = lib.mkMerge (lib.flatten (
+      lib.mapAttrsToList mkUserShares smbUsers
+      ++ lib.mapAttrsToList mkGroupShares smbGroups
+    ));
   };
 
   users.users = let

@@ -44,7 +44,11 @@
   # services.telegraf.extraConfig.inputs.github = {};
 
   guests = let
-    mkGuest = guestName: {enableStorageDataset ? false, ...}: {
+    mkGuest = guestName: {
+      enableStorageDataset ? false,
+      enableBunkerDataset ? false,
+      ...
+    }: {
       autostart = true;
       zfs."/state" = {
         # TODO make one option out of that? and split into two readonly options automatically?
@@ -58,6 +62,10 @@
       zfs."/storage" = lib.mkIf enableStorageDataset {
         pool = "storage";
         dataset = "safe/guests/${guestName}";
+      };
+      zfs."/bunker" = lib.mkIf enableBunkerDataset {
+        pool = "storage";
+        dataset = "bunker/guests/${guestName}";
       };
       modules = [
         ../../modules
@@ -105,7 +113,10 @@
   in
     lib.mkIf (!minimal) (
       {}
-      // mkMicrovm "samba" {enableStorageDataset = true;}
+      // mkMicrovm "samba" {
+        enableStorageDataset = true;
+        enableBunkerDataset = true;
+      }
       // mkMicrovm "grafana" {}
       // mkMicrovm "influxdb" {}
       // mkMicrovm "loki" {}

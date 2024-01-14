@@ -80,6 +80,7 @@ in {
             "rpool/local/state<" = true;
             "rpool/safe<" = true;
             "storage/safe<" = true;
+            "storage/bunker<" = true;
           };
           snapshotting = {
             type = "periodic";

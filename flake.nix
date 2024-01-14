@@ -160,6 +160,8 @@
         ;
     }
     // flake-utils.lib.eachDefaultSystem (system: rec {
+      apps.setupHetznerStorageBoxes = import ./nix/setup-hetzner-storage-boxes.nix self;
+
       pkgs = import nixpkgs {
         inherit system;
         config.allowUnfree = true;

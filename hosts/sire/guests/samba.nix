@@ -209,4 +209,37 @@ in {
     ];
 
   users.groups = lib.mapAttrs (_: cfg: {gid = cfg.id;}) (smbUsers // smbGroups);
+
+  # Backups
+  # ========================================================================
+
+  age.secrets.restic-encryption-password.generator.script = "alnum";
+  age.secrets.restic-ssh-privkey.generator.script = "ssh-ed25519";
+
+  services.restic.backups.main = {
+    hetznerStorageBox = let
+      box = config.repo.secrets.global.hetzner.storageboxes.dusk;
+    in {
+      enable = true;
+      inherit (box) mainUser;
+      inherit (box.users.samba) subUid path;
+      sshPrivateKeyFile = config.age.secrets.restic-ssh-privkey.path;
+    };
+
+    user = "root";
+    timerConfig = {
+      OnCalendar = "06:15";
+      RandomizedDelaySec = "3h";
+      Persistent = true;
+    };
+    initialize = true;
+    passwordFile = config.age.secrets.restic-encryption-password.path;
+    paths = ["/bunker"];
+    pruneOpts = [
+      "--keep-daily 14"
+      "--keep-weekly 7"
+      "--keep-monthly 12"
+      "--keep-yearly 75"
+    ];
+  };
 }

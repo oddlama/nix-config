@@ -138,7 +138,7 @@ in {
       mkGroupShare = group:
         mkShare "/shares/groups/${group}" {
           "valid users" = "@${group}";
-          "force user" = "family";
+          "force user" = group;
           "force group" = group;
         };
 

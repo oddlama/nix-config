@@ -5,18 +5,14 @@
 }: let
   inherit
     (lib)
-    attrNames
-    concatMap
     flip
     filterAttrs
-    getAttrFromPath
     mapAttrs
     mapAttrs'
     mapAttrsToList
     mkMerge
     mkOption
     nameValuePair
-    optionals
     types
     ;
 in {
@@ -100,15 +96,13 @@ in {
         isNetwork = netDef: (netDef.matchConfig != {}) && (netDef.address != [] || netDef.DHCP != null);
         macsByName = mapAttrs' (flip nameValuePair) (config.networking.renameInterfacesByMac or {});
         netNameFor = netName: netDef:
-          if netDef ? matchConfig.Name
-          then netDef.matchConfig.Name
-          else if netDef ? matchConfig.MACAddress && macsByName ? ${netDef.matchConfig.MACAddress}
-          then macsByName.${netDef.matchConfig.MACAddress}
-          else lib.trace "Could not derive network name for systemd network ${netName} on host ${config.node.name}, using unit name as fallback." netName;
-        netMACFor = netDef:
-          if netDef ? matchConfig.MACAddress
-          then netDef.matchConfig.MACAddress
-          else null;
+          netDef.matchConfig.Name
+          or (
+            if netDef ? matchConfig.MACAddress && macsByName ? ${netDef.matchConfig.MACAddress}
+            then macsByName.${netDef.matchConfig.MACAddress}
+            else lib.trace "Could not derive network name for systemd network ${netName} on host ${config.node.name}, using unit name as fallback." netName
+          );
+        netMACFor = netDef: netDef.matchConfig.MACAddress or null;
         networks = filterAttrs (_: isNetwork) (config.systemd.network.networks or {});
       in
         flip mapAttrs' networks (netName: netDef:

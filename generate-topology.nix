@@ -1,5 +1,6 @@
 {
   pkgs,
+  # deadnix: skip
   renderer ? "graphviz",
   nixosConfigurations,
 }: let
@@ -9,32 +10,27 @@
     attrNames
     attrValues
     concatLines
-    concatMapStrings
     concatStringsSep
-    const
     elem
     escapeXML
     flip
     filterAttrs
-    id
     imap0
-    mapAttrs
     mapAttrs'
     nameValuePair
     mapAttrsToList
     optional
     optionalAttrs
     optionalString
-    optionals
     ;
 
-  global = {
-    # global entities;
-  };
+  # global = {
+  #   # global entities;
+  # };
 
-  asjson = builtins.toFile "topology.dot" (
-    builtins.toJSON (map (x: x.config.topology) (attrValues nixosConfigurations))
-  );
+  # asjson = builtins.toFile "topology.dot" (
+  #   builtins.toJSON (map (x: x.config.topology) (attrValues nixosConfigurations))
+  # );
 
   colors.base00 = "#101419";
   colors.base01 = "#171B20";
@@ -60,7 +56,7 @@
   font = attrs: text: "<font ${xmlAttrs attrs}>${text}</font>";
   fontMono = {face = "JetBrains Mono";};
   mono = font fontMono;
-  monoColor = color: font (fontMono // {color = color;});
+  monoColor = color: font (fontMono // {inherit color;});
 
   mkCell = cellAttrs: text: "<td ${xmlAttrs cellAttrs}>${text}</td>";
   mapToTableRows = xs: {

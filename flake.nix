@@ -160,7 +160,11 @@
         ;
     }
     // flake-utils.lib.eachDefaultSystem (system: rec {
-      apps.setupHetznerStorageBoxes = import ./nix/setup-hetzner-storage-boxes.nix self;
+      apps.setupHetznerStorageBoxes = import (nixos-extra-modules + "/apps/setup-hetzner-storage-box.nix") {
+        inherit pkgs;
+        nixosConfigurations = self.nodes;
+        decryptIdentity = builtins.head self.secretsConfig.masterIdentities;
+      };
 
       pkgs = import nixpkgs {
         inherit system;

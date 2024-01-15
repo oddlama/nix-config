@@ -34,7 +34,6 @@
     ./oauth2-proxy.nix
     ./promtail.nix
     ./provided-domains.nix
-    ./restic.nix
     ./secrets.nix
     ./telegraf.nix
     ./wireguard-proxy.nix

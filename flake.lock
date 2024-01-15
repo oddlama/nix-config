@@ -53,11 +53,11 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "lastModified": 1696078264,
-        "narHash": "sha256-NF5G9CHaVWDD6DY0TP8z0cx30dAL1ciFYcVidVvb+NA=",
+        "lastModified": 1705278709,
+        "narHash": "sha256-CNJSc6tp12UZKAprviztJ509yAblteK4GiWwKewWEPQ=",
         "owner": "oddlama",
         "repo": "agenix-rekey",
-        "rev": "e529da8197f024c0069c4fde6237505e305b8d0a",
+        "rev": "e02a57e08224422934974f19853d4d70ed7eaaaa",
         "type": "github"
       },
       "original": {
@@ -981,11 +981,11 @@
         "pre-commit-hooks": "pre-commit-hooks_3"
       },
       "locked": {
-        "lastModified": 1704999567,
-        "narHash": "sha256-Whj1PFPomS/f97OD30CRrETTH/dmnUJdjEevDLJG4MM=",
+        "lastModified": 1705279209,
+        "narHash": "sha256-Lfd9gpDcsF5EaBdHNVrSQtXqs1B7wx1lXiW4nKvxrQw=",
         "owner": "oddlama",
         "repo": "nixos-extra-modules",
-        "rev": "4744a2844cd74ca9b122fbaaae5ae97159c0d30e",
+        "rev": "a776d7c47663029588aec52fb7ac941fa8bbd8bd",
         "type": "github"
       },
       "original": {

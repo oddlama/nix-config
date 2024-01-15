@@ -223,7 +223,7 @@ in {
       enable = true;
       inherit (box) mainUser;
       inherit (box.users.samba) subUid path;
-      sshPrivateKeyFile = config.age.secrets.restic-ssh-privkey.rekeyFile;
+      sshAgeSecret = "restic-ssh-privkey";
     };
 
     user = "root";

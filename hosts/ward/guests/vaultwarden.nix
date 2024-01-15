@@ -51,6 +51,10 @@ in {
   services.vaultwarden = {
     enable = true;
     dbBackend = "sqlite";
+    # WARN: Careful! The backup script does not remove files in the backup location
+    # if they were removed in the original location! Therefore, we use a directory
+    # that is not persisted and thus clean on every reboot.
+    backupDir = "/var/cache/vaultwarden-backup";
     config = {
       dataFolder = lib.mkForce "/var/lib/vaultwarden";
       extendedLogging = true;
@@ -79,5 +83,38 @@ in {
   systemd.services.vaultwarden.serviceConfig = {
     StateDirectory = lib.mkForce "vaultwarden";
     RestartSec = "600"; # Retry every 10 minutes
+  };
+
+  # Backups
+  # ========================================================================
+
+  age.secrets.restic-encryption-password.generator.script = "alnum";
+  age.secrets.restic-ssh-privkey.generator.script = "ssh-ed25519";
+
+  services.restic.backups.main = {
+    hetznerStorageBox = let
+      box = config.repo.secrets.global.hetzner.storageboxes.dusk;
+    in {
+      enable = true;
+      inherit (box) mainUser;
+      inherit (box.users.vaultwarden) subUid path;
+      sshAgeSecret = "restic-ssh-privkey";
+    };
+
+    user = "root";
+    timerConfig = {
+      OnCalendar = "06:15";
+      RandomizedDelaySec = "3h";
+      Persistent = true;
+    };
+    initialize = true;
+    passwordFile = config.age.secrets.restic-encryption-password.path;
+    paths = [config.services.vaultwarden.backupDir];
+    pruneOpts = [
+      "--keep-daily 14"
+      "--keep-weekly 7"
+      "--keep-monthly 12"
+      "--keep-yearly 75"
+    ];
   };
 }

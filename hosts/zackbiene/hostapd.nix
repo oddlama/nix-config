@@ -17,8 +17,7 @@
         apIsolate = true;
         authentication = {
           saePasswordsFile = config.age.secrets.wifi-clients.path;
-          # TODO reenable when nixpkgs#245413 is merged
-          # saeAddToMacAllow = true;
+          saeAddToMacAllow = true;
           enableRecommendedPairwiseCiphers = true;
         };
         bssid = "00:c0:ca:b1:4f:9f";

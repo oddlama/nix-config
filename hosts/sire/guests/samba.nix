@@ -161,6 +161,11 @@ in {
       # Require native SMB transport encryption by default.
       "server smb encrypt = required"
 
+      # Never map anything to the excutable bit.
+      "map archive = no"
+      "map system = no"
+      "map hidden = no"
+
       # Disable printer sharing. By default Samba shares printers configured
       # using CUPS.
       "load printers = no"

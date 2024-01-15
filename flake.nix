@@ -67,7 +67,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # BUG: nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:oddlama/nixpkgs/fix-kanidm-build";
 
     nixpkgs-wayland = {
       url = "github:nix-community/nixpkgs-wayland";

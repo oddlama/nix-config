@@ -65,6 +65,7 @@ in {
       rules."${proxy}-to-local" = {
         from = [proxy];
         to = ["local"];
+        ignoreEmptyRule = true;
 
         inherit
           (cfg.${proxy})

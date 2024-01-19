@@ -47,6 +47,7 @@
     mkGuest = guestName: {
       enableStorageDataset ? false,
       enableBunkerDataset ? false,
+      enablePaperlessDataset ? false,
       ...
     }: {
       autostart = true;
@@ -66,6 +67,10 @@
       zfs."/bunker" = lib.mkIf enableBunkerDataset {
         pool = "storage";
         dataset = "bunker/guests/${guestName}";
+      };
+      zfs."/paperless" = lib.mkIf enablePaperlessDataset {
+        pool = "storage";
+        dataset = "bunker/paperless";
       };
       modules = [
         ../../modules
@@ -116,11 +121,14 @@
       // mkMicrovm "samba" {
         enableStorageDataset = true;
         enableBunkerDataset = true;
+        enablePaperlessDataset = true;
       }
       // mkMicrovm "grafana" {}
       // mkMicrovm "influxdb" {}
       // mkMicrovm "loki" {}
-      // mkMicrovm "paperless" {}
+      // mkMicrovm "paperless" {
+        enablePaperlessDataset = true;
+      }
       #// mkMicrovm "minecraft"
       #// mkMicrovm "immich"
       #// mkMicrovm "firefly"

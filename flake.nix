@@ -63,12 +63,11 @@
     };
 
     nixos-nftables-firewall = {
-      url = "github:oddlama/nixos-nftables-firewall";
+      url = "github:thelegy/nixos-nftables-firewall";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # BUG: nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs.url = "github:oddlama/nixpkgs/fix-kanidm-build";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     nixpkgs-wayland = {
       url = "github:nix-community/nixpkgs-wayland";

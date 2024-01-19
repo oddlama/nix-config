@@ -67,6 +67,13 @@ in {
       PAPERLESS_CORS_ALLOWED_HOSTS = "https://${paperlessDomain}";
       PAPERLESS_TRUSTED_PROXIES = sentinelCfg.meta.wireguard.proxy-sentinel.ipv4;
 
+      # virtiofsd doesn't send inotify events (not sure if generally, or because we
+      # mount the same host share on another vm (samba) and modify it there).
+      PAPERLESS_CONSUMER_POLLING = 1; # seconds
+      # Wait three seconds between file-modified checks. After 5 consecutive checks
+      # where the file wasn't modified it will be consumed.
+      PAPERLESS_CONSUMER_POLLING_DELAY = 3;
+
       PAPERLESS_CONSUMER_ENABLE_BARCODES = true;
       PAPERLESS_CONSUMER_ENABLE_ASN_BARCODE = true;
       PAPERLESS_CONSUMER_BARCODE_SCANNER = "ZXING";

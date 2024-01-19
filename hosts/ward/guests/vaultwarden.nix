@@ -101,7 +101,7 @@ in {
       sshAgeSecret = "restic-ssh-privkey";
     };
 
-    user = "root";
+    user = "vaultwarden";
     timerConfig = {
       OnCalendar = "06:15";
       RandomizedDelaySec = "3h";

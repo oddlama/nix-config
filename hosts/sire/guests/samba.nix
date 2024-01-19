@@ -363,6 +363,7 @@ in {
       sshAgeSecret = "restic-ssh-privkey";
     };
 
+    # We need to backup stuff from other users, so run as root.
     user = "root";
     timerConfig = {
       OnCalendar = "06:15";

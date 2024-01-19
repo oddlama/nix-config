@@ -258,10 +258,22 @@ in {
               group = "paperless";
               mode = "0750";
             };
+            # A .keep file prevents paperless from removing this folder if no documents are present
+            "/paperless/media/documents/archive/${user}/.keep".f = {
+              user = "paperless";
+              group = "paperless";
+              mode = "0640";
+            };
             "/paperless/media/documents/originals/${user}".d = {
               user = "paperless";
               group = "paperless";
               mode = "0750";
+            };
+            # A .keep file prevents paperless from removing this folder if no documents are present
+            "/paperless/media/documents/originals/${user}/.keep".f = {
+              user = "paperless";
+              group = "paperless";
+              mode = "0640";
             };
           };
         }

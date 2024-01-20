@@ -29,11 +29,6 @@ in {
           type = types.str;
         };
 
-        user = mkOption {
-          description = "The user as which restic should run.";
-          type = types.str;
-        };
-
         paths = mkOption {
           description = "The paths to backup.";
           type = types.listOf types.path;
@@ -58,8 +53,13 @@ in {
             sshAgeSecret = "restic-ssh-privkey";
           };
 
-          # We need to backup stuff from other users, so run as root.
-          inherit (boxCfg) user paths;
+          # A) We need to backup stuff from other users, so run as root.
+          # B) We also need to be root because the ssh key will only
+          #    be accessible to root so whatever service is running cannot
+          #    just access our backup server.
+          user = "root";
+
+          inherit (boxCfg) paths;
           timerConfig = {
             OnCalendar = "06:15";
             RandomizedDelaySec = "3h";

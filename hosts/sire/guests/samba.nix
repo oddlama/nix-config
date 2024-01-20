@@ -349,7 +349,6 @@ in {
 
   backups.storageBoxes.dusk = {
     subuser = "samba";
-    user = "root";
     paths = ["/bunker"];
   };
 }

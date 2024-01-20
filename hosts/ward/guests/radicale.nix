@@ -85,7 +85,6 @@ in {
 
   backups.storageBoxes.dusk = {
     subuser = "radicale";
-    user = "radicale";
     paths = ["/var/lib/radicale"];
   };
 }

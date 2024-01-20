@@ -86,7 +86,6 @@ in {
 
   backups.storageBoxes.dusk = {
     subuser = "vaultwarden";
-    user = "vaultwarden";
     paths = [config.services.vaultwarden.backupDir];
   };
 }

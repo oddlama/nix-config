@@ -116,7 +116,6 @@ in {
 
   backups.storageBoxes.dusk = {
     subuser = "paperless";
-    user = "paperless";
     paths = [paperlessBackupDir];
   };
 }

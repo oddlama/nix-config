@@ -1,10 +1,12 @@
 {
   config,
+  lib,
   nodes,
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
   paperlessDomain = "paperless.${sentinelCfg.repo.secrets.local.personalDomain}";
+  paperlessBackupDir = "/var/cache/paperless-backup";
 in {
   microvm.mem = 1024 * 6;
   microvm.vcpu = 8;
@@ -92,4 +94,29 @@ in {
   };
 
   systemd.services.paperless.serviceConfig.RestartSec = "600"; # Retry every 10 minutes
+
+  systemd.tmpfiles.settings."10-paperless".${paperlessBackupDir}.d = {
+    inherit (config.services.paperless) user;
+    mode = "0700";
+  };
+
+  systemd.services.paperless-backup = let
+    cfg = config.systemd.services.paperless-consumer;
+  in {
+    description = "Paperless documents backup";
+    serviceConfig = lib.recursiveUpdate cfg.serviceConfig {
+      ExecStart = "${config.services.paperless.package}/bin/paperless-ngx document_exporter -na -nt -f -d ${paperlessBackupDir}";
+      ReadWritePaths = cfg.serviceConfig.ReadWritePaths ++ [paperlessBackupDir];
+      Restart = "no";
+      Type = "oneshot";
+    };
+    inherit (cfg) environment;
+    requiredBy = ["restic-backups-storage-box-dusk.service"];
+  };
+
+  backups.storageBoxes.dusk = {
+    subuser = "paperless";
+    user = "paperless";
+    paths = [paperlessBackupDir];
+  };
 }

@@ -27,6 +27,7 @@
     ./config/users.nix
 
     ./acme-wildcard.nix
+    ./backups.nix
     ./deterministic-ids.nix
     ./distributed-config.nix
     ./kanidm.nix

@@ -82,4 +82,10 @@ in {
   };
 
   systemd.services.radicale.serviceConfig.RestartSec = "600"; # Retry every 10 minutes
+
+  backups.storageBoxes.dusk = {
+    subuser = "radicale";
+    user = "radicale";
+    paths = ["/var/lib/radicale"];
+  };
 }

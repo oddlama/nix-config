@@ -104,12 +104,6 @@ in {
         masquerade = true;
       };
 
-      # Rule needed to allow local-vms wireguard traffic
-      lan-to-local = {
-        from = ["lan"];
-        to = ["local"];
-      };
-
       outbound = {
         from = ["lan"];
         to = ["lan" "untrusted"];

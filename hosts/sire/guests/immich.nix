@@ -38,10 +38,14 @@
     wantedBy = ["podman-compose-immich-root.target"];
   };
 in {
-  microvm.mem = 1024 * 8;
-  microvm.vcpu = 20;
+  microvm.mem = 1024 * 12;
+  microvm.vcpu = 16;
 
   meta.wireguard-proxy.sentinel.allowedTCPPorts = [2283];
+  networking.nftables.chains.forward.into-immich-container = {
+    after = ["conntrack"];
+    rules = ["iifname proxy-sentinel ip saddr 10.43.0.29 tcp dport 3001 accept"];
+  };
 
   nodes.sentinel = {
     networking.providedDomains.immich = immichDomain;
@@ -63,6 +67,9 @@ in {
           proxyPass = "http://immich";
           proxyWebsockets = true;
         };
+        extraConfig = ''
+          client_max_body_size 10G;
+        '';
       };
     };
   };
@@ -204,7 +211,7 @@ in {
       ExecStop = "${pkgs.podman}/bin/podman network rm -f immich-default";
     };
     script = ''
-      podman network inspect immich-default || podman network create immich-default --opt isolate=true --subnet=10.89.0.0/24
+      podman network inspect immich-default || podman network create immich-default --opt isolate=true --subnet=10.89.0.0/24 --disable-dns
     '';
     partOf = ["podman-compose-immich-root.target"];
     wantedBy = ["podman-compose-immich-root.target"];

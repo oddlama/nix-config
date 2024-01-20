@@ -1,7 +1,6 @@
 {config, ...}: {
   networking = {
     inherit (config.repo.secrets.local.networking) hostId;
-    wireless.iwd.enable = true;
   };
 
   boot.initrd.systemd.network = {

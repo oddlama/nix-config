@@ -146,9 +146,9 @@ in {
     extraConfig = lib.concatLines [
       # Show the server host name in the printer comment box in print manager
       # and next to the IPC connection in net view.
-      "server string = my-nas"
+      "server string = SambaOelig"
       # Set the NetBIOS name by which the Samba server is known.
-      "netbios name = my-nas"
+      "netbios name = SambaOelig"
       # Disable netbios support. We don't need to support browsing since all
       # clients hardcode the host and share names.
       "disable netbios = yes"

@@ -84,6 +84,15 @@ in {
     RestartSec = "600"; # Retry every 10 minutes
   };
 
+  environment.persistence."/state".directories = [
+    {
+      directory = config.services.vaultwarden.backupDir;
+      user = "vaultwarden";
+      group = "vaultwarden";
+      mode = "0700";
+    }
+  ];
+
   backups.storageBoxes.dusk = {
     subuser = "vaultwarden";
     paths = [config.services.vaultwarden.backupDir];

@@ -112,7 +112,17 @@ in {
     };
     inherit (cfg) environment;
     requiredBy = ["restic-backups-storage-box-dusk.service"];
+    before = ["restic-backups-storage-box-dusk.service"];
   };
+
+  environment.persistence."/state".directories = [
+    {
+      directory = paperlessBackupDir;
+      user = "paperless";
+      group = "paperless";
+      mode = "0700";
+    }
+  ];
 
   backups.storageBoxes.dusk = {
     subuser = "paperless";

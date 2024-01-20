@@ -148,6 +148,7 @@ in {
       groups.web-sentinel = {};
       groups."web-sentinel.adguardhome" = {};
       groups."web-sentinel.influxdb" = {};
+      groups."web-sentinel.immich" = {};
       systems.oauth2.web-sentinel = {
         displayName = "Web Sentinel";
         originUrl = "https://oauth2.${personalDomain}";
@@ -156,6 +157,7 @@ in {
         supplementaryScopeMaps = {
           "web-sentinel.adguardhome" = ["access_adguardhome"];
           "web-sentinel.influxdb" = ["access_influxdb"];
+          "web-sentinel.immich" = ["access_immich"];
         };
       };
     };

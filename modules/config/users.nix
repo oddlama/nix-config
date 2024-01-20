@@ -29,5 +29,6 @@
     msr = uidGid 980;
     fwupd-refresh = uidGid 979;
     radicale = uidGid 978;
+    podman = uidGid 977;
   };
 }

@@ -129,8 +129,10 @@
       // mkMicrovm "paperless" {
         enablePaperlessDataset = true;
       }
+      // mkMicrovm "immich" {
+        enableStorageDataset = true;
+      }
       #// mkMicrovm "minecraft"
-      #// mkMicrovm "immich"
       #// mkMicrovm "firefly"
       #// mkMicrovm "fasten-health"
     );

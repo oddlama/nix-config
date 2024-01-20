@@ -115,6 +115,8 @@ in {
     before = ["restic-backups-storage-box-dusk.service"];
   };
 
+  # Needed so we don't run out of tmpfs space for large backups.
+  # Technically this could be cleared each boot but whatever.
   environment.persistence."/state".directories = [
     {
       directory = paperlessBackupDir;

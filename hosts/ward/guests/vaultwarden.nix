@@ -84,6 +84,8 @@ in {
     RestartSec = "600"; # Retry every 10 minutes
   };
 
+  # Needed so we don't run out of tmpfs space for large backups.
+  # Technically this could be cleared each boot but whatever.
   environment.persistence."/state".directories = [
     {
       directory = config.services.vaultwarden.backupDir;

@@ -35,6 +35,13 @@ in {
     group = "kanidm";
   };
 
+  age.secrets.kanidm-oauth2-immich = {
+    generator.script = "alnum";
+    generator.tags = ["oauth2"];
+    mode = "440";
+    group = "kanidm";
+  };
+
   age.secrets.kanidm-oauth2-grafana = {
     generator.script = "alnum";
     generator.tags = ["oauth2"];
@@ -114,6 +121,15 @@ in {
 
       inherit (config.repo.secrets.global.kanidm) persons;
 
+      # Immich
+      groups.immich = {};
+      systems.oauth2.immich = {
+        displayName = "Immich";
+        originUrl = "https://${sentinelCfg.networking.providedDomains.immich}";
+        basicSecretFile = config.age.secrets.kanidm-oauth2-immich.path;
+        scopeMaps.immich = ["openid" "email" "profile"];
+      };
+
       # Grafana
       groups.grafana = {};
       groups."grafana.admins" = {};
@@ -148,7 +164,6 @@ in {
       groups.web-sentinel = {};
       groups."web-sentinel.adguardhome" = {};
       groups."web-sentinel.influxdb" = {};
-      groups."web-sentinel.immich" = {};
       systems.oauth2.web-sentinel = {
         displayName = "Web Sentinel";
         originUrl = "https://oauth2.${personalDomain}";
@@ -157,7 +172,6 @@ in {
         supplementaryScopeMaps = {
           "web-sentinel.adguardhome" = ["access_adguardhome"];
           "web-sentinel.influxdb" = ["access_influxdb"];
-          "web-sentinel.immich" = ["access_immich"];
         };
       };
     };

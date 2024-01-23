@@ -117,7 +117,7 @@ in {
         client_id = "grafana";
         client_secret = "$__file{${config.age.secrets.grafana-oauth2-client-secret.path}}";
         scopes = "openid email profile";
-        login_attribute_path = "prefered_username";
+        login_attribute_path = "preferred_username";
         auth_url = "https://${sentinelCfg.networking.providedDomains.kanidm}/ui/oauth2";
         token_url = "https://${sentinelCfg.networking.providedDomains.kanidm}/oauth2/token";
         api_url = "https://${sentinelCfg.networking.providedDomains.kanidm}/oauth2/openid/grafana/userinfo";

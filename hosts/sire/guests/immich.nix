@@ -12,6 +12,112 @@
   ipImmichPostgres = "10.89.0.12";
   ipImmichRedis = "10.89.0.13";
   ipImmichServer = "10.89.0.14";
+  configFile = pkgs.writeText "immich.config.json" (
+    builtins.toJSON {
+      ffmpeg = {
+        accel = "disabled";
+        bframes = -1;
+        cqMode = "auto";
+        crf = 23;
+        gopSize = 0;
+        maxBitrate = "0";
+        npl = 0;
+        preset = "ultrafast";
+        refs = 0;
+        targetAudioCodec = "aac";
+        targetResolution = "720";
+        targetVideoCodec = "h264";
+        temporalAQ = false;
+        threads = 0;
+        tonemap = "hable";
+        transcode = "required";
+        twoPass = false;
+      };
+      job = {
+        backgroundTask.concurrency = 5;
+        faceDetection.concurrency = 10;
+        library.concurrency = 5;
+        metadataExtraction.concurrency = 10;
+        migration.concurrency = 5;
+        search.concurrency = 5;
+        sidecar.concurrency = 5;
+        smartSearch.concurrency = 10;
+        thumbnailGeneration.concurrency = 10;
+        videoConversion.concurrency = 5;
+      };
+      library.scan = {
+        enabled = true;
+        cronExpression = "0 0 * * *";
+      };
+      logging = {
+        enabled = true;
+        level = "log";
+      };
+      machineLearning = {
+        clip = {
+          enabled = true;
+          modelName = "ViT-B-32__openai";
+        };
+        enabled = true;
+        facialRecognition = {
+          enabled = true;
+          maxDistance = 0.6;
+          minFaces = 3;
+          minScore = 0.7;
+          modelName = "buffalo_l";
+        };
+        url = "http://${ipImmichMachineLearning}:3003";
+      };
+      map = {
+        enabled = true;
+        darkStyle = "";
+        lightStyle = "";
+      };
+      newVersionCheck.enabled = true;
+      # XXX: Immich's oauth cannot use PKCE and uses legacy crypto so we need to run:
+      # kanidm system oauth2 warning-insecure-client-disable-pkce immich
+      # kanidm system oauth2 warning-enable-legacy-crypto immich
+      oauth = rec {
+        enabled = true;
+        autoLaunch = false;
+        autoRegister = true;
+        buttonText = "Login with Kanidm";
+
+        mobileOverrideEnabled = true;
+        mobileRedirectUri = "https://${immichDomain}/api/oauth/mobile-redirect";
+
+        clientId = "immich";
+        # clientSecret will be dynamically added in activation script
+        issuerUrl = "https://${sentinelCfg.networking.providedDomains.kanidm}/oauth2/openid/${clientId}";
+        scope = "openid email profile";
+        storageLabelClaim = "preferred_username";
+      };
+      passwordLogin.enabled = true;
+      reverseGeocoding.enabled = true;
+      server = {
+        externalDomain = "https://${immichDomain}";
+        loginPageMessage = "Besser im Stuhl einschlafen als im Schlaf einstuhlen.";
+      };
+      storageTemplate = {
+        enabled = true;
+        hashVerificationEnabled = true;
+        template = "{{y}}/{{MM}}/{{filename}}";
+      };
+      theme.customCss = "";
+      thumbnail = {
+        colorspace = "p3";
+        jpegSize = 1440;
+        quality = 80;
+        webpSize = 250;
+      };
+      trash = {
+        days = 30;
+        enabled = true;
+      };
+    }
+  );
+
+  processedConfigFile = "/run/agenix/immich.config.json";
 
   version = "v1.93.3";
   environment = {
@@ -24,6 +130,7 @@
     IMMICH_SERVER_URL = "http://${ipImmichServer}:3001/";
     IMMICH_MACHINE_LEARNING_URL = "http://${ipImmichMachineLearning}:3003";
     REDIS_HOSTNAME = ipImmichRedis;
+    IMMICH_CONFIG_FILE = "/immich.config.json";
   };
 
   upload_folder = "/storage/immich";
@@ -41,10 +148,30 @@ in {
   microvm.mem = 1024 * 12;
   microvm.vcpu = 16;
 
+  # Mirror the original oauth2 secret
+  age.secrets.immich-oauth2-client-secret = {
+    inherit (nodes.ward-kanidm.config.age.secrets.kanidm-oauth2-immich) rekeyFile;
+    mode = "440";
+    group = "root";
+  };
+
+  system.activationScripts.agenixRooterDerivedSecrets = {
+    # Run after agenix has generated secrets
+    deps = ["agenix"];
+    text = ''
+      immichClientSecret=$(< ${config.age.secrets.immich-oauth2-client-secret.path})
+      ${pkgs.jq}/bin/jq --arg immichClientSecret "$immichClientSecret" '.oauth.clientSecret = $immichClientSecret' ${configFile} > ${processedConfigFile}
+      chmod 444 ${processedConfigFile}
+    '';
+  };
+
   meta.wireguard-proxy.sentinel.allowedTCPPorts = [2283];
   networking.nftables.chains.forward.into-immich-container = {
     after = ["conntrack"];
-    rules = ["iifname proxy-sentinel ip saddr 10.43.0.29 tcp dport 3001 accept"];
+    rules = [
+      "iifname proxy-sentinel ip saddr 10.43.0.29 tcp dport 3001 accept"
+      "iifname podman1 oifname lan accept"
+    ];
   };
 
   nodes.sentinel = {
@@ -61,8 +188,6 @@ in {
       virtualHosts.${immichDomain} = {
         forceSSL = true;
         useACMEWildcardHost = true;
-        oauth2.enable = true;
-        oauth2.allowedGroups = ["access_immich"];
         locations."/" = {
           proxyPass = "http://immich";
           proxyWebsockets = true;
@@ -91,18 +216,19 @@ in {
   age.secrets.postgres_password.generator.script = "alnum";
 
   # Runtime
+  virtualisation.oci-containers.backend = "podman";
   virtualisation.podman = {
     enable = true;
     autoPrune.enable = true;
     dockerCompat = true;
   };
-  virtualisation.oci-containers.backend = "podman";
 
   # Containers
   virtualisation.oci-containers.containers."immich_machine_learning" = {
     image = "ghcr.io/immich-app/immich-machine-learning:${version}";
     inherit environment;
     volumes = [
+      "${processedConfigFile}:${environment.IMMICH_CONFIG_FILE}:ro"
       "${model_folder}:/cache:rw"
     ];
     log-driver = "journald";
@@ -117,6 +243,7 @@ in {
     image = "ghcr.io/immich-app/immich-server:${version}";
     inherit environment;
     volumes = [
+      "${processedConfigFile}:${environment.IMMICH_CONFIG_FILE}:ro"
       "${config.age.secrets.postgres_password.path}:${config.age.secrets.postgres_password.path}:ro"
       "/etc/localtime:/etc/localtime:ro"
       "${upload_folder}:/usr/src/app/upload:rw"
@@ -174,6 +301,7 @@ in {
     image = "ghcr.io/immich-app/immich-server:${version}";
     inherit environment;
     volumes = [
+      "${processedConfigFile}:${environment.IMMICH_CONFIG_FILE}:ro"
       "${config.age.secrets.postgres_password.path}:${config.age.secrets.postgres_password.path}:ro"
       "/etc/localtime:/etc/localtime:ro"
       "${upload_folder}:/usr/src/app/upload:rw"

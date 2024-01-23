@@ -69,11 +69,6 @@
 
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-    nixpkgs-wayland = {
-      url = "github:nix-community/nixpkgs-wayland";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     nixvim = {
       url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs";

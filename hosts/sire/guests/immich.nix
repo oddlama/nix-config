@@ -148,6 +148,9 @@ in {
   microvm.mem = 1024 * 12;
   microvm.vcpu = 16;
 
+  # Forwarding required to masquerade podman network
+  boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
+
   # Mirror the original oauth2 secret
   age.secrets.immich-oauth2-client-secret = {
     inherit (nodes.ward-kanidm.config.age.secrets.kanidm-oauth2-immich) rekeyFile;

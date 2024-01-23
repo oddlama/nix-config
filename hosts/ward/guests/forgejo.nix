@@ -30,6 +30,28 @@ in {
   nodes.sentinel = {
     networking.providedDomains.forgejo = forgejoDomain;
 
+    # Make sure to masquerade 9922 (wan) -> 22 (proxy-sentinel)
+    networking.nftables.chains = {
+      forward.dnat = {
+        after = ["conntrack"];
+        rules = ["ct status dnat accept"];
+      };
+      postrouting.to-forgejo = {
+        after = ["hook"];
+        rules = [
+          "iifname wan ip daddr ${config.meta.wireguard.proxy-sentinel.ipv4} tcp dport 22 masquerade random"
+          "iifname wan ip6 daddr ${config.meta.wireguard.proxy-sentinel.ipv6} tcp dport 22 masquerade random"
+        ];
+      };
+      prerouting.to-forgejo = {
+        after = ["hook"];
+        rules = [
+          "iifname wan tcp dport 9922 dnat ip to ${config.meta.wireguard.proxy-sentinel.ipv4}:22"
+          "iifname wan tcp dport 9922 dnat ip6 to ${config.meta.wireguard.proxy-sentinel.ipv6}:22"
+        ];
+      };
+    };
+
     services.nginx = {
       upstreams.forgejo = {
         servers."${config.meta.wireguard.proxy-sentinel.ipv4}:${toString config.services.gitea.settings.server.HTTP_PORT}" = {};

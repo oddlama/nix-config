@@ -41,6 +41,7 @@
   forwardedOptions = [
     ["age" "secrets"]
     ["networking" "providedDomains"]
+    ["networking" "nftables" "chains"]
     ["services" "nginx" "upstreams"]
     ["services" "nginx" "virtualHosts"]
     ["services" "influxdb2" "provision" "organizations"]

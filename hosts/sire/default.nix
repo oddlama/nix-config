@@ -132,6 +132,7 @@
       // mkMicrovm "immich" {
         enableStorageDataset = true;
       }
+      // mkMicrovm "ai" {}
       #// mkMicrovm "minecraft"
       #// mkMicrovm "firefly"
       #// mkMicrovm "fasten-health"

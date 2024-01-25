@@ -2,6 +2,9 @@
   networking.hostId = config.repo.secrets.local.networking.hostId;
   networking.domain = config.repo.secrets.local.personalDomain;
 
+  # Forwarding required for forgejo 9922->22
+  boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
+
   boot.initrd.systemd.network = {
     enable = true;
     networks = {inherit (config.systemd.network.networks) "10-wan";};

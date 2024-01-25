@@ -9,7 +9,6 @@
   # XXX: other domain on other proxy?
   forgejoDomain = "git.${sentinelCfg.repo.secrets.local.personalDomain}";
 in {
-  # TODO forward ssh port
   meta.wireguard-proxy.sentinel.allowedTCPPorts = [
     config.services.gitea.settings.server.HTTP_PORT
   ];

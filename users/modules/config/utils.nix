@@ -27,6 +27,8 @@ lib.optionalAttrs (!minimal) {
       unzip
       zip
       wget
+      usbutils
+      pciutils
     ];
   };
 

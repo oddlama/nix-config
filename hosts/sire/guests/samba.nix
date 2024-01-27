@@ -156,6 +156,8 @@ in {
       "hosts deny = 0.0.0.0/0"
       # Allow access to local network and TODO: wireguard
       "hosts allow = 192.168.1.0/24"
+      # Don't advertise inaccessible shares to users
+      "access based share enum = yes"
 
       # Set sane logging options
       "log level = 0 auth:2 passdb:2"

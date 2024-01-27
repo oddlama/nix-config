@@ -61,9 +61,9 @@
         enabled = true;
         facialRecognition = {
           enabled = true;
-          maxDistance = 0.6;
-          minFaces = 3;
-          minScore = 0.7;
+          maxDistance = 0.45;
+          minFaces = 2;
+          minScore = 0.65;
           modelName = "buffalo_l";
         };
         url = "http://${ipImmichMachineLearning}:3003";

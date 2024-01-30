@@ -14,6 +14,8 @@
       git-lfs
       d2
       cloc
+      jq
+      python3
     ];
   };
 }

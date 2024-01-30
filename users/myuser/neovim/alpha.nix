@@ -29,14 +29,50 @@
         opts.spacing = 1;
         val = [
           {
-            command = ":enew<CR>";
-            desc = "  New file";
-            shortcut = "e";
+            type = "button";
+            val = "  New file";
+            on_press.__raw = "function() vim.cmd[[enew]] end";
+            opts = {
+              shortcut = "e";
+              position = "center";
+              hl_shortcut = "keyword";
+              align_shortcut = "right";
+              width = 50;
+              cursor = 3;
+              keymap = [
+                "n"
+                "e"
+                ":enew<CR>"
+                {
+                  noremap = true;
+                  silent = true;
+                  nowait = true;
+                }
+              ];
+            };
           }
           {
-            command = ":qa<CR>";
-            desc = "󰅙  Quit Neovim";
-            shortcut = "q";
+            type = "button";
+            val = "󰅙  Quit Neovim";
+            on_press.__raw = "function() vim.cmd[[qa]] end";
+            opts = {
+              shortcut = "q";
+              position = "center";
+              hl_shortcut = "keyword";
+              align_shortcut = "right";
+              width = 50;
+              cursor = 3;
+              keymap = [
+                "n"
+                "q"
+                ":qa<CR>"
+                {
+                  noremap = true;
+                  silent = true;
+                  nowait = true;
+                }
+              ];
+            };
           }
         ];
       }

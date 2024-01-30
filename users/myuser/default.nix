@@ -28,12 +28,6 @@ in
       mode = "640";
     };
 
-    age.secrets.mailpw-206fd3b8 = {
-      rekeyFile = ./secrets/mailpw-206fd3b8.age;
-      group = myuser;
-      mode = "640";
-    };
-
     home-manager.users.${myuser} = {
       imports = [
         ../modules

@@ -1,31 +1,17 @@
 {
   config,
   lib,
-  nixosConfig,
-  pkgs,
   ...
-}: let
-  rageWrapper = pkgs.writeShellScript "rage-decrypt-yubikey" ''
-    export PATH="${pkgs.age-plugin-yubikey}:$PATH"
-    exec ${pkgs.rage}/bin/rage
-  '';
-in {
-  accounts.email.accounts =
-    lib.flip lib.mapAttrs' config.userSecrets.accounts.email
-    (_n: v:
-      lib.nameValuePair v.address ({
-          # TODO genericize
-          passwordCommand =
-            [rageWrapper.out "-d"]
-            ++ lib.concatMap (x: ["-i" x]) nixosConfig.age.rekey.masterIdentities
-            ++ [nixosConfig.age.secrets.mailpw-206fd3b8.path];
-
-          thunderbird = {
-            enable = true;
-            profiles = ["personal"];
-          };
-        }
-        // v));
+}: {
+  accounts.email.accounts = lib.flip lib.mapAttrs' config.userSecrets.accounts.email (_n: v:
+    lib.nameValuePair v.address (
+      lib.recursiveUpdate v {
+        thunderbird = {
+          enable = true;
+          profiles = ["personal"];
+        };
+      }
+    ));
 
   programs.thunderbird = {
     enable = true;

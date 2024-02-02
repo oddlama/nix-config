@@ -69,6 +69,11 @@ in {
       PAPERLESS_CORS_ALLOWED_HOSTS = "https://${paperlessDomain}";
       PAPERLESS_TRUSTED_PROXIES = sentinelCfg.meta.wireguard.proxy-sentinel.ipv4;
 
+      # Ghostscript is entirely bug-free.
+      PAPERLESS_OCR_USER_ARGS = builtins.toJSON {
+        continue_on_soft_render_error = true;
+      };
+
       # virtiofsd doesn't send inotify events (not sure if generally, or because we
       # mount the same host share on another vm (samba) and modify it there).
       PAPERLESS_CONSUMER_POLLING = 1; # seconds

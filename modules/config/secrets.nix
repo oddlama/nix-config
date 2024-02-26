@@ -21,12 +21,10 @@
       extraEncryptionPubkeys
       ;
 
-    # This is technically impure, but intended. We need to rekey on the
-    # current system due to yubikey availability.
-    forceRekeyOnSystem = builtins.extraBuiltins.unsafeCurrentSystem;
     hostPubkey = config.node.secretsDir + "/host.pub";
+    storageMode = "local";
     generatedSecretsDir = inputs.self.outPath + "/secrets/generated/${config.node.name}";
-    cacheDir = "/var/tmp/agenix-rekey/\"$UID\"";
+    localStorageDir = inputs.self.outPath + "/secrets/rekeyed/${config.node.name}";
   };
 
   age.generators.basic-auth = {

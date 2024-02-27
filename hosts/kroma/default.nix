@@ -3,6 +3,7 @@
   lib,
   minimal,
   pkgs,
+  #nodes,
   ...
 }:
 {
@@ -43,8 +44,8 @@
   '';
   networking.extraHosts = "127.0.0.1 modules-cdn.eac-prod.on.epicgames.com";
 
-  systemd.services."systemd-networkd".environment.SYSTEMD_LOG_LEVEL = "debug";
-  systemd.services."systemd-resolved".environment.SYSTEMD_LOG_LEVEL = "debug";
+  #systemd.services."systemd-networkd".environment.SYSTEMD_LOG_LEVEL = "debug";
+  #systemd.services."systemd-resolved".environment.SYSTEMD_LOG_LEVEL = "debug";
 
   graphical.gaming.enable = true;
 
@@ -64,4 +65,21 @@
 
   # BUG: remove when https://github.com/NixOS/nixpkgs/issues/280826 is merged
   environment.systemPackages = lib.trace "remove pcsclite polkit override https://github.com/NixOS/nixpkgs/issues/280826" [pkgs.pcscliteWithPolkit.out];
+
+  #meta.promtail = {
+  #  enable = true;
+  #  proxy = "sentinel";
+  #};
+
+  ## Connect safely via wireguard to skip authentication
+  #networking.hosts.${nodes.sentinel.config.meta.wireguard.proxy-sentinel.ipv4} = [nodes.sentinel.config.networking.providedDomains.influxdb];
+  #meta.telegraf = {
+  #  enable = true;
+  #  influxdb2 = {
+  #    domain = nodes.sentinel.config.networking.providedDomains.influxdb;
+  #    organization = "machines";
+  #    bucket = "telegraf";
+  #    node = "sire-influxdb";
+  #  };
+  #};
 }

@@ -1,34 +1,11 @@
-[Hosts](#hosts) \| [Programs](#programs--services) \| [Structure](./STRUCTURE.md)
+[Hosts](#hosts) \| [Overview](#overview) \| [Structure](./STRUCTURE.md)
 
 ![2024-01-04T21:24:51+01:00-fullscreen](https://github.com/oddlama/nix-config/assets/31919558/f473b473-0715-4323-89f2-5a79140ba54c)
 
 ## ❄️  My NixOS Configuration
 
-This is my personal nix config. It's still in the making, but this is what I got so far:
-
-- Secret rekeying, generation and bootstrapping using [agenix-rekey](https://github.com/oddlama/agenix-rekey)
-- Remote-unlockable full disk encryption using ZFS on LUKS <!-- with automatic snapshots and backups -->
-- Automatic disk partitioning via [disko](https://github.com/nix-community/disko)
-- Support for repository-wide secrets at evaluation time (hides PII like MACs)
-- Automatic static wireguard mesh generation <!-- plus netbird for dynamic meshing -->
-- Opt-in persistence with [impermanence](https://github.com/nix-community/impermanence)
-<!-- - Secure boot using [lanzaboote](https://github.com/nix-community/lanzaboote) -->
-
-<!--
-Desktop machines:
-
-- [Secondary neovim instance](./users/modules/config/manpager/default.nix) as a better manpager
-- System-wide theme using [stylix](https://github.com/danth/stylix)
--->
-
-Server related stuff:
-
-- Log and system monitoring through [grafana](https://github.com/grafana/grafana) using
-  - [influxdb2](https://github.com/influxdata/influxdb) and [telegraf](https://github.com/influxdata/telegraf) for metrics
-  - [loki](https://github.com/grafana/loki) and [promtail](https://grafana.com/docs/loki/latest/clients/promtail/) for logs
-- Single-Sign-On for all services using oauth2 via [kanidm](https://github.com/kanidm/kanidm)
-- Zoned nftables firewall via [nixos-nftables-firewall](https://github.com/thelegy/nixos-nftables-firewall)
-- Service isolation using [microvms](https://github.com/astro/microvm.nix) and nixos-containers
+This is my personal nix config which I use to maintain my whole infrastructure,
+including my homelab, external servers and my development machines.
 
 ## Hosts
 
@@ -42,34 +19,69 @@ Server related stuff:
 ☁️  | VPS | sentinel | Hetzner Cloud server | Proxies and protects my local services
 ☁️  | VPS | envoy | Hetzner Cloud server | Mailserver (WIP, still on gentoo)
 
-## Programs & Services
+## Overview
 
-#### Desktop Programs
+An overview over what you will find in this repository. I usually put a lot of
+effort into all my configurations and try to go over every option in detail.
+These lists summarize the major parts.
 
-|   |   |
-|---|---|
-**Shell** | zsh <!--& [nushell](https://github.com/nushell/nushell)--> with [starship](https://github.com/starship/starship), fzf plugins and sqlite history
-**Terminal** | [kitty](https://github.com/kovidgoyal/kitty)
-**Editor** | [neovim](https://github.com/neovim/neovim) via [nixvim](https://github.com/nix-community/nixvim)
-**WM** | [sway](https://github.com/swaywm/sway) & [i3](https://github.com/i3/i3) (still need X11 for gaming)
-**Browser** | [Firefox](https://www.mozilla.org/en-US/firefox/new/)
-**Notifications** | [wired-notify](https://github.com/Toqozz/wired-notify)
-**Screenshots** | [Flameshot](https://github.com/flameshot-org/flameshot) with custom [QR code detection](./pkgs/scripts/screenshot-area-scan-qr.nix) and [OCR to clipboard](./pkgs/scripts/screenshot-area.nix)
-**Gaming** | [Steam](https://store.steampowered.com/) and [Bottles](https://github.com/bottlesdevs/Bottles)
+I've also included a (subjective) indicator of customization (💎) so you can more
+easily find the configs that are very polished or different from the basic setup
+that most people would have. The configurations are sorted into three categories:
+
+- **dotfiles**: Lists all the stuff I use on my desktop/development machines. All of this is very customized.
+- **services**: Lists all my services, both homelab and external.
+- **other**: Lists anything else, like general machine config, organizational and miscellaneous stuff.
+
+#### Dotfiles
+
+|  | Program | Source | Description
+---|---|---|---
+🐚 Shell | ZSH & Starship | [Link](./users/modules/config/shell) | ZSH configuration with FZF, starship prompt, sqlite history and histdb-skim for fancy <kbd>Ctrl</kbd><kbd>R</kbd>
+🖥️ Terminal | Kitty | [Link](./users/myuser/graphical/kitty.nix) | Terminal configuration with nerdfonts and history <kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>H</kbd> to view scrollback buffer in neovim
+🪟 WM | i3 | [Link](./users/myuser/graphical/i3.nix) | Tiling window manager, heavily customized to my personal preferences
+🌐 Browser | Firefox | [Link](./users/myuser/graphical/firefox.nix) | Firefox with many privacy settings and betterfox
+🖊️ Editor | Neovim | [Link](./users/myuser/neovim) | Extensive neovim configuration, made with nixvim
+📜 Manpager | Neovim | [Link](./users/modules/config/manpager.nix) | Isolated neovim as manpager via nixvim
+📷 Screenshots | Flameshot | [Link](./users/myuser/graphical/flameshot.nix) | Screenshot tool with custom [QR code detection](./pkgs/scripts/screenshot-area-scan-qr.nix) and [OCR to clipboard](./pkgs/scripts/screenshot-area.nix)
+🗨️ Notifications | wired-notify | [Link](./users/myuser/graphical/wired-notify.nix) | Notification daemon with a very customized layout and color scheme
+🎮 Gaming | Steam & Bottles | [Link](./users/myuser/graphical/games) | Setup for gaming
 
 #### Services
 
-|   |   |
-|---|---|
-**Git** | Forgejo
-**SSO** | Kanidm
-**Logs** | Loki
-**Time Series DB** | Influxdb
-**Monitoring** | Grafana
-**DNS AdBlock** | AdGuard Home
-**Passwords** | Vaultwarden
-**Photos** | Immich
-**Documents** | Paperless
+|  | 💎 | Service | Source | Description
+---|---|---|---|---
+🐙 Git | — | Forgejo | [Link](./hosts/ward/guests/forgejo.nix) | Forgejo with SSO
+🔑 SSO | 💎 | Kanidm | [Link](./hosts/ward/guests/kanidm.nix) | Identity provider for Single Sign On on my hosted services. 💎 With custom-made secret provisioning.
+🔴 DNS Adblock | — | AdGuard Home | [Link](./hosts/ward/guests/adguardhome.nix) | DNS level adblocker
+🔐 Passwords | — | Vaultwarden | [Link](./hosts/ward/guests/vaultwarden.nix) | Self-hosted password manager
+📷 Photos | — | Immich | [Link](./hosts/sire/guests/immich.nix) | Self-hosted photo and video backup solution
+🗂️ Documents | 💎 | Paperless | [Link](./hosts/sire/guests/paperless.nix) | Document management system. 💎 with per-user Samba share integration (consume & archive)
+🗓️ CalDAV/CardDAV | — | Radicale | [Link](./hosts/ward/guests/radicale.nix) | Contacts, Calender and Tasks synchronization
+📁 NAS | 💎 | Samba | [Link](./hosts/sire/guests/samba.nix) | Network attached storage. 💎 Cross-integration with paperless
+📈 Dashboard | — | Grafana | [Link](./hosts/sire/guests/grafana.nix) | Logs and metrics dashboard and alerting
+📔 Logs DB | — | Loki | [Link](./hosts/sire/guests/loki.nix) | Central log aggregation service
+📔 Logs | — | Promtail | [Link](./modules/promtail.nix) | Log shipping agent
+📚 TSDB | — | Influxdb2 | [Link](./hosts/sire/guests/influxdb.nix) | Time series database for storing host metrics
+⏱️  Metrics | — | Telegraf | [Link](./modules/telegraf.nix) | Per-host collection of metrics
+
+#### General & Miscellaneous
+
+(WIP)
+
+|  | 💎 | Name | Source | Description
+---|---|---|---|---
+🗑️ | — | Impermanence | [Link](./modules/config/impermanence.nix) | Only persist what is necessary. ZFS rollback on boot. Most configuration is will be next to the respective service / program configuration.
+
+- reverse proxy with wireguard tunnel
+- restic
+- static wireguard mesh
+- unified guests interface for microvms and containers with ZFS integration
+- zoned nftables
+- Secret rekeying, generation and bootstrapping using [agenix-rekey](https://github.com/oddlama/agenix-rekey)
+- Remote-unlockable full disk encryption using ZFS on LUKS <!-- with automatic snapshots and backups -->
+- Automatic disk partitioning via [disko](https://github.com/nix-community/disko)
+- Support for repository-wide secrets at evaluation time (hides PII like MACs)
 
 ## Structure
 

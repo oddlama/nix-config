@@ -35,7 +35,7 @@ that most people would have. The configurations are sorted into three categories
 
 #### Dotfiles
 
-|  | Program | Source | Description
+| ~~~~~~~~~~~~ | Program | Source | Description
 ---|---|---|---
 🐚 Shell | ZSH & Starship | [Link](./users/modules/config/shell) | ZSH configuration with FZF, starship prompt, sqlite history and histdb-skim for fancy <kbd>Ctrl</kbd><kbd>R</kbd>
 🖥️ Terminal | Kitty | [Link](./users/myuser/graphical/kitty.nix) | Terminal configuration with nerdfonts and history <kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>H</kbd> to view scrollback buffer in neovim
@@ -49,29 +49,29 @@ that most people would have. The configurations are sorted into three categories
 
 #### Services
 
-|  | 💎 | Service | Source | Description
+| ~~~~~~~~~~~~ | 💎 | Service | Source | Description
 ---|---|---|---|---
-🐙 Git | — | Forgejo | [Link](./hosts/ward/guests/forgejo.nix) | Forgejo with SSO
+🐙 Git | – | Forgejo | [Link](./hosts/ward/guests/forgejo.nix) | Forgejo with SSO
 🔑 SSO | 💎 | Kanidm | [Link](./hosts/ward/guests/kanidm.nix) | Identity provider for Single Sign On on my hosted services. 💎 With custom-made secret provisioning.
-🔴 DNS Adblock | — | AdGuard Home | [Link](./hosts/ward/guests/adguardhome.nix) | DNS level adblocker
-🔐 Passwords | — | Vaultwarden | [Link](./hosts/ward/guests/vaultwarden.nix) | Self-hosted password manager
-📷 Photos | — | Immich | [Link](./hosts/sire/guests/immich.nix) | Self-hosted photo and video backup solution
+🔴 DNS Adblock | – | AdGuard Home | [Link](./hosts/ward/guests/adguardhome.nix) | DNS level adblocker
+🔐 Passwords | – | Vaultwarden | [Link](./hosts/ward/guests/vaultwarden.nix) | Self-hosted password manager
+📷 Photos | – | Immich | [Link](./hosts/sire/guests/immich.nix) | Self-hosted photo and video backup solution
 🗂️ Documents | 💎 | Paperless | [Link](./hosts/sire/guests/paperless.nix) | Document management system. 💎 with per-user Samba share integration (consume & archive)
-🗓️ CalDAV/CardDAV | — | Radicale | [Link](./hosts/ward/guests/radicale.nix) | Contacts, Calender and Tasks synchronization
+🗓️ CalDAV/CardDAV | – | Radicale | [Link](./hosts/ward/guests/radicale.nix) | Contacts, Calender and Tasks synchronization
 📁 NAS | 💎 | Samba | [Link](./hosts/sire/guests/samba.nix) | Network attached storage. 💎 Cross-integration with paperless
-📈 Dashboard | — | Grafana | [Link](./hosts/sire/guests/grafana.nix) | Logs and metrics dashboard and alerting
-📔 Logs DB | — | Loki | [Link](./hosts/sire/guests/loki.nix) | Central log aggregation service
-📔 Logs | — | Promtail | [Link](./modules/promtail.nix) | Log shipping agent
-📚 TSDB | — | Influxdb2 | [Link](./hosts/sire/guests/influxdb.nix) | Time series database for storing host metrics
-⏱️  Metrics | — | Telegraf | [Link](./modules/telegraf.nix) | Per-host collection of metrics
+📈 Dashboard | – | Grafana | [Link](./hosts/sire/guests/grafana.nix) | Logs and metrics dashboard and alerting
+📔 Logs DB | – | Loki | [Link](./hosts/sire/guests/loki.nix) | Central log aggregation service
+📔 Logs | – | Promtail | [Link](./modules/promtail.nix) | Log shipping agent
+📚 TSDB | – | Influxdb2 | [Link](./hosts/sire/guests/influxdb.nix) | Time series database for storing host metrics
+⏱️  Metrics | – | Telegraf | [Link](./modules/telegraf.nix) | Per-host collection of metrics
 
 #### General & Miscellaneous
 
 (WIP)
 
-|  | 💎 | Name | Source | Description
----|---|---|---|---
-🗑️ | — | Impermanence | [Link](./modules/config/impermanence.nix) | Only persist what is necessary. ZFS rollback on boot. Most configuration is will be next to the respective service / program configuration.
+| ~~~~~~~~~~~~ | 💎 | Source | Description
+---|---|---|---
+🗑️ Impermanence | – | [Link](./modules/config/impermanence.nix) | Only persist what is necessary. ZFS rollback on boot. Most configuration is will be next to the respective service / program configuration.
 
 - reverse proxy with wireguard tunnel
 - restic

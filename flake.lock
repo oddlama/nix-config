@@ -53,11 +53,11 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "lastModified": 1705278709,
-        "narHash": "sha256-CNJSc6tp12UZKAprviztJ509yAblteK4GiWwKewWEPQ=",
+        "lastModified": 1708966623,
+        "narHash": "sha256-ClfhWvju5sJpt2l9FKCcHtyNnVtLBRjMNie066GLgyM=",
         "owner": "oddlama",
         "repo": "agenix-rekey",
-        "rev": "e02a57e08224422934974f19853d4d70ed7eaaaa",
+        "rev": "ac73aac46bc4a9474496ce3e68ed05f0c2a340ce",
         "type": "github"
       },
       "original": {

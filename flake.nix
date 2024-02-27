@@ -257,7 +257,7 @@
           }
           {
             package = pkgs.nix-output-monitor;
-            help = "Nix Output Monitor (a drop alternative for `nix` which shows a build graph)";
+            help = "Nix Output Monitor (a drop-in alternative for `nix` which shows a build graph)";
           }
           {
             package = pkgs.writeShellApplication {
@@ -284,6 +284,11 @@
               plugin-files = ${pkgs.nix-plugins}/lib/nix/plugins
               extra-builtins-file = ${self.outPath}/nix/extra-builtins.nix
             '';
+          }
+          {
+            # Always add files to git after agenix rekey and agenix generate.
+            name = "AGENIX_REKEY_ADD_TO_GIT";
+            value = "true";
           }
         ];
       };

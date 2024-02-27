@@ -8,7 +8,7 @@
   paperlessDomain = "paperless.${sentinelCfg.repo.secrets.local.personalDomain}";
   paperlessBackupDir = "/var/cache/paperless-backup";
 in {
-  microvm.mem = 1024 * 6;
+  microvm.mem = 1024 * 9;
   microvm.vcpu = 8;
 
   nodes.sentinel = {

@@ -42,7 +42,6 @@ in {
   ];
 
   age.secrets.paperless-admin-password = {
-    rekeyFile = config.node.secretsDir + "/paperless-admin-password.age";
     generator.script = "alnum";
     mode = "440";
     group = "paperless";

@@ -12,6 +12,7 @@
         # TODO good idea? targets.emergency.wants = ["network.target" "sshd.service"];
         extraBin.ip = "${pkgs.iproute2}/bin/ip";
         extraBin.ping = "${pkgs.iputils}/bin/ping";
+        extraBin.cryptsetup = "${pkgs.cryptsetup}/bin/cryptsetup";
         # Give me a usable shell please
         users.root.shell = "${pkgs.bashInteractive}/bin/bash";
         storePaths = ["${pkgs.bashInteractive}/bin/bash"];

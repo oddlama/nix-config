@@ -13,9 +13,24 @@ in {
         content = with lib.disko.gpt; {
           type = "gpt";
           partitions = {
-            grub = partGrub "0%" "1MiB";
-            bios = partEfi "1MiB" "512MiB";
-            "rpool_${disks.main}" = partLuksZfs disks.main "rpool" "512MiB" "100%";
+            grub =
+              partGrub "0%" "1MiB"
+              // {
+                # FIXME: Needed because partlabels are 💩: https://github.com/nix-community/disko/issues/551
+                device = "/dev/disk/by-id/${disks.main}-part1";
+              };
+            bios =
+              partEfi "1MiB" "512MiB"
+              // {
+                # FIXME: Needed because partlabels are 💩: https://github.com/nix-community/disko/issues/551
+                device = "/dev/disk/by-id/${disks.main}-part2";
+              };
+            "rpool_${disks.main}" =
+              partLuksZfs disks.main "rpool" "512MiB" "100%"
+              // {
+                # FIXME: Needed because partlabels are 💩: https://github.com/nix-community/disko/issues/551
+                device = "/dev/disk/by-id/${disks.main}-part3";
+              };
           };
         };
       };

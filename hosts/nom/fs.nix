@@ -13,7 +13,12 @@ in {
         content = with lib.disko.gpt; {
           type = "gpt";
           partitions = {
-            "rpool_${disks.m2-ssd}" = partLuksZfs disks.m2-ssd "rpool" "0%" "100%";
+            "rpool_${disks.m2-ssd}" =
+              partLuksZfs disks.m2-ssd "rpool" "0%" "100%"
+              // {
+                # FIXME: Needed because partlabels are 💩: https://github.com/nix-community/disko/issues/551
+                device = "/dev/disk/by-id/${disks.m2-ssd}-part1";
+              };
           };
         };
       };
@@ -23,8 +28,18 @@ in {
         content = with lib.disko.gpt; {
           type = "gpt";
           partitions = {
-            efi = partEfi "0%" "8GiB";
-            swap = partSwap "8GiB" "100%";
+            efi =
+              partEfi "0%" "8GiB"
+              // {
+                # FIXME: Needed because partlabels are 💩: https://github.com/nix-community/disko/issues/551
+                device = "/dev/disk/by-id/${disks.boot-ssd}-part1";
+              };
+            swap =
+              partSwap "8GiB" "100%"
+              // {
+                # FIXME: Needed because partlabels are 💩: https://github.com/nix-community/disko/issues/551
+                device = "/dev/disk/by-id/${disks.boot-ssd}-part2";
+              };
           };
         };
       };

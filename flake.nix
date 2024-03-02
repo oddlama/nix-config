@@ -264,9 +264,13 @@
               name = "build";
               text = ''
                 set -euo pipefail
-                [[ "$#" -eq 1 ]] \
-                  || { echo "usage: build <host>" >&2; exit 1; }
-                nom build --no-link --print-out-paths --show-trace .#nodes."$1".config.system.build.toplevel
+                [[ "$#" -ge 1 ]] \
+                  || { echo "usage: build <HOST>..." >&2; exit 1; }
+                HOSTS=()
+                for h in "$@"; do
+                  HOSTS+=(".#nodes.$h.config.system.build.toplevel")
+                done
+                nom build --no-link --print-out-paths --show-trace "''${HOSTS[@]}"
               '';
             };
             help = "Build a host configuration";

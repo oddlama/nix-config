@@ -9,9 +9,6 @@
     diffview.enable = true;
 
     # Manage git from within neovim
-    neogit = {
-      enable = true;
-      disableBuiltinNotifications = true;
-    };
+    neogit.enable = true;
   };
 }

@@ -19,24 +19,44 @@ in {
   options.topology = {
     id = mkOption {
       description = ''
-        The attribute name in nixosConfigurations corresponding to this host.
-        Please overwrite with a unique identifier if your hostnames are not
+        The attribute name in the given `nodes` which corresponds to this host.
+        Please overwrite it with a unique identifier if your hostnames are not
         unique or don't reflect the name you use to refer to that node.
       '';
+      default = config.networking.hostName;
+      # TODO ensure unique across the board
       type = types.str;
     };
-    guests = mkOption {
-      description = "TODO guests ids (topology.id)";
-      type = types.listOf types.str;
-      default = [];
-    };
+
     type = mkOption {
       description = "TODO";
-      type = types.enum ["normal" "microvm" "nixos-container"];
       default = "normal";
+      type = types.enum ["normal" "microvm" "nixos-container"];
     };
+
+    guests = mkOption {
+      description = "TODO guests ids (topology.node.<name>.id) ensure exists";
+      default = [];
+      type = types.listOf types.str;
+    };
+
+    disks = mkOption {
+      default = {};
+      type = types.attrsOf (types.submodule (submod: {
+        options = {
+          name = mkOption {
+            description = "The name of this disk";
+            default = submod.config._module.args.name;
+            readOnly = true;
+            type = types.str;
+          };
+        };
+      }));
+    };
+
     interfaces = mkOption {
       description = "TODO";
+      default = {};
       type = types.attrsOf (types.submodule (submod: {
         options = {
           name = mkOption {
@@ -48,30 +68,45 @@ in {
 
           mac = mkOption {
             description = "The MAC address of this interface, if known.";
-            type = types.nullOr types.str;
             default = null;
+            type = types.nullOr types.str;
           };
 
           addresses = mkOption {
             description = "The configured address(es), or a descriptive string (like DHCP).";
             type = types.listOf types.str;
           };
+
+          network = mkOption {
+            description = ''
+              The global name of the attached/spanned network.
+              If this is given, this interface can be shown in the network graph.
+            '';
+            default = null;
+            type = types.nullOr types.str;
+          };
         };
       }));
-      default = {};
     };
-    disks = mkOption {
+
+    firewallRules = mkOption {
+      description = "TODO";
+      default = {};
       type = types.attrsOf (types.submodule (submod: {
         options = {
           name = mkOption {
-            description = "The name of this disk";
+            description = "The name of this firewall rule";
             type = types.str;
             readOnly = true;
             default = submod.config._module.args.name;
           };
+
+          contents = mkOption {
+            description = "A human readable summary of this rule's effects";
+            type = types.lines;
+          };
         };
       }));
-      default = {};
     };
   };
 
@@ -89,8 +124,10 @@ in {
       disks =
         flip mapAttrs (config.disko.devices.disk or {})
         (_: _: {});
+      # TODO: zfs pools from disko / fileSystems
       # TODO: microvm shares
       # TODO: container shares
+      # TODO: OCI containers shares
 
       interfaces = let
         isNetwork = netDef: (netDef.matchConfig != {}) && (netDef.address != [] || netDef.DHCP != null);

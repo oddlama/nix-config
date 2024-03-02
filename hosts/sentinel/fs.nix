@@ -11,13 +11,12 @@ in {
         type = "disk";
         device = "/dev/disk/by-id/${disks.main}";
         content = with lib.disko.gpt; {
-          type = "table";
-          format = "gpt";
-          partitions = [
-            (partGrub "grub" "0%" "1MiB")
-            (partEfi "bios" "1MiB" "512MiB")
-            (partLuksZfs disks.main "rpool" "512MiB" "100%")
-          ];
+          type = "gpt";
+          partitions = {
+            grub = partGrub "0%" "1MiB";
+            bios = partEfi "1MiB" "512MiB";
+            "rpool_${disks.main}" = partLuksZfs disks.main "rpool" "512MiB" "100%";
+          };
         };
       };
     };

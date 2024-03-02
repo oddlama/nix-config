@@ -21,8 +21,8 @@
       #   disableWhileTyping = true;
       # };
     };
-    layout = "de";
-    xkbVariant = "nodeadkeys";
+    xkb.layout = "de";
+    xkb.variant = "nodeadkeys";
   };
   services.autorandr.enable = true;
 

@@ -11,26 +11,14 @@ in {
         type = "disk";
         device = "/dev/disk/by-id/${disks.m2-ssd}";
         content = with lib.disko.gpt; {
-          type = "table";
-          format = "gpt";
-          partitions = [
-            (partEfi "efi" "0%" "1GiB")
-            (partSwap "swap" "1GiB" "17GiB")
-            (partLuksZfs disks.m2-ssd "rpool" "17GiB" "100%")
-          ];
+          type = "gpt";
+          partitions = {
+            efi = partEfi "0%" "1GiB";
+            swap = partSwap "1GiB" "17GiB";
+            "rpool_${disks.m2-ssd}" = partLuksZfs disks.m2-ssd "rpool" "17GiB" "100%";
+          };
         };
       };
-      #data-hdd = {
-      #  type = "disk";
-      #  device = "/dev/disk/by-id/${config.repo.secrets.local.disk.data-hdd}";
-      #  content = with lib.disko.gpt; {
-      #    type = "table";
-      #    format = "gpt";
-      #    partitions = [
-      #      (partLuksZfs "data" "0%" "100%")
-      #    ];
-      #  };
-      #};
     };
     zpool = with lib.disko.zfs; {
       rpool = mkZpool {datasets = impermanenceZfsDatasets;};

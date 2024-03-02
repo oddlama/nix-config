@@ -12,12 +12,11 @@ in {
           type = "disk";
           device = "/dev/disk/by-id/${disks.m2-ssd-1}";
           content = with lib.disko.gpt; {
-            type = "table";
-            format = "gpt";
-            partitions = [
-              (partEfi "efi" "0%" "1GiB")
-              (partLuksZfs disks.m2-ssd-1 "rpool" "1GiB" "100%")
-            ];
+            type = "gpt";
+            partitions = {
+              efi = partEfi "0%" "1GiB";
+              "rpool_${disks.m2-ssd-1}" = partLuksZfs disks.m2-ssd-1 "rpool" "1GiB" "100%";
+            };
           };
         };
         ${disks.m2-ssd-2} = {

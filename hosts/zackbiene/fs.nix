@@ -11,13 +11,12 @@ in {
         type = "disk";
         device = "/dev/disk/by-id/${disks.mmc}";
         content = with lib.disko.gpt; {
-          type = "table";
-          format = "gpt";
-          partitions = [
-            (partEfi "efi" "0%" "1GiB")
-            (partSwap "swap" "1GiB" "9GiB")
-            (partLuksZfs disks.mmc "rpool" "9GiB" "100%")
-          ];
+          type = "gpt";
+          partitions = {
+            efi = partEfi "0%" "1GiB";
+            swap = partSwap "1GiB" "9GiB";
+            "rpool_${disks.mmc}" = partLuksZfs disks.mmc "rpool" "9GiB" "100%";
+          };
         };
       };
     };

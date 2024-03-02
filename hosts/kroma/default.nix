@@ -2,8 +2,6 @@
   inputs,
   lib,
   minimal,
-  pkgs,
-  #nodes,
   ...
 }:
 {
@@ -58,13 +56,6 @@
 
   nix.settings.trusted-substituters = ["https://ai.cachix.org"];
   nix.settings.trusted-public-keys = ["ai.cachix.org-1:N9dzRK+alWwoKXQlnn0H6aUx0lU/mspIoz8hMvGvbbc="];
-
-  nixpkgs.config.permittedInsecurePackages = lib.warnIf (pkgs.obsidian.version != "1.5.3") "REMOVE THIS obsidian electron override! in kroma.nix" [
-    "electron-25.9.0"
-  ];
-
-  # BUG: remove when https://github.com/NixOS/nixpkgs/issues/280826 is merged
-  environment.systemPackages = lib.trace "remove pcsclite polkit override https://github.com/NixOS/nixpkgs/issues/280826" [pkgs.pcscliteWithPolkit.out];
 
   #meta.promtail = {
   #  enable = true;

@@ -23,7 +23,6 @@
         bashls.enable = true;
         cssls.enable = true;
         html.enable = true;
-        lua-ls.enable = true;
         rust-analyzer = {
           enable = true;
           settings = {
@@ -63,25 +62,16 @@
     none-ls = {
       enable = true;
       sources = {
-        code_actions = {
-          # gitsigns.enable = true;
-          shellcheck.enable = true;
-        };
         diagnostics = {
           deadnix.enable = true;
           gitlint.enable = true;
-          luacheck.enable = true;
           protolint.enable = true;
-          shellcheck.enable = true;
         };
         formatting = {
           alejandra.enable = true;
-          jq.enable = true;
           markdownlint.enable = true;
-          rustfmt.enable = true;
           sqlfluff.enable = true;
           shfmt.enable = true;
-          stylua.enable = true;
         };
       };
     };

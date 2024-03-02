@@ -23,20 +23,15 @@ lib.optionalAttrs (!minimal) {
     jack.enable = true;
     pulse.enable = true;
     wireplumber.enable = true;
+    extraConfig.pipewire."99-allowed-rates"."context.properties"."default.clock.allowed-rates" = [
+      44100
+      48000
+      88200
+      96000
+      176400
+      192000
+    ];
   };
 
   environment.systemPackages = with pkgs; [pulseaudio pulsemixer];
-  environment.etc = {
-    # Allow pipewire to dynamically adjust the rate sent to the devices based on the playback stream
-    "pipewire/pipewire.conf.d/99-allowed-rates.conf".text = builtins.toJSON {
-      "context.properties"."default.clock.allowed-rates" = [
-        44100
-        48000
-        88200
-        96000
-        176400
-        192000
-      ];
-    };
-  };
 }

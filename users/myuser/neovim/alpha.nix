@@ -31,7 +31,11 @@
           {
             type = "button";
             val = "  New file";
-            on_press.__raw = "function() vim.cmd[[enew]] end";
+            on_press.__raw =
+              /*
+              lua
+              */
+              "function() vim.cmd[[enew]] end";
             opts = {
               shortcut = "e";
               position = "center";
@@ -54,7 +58,11 @@
           {
             type = "button";
             val = "󰅙  Quit Neovim";
-            on_press.__raw = "function() vim.cmd[[qa]] end";
+            on_press.__raw =
+              /*
+              lua
+              */
+              "function() vim.cmd[[qa]] end";
             opts = {
               shortcut = "q";
               position = "center";

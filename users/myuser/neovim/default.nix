@@ -51,26 +51,34 @@
       {
         event = ["BufEnter" "BufWinEnter"];
         pattern = ["term://*"];
-        callback.__raw = ''
-          function()
-            vim.bo.number = false
-          end
-        '';
+        callback.__raw =
+          /*
+          lua
+          */
+          ''
+            function()
+              vim.bo.number = false
+            end
+          '';
       }
       {
         event = ["WinEnter"];
         pattern = ["*"];
-        callback.__raw = ''
-          function()
-            pcall(function()
-              if vim.bo.buftype == "nofile" or vim.bo.buftype == "help" then
-                vim.cmd "DisableWhitespace"
-              else
-                vim.cmd "EnableWhitespace"
-              end
-            end)
-          end
-        '';
+        callback.__raw =
+          /*
+          lua
+          */
+          ''
+            function()
+              pcall(function()
+                if vim.bo.buftype == "nofile" or vim.bo.buftype == "help" then
+                  vim.cmd "DisableWhitespace"
+                else
+                  vim.cmd "EnableWhitespace"
+                end
+              end)
+            end
+          '';
       }
     ];
 

@@ -4,7 +4,11 @@
       notify = {
         enable = true;
         stages = "static";
-        render.__raw = ''"compact"'';
+        render.__raw =
+          /*
+          lua
+          */
+          ''"compact"'';
         icons = {
           debug = "";
           error = "󰅙";
@@ -68,39 +72,47 @@
       vim-startuptime
     ];
 
-    extraConfigLuaPre = ''
-      vim.g.operator_sandwich_no_default_key_mappings = 1
-      vim.g.textobj_sandwich_no_default_key_mappings = 1
+    extraConfigLuaPre =
+      /*
+      lua
+      */
+      ''
+        vim.g.operator_sandwich_no_default_key_mappings = 1
+        vim.g.textobj_sandwich_no_default_key_mappings = 1
 
-      vim.g.wordmotion_nomap = 1
-    '';
+        vim.g.wordmotion_nomap = 1
+      '';
 
-    extraConfigLuaPost = ''
-      require("window-picker").setup {
-        hint = "floating-big-letter",
-        filter_rules = {
-          bo = {
-            filetype = { "neo-tree", "neo-tree-popup", "notify", "quickfix" },
-            buftype = { "terminal", "quickfix", "prompt" },
+    extraConfigLuaPost =
+      /*
+      lua
+      */
+      ''
+        require("window-picker").setup {
+          hint = "floating-big-letter",
+          filter_rules = {
+            bo = {
+              filetype = { "neo-tree", "neo-tree-popup", "notify", "quickfix" },
+              buftype = { "terminal", "quickfix", "prompt" },
+            },
           },
-        },
-        floating_big_letter = {
-          font = "ansi-shadow",
-        },
-        selection_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        show_prompt = false,
-      }
-
-      require("dressing").setup {
-        input = {
-          prefer_width = 80,
-          max_width = { 140, 0.9 },
-          min_width = { 80, 0.6 },
-          win_options = {
-            winblend = 0,
+          floating_big_letter = {
+            font = "ansi-shadow",
           },
-        },
-      }
-    '';
+          selection_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+          show_prompt = false,
+        }
+
+        require("dressing").setup {
+          input = {
+            prefer_width = 80,
+            max_width = { 140, 0.9 },
+            min_width = { 80, 0.6 },
+            win_options = {
+              winblend = 0,
+            },
+          },
+        }
+      '';
   };
 }

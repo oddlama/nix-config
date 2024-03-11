@@ -6,19 +6,23 @@
   programs.nixvim.plugins = {
     lsp = {
       enable = true;
-      preConfig = ''
-        local lsp_symbol = function(name, icon)
-        vim.fn.sign_define(
-          "DiagnosticSign" .. name,
-          { text = icon, numhl = "Diagnostic" .. name, texthl = "Diagnostic" .. name }
-        )
-        end
+      preConfig =
+        /*
+        lua
+        */
+        ''
+          local lsp_symbol = function(name, icon)
+          vim.fn.sign_define(
+            "DiagnosticSign" .. name,
+            { text = icon, numhl = "Diagnostic" .. name, texthl = "Diagnostic" .. name }
+          )
+          end
 
-        lsp_symbol("Error", "󰅙")
-        lsp_symbol("Info", "")
-        lsp_symbol("Hint", "󰌵")
-        lsp_symbol("Warn", "")
-      '';
+          lsp_symbol("Error", "󰅙")
+          lsp_symbol("Info", "")
+          lsp_symbol("Hint", "󰌵")
+          lsp_symbol("Warn", "")
+        '';
       servers = {
         bashls.enable = true;
         cssls.enable = true;

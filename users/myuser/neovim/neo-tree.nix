@@ -15,10 +15,26 @@
         "t" = "open_tabnew";
         "z" = "close_all_nodes";
         "Z" = "expand_all_nodes";
-        "a".__raw = ''{ "add", config = { show_path = "relative" } }'';
-        "A".__raw = ''{ "add_directory", config = { show_path = "relative" } }'';
-        "c".__raw = ''{ "copy", config = { show_path = "relative" } }'';
-        "m".__raw = ''{ "move", config = { show_path = "relative" } }'';
+        "a".__raw =
+          /*
+          lua
+          */
+          ''{ "add", config = { show_path = "relative" } }'';
+        "A".__raw =
+          /*
+          lua
+          */
+          ''{ "add_directory", config = { show_path = "relative" } }'';
+        "c".__raw =
+          /*
+          lua
+          */
+          ''{ "copy", config = { show_path = "relative" } }'';
+        "m".__raw =
+          /*
+          lua
+          */
+          ''{ "move", config = { show_path = "relative" } }'';
       };
     };
     defaultComponentConfigs = {

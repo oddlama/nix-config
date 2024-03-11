@@ -12,20 +12,15 @@
     attrValues
     concatLines
     concatLists
-    concatMap
-    concatMapStrings
     converge
-    escapeShellArg
-    escapeShellArgs
     filter
+    filterAttrs
     filterAttrsRecursive
     flip
     foldl'
     getExe
-    hasInfix
     hasPrefix
     isStorePath
-    mapAttrs
     mapAttrsToList
     mdDoc
     mkEnableOption
@@ -35,9 +30,10 @@
     mkOption
     mkPackageOption
     optional
-    optionals
+    optionalString
     subtractLists
     types
+    unique
     ;
 
   cfg = config.services.kanidm;
@@ -88,10 +84,10 @@
     ProtectHostname = true;
     # Would re-mount paths ignored by temporary root
     #ProtectSystem = "strict";
-    # ProtectControlGroups = true; # needed for restarter script
+    ProtectControlGroups = true;
     ProtectKernelLogs = true;
     ProtectKernelModules = true;
-    # ProtectKernelTunables = true; # needed for restarter script
+    ProtectKernelTunables = true;
     ProtectProc = "invisible";
     RestrictAddressFamilies = [];
     RestrictNamespaces = true;
@@ -110,38 +106,49 @@
       default = true;
     };
 
-  mkScript = script:
-    mkOption {
-      readOnly = true;
-      internal = true;
-      type = types.str;
-      default = script;
-    };
+  filterPresent = filterAttrs (_: v: v.present);
 
-  mappingsJson = pkgs.writeText "mappings.json" (builtins.toJSON {
-    account_credentials.admin = cfg.provision.adminPasswordFile;
-    account_credentials.idm_admin = cfg.provision.idmAdminPasswordFile;
-    oauth2_basic_secrets = mapAttrs (_: x: x.basicSecretFile) cfg.provision.systems.oauth2;
+  provisionStateJson = pkgs.writeText "provision-state.json" (builtins.toJSON {
+    inherit (cfg.provision) groups persons systems;
   });
 
-  preStartScript = pkgs.writeShellScript "pre-start-manipulate" ''
-    if ! test -e ${escapeShellArg cfg.serverSettings.db_path}; then
-      touch "$STATE_DIRECTORY/.first_startup"
-    else
-      ${getExe pkgs.kanidm-secret-manipulator} ${escapeShellArg cfg.serverSettings.db_path} ${mappingsJson}
+  # Only recover the admin account if a password should explicitly be provisioned
+  # for the account. Otherwise it is not needed for provisioning.
+  maybeRecoverAdmin = optionalString (cfg.provision.adminPasswordFile != null) ''
+    KANIDM_ADMIN_PASSWORD=$(< ${cfg.provision.adminPasswordFile})
+    # We always reset the admin account password if a desired password was specified.
+    if ! KANIDM_RECOVER_ACCOUNT_PASSWORD=$KANIDM_ADMIN_PASSWORD ${cfg.package}/bin/kanidmd recover-account -c ${serverConfigFile} admin --from-environment >/dev/null; then
+      echo "Failed to recover admin account" >&2
+      exit 1
     fi
   '';
 
-  restarterScript = pkgs.writeShellScript "post-start-restarter" ''
-    set -euo pipefail
-    if test -e "$STATE_DIRECTORY/.needs_restart"; then
-      rm -f "$STATE_DIRECTORY/.needs_restart"
-      echo "Restarting kanidm.service..."
-      #kill -TERM $MAINPID
-      #echo "Restarting kanidm.service via dbus..."
-      ${pkgs.dbus}/bin/dbus-send --system --type=method_call --print-reply --dest=org.freedesktop.systemd1 /org/freedesktop/systemd1 org.freedesktop.systemd1.Manager.RestartUnit string:"kanidm.service" string:"replace"
-    fi
-  '';
+  # Recover the idm_admin account. If a password should explicitly be provisioned
+  # for the account we set it, otherwise we generate a new one because it is required
+  # for provisioning.
+  recoverIdmAdmin =
+    if cfg.provision.idmAdminPasswordFile != null
+    then ''
+      KANIDM_IDM_ADMIN_PASSWORD=$(< ${cfg.provision.idmAdminPasswordFile})
+      # We always reset the idm_admin account password if a desired password was specified.
+      if ! KANIDM_RECOVER_ACCOUNT_PASSWORD=$KANIDM_IDM_ADMIN_PASSWORD ${cfg.package}/bin/kanidmd recover-account -c ${serverConfigFile} idm_admin --from-environment >/dev/null; then
+        echo "Failed to recover idm_admin account" >&2
+        exit 1
+      fi
+    ''
+    else ''
+      # Recover idm_admin account
+      if ! recover_out=$(${cfg.package}/bin/kanidmd recover-account -c ${serverConfigFile} idm_admin -o json); then
+        echo "$recover_out" >&2
+        echo "kanidm provision: Failed to recover admin account" >&2
+        exit 1
+      fi
+      if ! KANIDM_IDM_ADMIN_PASSWORD=$(grep '{"password' <<< "$recover_out" | ${getExe pkgs.jq} -r .password); then
+        echo "$recover_out" >&2
+        echo "kanidm provision: Failed to parse password for idm_admin account" >&2
+        exit 1
+      fi
+    '';
 
   postStartScript = pkgs.writeShellScript "post-start" ''
     set -euo pipefail
@@ -150,7 +157,7 @@
     count=0
     while ! test -e /run/kanidmd/sock; do
       sleep 0.1
-      if [ "$count" -eq 600 ]; then
+      if [[ "$count" -eq 600 ]]; then
         echo "Tried for 60 seconds, giving up..."
         exit 1
       fi
@@ -161,113 +168,11 @@
       count=$((count++))
     done
 
-    # If this is the first start, we login this time by recovering the admin account
-    # and force a restart afterwards to rewrite the password.
-    if test -e "$STATE_DIRECTORY/.first_startup"; then
-      # Recover admin account
-      if ! recover_out=$(${cfg.package}/bin/kanidmd recover-account -c ${serverConfigFile} admin); then
-        echo "$recover_out" >&2
-        echo "kanidm provision: Failed to recover admin account" >&2
-        exit 1
-      fi
-      if ! KANIDM_PASSWORD_ADMIN=$(grep -o '[A-Za-z0-9]\{48\}' <<< "$recover_out"); then
-        echo "$recover_out" >&2
-        echo "kanidm provision: Failed to parse password for admin account" >&2
-        exit 1
-      fi
+    ${recoverIdmAdmin}
+    ${maybeRecoverAdmin}
 
-      # Recover idm_admin account
-      if ! recover_out=$(${cfg.package}/bin/kanidmd recover-account -c ${serverConfigFile} idm_admin); then
-        echo "$recover_out" >&2
-        echo "kanidm provision: Failed to recover admin account" >&2
-        exit 1
-      fi
-      if ! KANIDM_PASSWORD_IDM=$(grep -o '[A-Za-z0-9]\{48\}' <<< "$recover_out"); then
-        echo "$recover_out" >&2
-        echo "kanidm provision: Failed to parse password for idm_admin account" >&2
-        exit 1
-      fi
-      needs_rewrite=1
-      rm -f "$STATE_DIRECTORY/.first_startup"
-    else
-      # Login using the admin password
-      KANIDM_PASSWORD_ADMIN="$(< ${escapeShellArg cfg.provision.adminPasswordFile})"
-      KANIDM_PASSWORD_IDM="$(< ${escapeShellArg cfg.provision.idmAdminPasswordFile})"
-    fi
-
-    # Set $HOME so kanidm can save the token temporarily
-    export TMPDIR=$(mktemp -d)
-    mkdir -p "$TMPDIR"/{.config,.cache}
-    touch "$TMPDIR/.config/kanidm"
-    trap 'rm -rf $TMPDIR' EXIT
-    export HOME=$TMPDIR
-
-    # Login to admin and idm_admin
-    KANIDM_PASSWORD=$KANIDM_PASSWORD_ADMIN ${cfg.package}/bin/kanidm login --name admin \
-      || { echo "kanidm provision: Failed to login as admin, see kanidm logs." >&2; exit 1; }
-    KANIDM_PASSWORD=$KANIDM_PASSWORD_IDM ${cfg.package}/bin/kanidm login --name idm_admin \
-      || { echo "kanidm provision: Failed to login as idm_admin, see kanidm logs." >&2; exit 1; }
-
-    # Wrapper function that detects kanidm errors by detecting any output to stderr
-    # (stderr and stdout are swapped when calling this)
-    function kanidm-detect-err() {
-      if ! err=$(${cfg.package}/bin/kanidm "$@" 3>&2 2>&1 1>&3-); then
-        echo "$err"
-        echo "kanidm ''${*@Q}: failed with status $?, see error above"
-        exit 1
-      fi
-      if [[ -n "$err" ]]; then
-        echo "$err"
-        echo "kanidm ''${*@Q}: failed, see error above"
-        exit 1
-      fi
-    }
-
-    # Wrapper function to easily execute commands as admin or idm_admin
-    function kanidm-as-user() {
-      name=$1
-      shift
-      kanidm-detect-err "$@" --name "$name" 3>&2 2>&1 1>&3-
-    }
-
-    function kanidm-admin() { kanidm-as-user admin "$@"; }
-    function kanidm-idm() { kanidm-as-user idm_admin "$@"; }
-
-    known_groups=$(kanidm-admin group list --output=json)
-    function group_exists() {
-      if ! x=$(${getExe pkgs.jq} <<< "$known_groups" ".[] | select(.name[0] == \"$1\")"); then
-        echo "kanidm provision: Failed to parse groups list." >&2
-        exit 1
-      fi
-      [[ -n "$x" ]]
-    }
-
-    known_persons=$(kanidm-admin person list --output=json)
-    function person_exists() {
-      if ! x=$(${getExe pkgs.jq} <<< "$known_persons" ".[] | select(.name[0] == \"$1\")"); then
-        echo "kanidm provision: Failed to parse persons list." >&2
-        exit 1
-      fi
-      [[ -n "$x" ]]
-    }
-
-    known_oauth2_systems=$(kanidm-admin system oauth2 list --output=json)
-    function oauth2_system_exists() {
-      if ! x=$(${getExe pkgs.jq} <<< "$known_oauth2_systems" ".[] | select(.oauth2_rs_name[0] == \"$1\")"); then
-        echo "kanidm provision: Failed to parse oauth2 systems list." >&2
-        exit 1
-      fi
-      [[ -n "$x" ]]
-    }
-
-    ${concatMapStrings (x: x._script) (attrValues cfg.provision.groups)}
-    ${concatMapStrings (x: x._script) (attrValues cfg.provision.persons)}
-    ${concatMapStrings (x: x._script) (attrValues cfg.provision.systems.oauth2)}
-
-    if [[ "''${needs_rewrite-0}" == 1 ]]; then
-      echo "Queueing service restart to rewrite secrets"
-      touch "$STATE_DIRECTORY/.needs_restart"
-    fi
+    KANIDM_PROVISION_IDM_ADMIN_TOKEN=$KANIDM_IDM_ADMIN_PASSWORD \
+      ${getExe pkgs.kanidm-provision} --url "${cfg.provision.instanceUrl}" --state ${provisionStateJson} ${optionalString cfg.provision.acceptInvalidCerts "--accept-invalid-certs"}
   '';
 in {
   options.services.kanidm = {
@@ -276,182 +181,6 @@ in {
     enablePam = mkEnableOption (mdDoc "the Kanidm PAM and NSS integration");
 
     package = mkPackageOption pkgs "kanidm" {};
-
-    provision = {
-      enable = mkEnableOption "provisioning of systems (oauth2), groups and users";
-
-      adminPasswordFile = mkOption {
-        description = mdDoc "Path to a file containing the admin password for kanidm. Do NOT use a file from the nix store here!";
-        example = "/run/secrets/kanidm-admin-password";
-        type = types.path;
-      };
-
-      idmAdminPasswordFile = mkOption {
-        description = mdDoc "Path to a file containing the idm admin password for kanidm. Do NOT use a file from the nix store here!";
-        example = "/run/secrets/kanidm-idm-admin-password";
-        type = types.path;
-      };
-
-      persons = mkOption {
-        description = mdDoc "Provisioning of kanidm persons";
-        default = {};
-        type = types.attrsOf (types.submodule (personSubmod: let
-          inherit (personSubmod.config._module.args) name;
-          updateArgs =
-            ["--displayname" personSubmod.config.displayName]
-            ++ optionals (personSubmod.config.legalName != null)
-            ["--legalname" personSubmod.config.legalName]
-            # mail addresses
-            ++ concatMap (addr: ["--mail" addr]) personSubmod.config.mailAddresses;
-        in {
-          options = {
-            _script = mkScript (
-              if personSubmod.config.present
-              then
-                ''
-                  if ! person_exists ${escapeShellArg name}; then
-                    kanidm-idm person create ${escapeShellArg name} \
-                      ${escapeShellArg personSubmod.config.displayName}
-                  fi
-                  kanidm-idm person update ${escapeShellArg name} ${escapeShellArgs updateArgs}
-                ''
-                + flip concatMapStrings personSubmod.config.groups (group: ''
-                  kanidm-idm group add-members ${escapeShellArg group} ${escapeShellArg name}
-                '')
-              else ''
-                if person_exists ${escapeShellArg name}; then
-                  kanidm-idm person delete ${escapeShellArg name}
-                fi
-              ''
-            );
-
-            present = mkPresentOption "person";
-
-            displayName = mkOption {
-              description = mdDoc "Display name";
-              type = types.str;
-              example = "My User";
-            };
-
-            legalName = mkOption {
-              description = mdDoc "Full legal name";
-              type = types.nullOr types.str;
-              example = "Jane Doe";
-              default = null;
-            };
-
-            mailAddresses = mkOption {
-              description = mdDoc "Mail addresses. First given address is considered the primary address.";
-              type = types.listOf types.str;
-              example = ["jane.doe@example.com"];
-              default = [];
-            };
-
-            groups = mkOption {
-              description = mdDoc "List of kanidm groups to which this user belongs.";
-              type = types.listOf types.str;
-              default = [];
-            };
-          };
-        }));
-      };
-
-      groups = mkOption {
-        description = mdDoc "Provisioning of kanidm groups";
-        default = {};
-        type = types.attrsOf (types.submodule (groupSubmod: let
-          inherit (groupSubmod.config._module.args) name;
-        in {
-          options = {
-            _script = mkScript (
-              if groupSubmod.config.present
-              then ''
-                if ! group_exists ${escapeShellArg name}; then
-                  kanidm-admin group create ${escapeShellArg name}
-                fi
-              ''
-              else ''
-                if group_exists ${escapeShellArg name}; then
-                  kanidm-admin group delete ${escapeShellArg name}
-                fi
-              ''
-            );
-
-            present = mkPresentOption "group";
-          };
-        }));
-      };
-
-      systems.oauth2 = mkOption {
-        description = mdDoc "Provisioning of oauth2 systems";
-        default = {};
-        type = types.attrsOf (types.submodule (oauth2Submod: let
-          inherit (oauth2Submod.config._module.args) name;
-        in {
-          options = {
-            _script = mkScript (
-              if oauth2Submod.config.present
-              then
-                ''
-                  if ! oauth2_system_exists ${escapeShellArg name}; then
-                    kanidm-admin system oauth2 create \
-                      ${escapeShellArg name} \
-                      ${escapeShellArg oauth2Submod.config.displayName} \
-                      ${escapeShellArg oauth2Submod.config.originUrl}
-                    needs_rewrite=1
-                  fi
-                ''
-                + concatLines (flip mapAttrsToList oauth2Submod.config.scopeMaps (group: scopes: ''
-                  kanidm-admin system oauth2 update-scope-map ${escapeShellArg name} \
-                    ${escapeShellArg group} ${escapeShellArgs scopes}
-                ''))
-                + concatLines (flip mapAttrsToList oauth2Submod.config.supplementaryScopeMaps (group: scopes: ''
-                  kanidm-admin system oauth2 update-sup-scope-map ${escapeShellArg name} \
-                    ${escapeShellArg group} ${escapeShellArgs scopes}
-                ''))
-              else ''
-                if oauth2_system_exists ${escapeShellArg name}; then
-                  kanidm-admin system oauth2 delete ${escapeShellArg name}
-                fi
-              ''
-            );
-
-            present = mkPresentOption "oauth2 system";
-
-            displayName = mkOption {
-              description = mdDoc "Display name";
-              type = types.str;
-              example = "Some Service";
-            };
-
-            originUrl = mkOption {
-              description = mdDoc "The basic secret to use for this service. If null, the random secret generated by kanidm will not be touched. Do NOT use a path from the nix store here!";
-              type = types.str;
-              example = "https://someservice.example.com/";
-            };
-
-            basicSecretFile = mkOption {
-              description = mdDoc "The basic secret to use for this service. If null, the random secret generated by kanidm will not be touched. Do NOT use a path from the nix store here!";
-              type = types.nullOr types.path;
-              example = "/run/secrets/some-oauth2-basic-secret";
-              default = null;
-            };
-
-            scopeMaps = mkOption {
-              description = mdDoc "Maps kanidm groups to provided scopes. See [Scope Relations](https://kanidm.github.io/kanidm/stable/integrations/oauth2.html#scope-relationships) for more information.";
-              type = types.attrsOf (types.listOf types.str);
-              default = {};
-            };
-
-            supplementaryScopeMaps = mkOption {
-              description = mdDoc "Maps kanidm groups to provided supplementary scopes. See [Scope Relations](https://kanidm.github.io/kanidm/stable/integrations/oauth2.html#scope-relationships) for more information.";
-              type = types.attrsOf (types.listOf types.str);
-              default = {};
-            };
-          };
-        }));
-      };
-    };
 
     serverSettings = mkOption {
       type = types.submodule {
@@ -514,12 +243,34 @@ in {
             default = "WriteReplica";
             type = types.enum ["WriteReplica" "WriteReplicaNoUI" "ReadOnlyReplica"];
           };
+          online_backup = {
+            path = mkOption {
+              description = mdDoc "Path to the output directory for backups.";
+              type = types.path;
+              default = "/var/lib/kanidm/backups";
+            };
+            schedule = mkOption {
+              description = mdDoc "The schedule for backups in cron format.";
+              type = types.str;
+              default = "00 22 * * *";
+            };
+            versions = mkOption {
+              description = mdDoc ''
+                Number of backups to keep.
+
+                The default is set to `0`, in order to disable backups by default.
+              '';
+              type = types.ints.unsigned;
+              default = 0;
+              example = 7;
+            };
+          };
         };
       };
       default = {};
       description = mdDoc ''
         Settings for Kanidm, see
-        [the documentation](https://github.com/kanidm/kanidm/blob/master/kanidm_book/src/server_configuration.md)
+        [the documentation](https://kanidm.github.io/kanidm/stable/server_configuration.html)
         and [example configuration](https://github.com/kanidm/kanidm/blob/master/examples/server.toml)
         for possible values.
       '';
@@ -537,7 +288,7 @@ in {
       };
       description = mdDoc ''
         Configure Kanidm clients, needed for the PAM daemon. See
-        [the documentation](https://github.com/kanidm/kanidm/blob/master/kanidm_book/src/client_tools.md#kanidm-configuration)
+        [the documentation](https://kanidm.github.io/kanidm/stable/client_tools.html#kanidm-configuration)
         and [example configuration](https://github.com/kanidm/kanidm/blob/master/examples/config)
         for possible values.
       '';
@@ -547,23 +298,276 @@ in {
       type = types.submodule {
         freeformType = settingsFormat.type;
 
-        options.pam_allowed_login_groups = mkOption {
-          description = mdDoc "Kanidm groups that are allowed to login using PAM.";
-          example = "my_pam_group";
-          type = types.listOf types.str;
+        options = {
+          pam_allowed_login_groups = mkOption {
+            description = mdDoc "Kanidm groups that are allowed to login using PAM.";
+            example = "my_pam_group";
+            type = types.listOf types.str;
+          };
+          hsm_pin_path = mkOption {
+            description = mdDoc "Path to a HSM pin.";
+            default = "/var/cache/kanidm-unixd/hsm-pin";
+            type = types.path;
+          };
         };
       };
       description = mdDoc ''
         Configure Kanidm unix daemon.
-        See [the documentation](https://github.com/kanidm/kanidm/blob/master/kanidm_book/src/pam_and_nsswitch.md#the-unix-daemon)
+        See [the documentation](https://kanidm.github.io/kanidm/stable/integrations/pam_and_nsswitch.html#the-unix-daemon)
         and [example configuration](https://github.com/kanidm/kanidm/blob/master/examples/unixd)
         for possible values.
       '';
     };
+
+    provision = {
+      enable = mkEnableOption "provisioning of groups, users and oauth2 resource servers";
+
+      instanceUrl = mkOption {
+        description = "The instance url to which the provisioning tool should connect.";
+        default = "https://localhost";
+        type = types.str;
+      };
+
+      acceptInvalidCerts = mkOption {
+        description = ''
+          Whether to allow invalid certificates when provisioning the target instance.
+          By default this is only allowed when the instanceUrl is localhost. This is
+          dangerous when used with an external URL.
+        '';
+        type = types.bool;
+        default = cfg.provision.instanceUrl == "https://localhost";
+        defaultText = ''services.kanidm.provision.instanceUrl == "https://localhost"'';
+      };
+
+      adminPasswordFile = mkOption {
+        description = "Path to a file containing the admin password for kanidm. Do NOT use a file from the nix store here!";
+        example = "/run/secrets/kanidm-admin-password";
+        default = null;
+        type = types.nullOr types.path;
+      };
+
+      idmAdminPasswordFile = mkOption {
+        description = ''
+          Path to a file containing the idm admin password for kanidm. Do NOT use a file from the nix store here!
+          If this is not given but provisioning is enabled, the idm_admin password will be reset on each restart.
+        '';
+        example = "/run/secrets/kanidm-idm-admin-password";
+        default = null;
+        type = types.nullOr types.path;
+      };
+
+      autoRemove = mkOption {
+        description = ''
+          Determines whether deleting an entity in this provisioning config should automatically
+          cause them to be removed from kanidm, too. This works because the provisioning tool tracks
+          all entities it has ever created. If this is set to false, you need to explicitly specify
+          `present = false` to delete an entity.
+        '';
+        type = types.bool;
+        default = true;
+      };
+
+      groups = mkOption {
+        description = "Provisioning of kanidm groups";
+        default = {};
+        type = types.attrsOf (types.submodule (groupSubmod: {
+          options = {
+            present = mkPresentOption "group";
+
+            members = mkOption {
+              description = "List of kanidm entities (persons, groups, ...) which are part of this group.";
+              type = types.listOf types.str;
+              apply = unique;
+              default = [];
+            };
+          };
+          config.members = concatLists (flip mapAttrsToList cfg.provision.persons (
+            person: personCfg:
+              optional (personCfg.present && builtins.elem groupSubmod.config._module.args.name personCfg.groups) person
+          ));
+        }));
+      };
+
+      persons = mkOption {
+        description = "Provisioning of kanidm persons";
+        default = {};
+        type = types.attrsOf (types.submodule {
+          options = {
+            present = mkPresentOption "person";
+
+            displayName = mkOption {
+              description = "Display name";
+              type = types.str;
+              example = "My User";
+            };
+
+            legalName = mkOption {
+              description = "Full legal name";
+              type = types.nullOr types.str;
+              example = "Jane Doe";
+              default = null;
+            };
+
+            mailAddresses = mkOption {
+              description = "Mail addresses. First given address is considered the primary address.";
+              type = types.listOf types.str;
+              example = ["jane.doe@example.com"];
+              default = [];
+            };
+
+            groups = mkOption {
+              description = "List of groups this person should belong to.";
+              type = types.listOf types.str;
+              apply = unique;
+              default = [];
+            };
+          };
+        });
+      };
+
+      systems.oauth2 = mkOption {
+        description = "Provisioning of oauth2 resource servers";
+        default = {};
+        type = types.attrsOf (types.submodule {
+          options = {
+            present = mkPresentOption "oauth2 resource server";
+
+            displayName = mkOption {
+              description = "Display name";
+              type = types.str;
+              example = "Some Service";
+            };
+
+            originUrl = mkOption {
+              description = "The origin URL of the service. OAuth2 redirects will only be allowed to sites under this origin. Must end with a slash.";
+              type = types.strMatching ".*://.*/$";
+              example = "https://someservice.example.com/";
+            };
+
+            originLanding = mkOption {
+              description = "When redirecting from the Kanidm Apps Listing page, some linked applications may need to land on a specific page to trigger oauth2/oidc interactions.";
+              type = types.nullOr types.str;
+              default = null;
+              example = "https://someservice.example.com/home";
+            };
+
+            basicSecretFile = mkOption {
+              description = ''
+                The basic secret to use for this service. If null, the random secret generated
+                by kanidm will not be touched. Do NOT use a path from the nix store here!
+              '';
+              type = types.nullOr types.path;
+              example = "/run/secrets/some-oauth2-basic-secret";
+              default = null;
+            };
+
+            allowInsecureClientDisablePkce = mkOption {
+              description = ''
+                Disable PKCE on this oauth2 resource server to work around insecure clients
+                that may not support it. You should request the client to enable PKCE!
+              '';
+              type = types.bool;
+              default = false;
+            };
+
+            preferShortUsername = mkOption {
+              description = "Use 'name' instead of 'spn' in the preferred_username claim";
+              type = types.bool;
+              default = false;
+            };
+
+            scopeMaps = mkOption {
+              description = ''
+                Maps kanidm groups to returned oauth scopes.
+                See [Scope Relations](https://kanidm.github.io/kanidm/stable/integrations/oauth2.html#scope-relationships) for more information.
+              '';
+              type = types.attrsOf (types.listOf types.str);
+              default = {};
+            };
+
+            supplementaryScopeMaps = mkOption {
+              description = ''
+                Maps kanidm groups to additionally returned oauth scopes.
+                See [Scope Relations](https://kanidm.github.io/kanidm/stable/integrations/oauth2.html#scope-relationships) for more information.
+              '';
+              type = types.attrsOf (types.listOf types.str);
+              default = {};
+            };
+
+            removeOrphanedClaimMaps = mkOption {
+              description = "Whether claim maps not specified here but present in kanidm should be removed from kanidm.";
+              type = types.bool;
+              default = true;
+            };
+
+            claimMaps = mkOption {
+              description = ''
+                Adds additional claims (and values) based on which kanidm groups an authenticating party belongs to.
+                See [Claim Maps](https://kanidm.github.io/kanidm/master/integrations/oauth2.html#custom-claim-maps) for more information.
+              '';
+              default = {};
+              type = types.attrsOf (types.submodule {
+                options = {
+                  joinType = mkOption {
+                    description = ''
+                      Determines how multiple values are joined to create the claim value.
+                      See [Claim Maps](https://kanidm.github.io/kanidm/master/integrations/oauth2.html#custom-claim-maps) for more information.
+                    '';
+                    type = types.enum ["array" "csv" "ssv"];
+                    default = "array";
+                  };
+
+                  valuesByGroup = mkOption {
+                    description = "Maps kanidm groups to values for the claim.";
+                    default = {};
+                    type = types.attrsOf (types.listOf types.str);
+                  };
+                };
+              });
+            };
+          };
+        });
+      };
+    };
   };
 
   config = mkIf (cfg.enableClient || cfg.enableServer || cfg.enablePam) {
-    assertions =
+    assertions = let
+      entityList = type: attrs: flip mapAttrsToList (filterPresent attrs) (name: _: {inherit type name;});
+      entities =
+        entityList "group" cfg.provision.groups
+        ++ entityList "person" cfg.provision.persons
+        ++ entityList "oauth2" cfg.provision.systems.oauth2;
+
+      # Accumulate entities by name. Track corresponding entity types for later duplicate check.
+      entitiesByName =
+        foldl' (
+          acc: {
+            type,
+            name,
+          }:
+            acc
+            // {
+              ${name} = (acc.${name} or []) ++ [type];
+            }
+        ) {}
+        entities;
+
+      assertGroupsKnown = opt: groups: let
+        knownGroups = attrNames (filterPresent cfg.provision.groups);
+        unknownGroups = subtractLists knownGroups groups;
+      in {
+        assertion = (cfg.enableServer && cfg.provision.enable) -> unknownGroups == [];
+        message = "${opt} refers to unknown groups: ${toString unknownGroups}";
+      };
+
+      assertEntitiesKnown = opt: entities: let
+        unknownEntities = subtractLists (attrNames entitiesByName) entities;
+      in {
+        assertion = (cfg.enableServer && cfg.provision.enable) -> unknownEntities == [];
+        message = "${opt} refers to unknown entities: ${toString unknownEntities}";
+      };
+    in
       [
         {
           assertion = !cfg.enableServer || ((cfg.serverSettings.tls_chain or null) == null) || (!isStorePath cfg.serverSettings.tls_chain);
@@ -611,37 +615,66 @@ in {
           assertion = cfg.provision.enable -> cfg.enableServer;
           message = "<option>services.kanidm.provision</option> requires <option>services.kanidm.enableServer</option> to be true";
         }
+        # If any secret is provisioned, the kanidm package must have some required patches applied to it
         {
-          assertion = cfg.provision.enable -> cfg.enableClient;
-          message = "<option>services.kanidm.provision</option> requires <option>services.kanidm.enableClient</option> to be able to use the kanidm client locally for provisioning.";
+          assertion =
+            (cfg.provision.enable
+              && (
+                cfg.provision.adminPasswordFile
+                != null
+                || cfg.provision.idmAdminPasswordFile != null
+                || any (x: x.basicSecretFile != null) (attrValues (filterPresent cfg.provision.systems.oauth2))
+              ))
+            -> cfg.package.enableSecretProvisioning;
+          message = ''
+            Specifying an admin account password or oauth2 basicSecretFile requires kanidm to be built with the secret provisioning patches.
+            You may want to set `services.kanidm.package = pkgs.kanidm.withSecretProvisioning;`.
+          '';
         }
+        # Entity names must be globally unique:
+        (let
+          # Filter all names that occurred in more than one entity type.
+          duplicateNames = filterAttrs (_: v: builtins.length v > 1) entitiesByName;
+        in {
+          assertion = cfg.provision.enable -> duplicateNames == {};
+          message = ''
+            services.kanidm.provision requires all entity names (group, person, oauth2, ...) to be unique!
+            ${concatLines (mapAttrsToList (name: xs: "  - '${name}' used as: ${toString xs}") duplicateNames)}'';
+        })
       ]
-      ++ flip mapAttrsToList cfg.provision.persons (person: personCfg: let
-        unknownGroups = subtractLists (attrNames cfg.provision.groups) personCfg.groups;
-      in {
-        assertion = (cfg.enableServer && cfg.provision.enable) -> unknownGroups == [];
-        message = "kanidm: provision.persons.${person}.groups: Refers to unknown groups: ${toString unknownGroups}";
-      })
-      ++ concatLists (flip mapAttrsToList cfg.provision.systems.oauth2 (oauth2: oauth2Cfg: [
-        {
-          assertion = (cfg.enableServer && cfg.provision.enable) -> hasInfix "://" oauth2Cfg.originUrl;
-          message = "kanidm: provision.systems.oauth2.${oauth2}.originUrl: Missing a schema like 'https://': ${oauth2Cfg.originUrl}";
-        }
-        (let
-          unknownGroups = subtractLists (attrNames cfg.provision.groups) (attrNames oauth2Cfg.scopeMaps);
-        in {
-          assertion = (cfg.enableServer && cfg.provision.enable) -> unknownGroups == [];
-          message = "kanidm: provision.systems.oauth2.${oauth2}.scopeMaps: Refers to unknown groups: ${toString unknownGroups}";
-        })
-        (let
-          unknownGroups = subtractLists (attrNames cfg.provision.groups) (attrNames oauth2Cfg.supplementaryScopeMaps);
-        in {
-          assertion = (cfg.enableServer && cfg.provision.enable) -> unknownGroups == [];
-          message = "kanidm: provision.systems.oauth2.${oauth2}.supplementaryScopeMaps: Refers to unknown groups: ${toString unknownGroups}";
-        })
-      ]));
+      ++ flip mapAttrsToList (filterPresent cfg.provision.persons) (
+        person: personCfg:
+          assertGroupsKnown "services.kanidm.provision.persons.${person}.groups" personCfg.groups
+      )
+      ++ flip mapAttrsToList (filterPresent cfg.provision.groups) (
+        group: groupCfg:
+          assertEntitiesKnown "services.kanidm.provision.groups.${group}.members" groupCfg.members
+      )
+      ++ concatLists (flip mapAttrsToList (filterPresent cfg.provision.systems.oauth2) (
+        oauth2: oauth2Cfg:
+          [
+            (assertGroupsKnown "services.kanidm.provision.systems.oauth2.${oauth2}.scopeMaps" (attrNames oauth2Cfg.scopeMaps))
+            (assertGroupsKnown "services.kanidm.provision.systems.oauth2.${oauth2}.supplementaryScopeMaps" (attrNames oauth2Cfg.supplementaryScopeMaps))
+          ]
+          ++ concatLists (flip mapAttrsToList oauth2Cfg.claimMaps (claim: claimCfg: [
+            (assertGroupsKnown "services.kanidm.provision.systems.oauth2.${oauth2}.claimMaps.${claim}.valuesByGroup" (attrNames claimCfg.valuesByGroup))
+            # At least one group must map to a value in each claim map
+            {
+              assertion = (cfg.provision.enable && cfg.enableServer) -> any (xs: xs != []) (attrValues claimCfg.valuesByGroup);
+              message = "services.kanidm.provision.systems.oauth2.${oauth2}.claimMaps.${claim} does not specify any values for any group";
+            }
+          ]))
+      ));
 
     environment.systemPackages = mkIf cfg.enableClient [cfg.package];
+
+    systemd.tmpfiles.settings."10-kanidm" = {
+      ${cfg.serverSettings.online_backup.path}.d = {
+        mode = "0700";
+        user = "kanidm";
+        group = "kanidm";
+      };
+    };
 
     systemd.services.kanidm = mkIf cfg.enableServer {
       description = "kanidm identity management daemon";
@@ -651,39 +684,22 @@ in {
         # Merge paths and ignore existing prefixes needs to sidestep mkMerge
         (defaultServiceConfig
           // {
-            BindReadOnlyPaths = mergePaths (
-              defaultServiceConfig.BindReadOnlyPaths
-              ++ certPaths
-              # If provisioning is enabled, we need access to the client config to use the kanidm cli,
-              # and to the installed system certificates.
-              ++ optionals cfg.provision.enable [
-                "-/etc/ssl/certs"
-                "-/etc/static/ssl/certs"
-                "-/etc/kanidm"
-                "-/etc/static/kanidm"
-              ]
-            );
+            BindReadOnlyPaths = mergePaths (defaultServiceConfig.BindReadOnlyPaths ++ certPaths);
           })
         {
           StateDirectory = "kanidm";
           StateDirectoryMode = "0700";
           RuntimeDirectory = "kanidmd";
-          ExecStartPre = mkIf cfg.provision.enable [preStartScript];
           ExecStart = "${cfg.package}/bin/kanidmd server -c ${serverConfigFile}";
-          ExecStartPost =
-            mkIf cfg.provision.enable
-            [
-              postStartScript
-              # Only the restarter runs with elevated privileges
-              "+${restarterScript}"
-            ];
+          ExecStartPost = mkIf cfg.provision.enable postStartScript;
           User = "kanidm";
           Group = "kanidm";
 
           BindPaths = [
             # To create the socket
             "/run/kanidmd:/run/kanidmd"
-            "/run/dbus/system_bus_socket"
+            # To store backups
+            cfg.serverSettings.online_backup.path
           ];
 
           AmbientCapabilities = ["CAP_NET_BIND_SERVICE"];

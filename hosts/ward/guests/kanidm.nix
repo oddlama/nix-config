@@ -37,28 +37,24 @@ in {
 
   age.secrets.kanidm-oauth2-immich = {
     generator.script = "alnum";
-    generator.tags = ["oauth2"];
     mode = "440";
     group = "kanidm";
   };
 
   age.secrets.kanidm-oauth2-grafana = {
     generator.script = "alnum";
-    generator.tags = ["oauth2"];
     mode = "440";
     group = "kanidm";
   };
 
   age.secrets.kanidm-oauth2-forgejo = {
     generator.script = "alnum";
-    generator.tags = ["oauth2"];
     mode = "440";
     group = "kanidm";
   };
 
   age.secrets.kanidm-oauth2-web-sentinel = {
     generator.script = "alnum";
-    generator.tags = ["oauth2"];
     mode = "440";
     group = "kanidm";
   };
@@ -122,24 +118,24 @@ in {
       inherit (config.repo.secrets.global.kanidm) persons;
 
       # Immich
-      groups.immich = {};
+      groups."immich.access" = {};
       systems.oauth2.immich = {
         displayName = "Immich";
-        originUrl = "https://${sentinelCfg.networking.providedDomains.immich}";
+        originUrl = "https://${sentinelCfg.networking.providedDomains.immich}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-immich.path;
-        scopeMaps.immich = ["openid" "email" "profile"];
+        scopeMaps."immich.access" = ["openid" "email" "profile"];
       };
 
       # Grafana
-      groups.grafana = {};
+      groups."grafana.access" = {};
       groups."grafana.admins" = {};
       groups."grafana.editors" = {};
       groups."grafana.server-admins" = {};
       systems.oauth2.grafana = {
         displayName = "Grafana";
-        originUrl = "https://${sentinelCfg.networking.providedDomains.grafana}";
+        originUrl = "https://${sentinelCfg.networking.providedDomains.grafana}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-grafana.path;
-        scopeMaps.grafana = ["openid" "email" "profile"];
+        scopeMaps."grafana.access" = ["openid" "email" "profile"];
         supplementaryScopeMaps = {
           "grafana.admins" = ["admin"];
           "grafana.editors" = ["editor"];
@@ -148,27 +144,27 @@ in {
       };
 
       # Forgejo
-      groups.forgejo = {};
+      groups."forgejo.access" = {};
       groups."forgejo.admins" = {};
       systems.oauth2.forgejo = {
         displayName = "Forgejo";
-        originUrl = "https://${sentinelCfg.networking.providedDomains.forgejo}";
+        originUrl = "https://${sentinelCfg.networking.providedDomains.forgejo}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-forgejo.path;
-        scopeMaps.forgejo = ["openid" "email" "profile"];
+        scopeMaps."forgejo.access" = ["openid" "email" "profile"];
         supplementaryScopeMaps = {
           "forgejo.admins" = ["admin"];
         };
       };
 
       # Web Sentinel
-      groups.web-sentinel = {};
+      groups."web-sentinel.access" = {};
       groups."web-sentinel.adguardhome" = {};
       groups."web-sentinel.influxdb" = {};
       systems.oauth2.web-sentinel = {
         displayName = "Web Sentinel";
-        originUrl = "https://oauth2.${personalDomain}";
+        originUrl = "https://oauth2.${personalDomain}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-web-sentinel.path;
-        scopeMaps.web-sentinel = ["openid" "email"];
+        scopeMaps."web-sentinel.access" = ["openid" "email"];
         supplementaryScopeMaps = {
           "web-sentinel.adguardhome" = ["access_adguardhome"];
           "web-sentinel.influxdb" = ["access_influxdb"];

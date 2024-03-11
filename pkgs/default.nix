@@ -1,6 +1,5 @@
 [
   (import ./caddy.nix)
-  (import ./oauth2-proxy)
   (import ./scripts)
   (_final: prev: {
     deploy = prev.callPackage ./deploy.nix {};

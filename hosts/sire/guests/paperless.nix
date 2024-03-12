@@ -2,6 +2,7 @@
   config,
   lib,
   nodes,
+  pkgs,
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
@@ -47,6 +48,13 @@ in {
     group = "paperless";
   };
 
+  # Mirror the original oauth2 secret
+  age.secrets.paperless-oauth2-client-secret = {
+    inherit (nodes.ward-kanidm.config.age.secrets.kanidm-oauth2-paperless) rekeyFile;
+    mode = "440";
+    group = "paperless";
+  };
+
   environment.persistence."/persist".directories = [
     {
       directory = "/var/lib/paperless";
@@ -55,11 +63,6 @@ in {
       mode = "0750";
     }
   ];
-
-  # TODO: workaround for https://github.com/paperless-ngx/paperless-ngx/discussions/5606
-  systemd.services.paperless-web.script = lib.mkBefore ''
-    mkdir -p /tmp/paperless
-  '';
 
   services.paperless = {
     enable = true;
@@ -72,6 +75,24 @@ in {
       PAPERLESS_ALLOWED_HOSTS = paperlessDomain;
       PAPERLESS_CORS_ALLOWED_HOSTS = "https://${paperlessDomain}";
       PAPERLESS_TRUSTED_PROXIES = sentinelCfg.meta.wireguard.proxy-sentinel.ipv4;
+
+      # Authentication via kanidm
+      PAPERLESS_APPS = "allauth.socialaccount.providers.openid_connect";
+      PAPERLESS_SOCIALACCOUNT_PROVIDERS = builtins.toJSON {
+        openid_connect = {
+          OAUTH_PKCE_ENABLED = "True";
+          APPS = [
+            rec {
+              provider_id = "kanidm";
+              name = "Kanidm";
+              client_id = "paperless";
+              # secret will be added dynamically
+              #secret = "";
+              settings.server_url = "https://${sentinelCfg.networking.providedDomains.kanidm}/oauth2/openid/${client_id}/.well-known/openid-configuration";
+            }
+          ];
+        };
+      };
 
       # Ghostscript is entirely bug-free.
       PAPERLESS_OCR_USER_ARGS = builtins.toJSON {
@@ -108,6 +129,16 @@ in {
     inherit (config.services.paperless) user;
     mode = "0700";
   };
+
+  # Add secret to PAPERLESS_SOCIALACCOUNT_PROVIDERS
+  systemd.services.paperless-web.script = lib.mkBefore ''
+    oidcSecret=$(< ${config.age.secrets.paperless-oauth2-client-secret.path})
+    export PAPERLESS_SOCIALACCOUNT_PROVIDERS=$(
+      ${pkgs.jq}/bin/jq <<< "$PAPERLESS_SOCIALACCOUNT_PROVIDERS" \
+        --compact-output \
+        --arg oidcSecret "$oidcSecret" '.openid_connect.APPS.[0].secret = $oidcSecret'
+    )
+  '';
 
   systemd.services.paperless-backup = let
     cfg = config.systemd.services.paperless-consumer;

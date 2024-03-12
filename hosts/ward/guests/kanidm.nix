@@ -7,6 +7,12 @@
   sentinelCfg = nodes.sentinel.config;
   kanidmDomain = "auth.${domains.me}";
   kanidmPort = 8300;
+
+  mkRandomSecret = {
+    generator.script = "alnum";
+    mode = "440";
+    group = "kanidm";
+  };
 in {
   meta.wireguard-proxy.sentinel.allowedTCPPorts = [kanidmPort];
 
@@ -22,41 +28,14 @@ in {
     group = "kanidm";
   };
 
-  age.secrets.kanidm-admin-password = {
-    generator.script = "alnum";
-    mode = "440";
-    group = "kanidm";
-  };
+  age.secrets.kanidm-admin-password = mkRandomSecret;
+  age.secrets.kanidm-idm-admin-password = mkRandomSecret;
 
-  age.secrets.kanidm-idm-admin-password = {
-    generator.script = "alnum";
-    mode = "440";
-    group = "kanidm";
-  };
-
-  age.secrets.kanidm-oauth2-immich = {
-    generator.script = "alnum";
-    mode = "440";
-    group = "kanidm";
-  };
-
-  age.secrets.kanidm-oauth2-grafana = {
-    generator.script = "alnum";
-    mode = "440";
-    group = "kanidm";
-  };
-
-  age.secrets.kanidm-oauth2-forgejo = {
-    generator.script = "alnum";
-    mode = "440";
-    group = "kanidm";
-  };
-
-  age.secrets.kanidm-oauth2-web-sentinel = {
-    generator.script = "alnum";
-    mode = "440";
-    group = "kanidm";
-  };
+  age.secrets.kanidm-oauth2-forgejo = mkRandomSecret;
+  age.secrets.kanidm-oauth2-grafana = mkRandomSecret;
+  age.secrets.kanidm-oauth2-immich = mkRandomSecret;
+  age.secrets.kanidm-oauth2-paperless = mkRandomSecret;
+  age.secrets.kanidm-oauth2-web-sentinel = mkRandomSecret;
 
   nodes.sentinel = {
     networking.providedDomains.kanidm = kanidmDomain;
@@ -128,6 +107,16 @@ in {
         # kanidm system oauth2 warning-enable-legacy-crypto immich
         allowInsecureClientDisablePkce = true;
         scopeMaps."immich.access" = ["openid" "email" "profile"];
+      };
+
+      # Paperless
+      groups."paperless.access" = {};
+      systems.oauth2.paperless = {
+        displayName = "Paperless";
+        originUrl = "https://${sentinelCfg.networking.providedDomains.paperless}/";
+        basicSecretFile = config.age.secrets.kanidm-oauth2-paperless.path;
+        preferShortUsername = true;
+        scopeMaps."paperless.access" = ["openid" "email" "profile"];
       };
 
       # Grafana

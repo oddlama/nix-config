@@ -93,12 +93,12 @@ in {
 
   services.forgejo = {
     enable = true;
-    appName = "Redlew Git"; # tungsten inert gas?
     # TODO db backups
     # dump.enable = true;
     lfs.enable = true;
     mailerPasswordFile = config.age.secrets.forgejo-mailer-password.path;
     settings = {
+      DEFAULT.APP_NAME = "Redlew Git"; # tungsten inert gas?
       actions = {
         ENABLED = true;
         DEFAULT_ACTIONS_URL = "github";
@@ -129,7 +129,10 @@ in {
         # with the existing account to link.
         ACCOUNT_LINKING = "login";
         USERNAME = "nickname";
-        ENABLE_AUTO_REGISTRATION = true;
+        # This does not mean that you cannot register via oauth, but just that there should
+        # be a confirmation dialog shown to the user before the account is actually created.
+        # This dialog allows changing user name and email address before creating the account.
+        ENABLE_AUTO_REGISTRATION = false;
         REGISTER_EMAIL_CONFIRM = false;
         UPDATE_AVATAR = true;
       };

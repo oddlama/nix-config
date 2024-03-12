@@ -173,25 +173,17 @@ in {
       exe = lib.getExe config.services.forgejo.package;
       providerName = "kanidm";
       clientId = "forgejo";
-      args = lib.escapeShellArgs [
-        "--name"
-        providerName
-        "--provider"
-        "openidConnect"
-        "--key"
-        clientId
-        "--auto-discover-url"
-        "https://${sentinelCfg.networking.providedDomains.kanidm}/oauth2/openid/${clientId}/.well-known/openid-configuration"
-        "--scopes"
-        "email"
-        "--scopes"
-        "profile"
-        "--group-claim-name"
-        "groups"
-        "--admin-group"
-        "admin"
-        "--skip-local-2fa"
-      ];
+      args = lib.escapeShellArgs (lib.concatLists [
+        ["--name" providerName]
+        ["--provider" "openidConnect"]
+        ["--key" clientId]
+        ["--auto-discover-url" "https://${sentinelCfg.networking.providedDomains.kanidm}/oauth2/openid/${clientId}/.well-known/openid-configuration"]
+        ["--scopes" "email"]
+        ["--scopes" "profile"]
+        ["--group-claim-name" "groups"]
+        ["--admin-group" "admin"]
+        ["--skip-local-2fa"]
+      ]);
     in
       lib.mkAfter ''
         provider_id=$(${exe} admin auth list | ${pkgs.gnugrep}/bin/grep -w '${providerName}' | cut -f1)

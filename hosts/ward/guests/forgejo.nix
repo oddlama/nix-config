@@ -167,7 +167,7 @@ in {
   };
 
   systemd.services.forgejo = {
-    serviceConfig.RestartSec = "600"; # Retry every 10 minutes
+    serviceConfig.RestartSec = "60"; # Retry every minute
     preStart = let
       exe = lib.getExe config.services.forgejo.package;
       providerName = "kanidm";

@@ -79,7 +79,7 @@ in {
   systemd.services.backup-vaultwarden.environment.DATA_FOLDER = lib.mkForce "/var/lib/vaultwarden";
   systemd.services.vaultwarden.serviceConfig = {
     StateDirectory = lib.mkForce "vaultwarden";
-    RestartSec = "600"; # Retry every 10 minutes
+    RestartSec = "60"; # Retry every minute
   };
 
   # Needed so we don't run out of tmpfs space for large backups.

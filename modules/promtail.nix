@@ -145,6 +145,6 @@ in {
       };
     };
 
-    systemd.services.promtail.serviceConfig.RestartSec = "600"; # Retry every 10 minutes
+    systemd.services.promtail.serviceConfig.RestartSec = "60"; # Retry every minute
   };
 }

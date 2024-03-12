@@ -157,5 +157,5 @@ in {
     };
   };
 
-  systemd.services.grafana.serviceConfig.RestartSec = "600"; # Retry every 10 minutes
+  systemd.services.grafana.serviceConfig.RestartSec = "60"; # Retry every minute
 }

@@ -102,7 +102,7 @@ in {
     };
   };
 
-  systemd.services.paperless.serviceConfig.RestartSec = "600"; # Retry every 10 minutes
+  systemd.services.paperless.serviceConfig.RestartSec = "60"; # Retry every minute
 
   systemd.tmpfiles.settings."10-paperless".${paperlessBackupDir}.d = {
     inherit (config.services.paperless) user;

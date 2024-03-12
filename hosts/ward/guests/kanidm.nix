@@ -124,6 +124,8 @@ in {
         basicSecretFile = config.age.secrets.kanidm-oauth2-immich.path;
         preferShortUsername = true;
         # XXX: PKCE is currently not supported by immich
+        # XXX: Also RS256 is used instead of ES256 so additionally needed:
+        # kanidm system oauth2 warning-enable-legacy-crypto immich
         allowInsecureClientDisablePkce = true;
         scopeMaps."immich.access" = ["openid" "email" "profile"];
       };
@@ -137,6 +139,7 @@ in {
         displayName = "Grafana";
         originUrl = "https://${sentinelCfg.networking.providedDomains.grafana}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-grafana.path;
+        preferShortUsername = true;
         scopeMaps."grafana.access" = ["openid" "email" "profile"];
         claimMaps.groups = {
           joinType = "array";
@@ -174,6 +177,7 @@ in {
         displayName = "Web Sentinel";
         originUrl = "https://oauth2.${domains.me}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-web-sentinel.path;
+        preferShortUsername = true;
         scopeMaps."web-sentinel.access" = ["openid" "email"];
         claimMaps.groups = {
           joinType = "array";

@@ -76,7 +76,7 @@ in {
     };
   };
 
-  systemd.services.radicale.serviceConfig.RestartSec = "600"; # Retry every 10 minutes
+  systemd.services.radicale.serviceConfig.RestartSec = "60"; # Retry every minute
 
   backups.storageBoxes.dusk = {
     subuser = "radicale";

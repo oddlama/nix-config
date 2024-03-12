@@ -110,6 +110,6 @@ in {
       INTERFACE_ADDR=$(${pkgs.iproute2}/bin/ip -family inet -brief addr show lan | grep -o "[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+")
       sed -i -e "s/123.123.123.123/$INTERFACE_ADDR/" "$STATE_DIRECTORY/AdGuardHome.yaml"
     '';
-    serviceConfig.RestartSec = lib.mkForce "600"; # Retry every 10 minutes
+    serviceConfig.RestartSec = lib.mkForce "60"; # Retry every minute
   };
 }

@@ -120,7 +120,7 @@ in {
       RuntimeDirectory = "oauth2_proxy";
       RuntimeDirectoryMode = "0750";
       UMask = "007"; # TODO remove once https://github.com/oauth2-proxy/oauth2-proxy/issues/2141 is fixed
-      RestartSec = "600"; # Retry every 10 minutes
+      RestartSec = "60"; # Retry every minute
     };
 
     users.groups.oauth2_proxy.members = ["nginx"];

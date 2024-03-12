@@ -116,7 +116,7 @@
 
   processedConfigFile = "/run/agenix/immich.config.json";
 
-  version = "v1.93.3";
+  version = "v1.98.2";
   environment = {
     DB_DATABASE_NAME = "immich";
     DB_HOSTNAME = ipImmichPostgres;
@@ -269,7 +269,7 @@ in {
       ];
     };
   virtualisation.oci-containers.containers."immich_postgres" = {
-    image = "tensorchord/pgvecto-rs:pg14-v0.1.11@sha256:0335a1a22f8c5dd1b697f14f079934f5152eaaa216c09b61e293be285491f8ee";
+    image = "tensorchord/pgvecto-rs:pg14-v0.2.0@sha256:90724186f0a3517cf6914295b5ab410db9ce23190a2d9d0b9dd6463e3fa298f0";
     environment = {
       POSTGRES_DB = environment.DB_DATABASE_NAME;
       POSTGRES_PASSWORD_FILE = environment.DB_PASSWORD_FILE;
@@ -288,7 +288,7 @@ in {
   };
   systemd.services."podman-immich_postgres" = serviceConfig;
   virtualisation.oci-containers.containers."immich_redis" = {
-    image = "redis:6.2-alpine@sha256:c5a607fb6e1bb15d32bbcf14db22787d19e428d59e31a5da67511b49bb0f1ccc";
+    image = "redis:6.2-alpine@sha256:51d6c56749a4243096327e3fb964a48ed92254357108449cb6e23999c37773c5";
     log-driver = "journald";
     extraOptions = [
       "--network-alias=immich_redis"

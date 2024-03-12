@@ -212,7 +212,7 @@ in {
         ];
         # For wireguard statistics
         AmbientCapabilities = ["CAP_NET_ADMIN"];
-        RestartSec = "600"; # Retry every 10 minutes
+        RestartSec = "60"; # Retry every minute
       };
     };
   };

@@ -5,7 +5,7 @@
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
-  homeDomain = "home.${sentinelCfg.repo.secrets.local.personalDomain}";
+  homeDomain = "home.${sentinelCfg.repo.secrets.global.domains.personal}";
 in {
   meta.wireguard-proxy.sentinel.allowedTCPPorts = [80];
 

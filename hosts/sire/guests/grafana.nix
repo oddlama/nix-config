@@ -4,7 +4,7 @@
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
-  grafanaDomain = "grafana.${sentinelCfg.repo.secrets.local.personalDomain}";
+  grafanaDomain = "grafana.${config.repo.secrets.global.domains.me}";
 in {
   meta.wireguard-proxy.sentinel.allowedTCPPorts = [config.services.grafana.settings.server.http_port];
 
@@ -124,7 +124,7 @@ in {
         use_pkce = true;
         # Allow mapping oauth2 roles to server admin
         allow_assign_grafana_admin = true;
-        role_attribute_path = "contains(scopes[*], 'server_admin') && 'GrafanaAdmin' || contains(scopes[*], 'admin') && 'Admin' || contains(scopes[*], 'editor') && 'Editor' || 'Viewer'";
+        role_attribute_path = "contains(groups[*], 'server_admin') && 'GrafanaAdmin' || contains(groups[*], 'admin') && 'Admin' || contains(groups[*], 'editor') && 'Editor' || 'Viewer'";
       };
     };
 

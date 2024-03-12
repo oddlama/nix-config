@@ -5,8 +5,7 @@
   pkgs,
   ...
 }: let
-  sentinelCfg = nodes.sentinel.config;
-  adguardhomeDomain = "adguardhome.${sentinelCfg.repo.secrets.local.personalDomain}";
+  adguardhomeDomain = "adguardhome.${config.repo.secrets.global.domains.me}";
 in {
   meta.wireguard-proxy.sentinel.allowedTCPPorts = [config.services.adguardhome.settings.bind_port];
 
@@ -81,8 +80,8 @@ in {
         # wireguard address for influxdb
         rewrites = [
           {
-            domain = sentinelCfg.networking.providedDomains.influxdb;
-            answer = sentinelCfg.repo.secrets.local.personalDomain;
+            domain = nodes.sentinel.config.networking.providedDomains.influxdb;
+            answer = config.repo.secrets.global.domains.me;
           }
         ];
         filters = [

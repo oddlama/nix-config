@@ -4,7 +4,7 @@
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
-  lokiDomain = "loki.${sentinelCfg.repo.secrets.local.personalDomain}";
+  lokiDomain = "loki.${config.repo.secrets.global.domains.me}";
 in {
   meta.wireguard-proxy.sentinel.allowedTCPPorts = [config.services.loki.configuration.server.http_listen_port];
 

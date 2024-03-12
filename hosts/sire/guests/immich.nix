@@ -5,7 +5,7 @@
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
-  immichDomain = "immich.${sentinelCfg.repo.secrets.local.personalDomain}";
+  immichDomain = "immich.${config.repo.secrets.global.domains.me}";
 
   ipImmichMachineLearning = "10.89.0.10";
   ipImmichMicroservices = "10.89.0.11";
@@ -74,9 +74,6 @@
         lightStyle = "";
       };
       newVersionCheck.enabled = true;
-      # XXX: Immich's oauth cannot use PKCE and uses legacy crypto so we need to run:
-      # kanidm system oauth2 warning-insecure-client-disable-pkce immich
-      # kanidm system oauth2 warning-enable-legacy-crypto immich
       oauth = rec {
         enabled = true;
         autoLaunch = false;

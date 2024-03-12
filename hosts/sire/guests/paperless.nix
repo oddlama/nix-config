@@ -5,7 +5,7 @@
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
-  paperlessDomain = "paperless.${sentinelCfg.repo.secrets.local.personalDomain}";
+  paperlessDomain = "paperless.${config.repo.secrets.global.domains.me}";
   paperlessBackupDir = "/var/cache/paperless-backup";
 in {
   microvm.mem = 1024 * 9;

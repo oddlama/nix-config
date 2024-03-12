@@ -1,10 +1,5 @@
-{
-  config,
-  nodes,
-  ...
-}: let
-  sentinelCfg = nodes.sentinel.config;
-  radicaleDomain = "radicale.${sentinelCfg.repo.secrets.local.personalDomain}";
+{config, ...}: let
+  radicaleDomain = "radicale.${config.repo.secrets.global.domains.personal}";
 in {
   meta.wireguard-proxy.sentinel.allowedTCPPorts = [
     8000

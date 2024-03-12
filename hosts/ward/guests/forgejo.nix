@@ -6,8 +6,7 @@
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
-  # XXX: other domain on other proxy?
-  forgejoDomain = "git.${sentinelCfg.repo.secrets.local.personalDomain}";
+  forgejoDomain = "git.${config.repo.secrets.global.domains.me}";
 in {
   meta.wireguard-proxy.sentinel.allowedTCPPorts = [
     config.services.forgejo.settings.server.HTTP_PORT

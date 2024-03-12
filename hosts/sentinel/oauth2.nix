@@ -5,8 +5,8 @@
 }: {
   meta.oauth2_proxy = {
     enable = true;
-    cookieDomain = config.repo.secrets.local.personalDomain;
-    portalDomain = "oauth2.${config.repo.secrets.local.personalDomain}";
+    cookieDomain = config.repo.secrets.global.domains.me;
+    portalDomain = "oauth2.${config.repo.secrets.global.domains.me}";
     # TODO portal redirect to dashboard (in case someone clicks on kanidm "Web services")
   };
 

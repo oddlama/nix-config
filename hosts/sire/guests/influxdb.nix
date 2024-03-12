@@ -6,7 +6,7 @@
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
-  influxdbDomain = "influxdb.${sentinelCfg.repo.secrets.local.personalDomain}";
+  influxdbDomain = "influxdb.${config.repo.secrets.global.domains.me}";
   influxdbPort = 8086;
 in {
   meta.wireguard-proxy.sentinel.allowedTCPPorts = [influxdbPort];

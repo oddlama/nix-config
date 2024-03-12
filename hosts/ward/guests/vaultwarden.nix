@@ -1,11 +1,9 @@
 {
   config,
   lib,
-  nodes,
   ...
 }: let
-  sentinelCfg = nodes.sentinel.config;
-  vaultwardenDomain = "pw.${sentinelCfg.repo.secrets.local.personalDomain}";
+  vaultwardenDomain = "pw.${config.repo.secrets.global.domains.personal}";
 in {
   meta.wireguard-proxy.sentinel.allowedTCPPorts = [
     config.services.vaultwarden.config.rocketPort

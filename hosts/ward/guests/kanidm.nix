@@ -3,9 +3,9 @@
   nodes,
   ...
 }: let
-  inherit (sentinelCfg.repo.secrets.local) personalDomain;
+  inherit (config.repo.secrets.global) domains;
   sentinelCfg = nodes.sentinel.config;
-  kanidmDomain = "auth.${personalDomain}";
+  kanidmDomain = "auth.${domains.me}";
   kanidmPort = 8300;
 in {
   meta.wireguard-proxy.sentinel.allowedTCPPorts = [kanidmPort];
@@ -122,24 +122,29 @@ in {
         displayName = "Immich";
         originUrl = "https://${sentinelCfg.networking.providedDomains.immich}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-immich.path;
+        preferShortUsername = true;
+        # XXX: PKCE is currently not supported by immich
+        allowInsecureClientDisablePkce = true;
         scopeMaps."immich.access" = ["openid" "email" "profile"];
       };
 
       # Grafana
       groups."grafana.access" = {};
-      groups."grafana.admins" = {};
       groups."grafana.editors" = {};
+      groups."grafana.admins" = {};
       groups."grafana.server-admins" = {};
       systems.oauth2.grafana = {
         displayName = "Grafana";
         originUrl = "https://${sentinelCfg.networking.providedDomains.grafana}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-grafana.path;
         scopeMaps."grafana.access" = ["openid" "email" "profile"];
-        # FIXME: use new group claims k thx
-        supplementaryScopeMaps = {
-          "grafana.admins" = ["admin"];
-          "grafana.editors" = ["editor"];
-          "grafana.server-admins" = ["server_admin"];
+        claimMaps.groups = {
+          joinType = "array";
+          valuesByGroup = {
+            "grafana.editors" = ["editor"];
+            "grafana.admins" = ["admin"];
+            "grafana.server-admins" = ["server_admin"];
+          };
         };
       };
 
@@ -167,7 +172,7 @@ in {
       groups."web-sentinel.influxdb" = {};
       systems.oauth2.web-sentinel = {
         displayName = "Web Sentinel";
-        originUrl = "https://oauth2.${personalDomain}/";
+        originUrl = "https://oauth2.${domains.me}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-web-sentinel.path;
         scopeMaps."web-sentinel.access" = ["openid" "email"];
         claimMaps.groups = {

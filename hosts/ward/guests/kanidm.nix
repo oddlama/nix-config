@@ -136,6 +136,7 @@ in {
         originUrl = "https://${sentinelCfg.networking.providedDomains.grafana}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-grafana.path;
         scopeMaps."grafana.access" = ["openid" "email" "profile"];
+        # FIXME: use new group claims k thx
         supplementaryScopeMaps = {
           "grafana.admins" = ["admin"];
           "grafana.editors" = ["editor"];
@@ -151,8 +152,13 @@ in {
         originUrl = "https://${sentinelCfg.networking.providedDomains.forgejo}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-forgejo.path;
         scopeMaps."forgejo.access" = ["openid" "email" "profile"];
-        supplementaryScopeMaps = {
-          "forgejo.admins" = ["admin"];
+        # XXX: PKCE is currently not supported by gitea/forgejo,
+        # see https://github.com/go-gitea/gitea/issues/21376.
+        allowInsecureClientDisablePkce = true;
+        preferShortUsername = true;
+        claimMaps.groups = {
+          joinType = "array";
+          valuesByGroup."forgejo.admins" = ["admin"];
         };
       };
 
@@ -165,9 +171,10 @@ in {
         originUrl = "https://oauth2.${personalDomain}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-web-sentinel.path;
         scopeMaps."web-sentinel.access" = ["openid" "email"];
-        supplementaryScopeMaps = {
-          "web-sentinel.adguardhome" = ["access_adguardhome"];
-          "web-sentinel.influxdb" = ["access_influxdb"];
+        claimMaps.groups = {
+          joinType = "array";
+          valuesByGroup."web-sentinel.adguardhome" = ["access_adguardhome"];
+          valuesByGroup."web-sentinel.influxdb" = ["access_influxdb"];
         };
       };
     };

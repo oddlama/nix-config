@@ -124,9 +124,14 @@ in {
         ENABLED_ISSUE_BY_LABEL = true;
       };
       oauth2_client = {
-        ACCOUNT_LINKING = "auto";
+        # Never use auto account linking with this, otherwise users cannot change
+        # their new user name and they could potentially overtake other users accounts
+        # by setting their email address to an existing account.
+        # With "login" linking the user must choose a non-existing username first or login
+        # with the existing account to link.
+        ACCOUNT_LINKING = "login";
+        USERNAME = "nickname";
         ENABLE_AUTO_REGISTRATION = true;
-        OPENID_CONNECT_SCOPES = "email profile";
         REGISTER_EMAIL_CONFIRM = false;
         UPDATE_AVATAR = true;
       };
@@ -161,10 +166,6 @@ in {
     };
   };
 
-  # XXX: PKCE is currently not supported by gitea/forgejo,
-  # see https://github.com/go-gitea/gitea/issues/21376.
-  # Disable PKCE manually in kanidm for now.
-  # `kanidm system oauth2 warning-insecure-client-disable-pkce forgejo`
   systemd.services.gitea = {
     serviceConfig.RestartSec = "600"; # Retry every 10 minutes
     preStart = let
@@ -180,18 +181,26 @@ in {
         clientId
         "--auto-discover-url"
         "https://${sentinelCfg.networking.providedDomains.kanidm}/oauth2/openid/${clientId}/.well-known/openid-configuration"
-        #"--required-claim-name" "groups"
-        #"--group-claim-name" "groups"
-        #"--admin-group" "/forge_admins@${domain}"
+        "--scopes"
+        "email"
+        "--scopes"
+        "profile"
+        "--scopes"
+        "groups"
+        "--group-claim-name"
+        "groups"
+        "--admin-group"
+        "admin"
         "--skip-local-2fa"
       ];
     in
       lib.mkAfter ''
         provider_id=$(${exe} admin auth list | ${pkgs.gnugrep}/bin/grep -w '${providerName}' | cut -f1)
+        SECRET="$(< ${config.age.secrets.forgejo-oauth2-client-secret.path})"
         if [[ -z "$provider_id" ]]; then
-          FORGEJO_ADMIN_OAUTH2_SECRET="$(< ${config.age.secrets.forgejo-oauth2-client-secret.path})" ${exe} admin auth add-oauth ${args}
+          ${exe} admin auth add-oauth ${args} --secret "$SECRET"
         else
-          FORGEJO_ADMIN_OAUTH2_SECRET="$(< ${config.age.secrets.forgejo-oauth2-client-secret.path})" ${exe} admin auth update-oauth --id "$provider_id" ${args}
+          ${exe} admin auth update-oauth --id "$provider_id" ${args} --secret "$SECRET"
         fi
       '';
   };

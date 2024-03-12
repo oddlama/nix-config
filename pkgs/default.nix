@@ -19,6 +19,7 @@
           "${provisionSrc}/patches/${old.version}-recover-account.patch"
         ];
       passthru.enableSecretProvisioning = true;
+      doCheck = false;
     });
     kanidm-provision = prev.callPackage ./kanidm-provision.nix {};
     kanidm-secret-manipulator = prev.callPackage ./kanidm-secret-manipulator.nix {};

@@ -19,8 +19,10 @@
     flip
     foldl'
     getExe
+    hasInfix
     hasPrefix
     isStorePath
+    last
     mapAttrsToList
     mdDoc
     mkEnableOption
@@ -31,6 +33,7 @@
     mkPackageOption
     optional
     optionalString
+    splitString
     subtractLists
     types
     unique
@@ -111,6 +114,17 @@
   provisionStateJson = pkgs.writeText "provision-state.json" (builtins.toJSON {
     inherit (cfg.provision) groups persons systems;
   });
+
+  serverPort =
+    # ipv6:
+    if hasInfix "]:" cfg.serverSettings.bindaddress
+    then last (splitString "]:" cfg.serverSettings.bindaddress)
+    else
+      # ipv4:
+      if hasInfix "." cfg.serverSettings.bindaddress
+      then last (splitString ":" cfg.serverSettings.bindaddress)
+      # default is 8443
+      else "8443";
 
   # Only recover the admin account if a password should explicitly be provisioned
   # for the account. Otherwise it is not needed for provisioning.
@@ -324,7 +338,8 @@ in {
 
       instanceUrl = mkOption {
         description = "The instance url to which the provisioning tool should connect.";
-        default = "https://localhost";
+        default = "https://localhost:${serverPort}";
+        defaultText = ''"https://localhost:<port from serverSettings.bindaddress>"'';
         type = types.str;
       };
 
@@ -335,8 +350,8 @@ in {
           dangerous when used with an external URL.
         '';
         type = types.bool;
-        default = cfg.provision.instanceUrl == "https://localhost";
-        defaultText = ''services.kanidm.provision.instanceUrl == "https://localhost"'';
+        default = hasPrefix "https://localhost:" cfg.provision.instanceUrl;
+        defaultText = ''hasPrefix "https://localhost:" cfg.provision.instanceUrl'';
       };
 
       adminPasswordFile = mkOption {

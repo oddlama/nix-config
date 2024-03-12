@@ -10,20 +10,20 @@
   forgejoDomain = "git.${sentinelCfg.repo.secrets.local.personalDomain}";
 in {
   meta.wireguard-proxy.sentinel.allowedTCPPorts = [
-    config.services.gitea.settings.server.HTTP_PORT
+    config.services.forgejo.settings.server.HTTP_PORT
   ];
 
   age.secrets.forgejo-mailer-password = {
     rekeyFile = config.node.secretsDir + "/forgejo-mailer-password.age";
     mode = "440";
-    inherit (config.services.gitea) group;
+    inherit (config.services.forgejo) group;
   };
 
   # Mirror the original oauth2 secret
   age.secrets.forgejo-oauth2-client-secret = {
     inherit (nodes.ward-kanidm.config.age.secrets.kanidm-oauth2-forgejo) rekeyFile;
     mode = "440";
-    inherit (config.services.gitea) group;
+    inherit (config.services.forgejo) group;
   };
 
   nodes.sentinel = {
@@ -53,7 +53,7 @@ in {
 
     services.nginx = {
       upstreams.forgejo = {
-        servers."${config.meta.wireguard.proxy-sentinel.ipv4}:${toString config.services.gitea.settings.server.HTTP_PORT}" = {};
+        servers."${config.meta.wireguard.proxy-sentinel.ipv4}:${toString config.services.forgejo.settings.server.HTTP_PORT}" = {};
         extraConfig = ''
           zone forgejo 64k;
           keepalive 2;
@@ -84,18 +84,16 @@ in {
 
   environment.persistence."/persist".directories = [
     {
-      directory = config.services.gitea.stateDir;
-      user = "gitea";
-      group = "gitea";
+      directory = config.services.forgejo.stateDir;
+      user = "forgejo";
+      group = "forgejo";
       mode = "0700";
     }
   ];
 
-  services.gitea = {
+  services.forgejo = {
     enable = true;
-    package = pkgs.forgejo;
     appName = "Redlew Git"; # tungsten inert gas?
-    stateDir = "/var/lib/forgejo";
     # TODO db backups
     # dump.enable = true;
     lfs.enable = true;
@@ -112,7 +110,7 @@ in {
       # federation.ENABLED = true;
       mailer = {
         ENABLED = true;
-        HOST = config.repo.secrets.local.forgejo.mail.host;
+        SMTP_ADDR = config.repo.secrets.local.forgejo.mail.host;
         FROM = config.repo.secrets.local.forgejo.mail.from;
         USER = config.repo.secrets.local.forgejo.mail.user;
         SEND_AS_PLAIN_TEXT = true;
@@ -166,10 +164,10 @@ in {
     };
   };
 
-  systemd.services.gitea = {
+  systemd.services.forgejo = {
     serviceConfig.RestartSec = "600"; # Retry every 10 minutes
     preStart = let
-      exe = lib.getExe config.services.gitea.package;
+      exe = lib.getExe config.services.forgejo.package;
       providerName = "kanidm";
       clientId = "forgejo";
       args = lib.escapeShellArgs [
@@ -185,8 +183,6 @@ in {
         "email"
         "--scopes"
         "profile"
-        "--scopes"
-        "groups"
         "--group-claim-name"
         "groups"
         "--admin-group"

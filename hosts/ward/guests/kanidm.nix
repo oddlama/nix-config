@@ -1,7 +1,6 @@
 {
   config,
   nodes,
-  pkgs,
   ...
 }: let
   inherit (sentinelCfg.repo.secrets.local) personalDomain;
@@ -180,6 +179,5 @@ in {
     };
   };
 
-  environment.systemPackages = [pkgs.kanidm];
   systemd.services.kanidm.serviceConfig.RestartSec = "60"; # Retry every minute
 }

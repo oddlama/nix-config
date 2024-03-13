@@ -23,7 +23,7 @@
     influxdb2 = uidGid 986;
     telegraf = uidGid 985;
     rtkit = uidGid 984;
-    forgejo = uidGid 983;
+    git = uidGid 983;
     redis-paperless = uidGid 982;
     nixseparatedebuginfod = uidGid 981;
     msr = uidGid 980;

@@ -78,14 +78,26 @@ in {
     };
   };
 
-  # Recommended by forgejo: https://forgejo.org/docs/latest/admin/recommendations/#git-over-ssh
-  services.openssh.settings.AcceptEnv = "GIT_PROTOCOL";
+  users.groups.git = {};
+  users.users.git = {
+    isSystemUser = true;
+    useDefaultShell = true;
+    group = "git";
+    home = config.services.forgejo.stateDir;
+  };
+
+  services.openssh = {
+    authorizedKeysFiles = lib.mkForce [
+      "${config.services.forgejo.stateDir}/.ssh/authorized_keys"
+    ];
+    # Recommended by forgejo: https://forgejo.org/docs/latest/admin/recommendations/#git-over-ssh
+    settings.AcceptEnv = "GIT_PROTOCOL";
+  };
 
   environment.persistence."/persist".directories = [
     {
       directory = config.services.forgejo.stateDir;
-      user = "forgejo";
-      group = "forgejo";
+      inherit (config.services.forgejo) user group;
       mode = "0700";
     }
   ];
@@ -94,6 +106,8 @@ in {
     enable = true;
     # TODO db backups
     # dump.enable = true;
+    user = "git";
+    group = "git";
     lfs.enable = true;
     mailerPasswordFile = config.age.secrets.forgejo-mailer-password.path;
     settings = {
@@ -148,6 +162,7 @@ in {
         ROOT_URL = "https://${forgejoDomain}/";
         LANDING_PAGE = "login";
         SSH_PORT = 9922;
+        SSH_USER = "git";
       };
       service = {
         DISABLE_REGISTRATION = false;

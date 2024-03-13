@@ -120,60 +120,60 @@
       # Language server
       # -------------------------------------------------------------------------------------------------
 
-      (keymap ["n"] "gD" "<cmd>lua vim.lsp.buf.declaration()<CR>" "")
-      (keymap ["n"] "gd" "<cmd>lua require('telescope.builtin').lsp_definitions()<CR>" "")
-      (keymap ["n"] "K" "<cmd>lua vim.lsp.buf.hover()<CR>" "")
-      (keymap ["n"] "gi" "<cmd>lua require('telescope.builtin').lsp_implementations()<CR>" "")
-      (keymap ["n"] "<C-k>" "<cmd>lua vim.lsp.buf.signature_help()<CR>" "")
-      (keymap ["n"] "<leader>wa" "<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>" "")
-      (keymap ["n"] "<leader>wr" "<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>" "")
-      (keymap ["n"] "<leader>wl" "<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>" "")
-      (keymap ["n"] "gt" "<cmd>lua require('telescope.builtin').lsp_type_definitions()<CR>" "")
-      (keymap ["n"] "<leader>r" "<cmd>lua vim.lsp.buf.rename()<CR>" "")
-      (keymap ["n"] "<leader>a" "<cmd>lua vim.lsp.buf.code_action()<CR>" "")
-      (keymap ["n"] "gr" "<cmd>lua require('telescope.builtin').lsp_references()<CR>" "")
-      (keymap ["n"] "gl" "<cmd>lua vim.diagnostic.open_float()<CR>" "")
-      (keymap ["n"] "[d" "<cmd>lua vim.diagnostic.goto_prev()<CR>" "")
-      (keymap ["n"] "]d" "<cmd>lua vim.diagnostic.goto_next()<CR>" "")
-      (keymap ["n"] "<leader>q" "<cmd>lua vim.diagnostic.setloclist()<CR>" "")
-      (keymap ["n"] "<leader>f" "<cmd>lua vim.lsp.buf.format { async = true }<CR>" "")
+      (keymap ["n"] "gD" "<cmd>lua vim.lsp.buf.declaration()<CR>" "Goto declaration")
+      (keymap ["n"] "gd" "<cmd>lua require('telescope.builtin').lsp_definitions()<CR>" "Goto definition")
+      (keymap ["n"] "K" "<cmd>lua vim.lsp.buf.hover()<CR>" "Hover")
+      (keymap ["n"] "gi" "<cmd>lua require('telescope.builtin').lsp_implementations()<CR>" "Goto implementation")
+      (keymap ["n"] "<C-k>" "<cmd>lua vim.lsp.buf.signature_help()<CR>" "Signature Help")
+      (keymap ["n"] "<leader>wa" "<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>" "Add workspace folder")
+      (keymap ["n"] "<leader>wr" "<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>" "Remove workspace folder")
+      (keymap ["n"] "<leader>wl" "<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>" "List workspace folders")
+      (keymap ["n"] "gt" "<cmd>lua require('telescope.builtin').lsp_type_definitions()<CR>" "Goto type-definition")
+      (keymap ["n"] "<leader>r" "<cmd>lua vim.lsp.buf.rename()<CR>" "Rename")
+      (keymap ["n"] "<leader>a" "<cmd>lua vim.lsp.buf.code_action()<CR>" "Code Action")
+      (keymap ["n"] "gr" "<cmd>lua require('telescope.builtin').lsp_references()<CR>" "References")
+      (keymap ["n"] "gl" "<cmd>lua vim.diagnostic.open_float()<CR>" "Diagnostic float")
+      (keymap ["n"] "[d" "<cmd>lua vim.diagnostic.goto_prev()<CR>" "Next diagnostic")
+      (keymap ["n"] "]d" "<cmd>lua vim.diagnostic.goto_next()<CR>" "Previous diagnostic")
+      (keymap ["n"] "<leader>q" "<cmd>lua vim.diagnostic.setloclist()<CR>" "Show diagnostic quickfix list")
+      (keymap ["n"] "<leader>f" "<cmd>lua vim.lsp.buf.format { async = true }<CR>" "Format code")
 
       # -------------------------------------------------------------------------------------------------
       # Plugin: Easy Align
       # -------------------------------------------------------------------------------------------------
 
-      (keymap ["n"] "<leader>A" "<Plug>(EasyAlign)" "")
-      (keymap ["v"] "<leader>A" "<Plug>(EasyAlign)" "")
+      (keymap ["n"] "<leader>A" "<Plug>(EasyAlign)" "Easy-Align")
+      (keymap ["v"] "<leader>A" "<Plug>(EasyAlign)" "Easy-Align")
 
       # -------------------------------------------------------------------------------------------------
       # Plugin: Undotree
       # -------------------------------------------------------------------------------------------------
 
-      (keymap ["n"] "<leader>u" ":UndotreeToggle<CR>" "")
+      (keymap ["n"] "<leader>u" ":UndotreeToggle<CR>" "Undotree")
 
       # -------------------------------------------------------------------------------------------------
       # Plugin: Better Whitespace
       # -------------------------------------------------------------------------------------------------
 
-      (keymap ["n"] "<leader>$" ":StripWhitespace<CR>" "")
+      (keymap ["n"] "<leader>$" ":StripWhitespace<CR>" "Strip whitespace")
 
       # -------------------------------------------------------------------------------------------------
       # Plugin: Neotree
       # -------------------------------------------------------------------------------------------------
 
       # Mappings to open the tree / find the current file
-      (keymap ["n"] "<leader>t" ":Neotree toggle<CR>" "")
-      (keymap ["n"] "<leader>T" ":Neotree reveal<CR>" "")
-      (keymap ["n"] "<leader>G" ":Neotree float git_status<CR>" "")
-      (keymap ["n"] "<leader>b" ":Neotree float buffers<CR>" "")
+      (keymap ["n"] "<leader>t" ":Neotree toggle<CR>" "Filetree toggle")
+      (keymap ["n"] "<leader>T" ":Neotree reveal<CR>" "Filetree reveal current file")
+      (keymap ["n"] "<leader>G" ":Neotree float git_status<CR>" "Show git status")
+      (keymap ["n"] "<leader>b" ":Neotree float buffers<CR>" "Show open buffers")
 
       # -------------------------------------------------------------------------------------------------
       # Plugin: Sandwich
       # -------------------------------------------------------------------------------------------------
 
-      (keymap ["n" "v"] "m" "<Plug>(operator-sandwich-add)" "")
-      (keymap ["n" "v"] "M" "<Plug>(operator-sandwich-delete)" "")
-      (keymap ["n" "v"] "C-m" "<Plug>(operator-sandwich-replace)" "")
+      (keymap ["n" "v"] "m" "<Plug>(operator-sandwich-add)" "Sandwich Add")
+      (keymap ["n" "v"] "M" "<Plug>(operator-sandwich-delete)" "Sandwich Delete")
+      (keymap ["n" "v"] "<C-m>" "<Plug>(operator-sandwich-replace)" "Sandwich Replace")
 
       # -------------------------------------------------------------------------------------------------
       # Plugin: gomove
@@ -203,13 +203,45 @@
       # Plugin: wordmotion
       # -------------------------------------------------------------------------------------------------
 
-      (keymap ["x" "o"] "ie" "<Plug>WordMotion_iw" "")
+      (keymap ["x" "o"] "ie" "<Plug>WordMotion_iw" "inside subword")
+
+      # -------------------------------------------------------------------------------------------------
+      # Plugin: telescope
+      # -------------------------------------------------------------------------------------------------
+
+      (keymap ["n" "v"] "<space><space>" "<cmd>lua require('telescope.builtin').find_files()<CR>" "Telescope find files")
+      (keymap ["n" "v"] "<space>g" "<cmd>lua require('telescope.builtin').live_grep()<CR>" "Telescope live grep")
+      (keymap ["n" "v"] "<space>b" "<cmd>lua require('telescope.builtin').buffers()<CR>" "Telescope buffers")
 
       # -------------------------------------------------------------------------------------------------
       # Plugin: textcase
       # -------------------------------------------------------------------------------------------------
 
-      # TODO: ... keybinds + telescope integration
+      (keymap ["n"] "<leader>C" "<cmd>TextCaseOpenTelescopeQuickChange<CR>" "Change word case")
+
+      (keymap ["n"] "<leader>cu" "<cmd>lua require('textcase').current_word('to_upper_case')<CR>" "To UPPER CASE")
+      (keymap ["n"] "<leader>cl" "<cmd>lua require('textcase').current_word('to_lower_case')<CR>" "To lower case")
+      (keymap ["n"] "<leader>cs" "<cmd>lua require('textcase').current_word('to_snake_case')<CR>" "To snake_case")
+      (keymap ["n"] "<leader>cd" "<cmd>lua require('textcase').current_word('to_dash_case')<CR>" "To dash-case")
+      (keymap ["n"] "<leader>cn" "<cmd>lua require('textcase').current_word('to_constant_case')<CR>" "To CONSTANT_CASE")
+      (keymap ["n"] "<leader>cd" "<cmd>lua require('textcase').current_word('to_dot_case')<CR>" "To dot.case")
+      (keymap ["n"] "<leader>ca" "<cmd>lua require('textcase').current_word('to_phrase_case')<CR>" "To Phrase case")
+      (keymap ["n"] "<leader>cc" "<cmd>lua require('textcase').current_word('to_camel_case')<CR>" "To camelCase")
+      (keymap ["n"] "<leader>cp" "<cmd>lua require('textcase').current_word('to_pascal_case')<CR>" "To PascalCase")
+      (keymap ["n"] "<leader>ct" "<cmd>lua require('textcase').current_word('to_title_case')<CR>" "To Title Case")
+      (keymap ["n"] "<leader>cf" "<cmd>lua require('textcase').current_word('to_path_case')<CR>" "To path/case")
+
+      (keymap ["n"] "<leader>cU" "<cmd>lua require('textcase').lsp_rename('to_upper_case')<CR>" "To UPPER CASE")
+      (keymap ["n"] "<leader>cL" "<cmd>lua require('textcase').lsp_rename('to_lower_case')<CR>" "To lower case")
+      (keymap ["n"] "<leader>cS" "<cmd>lua require('textcase').lsp_rename('to_snake_case')<CR>" "To snake_case")
+      (keymap ["n"] "<leader>cD" "<cmd>lua require('textcase').lsp_rename('to_dash_case')<CR>" "To dash-case")
+      (keymap ["n"] "<leader>cN" "<cmd>lua require('textcase').lsp_rename('to_constant_case')<CR>" "To CONSTANT_CASE")
+      (keymap ["n"] "<leader>cD" "<cmd>lua require('textcase').lsp_rename('to_dot_case')<CR>" "To dot.case")
+      (keymap ["n"] "<leader>cA" "<cmd>lua require('textcase').lsp_rename('to_phrase_case')<CR>" "To Phrase case")
+      (keymap ["n"] "<leader>cC" "<cmd>lua require('textcase').lsp_rename('to_camel_case')<CR>" "To camelCase")
+      (keymap ["n"] "<leader>cP" "<cmd>lua require('textcase').lsp_rename('to_pascal_case')<CR>" "To PascalCase")
+      (keymap ["n"] "<leader>cT" "<cmd>lua require('textcase').lsp_rename('to_title_case')<CR>" "To Title Case")
+      (keymap ["n"] "<leader>cF" "<cmd>lua require('textcase').lsp_rename('to_path_case')<CR>" "To path/case")
     ];
   };
 

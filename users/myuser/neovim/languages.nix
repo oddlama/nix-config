@@ -37,10 +37,9 @@
         };
       };
 
-      # Rust specific LSP tools
-      rust-tools = {
+      rustaceanvim = {
         enable = true;
-        server.check.command = "clippy";
+        server.settings.files.excludeDirs = [".direnv"];
       };
     };
   };

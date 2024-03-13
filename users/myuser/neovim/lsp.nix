@@ -27,16 +27,7 @@
         bashls.enable = true;
         cssls.enable = true;
         html.enable = true;
-        rust-analyzer = {
-          enable = true;
-          settings = {
-            checkOnSave = true;
-            check.command = "clippy";
-          };
-          # cargo and rustc are managed per project with their own flakes.
-          installCargo = false;
-          installRustc = false;
-        };
+        # rust-analyzer should not be set here because of rustaceanvim
         nil_ls = {
           enable = true;
           settings = {

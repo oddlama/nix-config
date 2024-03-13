@@ -26,7 +26,7 @@
       # Fzf picker for arbitrary stuff
       telescope = {
         enable = true;
-        enabledExtensions = ["fzf" "notify" "ui-select"];
+        enabledExtensions = ["fzf" "notify" "ui-select" "textcase"];
         extensions.fzf-native.enable = true;
       };
 
@@ -112,6 +112,10 @@
               winblend = 0,
             },
           },
+        }
+
+        require('textcase').setup {
+          default_keymappings_enabled = false,
         }
       '';
   };

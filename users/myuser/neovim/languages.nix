@@ -1,4 +1,4 @@
-{
+{pkgs, ...}: {
   programs.nixvim = {
     files."ftplugin/nix.lua".extraConfigLua = ''
       vim.opt_local.expandtab = true
@@ -26,9 +26,6 @@
         nixvimInjections = true;
       };
 
-      # Show the current function / context in topmost line
-      treesitter-context.enable = true;
-
       # Cargo.toml dependency completion
       crates-nvim = {
         enable = true;
@@ -40,6 +37,21 @@
       rustaceanvim = {
         enable = true;
         server.settings.files.excludeDirs = [".direnv"];
+        dap.autoloadConfigurations = true;
+        dap.adapter = let
+          code-lldb = pkgs.vscode-extensions.vadimcn.vscode-lldb;
+        in {
+          executable.command = "${code-lldb}/share/vscode/extensions/vadimcn.vscode-lldb/adapter/codelldb";
+          executable.args = [
+            "--liblldb"
+            "${code-lldb}/share/vscode/extensions/vadimcn.vscode-lldb/lldb/lib/liblldb.dylib"
+            "--port"
+            "31337"
+          ];
+          type = "server";
+          port = "31337";
+          host = "127.0.0.1";
+        };
       };
     };
   };

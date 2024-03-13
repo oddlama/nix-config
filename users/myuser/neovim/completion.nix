@@ -12,6 +12,7 @@
       };
 
       cmp_luasnip.enable = true;
+      cmp-dap.enable = true;
       cmp-cmdline.enable = true;
       cmp-cmdline-history.enable = true;
       cmp-path.enable = true;
@@ -29,7 +30,8 @@
             {name = "nvim_lsp_document_symbol";}
             {name = "path";}
             {name = "treesitter";}
-            {name = "luasnip";}
+            {name = "dap";}
+            # {name = "luasnip";}
             {name = "emoji";}
           ];
           mapping = {
@@ -105,50 +107,50 @@
             */
             ''
               function(_, vim_item)
-              local icons = {
-                Namespace = "󰌗",
-                Text = "󰉿",
-                Method = "󰆧",
-                Function = "󰆧",
-                Constructor = "",
-                Field = "󰜢",
-                Variable = "󰀫",
-                Class = "󰠱",
-                Interface = "",
-                Module = "",
-                Property = "󰜢",
-                Unit = "󰑭",
-                Value = "󰎠",
-                Enum = "",
-                Keyword = "󰌋",
-                Snippet = "",
-                Color = "󰏘",
-                File = "󰈚",
-                Reference = "󰈇",
-                Folder = "󰉋",
-                EnumMember = "",
-                Constant = "󰏿",
-                Struct = "󰙅",
-                Event = "",
-                Operator = "󰆕",
-                TypeParameter = "󰊄",
-                Table = "",
-                Object = "󰅩",
-                Tag = "",
-                Array = "󰅪",
-                Boolean = "",
-                Number = "",
-                Null = "󰟢",
-                String = "󰉿",
-                Calendar = "",
-                Watch = "󰥔",
-                Package = "",
-                Copilot = "",
-                Codeium = "",
-                TabNine = "",
-              }
-              vim_item.kind = string.format("%s %s", icons[vim_item.kind], vim_item.kind)
-              return vim_item
+                local icons = {
+                  Namespace = "󰌗",
+                  Text = "󰉿",
+                  Method = "󰆧",
+                  Function = "󰆧",
+                  Constructor = "",
+                  Field = "󰜢",
+                  Variable = "󰀫",
+                  Class = "󰠱",
+                  Interface = "",
+                  Module = "",
+                  Property = "󰜢",
+                  Unit = "󰑭",
+                  Value = "󰎠",
+                  Enum = "",
+                  Keyword = "󰌋",
+                  Snippet = "",
+                  Color = "󰏘",
+                  File = "󰈚",
+                  Reference = "󰈇",
+                  Folder = "󰉋",
+                  EnumMember = "",
+                  Constant = "󰏿",
+                  Struct = "󰙅",
+                  Event = "",
+                  Operator = "󰆕",
+                  TypeParameter = "󰊄",
+                  Table = "",
+                  Object = "󰅩",
+                  Tag = "",
+                  Array = "󰅪",
+                  Boolean = "",
+                  Number = "",
+                  Null = "󰟢",
+                  String = "󰉿",
+                  Calendar = "",
+                  Watch = "󰥔",
+                  Package = "",
+                  Copilot = "",
+                  Codeium = "",
+                  TabNine = "",
+                }
+                vim_item.kind = string.format("%s %s", icons[vim_item.kind], vim_item.kind)
+                return vim_item
               end
             '';
           snippet.expand =

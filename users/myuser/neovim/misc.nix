@@ -28,6 +28,15 @@
         enable = true;
         enabledExtensions = ["fzf" "notify" "ui-select" "textcase"];
         extensions.fzf-native.enable = true;
+        defaults.mappings.i."<esc>".__raw =
+          /*
+          lua
+          */
+          ''
+            function(...)
+              return require("telescope.actions").close(...)
+            end
+          '';
       };
 
       # Undo tree

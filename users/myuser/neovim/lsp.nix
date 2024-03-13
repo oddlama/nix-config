@@ -71,6 +71,12 @@
       };
     };
 
-    # TODO dap.enable = true;
+    dap = {
+      enable = true;
+      extensions = {
+        dap-virtual-text.enable = true;
+        dap-ui.enable = true;
+      };
+    };
   };
 }

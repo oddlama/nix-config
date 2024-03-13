@@ -27,22 +27,6 @@
     # TODO for wayland:
     # clipboard.providers.wl-copy.enable = true;
 
-    #colorschemes.catppuccin = {
-    #  enable = true;
-    #  flavour = "mocha";
-    #  integrations = {
-    #    dap.enabled = true;
-    #    dap.enable_ui = true;
-    #    fidget = true;
-    #    indent_blankline = {
-    #      enabled = true;
-    #      colored_indent_levels = true;
-    #    };
-    #    native_lsp.enabled = true;
-    #  };
-    #};
-    #colorschemes.onedark.enable = true;
-
     luaLoader.enable = true;
     globals.mapleader = ",";
 
@@ -114,7 +98,7 @@
       (keymap ["t"] "<C-w>" "<C-\\><C-n><C-w>" "")
 
       # Open fixed size terminal window at the bottom
-      (keymap ["n"] "<leader><CR>" ":belowright new | setlocal wfh | resize 10 | terminal<CR>" "")
+      (keymap ["n"] "<leader><CR>" ":belowright new | setlocal wfh | resize 10 | terminal<CR>" "Open Terminal")
 
       # -------------------------------------------------------------------------------------------------
       # Language server
@@ -219,29 +203,29 @@
 
       (keymap ["n"] "<leader>C" "<cmd>TextCaseOpenTelescopeQuickChange<CR>" "Change word case")
 
-      (keymap ["n"] "<leader>cu" "<cmd>lua require('textcase').current_word('to_upper_case')<CR>" "To UPPER CASE")
-      (keymap ["n"] "<leader>cl" "<cmd>lua require('textcase').current_word('to_lower_case')<CR>" "To lower case")
-      (keymap ["n"] "<leader>cs" "<cmd>lua require('textcase').current_word('to_snake_case')<CR>" "To snake_case")
-      (keymap ["n"] "<leader>cd" "<cmd>lua require('textcase').current_word('to_dash_case')<CR>" "To dash-case")
-      (keymap ["n"] "<leader>cn" "<cmd>lua require('textcase').current_word('to_constant_case')<CR>" "To CONSTANT_CASE")
-      (keymap ["n"] "<leader>cd" "<cmd>lua require('textcase').current_word('to_dot_case')<CR>" "To dot.case")
-      (keymap ["n"] "<leader>ca" "<cmd>lua require('textcase').current_word('to_phrase_case')<CR>" "To Phrase case")
-      (keymap ["n"] "<leader>cc" "<cmd>lua require('textcase').current_word('to_camel_case')<CR>" "To camelCase")
-      (keymap ["n"] "<leader>cp" "<cmd>lua require('textcase').current_word('to_pascal_case')<CR>" "To PascalCase")
-      (keymap ["n"] "<leader>ct" "<cmd>lua require('textcase').current_word('to_title_case')<CR>" "To Title Case")
-      (keymap ["n"] "<leader>cf" "<cmd>lua require('textcase').current_word('to_path_case')<CR>" "To path/case")
+      (keymap ["n"] "<leader>cu" "<cmd>lua require('textcase').current_word('to_upper_case')<CR><right>" "To UPPER CASE")
+      (keymap ["n"] "<leader>cl" "<cmd>lua require('textcase').current_word('to_lower_case')<CR><right>" "To lower case")
+      (keymap ["n"] "<leader>cs" "<cmd>lua require('textcase').current_word('to_snake_case')<CR><right>" "To snake_case")
+      (keymap ["n"] "<leader>cd" "<cmd>lua require('textcase').current_word('to_dash_case')<CR><right>" "To dash-case")
+      (keymap ["n"] "<leader>cn" "<cmd>lua require('textcase').current_word('to_constant_case')<CR><right>" "To CONSTANT_CASE")
+      (keymap ["n"] "<leader>cd" "<cmd>lua require('textcase').current_word('to_dot_case')<CR><right>" "To dot.case")
+      (keymap ["n"] "<leader>ca" "<cmd>lua require('textcase').current_word('to_phrase_case')<CR><right>" "To Phrase case")
+      (keymap ["n"] "<leader>cc" "<cmd>lua require('textcase').current_word('to_camel_case')<CR><right>" "To camelCase")
+      (keymap ["n"] "<leader>cp" "<cmd>lua require('textcase').current_word('to_pascal_case')<CR><right>" "To PascalCase")
+      (keymap ["n"] "<leader>ct" "<cmd>lua require('textcase').current_word('to_title_case')<CR><right>" "To Title Case")
+      (keymap ["n"] "<leader>cf" "<cmd>lua require('textcase').current_word('to_path_case')<CR><right>" "To path/case")
 
-      (keymap ["n"] "<leader>cU" "<cmd>lua require('textcase').lsp_rename('to_upper_case')<CR>" "To UPPER CASE")
-      (keymap ["n"] "<leader>cL" "<cmd>lua require('textcase').lsp_rename('to_lower_case')<CR>" "To lower case")
-      (keymap ["n"] "<leader>cS" "<cmd>lua require('textcase').lsp_rename('to_snake_case')<CR>" "To snake_case")
-      (keymap ["n"] "<leader>cD" "<cmd>lua require('textcase').lsp_rename('to_dash_case')<CR>" "To dash-case")
-      (keymap ["n"] "<leader>cN" "<cmd>lua require('textcase').lsp_rename('to_constant_case')<CR>" "To CONSTANT_CASE")
-      (keymap ["n"] "<leader>cD" "<cmd>lua require('textcase').lsp_rename('to_dot_case')<CR>" "To dot.case")
-      (keymap ["n"] "<leader>cA" "<cmd>lua require('textcase').lsp_rename('to_phrase_case')<CR>" "To Phrase case")
-      (keymap ["n"] "<leader>cC" "<cmd>lua require('textcase').lsp_rename('to_camel_case')<CR>" "To camelCase")
-      (keymap ["n"] "<leader>cP" "<cmd>lua require('textcase').lsp_rename('to_pascal_case')<CR>" "To PascalCase")
-      (keymap ["n"] "<leader>cT" "<cmd>lua require('textcase').lsp_rename('to_title_case')<CR>" "To Title Case")
-      (keymap ["n"] "<leader>cF" "<cmd>lua require('textcase').lsp_rename('to_path_case')<CR>" "To path/case")
+      (keymap ["n"] "<leader>cU" "<cmd>lua require('textcase').lsp_rename('to_upper_case')<CR><right>" "LSP Rename: To UPPER CASE")
+      (keymap ["n"] "<leader>cL" "<cmd>lua require('textcase').lsp_rename('to_lower_case')<CR><right>" "LSP Rename: To lower case")
+      (keymap ["n"] "<leader>cS" "<cmd>lua require('textcase').lsp_rename('to_snake_case')<CR><right>" "LSP Rename: To snake_case")
+      (keymap ["n"] "<leader>cD" "<cmd>lua require('textcase').lsp_rename('to_dash_case')<CR><right>" "LSP Rename: To dash-case")
+      (keymap ["n"] "<leader>cN" "<cmd>lua require('textcase').lsp_rename('to_constant_case')<CR><right>" "LSP Rename: To CONSTANT_CASE")
+      (keymap ["n"] "<leader>cD" "<cmd>lua require('textcase').lsp_rename('to_dot_case')<CR><right>" "LSP Rename: To dot.case")
+      (keymap ["n"] "<leader>cA" "<cmd>lua require('textcase').lsp_rename('to_phrase_case')<CR><right>" "LSP Rename: To Phrase case")
+      (keymap ["n"] "<leader>cC" "<cmd>lua require('textcase').lsp_rename('to_camel_case')<CR><right>" "LSP Rename: To camelCase")
+      (keymap ["n"] "<leader>cP" "<cmd>lua require('textcase').lsp_rename('to_pascal_case')<CR><right>" "LSP Rename: To PascalCase")
+      (keymap ["n"] "<leader>cT" "<cmd>lua require('textcase').lsp_rename('to_title_case')<CR><right>" "LSP Rename: To Title Case")
+      (keymap ["n"] "<leader>cF" "<cmd>lua require('textcase').lsp_rename('to_path_case')<CR><right>" "LSP Rename: To path/case")
     ];
   };
 

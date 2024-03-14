@@ -40,7 +40,7 @@
     ./wireguard-proxy.nix
     ./wireguard.nix
 
-    ./topology.nix
+    ../topology/module.nix
   ];
 
   nixpkgs.overlays = [

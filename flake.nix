@@ -175,7 +175,7 @@
       };
 
       # XXX: WIP: only testing
-      topology = import ./generate-topology.nix {
+      topology = import ./topology {
         inherit pkgs;
         nixosConfigurations = self.nodes;
       };

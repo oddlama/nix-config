@@ -114,5 +114,5 @@ in {
   };
 
   # Allow accessing influx
-  meta.wireguard.proxy-sentinel.client.via = "sentinel";
+  wireguard.proxy-sentinel.client.via = "sentinel";
 }

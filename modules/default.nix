@@ -37,8 +37,6 @@
     ./provided-domains.nix
     ./secrets.nix
     ./telegraf.nix
-    ./wireguard-proxy.nix
-    ./wireguard.nix
 
     ../topology/module.nix
   ];

@@ -9,14 +9,17 @@
   influxdbDomain = "influxdb.${config.repo.secrets.global.domains.me}";
   influxdbPort = 8086;
 in {
-  meta.wireguard-proxy.sentinel.allowedTCPPorts = [influxdbPort];
+  wireguard.proxy-sentinel = {
+    client.via = "sentinel";
+    firewallRuleForNode.sentinel.allowedTCPPorts = [influxdbPort];
+  };
 
   nodes.sentinel = {
     networking.providedDomains.influxdb = influxdbDomain;
 
     services.nginx = {
       upstreams.influxdb = {
-        servers."${config.meta.wireguard.proxy-sentinel.ipv4}:${toString influxdbPort}" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString influxdbPort}" = {};
         extraConfig = ''
           zone influxdb 64k;
           keepalive 2;
@@ -25,7 +28,7 @@ in {
       virtualHosts.${influxdbDomain} = let
         accessRules = ''
           satisfy any;
-          ${lib.concatMapStrings (ip: "allow ${ip};\n") sentinelCfg.meta.wireguard.proxy-sentinel.server.reservedAddresses}
+          ${lib.concatMapStrings (ip: "allow ${ip};\n") sentinelCfg.wireguard.proxy-sentinel.server.reservedAddresses}
           deny all;
         '';
       in {

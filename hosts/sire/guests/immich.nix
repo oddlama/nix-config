@@ -165,7 +165,10 @@ in {
     '';
   };
 
-  meta.wireguard-proxy.sentinel.allowedTCPPorts = [2283];
+  wireguard.proxy-sentinel = {
+    client.via = "sentinel";
+    firewallRuleForNode.sentinel.allowedTCPPorts = [2283];
+  };
   networking.nftables.chains.forward.into-immich-container = {
     after = ["conntrack"];
     rules = [
@@ -179,7 +182,7 @@ in {
 
     services.nginx = {
       upstreams.immich = {
-        servers."${config.meta.wireguard.proxy-sentinel.ipv4}:2283" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:2283" = {};
         extraConfig = ''
           zone immich 64k;
           keepalive 2;

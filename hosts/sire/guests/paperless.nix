@@ -17,7 +17,7 @@ in {
 
     services.nginx = {
       upstreams.paperless = {
-        servers."${config.meta.wireguard.proxy-sentinel.ipv4}:${toString config.services.paperless.port}" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.paperless.port}" = {};
         extraConfig = ''
           zone paperless 64k;
           keepalive 2;
@@ -38,9 +38,10 @@ in {
     };
   };
 
-  meta.wireguard-proxy.sentinel.allowedTCPPorts = [
-    config.services.paperless.port
-  ];
+  wireguard.proxy-sentinel = {
+    client.via = "sentinel";
+    firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.paperless.port];
+  };
 
   age.secrets.paperless-admin-password = {
     generator.script = "alnum";
@@ -74,7 +75,7 @@ in {
       PAPERLESS_URL = "https://${paperlessDomain}";
       PAPERLESS_ALLOWED_HOSTS = paperlessDomain;
       PAPERLESS_CORS_ALLOWED_HOSTS = "https://${paperlessDomain}";
-      PAPERLESS_TRUSTED_PROXIES = sentinelCfg.meta.wireguard.proxy-sentinel.ipv4;
+      PAPERLESS_TRUSTED_PROXIES = sentinelCfg.wireguard.proxy-sentinel.ipv4;
 
       # Authentication via kanidm
       PAPERLESS_APPS = "allauth.socialaccount.providers.openid_connect";

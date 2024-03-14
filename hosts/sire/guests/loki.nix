@@ -6,7 +6,10 @@
   sentinelCfg = nodes.sentinel.config;
   lokiDomain = "loki.${config.repo.secrets.global.domains.me}";
 in {
-  meta.wireguard-proxy.sentinel.allowedTCPPorts = [config.services.loki.configuration.server.http_listen_port];
+  wireguard.proxy-sentinel = {
+    client.via = "sentinel";
+    firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.loki.configuration.server.http_listen_port];
+  };
 
   nodes.sentinel = {
     networking.providedDomains.loki = lokiDomain;
@@ -19,7 +22,7 @@ in {
 
     services.nginx = {
       upstreams.loki = {
-        servers."${config.meta.wireguard.proxy-sentinel.ipv4}:${toString config.services.loki.configuration.server.http_listen_port}" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.loki.configuration.server.http_listen_port}" = {};
         extraConfig = ''
           zone loki 64k;
           keepalive 2;

@@ -1,16 +1,17 @@
 {config, ...}: let
   radicaleDomain = "radicale.${config.repo.secrets.global.domains.personal}";
 in {
-  meta.wireguard-proxy.sentinel.allowedTCPPorts = [
-    8000
-  ];
+  wireguard.proxy-sentinel = {
+    client.via = "sentinel";
+    firewallRuleForNode.sentinel.allowedTCPPorts = [8000];
+  };
 
   nodes.sentinel = {
     networking.providedDomains.radicale = radicaleDomain;
 
     services.nginx = {
       upstreams.radicale = {
-        servers."${config.meta.wireguard.proxy-sentinel.ipv4}:8000" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:8000" = {};
         extraConfig = ''
           zone radicale 64k;
           keepalive 2;

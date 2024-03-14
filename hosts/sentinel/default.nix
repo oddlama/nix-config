@@ -15,6 +15,7 @@
   boot.mode = "bios";
 
   users.groups.acme.members = ["nginx"];
+  wireguard.proxy-sentinel.firewallRuleForAll.allowedTCPPorts = [80 443];
   services.nginx.enable = true;
   services.nginx.recommendedSetup = true;
 
@@ -24,7 +25,7 @@
   };
 
   # Connect safely via wireguard to skip authentication
-  networking.hosts.${config.meta.wireguard.proxy-sentinel.ipv4} = [config.networking.providedDomains.influxdb];
+  networking.hosts.${config.wireguard.proxy-sentinel.ipv4} = [config.networking.providedDomains.influxdb];
   meta.telegraf = {
     enable = true;
     scrapeSensors = false;

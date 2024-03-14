@@ -5,9 +5,10 @@
 }: let
   vaultwardenDomain = "pw.${config.repo.secrets.global.domains.personal}";
 in {
-  meta.wireguard-proxy.sentinel.allowedTCPPorts = [
-    config.services.vaultwarden.config.rocketPort
-  ];
+  wireguard.proxy-sentinel = {
+    client.via = "sentinel";
+    firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.vaultwarden.config.rocketPort];
+  };
 
   age.secrets.vaultwarden-env = {
     rekeyFile = config.node.secretsDir + "/vaultwarden-env.age";
@@ -29,7 +30,7 @@ in {
 
     services.nginx = {
       upstreams.vaultwarden = {
-        servers."${config.meta.wireguard.proxy-sentinel.ipv4}:${toString config.services.vaultwarden.config.rocketPort}" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.vaultwarden.config.rocketPort}" = {};
         extraConfig = ''
           zone vaultwarden 64k;
           keepalive 2;

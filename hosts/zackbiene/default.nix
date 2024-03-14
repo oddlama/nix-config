@@ -37,14 +37,13 @@ in {
     };
   };
 
-  meta.wireguard-proxy.sentinel = {};
   meta.promtail = {
     enable = true;
     proxy = "sentinel";
   };
 
   # Connect safely via wireguard to skip http authentication
-  networking.hosts.${sentinelCfg.meta.wireguard.proxy-sentinel.ipv4} = [sentinelCfg.networking.providedDomains.influxdb];
+  networking.hosts.${sentinelCfg.wireguard.proxy-sentinel.ipv4} = [sentinelCfg.networking.providedDomains.influxdb];
   meta.telegraf = {
     enable = true;
     influxdb2 = {

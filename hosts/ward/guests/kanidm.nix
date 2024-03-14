@@ -14,7 +14,10 @@
     group = "kanidm";
   };
 in {
-  meta.wireguard-proxy.sentinel.allowedTCPPorts = [kanidmPort];
+  wireguard.proxy-sentinel = {
+    client.via = "sentinel";
+    firewallRuleForNode.sentinel.allowedTCPPorts = [kanidmPort];
+  };
 
   age.secrets."kanidm-self-signed.crt" = {
     rekeyFile = config.node.secretsDir + "/kanidm-self-signed.crt.age";
@@ -42,7 +45,7 @@ in {
 
     services.nginx = {
       upstreams.kanidm = {
-        servers."${config.meta.wireguard.proxy-sentinel.ipv4}:${toString kanidmPort}" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString kanidmPort}" = {};
         extraConfig = ''
           zone kanidm 64k;
           keepalive 2;

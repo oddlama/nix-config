@@ -6,7 +6,10 @@
   sentinelCfg = nodes.sentinel.config;
   grafanaDomain = "grafana.${config.repo.secrets.global.domains.me}";
 in {
-  meta.wireguard-proxy.sentinel.allowedTCPPorts = [config.services.grafana.settings.server.http_port];
+  wireguard.proxy-sentinel = {
+    client.via = "sentinel";
+    firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.grafana.settings.server.http_port];
+  };
 
   age.secrets.grafana-secret-key = {
     rekeyFile = config.node.secretsDir + "/grafana-secret-key.age";
@@ -58,7 +61,7 @@ in {
 
     services.nginx = {
       upstreams.grafana = {
-        servers."${config.meta.wireguard.proxy-sentinel.ipv4}:${toString config.services.grafana.settings.server.http_port}" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.grafana.settings.server.http_port}" = {};
         extraConfig = ''
           zone grafana 64k;
           keepalive 2;

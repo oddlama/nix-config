@@ -34,23 +34,12 @@
     };
   };
 
-  networking.nftables.firewall = {
-    zones = {
-      untrusted.interfaces = ["wan"];
-      proxy-sentinel.interfaces = ["proxy-sentinel"];
-    };
-    # Allow accessing nginx through the proxy
-    rules.proxy-sentinel-to-local = {
-      from = ["proxy-sentinel"];
-      to = ["local"];
-      allowedTCPPorts = [80 443];
-    };
-  };
+  networking.nftables.firewall.zones.untrusted.interfaces = ["wan"];
 
-  meta.wireguard.proxy-sentinel.server = {
+  wireguard.proxy-sentinel.server = {
     host = config.networking.fqdn;
     port = 51443;
     reservedAddresses = ["10.43.0.0/24" "fd00:43::/120"];
-    openFirewallRules = ["untrusted-to-local"];
+    openFirewall = true;
   };
 }

@@ -7,14 +7,17 @@
 }: let
   adguardhomeDomain = "adguardhome.${config.repo.secrets.global.domains.me}";
 in {
-  meta.wireguard-proxy.sentinel.allowedTCPPorts = [config.services.adguardhome.settings.bind_port];
+  wireguard.proxy-sentinel = {
+    client.via = "sentinel";
+    firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.adguardhome.settings.bind_port];
+  };
 
   nodes.sentinel = {
     networking.providedDomains.adguard = adguardhomeDomain;
 
     services.nginx = {
       upstreams.adguardhome = {
-        servers."${config.meta.wireguard.proxy-sentinel.ipv4}:${toString config.services.adguardhome.settings.bind_port}" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.adguardhome.settings.bind_port}" = {};
         extraConfig = ''
           zone adguardhome 64k;
           keepalive 2;

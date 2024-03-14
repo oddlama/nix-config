@@ -7,8 +7,6 @@
   sentinelCfg = nodes.sentinel.config;
   homeDomain = "home.${sentinelCfg.repo.secrets.global.domains.personal}";
 in {
-  meta.wireguard-proxy.sentinel.allowedTCPPorts = [80];
-
   environment.persistence."/persist".directories = [
     {
       directory = config.services.home-assistant.configDir;
@@ -145,7 +143,7 @@ in {
   nodes.sentinel = {
     services.nginx = {
       upstreams."zackbiene" = {
-        servers."${config.meta.wireguard.proxy-sentinel.ipv4}:80" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:80" = {};
         extraConfig = ''
           zone zackbiene 64k;
           keepalive 2;

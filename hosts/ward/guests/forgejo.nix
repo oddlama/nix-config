@@ -8,9 +8,10 @@
   sentinelCfg = nodes.sentinel.config;
   forgejoDomain = "git.${config.repo.secrets.global.domains.me}";
 in {
-  meta.wireguard-proxy.sentinel.allowedTCPPorts = [
-    config.services.forgejo.settings.server.HTTP_PORT
-  ];
+  wireguard.proxy-sentinel = {
+    client.via = "sentinel";
+    firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.forgejo.settings.server.HTTP_PORT];
+  };
 
   age.secrets.forgejo-mailer-password = {
     rekeyFile = config.node.secretsDir + "/forgejo-mailer-password.age";
@@ -37,22 +38,22 @@ in {
       postrouting.to-forgejo = {
         after = ["hook"];
         rules = [
-          "iifname wan ip daddr ${config.meta.wireguard.proxy-sentinel.ipv4} tcp dport 22 masquerade random"
-          "iifname wan ip6 daddr ${config.meta.wireguard.proxy-sentinel.ipv6} tcp dport 22 masquerade random"
+          "iifname wan ip daddr ${config.wireguard.proxy-sentinel.ipv4} tcp dport 22 masquerade random"
+          "iifname wan ip6 daddr ${config.wireguard.proxy-sentinel.ipv6} tcp dport 22 masquerade random"
         ];
       };
       prerouting.to-forgejo = {
         after = ["hook"];
         rules = [
-          "iifname wan tcp dport 9922 dnat ip to ${config.meta.wireguard.proxy-sentinel.ipv4}:22"
-          "iifname wan tcp dport 9922 dnat ip6 to ${config.meta.wireguard.proxy-sentinel.ipv6}:22"
+          "iifname wan tcp dport 9922 dnat ip to ${config.wireguard.proxy-sentinel.ipv4}:22"
+          "iifname wan tcp dport 9922 dnat ip6 to ${config.wireguard.proxy-sentinel.ipv6}:22"
         ];
       };
     };
 
     services.nginx = {
       upstreams.forgejo = {
-        servers."${config.meta.wireguard.proxy-sentinel.ipv4}:${toString config.services.forgejo.settings.server.HTTP_PORT}" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.forgejo.settings.server.HTTP_PORT}" = {};
         extraConfig = ''
           zone forgejo 64k;
           keepalive 2;

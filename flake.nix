@@ -175,10 +175,20 @@
       };
 
       # XXX: WIP: only testing
-      topology = import ./topology {
-        inherit pkgs;
-        nixosConfigurations = self.nodes;
-      };
+      topology =
+        import ./topology inputs
+        /*
+        <-- move into topology flake
+        */
+        {
+          inherit pkgs;
+          modules = [
+            {
+              renderer = "d2";
+              nixosConfigurations = self.nodes;
+            }
+          ];
+        };
 
       # For each major system, we provide a customized installer image that
       # has ssh and some other convenience stuff preconfigured.

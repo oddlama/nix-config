@@ -38,7 +38,7 @@
     ./secrets.nix
     ./telegraf.nix
 
-    ../topology/module.nix
+    ../topology/nixos/module.nix
   ];
 
   nixpkgs.overlays = [

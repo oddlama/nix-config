@@ -172,7 +172,7 @@ in {
   networking.nftables.chains.forward.into-immich-container = {
     after = ["conntrack"];
     rules = [
-      "iifname proxy-sentinel ip saddr 10.43.0.29 tcp dport 3001 accept"
+      "iifname proxy-sentinel ip saddr ${sentinelCfg.wireguard.proxy-sentinel.ipv4} tcp dport 3001 accept"
       "iifname podman1 oifname lan accept"
     ];
   };

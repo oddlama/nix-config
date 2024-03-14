@@ -94,7 +94,7 @@ in {
             enabled = true;
           }
           {
-            name = "AdaAway Default Blocklist";
+            name = "AdAway Default Blocklist";
             url = "https://adaway.org/hosts.txt";
             enabled = true;
           }

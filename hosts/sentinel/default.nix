@@ -13,6 +13,7 @@
   ];
 
   boot.mode = "bios";
+
   users.groups.acme.members = ["nginx"];
   services.nginx.enable = true;
   services.nginx.recommendedSetup = true;

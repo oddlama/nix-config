@@ -24,6 +24,7 @@
     ./config/secrets.nix
     ./config/ssh.nix
     ./config/system.nix
+    ./config/topology.nix
     ./config/users.nix
 
     ./acme-wildcard.nix

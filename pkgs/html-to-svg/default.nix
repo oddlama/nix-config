@@ -2,7 +2,7 @@
   buildNpmPackage,
   lib,
 }:
-buildNpmPackage rec {
+buildNpmPackage {
   pname = "html-to-svg";
   version = "1.0.0";
 

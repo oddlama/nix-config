@@ -77,4 +77,8 @@
   nixpkgs.config.permittedInsecurePackages = lib.trace "please remove insecure nix 2.16.2 very fast ok thx bye" [
     "nix-2.16.2"
   ];
+
+  topology.self.icon = "devices.desktop";
+  #topology.self.interfaces.lan1.connections = [{ id = "dumbswitch"; interface = "lan1"; }];
+  #topology.nodes.dumbswitch = lib.topology.mkSwitch "Dummer Switch";
 }

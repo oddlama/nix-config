@@ -1,0 +1,22 @@
+diff --git a/src/layouts/AppLayout.tsx b/src/layouts/AppLayout.tsx
+index 86137fe..0339fb7 100644
+--- a/src/layouts/AppLayout.tsx
++++ b/src/layouts/AppLayout.tsx
+@@ -6,7 +6,7 @@ import { cn } from "@utils/helpers";
+ import dayjs from "dayjs";
+ import relativeTime from "dayjs/plugin/relativeTime";
+ import { Viewport } from "next/dist/lib/metadata/types/extra-types";
+-import { Inter } from "next/font/google";
++import localFont from "next/font/local";
+ import React from "react";
+ import { Toaster } from "react-hot-toast";
+ import OIDCProvider from "@/auth/OIDCProvider";
+@@ -17,7 +17,7 @@ import ErrorBoundaryProvider from "@/contexts/ErrorBoundary";
+ import { GlobalThemeProvider } from "@/contexts/GlobalThemeProvider";
+ import { NavigationEvents } from "@/contexts/NavigationEvents";
+ 
+-const inter = Inter({ subsets: ["latin"] });
++const inter = localFont({ src: "./inter.ttf" });
+ 
+ // Extend dayjs with relativeTime plugin
+ dayjs.extend(relativeTime);

@@ -186,6 +186,47 @@
             {
               renderer = "d2";
               nixosConfigurations = self.nodes;
+
+              nodes.fritzbox = {
+                name = "FritzBox";
+                deviceType = "router";
+                hardware.image = ./fritzbox.png;
+                # interfaces.wan0.network = "internet";
+                interfaces.wan0.physicalConnections = [
+                  {
+                    node = "ward";
+                    interface = "wan";
+                  }
+                ];
+              };
+
+              nodes.fritzbox-no-img = {
+                name = "FritzBox No HImg";
+                deviceType = "router";
+                interfaces.wan0.physicalConnections = [
+                  {
+                    node = "ward";
+                    interface = "wan";
+                  }
+                ];
+              };
+
+              nodes.fritzbox-device = {
+                name = "FritzBox No D&HImg";
+                deviceType = "device";
+                interfaces.wan0.physicalConnections = [
+                  {
+                    node = "ward";
+                    interface = "wan";
+                  }
+                ];
+              };
+
+              # TODO:
+              #nodes.fritzbox = config.lib.nodes.mkRouter {};
+              #nodes.fritzbox = config.lib.nodes.mkSwitch {};
+              #nodes.fritzbox = config.lib.nodes.mkWifiAP {};
+              #nodes.printer = config.lib.nodes.mkWifiAP {};
             }
           ];
         };

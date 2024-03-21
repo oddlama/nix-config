@@ -13,7 +13,8 @@ program
   .argument("<output>", "output svg")
   .option("--font <font>", "Sets the font")
   .option("--font-bold <font>", "Sets the bold font")
-  .option("-w, --width <width>", "Sets the width of the output", 680)
+  .option("-w, --width <width>", "Sets the width of the output. Use auto for automatic scaling.", "auto")
+  .option("-h, --height <height>", "Sets the height of the output. Use auto for automatic scaling.", "auto")
   .action(async (input, output, options) => {
     if (!options.font) {
       console.error("--font is required");
@@ -27,7 +28,8 @@ program
 
     const markup = html(await fs.readFile(input, { encoding: "utf8" }));
     const svg = await satori(markup, {
-      width: options.width,
+      ...(options.width != "auto" && {width: options.width}),
+      ...(options.height != "auto" && {height: options.height}),
       embedFont: true,
       fonts: [
         {

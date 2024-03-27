@@ -184,7 +184,7 @@
           inherit pkgs;
           modules = [
             {
-              renderer = "d2";
+              renderer = "elk";
               nixosConfigurations = self.nodes;
 
               nodes.fritzbox = {
@@ -203,6 +203,18 @@
               nodes.fritzbox-no-img = {
                 name = "FritzBox No HImg";
                 deviceType = "router";
+                interfaces.wan0.physicalConnections = [
+                  {
+                    node = "ward";
+                    interface = "wan";
+                  }
+                ];
+              };
+
+              nodes.fritzbox-device-nd = {
+                name = "FritzBox No DImg";
+                deviceType = "device";
+                hardware.image = ./fritzbox.png;
                 interfaces.wan0.physicalConnections = [
                   {
                     node = "ward";

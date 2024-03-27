@@ -64,6 +64,10 @@
           networking.nftables.firewall = {
             zones.untrusted.interfaces = [config.guests.${guestName}.networking.mainLinkName];
           };
+
+          # TODO: FIXME: remove!!!!
+          topology.self.guestType = "microvm";
+          topology.self.parent = config.node.name;
         }
       ];
     };

@@ -192,47 +192,69 @@
                 deviceType = "router";
                 hardware.image = ./fritzbox.png;
                 # interfaces.wan0.network = "internet";
-                interfaces.wan0.physicalConnections = [
+                interfaces.wan0 = {};
+                interfaces.lan0.physicalConnections = [
                   {
                     node = "ward";
+                    interface = "wan";
+                  }
+                  {
+                    node = "sire";
+                    interface = "lan";
+                  }
+                ];
+              };
+
+              nodes.internet = {
+                name = "Internet";
+                deviceType = "internet";
+                hardware.image = ./cloud.svg;
+                # interfaces.wan0.network = "internet";
+                interfaces.wan0.physicalConnections = [
+                  {
+                    node = "fritzbox";
+                    interface = "wan0";
+                  }
+                  {
+                    node = "sentinel";
                     interface = "wan";
                   }
                 ];
               };
 
-              nodes.fritzbox-no-img = {
-                name = "FritzBox No HImg";
-                deviceType = "router";
-                interfaces.wan0.physicalConnections = [
-                  {
-                    node = "ward";
-                    interface = "wan";
-                  }
-                ];
-              };
+              #nodes.fritzbox-no-img = {
+              #  name = "FritzBox No HImg";
+              #  deviceType = "router";
+              #  interfaces.wan0.physicalConnections = [
+              #    {
+              #      node = "ward";
+              #      interface = "wan";
+              #    }
+              #  ];
+              #};
 
-              nodes.fritzbox-device-nd = {
-                name = "FritzBox No DImg";
-                deviceType = "device";
-                hardware.image = ./fritzbox.png;
-                interfaces.wan0.physicalConnections = [
-                  {
-                    node = "ward";
-                    interface = "wan";
-                  }
-                ];
-              };
+              #nodes.fritzbox-device-nd = {
+              #  name = "FritzBox No DImg";
+              #  deviceType = "device";
+              #  hardware.image = ./fritzbox.png;
+              #  interfaces.wan0.physicalConnections = [
+              #    {
+              #      node = "ward";
+              #      interface = "wan";
+              #    }
+              #  ];
+              #};
 
-              nodes.fritzbox-device = {
-                name = "FritzBox No D&HImg";
-                deviceType = "device";
-                interfaces.wan0.physicalConnections = [
-                  {
-                    node = "ward";
-                    interface = "wan";
-                  }
-                ];
-              };
+              #nodes.fritzbox-device = {
+              #  name = "FritzBox No D&HImg";
+              #  deviceType = "device";
+              #  interfaces.wan0.physicalConnections = [
+              #    {
+              #      node = "ward";
+              #      interface = "wan";
+              #    }
+              #  ];
+              #};
 
               # TODO:
               #nodes.fritzbox = config.lib.nodes.mkRouter {};

@@ -21,6 +21,8 @@
     ./kea.nix
   ];
 
+  topology.self.hardware.image = ../../odroid-h3.png;
+
   boot.mode = "efi";
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" "r8169"];
 

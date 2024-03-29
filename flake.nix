@@ -187,30 +187,12 @@
               renderer = "elk";
               nixosConfigurations = self.nodes;
 
-              nodes.fritzbox = {
-                name = "FritzBox";
-                deviceType = "router";
-                hardware.image = ./fritzbox.png;
-                # interfaces.wan0.network = "internet";
-                interfaces.wan0 = {};
-                interfaces.lan0.physicalConnections = [
-                  {
-                    node = "ward";
-                    interface = "wan";
-                  }
-                  {
-                    node = "sire";
-                    interface = "lan";
-                  }
-                ];
-              };
-
               nodes.internet = {
                 name = "Internet";
                 deviceType = "internet";
                 hardware.image = ./cloud.svg;
-                # interfaces.wan0.network = "internet";
-                interfaces.wan0.physicalConnections = [
+                # interfaces.eth0.network = "internet";
+                interfaces.eth0.physicalConnections = [
                   {
                     node = "fritzbox";
                     interface = "wan0";
@@ -218,6 +200,63 @@
                   {
                     node = "sentinel";
                     interface = "wan";
+                  }
+                ];
+              };
+
+              nodes.fritzbox = {
+                name = "FritzBox";
+                deviceType = "router";
+                hardware.image = ./fritzbox.png;
+                # interfaces.wan0.network = "internet";
+                interfaces.wan0 = {};
+                interfaces.eth0.physicalConnections = [
+                  {
+                    node = "ward";
+                    interface = "wan";
+                  }
+                ];
+              };
+
+              nodes.switch-attic = {
+                name = "Switch Attic";
+                deviceType = "switch";
+                hardware.image = ./dlink-dgs1016d.png;
+                interfaces.eth0.physicalConnections = [
+                  {
+                    node = "ward";
+                    interface = "lan";
+                  }
+                ];
+                interfaces.eth1.physicalConnections = [
+                  {
+                    node = "sire";
+                    interface = "lan";
+                  }
+                ];
+                interfaces.eth2 = {};
+              };
+
+              nodes.switch-bedroom-1 = {
+                name = "Switch Bedroom 1";
+                deviceType = "switch";
+                hardware.image = ./dlink-dgs105.png;
+                interfaces.eth0.physicalConnections = [
+                  {
+                    node = "switch-attic";
+                    interface = "eth2";
+                  }
+                ];
+                interfaces.eth1.physicalConnections = [
+                  {
+                    node = "kroma";
+                    interface = "lan1";
+                  }
+                ];
+                interfaces.eth2.physicalConnections = [
+                  {
+                    node = "nom";
+                    interface = "lan1";
                   }
                 ];
               };

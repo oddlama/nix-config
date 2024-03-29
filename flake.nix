@@ -218,6 +218,21 @@
                 ];
               };
 
+              # TODO: extract from kea!
+              networks.home-lan = {
+                name = "Home LAN";
+                cidrv4 = "192.168.1.0/24";
+                color = "#78dba9";
+              };
+              networks.home-fritzbox = {
+                name = "Home Fritzbox";
+                cidrv4 = "192.168.178.0/24";
+                color = "#f1cf8a";
+              };
+              nodes.ward.interfaces.lan.network = "home-lan";
+              nodes.ward.interfaces.wan.network = "home-fritzbox";
+              nodes.fritzbox.interfaces.eth0.network = "home-fritzbox";
+
               nodes.switch-attic = {
                 name = "Switch Attic";
                 deviceType = "switch";

@@ -207,6 +207,7 @@
               nodes.fritzbox = {
                 name = "FritzBox";
                 deviceType = "router";
+                hardware.info = "FRITZ!Box 7520";
                 hardware.image = ./fritzbox.png;
                 # interfaces.wan0.network = "internet";
                 interfaces.wan0 = {};
@@ -229,14 +230,20 @@
                 cidrv4 = "192.168.178.0/24";
                 color = "#f1cf8a";
               };
+
               nodes.ward.interfaces.lan.network = "home-lan";
-              nodes.ward.interfaces.wan.network = "home-fritzbox";
               nodes.fritzbox.interfaces.eth0.network = "home-fritzbox";
 
               nodes.switch-attic = {
                 name = "Switch Attic";
                 deviceType = "switch";
+                hardware.info = "D-Link DGS-1016D";
                 hardware.image = ./dlink-dgs1016d.png;
+
+                interfaces.eth0.sharesNetworkWith = _: true;
+                interfaces.eth1.sharesNetworkWith = _: true;
+                interfaces.eth2.sharesNetworkWith = _: true;
+
                 interfaces.eth0.physicalConnections = [
                   {
                     node = "ward";
@@ -255,7 +262,13 @@
               nodes.switch-bedroom-1 = {
                 name = "Switch Bedroom 1";
                 deviceType = "switch";
+                hardware.info = "D-Link DGS-105";
                 hardware.image = ./dlink-dgs105.png;
+
+                interfaces.eth0.sharesNetworkWith = _: true;
+                interfaces.eth1.sharesNetworkWith = _: true;
+                interfaces.eth2.sharesNetworkWith = _: true;
+
                 interfaces.eth0.physicalConnections = [
                   {
                     node = "switch-attic";

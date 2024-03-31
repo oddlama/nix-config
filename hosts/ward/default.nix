@@ -22,6 +22,27 @@
   ];
 
   topology.self.hardware.image = ../../odroid-h3.png;
+  topology.self.hardware.info = "ODROID H3, 64GB RAM";
+  # TODO FIXME topology bogus
+  topology.self.interfaces.lan-self.physicalConnections = [
+    {
+      node = config.node.name;
+      interface = "lan";
+    }
+  ];
+  topology.self.interfaces.lan.physicalConnections =
+    lib.flip map [
+      "adguardhome"
+      "forgejo"
+      "kanidm"
+      "radicale"
+      "vaultwarden"
+    ] (
+      x: {
+        node = "ward-${x}";
+        interface = "lan";
+      }
+    );
 
   boot.mode = "efi";
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" "r8169"];

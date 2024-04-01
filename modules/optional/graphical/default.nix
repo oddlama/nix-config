@@ -85,7 +85,7 @@ in
         # based on decaycs-dark, normal variant
         base16Scheme = {
           base00 = "#101419";
-          base01 = "#171B20";
+          base01 = "#171b20";
           base02 = "#21262e";
           base03 = "#242931";
           base04 = "#485263";

@@ -21,7 +21,7 @@
     ./kea.nix
   ];
 
-  topology.self.hardware.image = ../../odroid-h3.png;
+  topology.self.hardware.image = ../../topology/images/odroid-h3.png;
   topology.self.hardware.info = "ODROID H3, 64GB RAM";
   topology.self.interfaces.lan.sharesNetworkWith = x: x == "lan-self";
   topology.self.interfaces.lan-self.sharesNetworkWith = x: x == "lan";

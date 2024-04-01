@@ -49,6 +49,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nix-topology = {
+      url = "github:oddlama/nix-topology";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
+    };
+
     nixos-extra-modules = {
       url = "github:oddlama/nixos-extra-modules";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -97,13 +103,7 @@
 
   outputs = {
     self,
-    agenix-rekey,
-    devshell,
-    nixos-extra-modules,
-    flake-utils,
-    nixos-generators,
     nixpkgs,
-    pre-commit-hooks,
     ...
   } @ inputs: let
     inherit
@@ -123,7 +123,7 @@
         extraEncryptionPubkeys = [./secrets/backup.pub];
       };
 
-      agenix-rekey = agenix-rekey.configure {
+      agenix-rekey = inputs.agenix-rekey.configure {
         userFlake = self;
         inherit (self) nodes pkgs;
       };
@@ -154,8 +154,8 @@
         packages
         ;
     }
-    // flake-utils.lib.eachDefaultSystem (system: rec {
-      apps.setupHetznerStorageBoxes = import (nixos-extra-modules + "/apps/setup-hetzner-storage-boxes.nix") {
+    // inputs.flake-utils.lib.eachDefaultSystem (system: rec {
+      apps.setupHetznerStorageBoxes = import (inputs.nixos-extra-modules + "/apps/setup-hetzner-storage-boxes.nix") {
         inherit pkgs;
         nixosConfigurations = self.nodes;
         decryptIdentity = builtins.head self.secretsConfig.masterIdentities;
@@ -168,82 +168,25 @@
           import ./lib inputs
           ++ import ./pkgs/default.nix
           ++ [
-            nixos-extra-modules.overlays.default
-            devshell.overlays.default
-            agenix-rekey.overlays.default
+            inputs.agenix-rekey.overlays.default
+            inputs.devshell.overlays.default
+            inputs.nix-topology.overlays.default
+            inputs.nixos-extra-modules.overlays.default
           ];
       };
 
-      # XXX: WIP: only testing
-      topology =
-        import ./topology inputs
-        /*
-        <-- move into topology flake
-        */
-        {
-          inherit pkgs;
-          modules = [
-            ({config, ...}: let
-              inherit
-                (config.lib.helpers)
-                mkInternet
-                mkSwitch
-                mkRouter
-                mkConnection
-                mkConnectionRev
-                ;
-            in {
-              renderer = "elk";
-              nixosConfigurations = self.nodes;
-
-              nodes.internet = mkInternet {};
-              nodes.sentinel.interfaces.wan.physicalConnections = [(mkConnectionRev "internet" "*")];
-
-              nodes.fritzbox = mkRouter "FritzBox" {
-                info = "FRITZ!Box 7520";
-                image = ./fritzbox.png;
-                interfaceGroups = [
-                  ["eth1" "eth2" "eth3" "eth4"]
-                  ["wan1"]
-                ];
-                connections.eth1 = mkConnection "ward" "wan";
-                connections.wan1 = mkConnectionRev "internet" "*";
-              };
-
-              networks.home-fritzbox = {
-                name = "Home Fritzbox";
-                cidrv4 = "192.168.178.0/24";
-              };
-
-              networks.ward-kea.name = "Home LAN";
-              nodes.switch-attic = mkSwitch "Switch Attic" {
-                info = "D-Link DGS-1016D";
-                image = ./dlink-dgs1016d.png;
-                interfaceGroups = [["eth1" "eth2" "eth3" "eth4" "eth5" "eth6"]];
-                connections.eth1 = mkConnection "ward" "lan";
-                connections.eth2 = mkConnection "sire" "lan";
-                connections.eth3 = [];
-              };
-
-              nodes.switch-bedroom-1 = mkSwitch "Switch Bedroom 1" {
-                info = "D-Link DGS-105";
-                image = ./dlink-dgs105.png;
-                interfaceGroups = [["eth1" "eth2" "eth3" "eth4" "eth5"]];
-                connections.eth1 = mkConnection "switch-attic" "eth3";
-                connections.eth2 = mkConnection "kroma" "lan1";
-                connections.eth3 = mkConnection "nom" "lan1";
-              };
-            })
-            {
-              nodes.fritzbox.interfaces.eth1.network = "home-fritzbox";
-            }
-          ];
-        };
+      topology = import inputs.nix-topology {
+        inherit pkgs;
+        modules = [
+          ./topology
+          {nixosConfigurations = self.nodes;}
+        ];
+      };
 
       # For each major system, we provide a customized installer image that
       # has ssh and some other convenience stuff preconfigured.
       # Not strictly necessary for new setups.
-      images.live-iso = nixos-generators.nixosGenerate {
+      images.live-iso = inputs.nixos-generators.nixosGenerate {
         inherit pkgs;
         modules = [
           ./nix/installer-configuration.nix
@@ -258,16 +201,13 @@
       };
 
       # `nix flake check`
-      checks.pre-commit-hooks = pre-commit-hooks.lib.${system}.run {
+      checks.pre-commit-hooks = inputs.pre-commit-hooks.lib.${system}.run {
         src = cleanSource ./.;
         hooks = {
           # Nix
           alejandra.enable = true;
           deadnix.enable = true;
           statix.enable = true;
-          # Lua (for neovim)
-          luacheck.enable = true;
-          stylua.enable = true;
         };
       };
 

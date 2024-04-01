@@ -5,9 +5,10 @@
     inputs.agenix.nixosModules.default
     inputs.disko.nixosModules.disko
     inputs.elewrap.nixosModules.default
-    inputs.nixos-extra-modules.nixosModules.default
     inputs.home-manager.nixosModules.default
     inputs.impermanence.nixosModules.impermanence
+    inputs.nix-topology.nixosModules.default
+    inputs.nixos-extra-modules.nixosModules.default
     inputs.nixos-nftables-firewall.nixosModules.default
 
     ../users/root
@@ -38,8 +39,6 @@
     ./provided-domains.nix
     ./secrets.nix
     ./telegraf.nix
-
-    ../topology/nixos/module.nix
   ];
 
   nixpkgs.overlays = [

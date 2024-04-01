@@ -183,151 +183,65 @@
         {
           inherit pkgs;
           modules = [
-            {
+            ({config, ...}: let
+              inherit
+                (config.lib.helpers)
+                mkInternet
+                mkSwitch
+                mkRouter
+                mkConnection
+                mkConnectionRev
+                ;
+            in {
               renderer = "elk";
               nixosConfigurations = self.nodes;
 
-              nodes.internet = {
-                name = "Internet";
-                deviceType = "internet";
-                hardware.image = ./cloud.svg;
-                # interfaces.eth0.network = "internet";
-                interfaces.eth0.physicalConnections = [
-                  {
-                    node = "fritzbox";
-                    interface = "wan0";
-                  }
-                  {
-                    node = "sentinel";
-                    interface = "wan";
-                  }
-                ];
-              };
+              nodes.internet = mkInternet {};
+              nodes.sentinel.interfaces.wan.physicalConnections = [(mkConnectionRev "internet" "*")];
 
-              nodes.fritzbox = {
-                name = "FritzBox";
-                deviceType = "router";
-                hardware.info = "FRITZ!Box 7520";
-                hardware.image = ./fritzbox.png;
-                # interfaces.wan0.network = "internet";
-                interfaces.wan0 = {};
-                interfaces.eth0.physicalConnections = [
-                  {
-                    node = "ward";
-                    interface = "wan";
-                  }
+              nodes.fritzbox = mkRouter "FritzBox" {
+                info = "FRITZ!Box 7520";
+                image = ./fritzbox.png;
+                interfaceGroups = [
+                  ["eth1" "eth2" "eth3" "eth4"]
+                  ["wan1"]
                 ];
+                connections.eth1 = mkConnection "ward" "wan";
+                connections.wan1 = mkConnectionRev "internet" "*";
               };
 
               # TODO: extract from kea!
               networks.home-lan = {
                 name = "Home LAN";
                 cidrv4 = "192.168.1.0/24";
-                #color = "#78dba9";
               };
+
               networks.home-fritzbox = {
                 name = "Home Fritzbox";
                 cidrv4 = "192.168.178.0/24";
-                #color = "#f1cf8a";
               };
 
+              nodes.switch-attic = mkSwitch "Switch Attic" {
+                info = "D-Link DGS-1016D";
+                image = ./dlink-dgs1016d.png;
+                interfaceGroups = [["eth1" "eth2" "eth3" "eth4" "eth5" "eth6"]];
+                connections.eth1 = mkConnection "ward" "lan";
+                connections.eth2 = mkConnection "sire" "lan";
+                connections.eth3 = [];
+              };
+
+              nodes.switch-bedroom-1 = mkSwitch "Switch Bedroom 1" {
+                info = "D-Link DGS-105";
+                image = ./dlink-dgs105.png;
+                interfaceGroups = [["eth1" "eth2" "eth3" "eth4" "eth5"]];
+                connections.eth1 = mkConnection "switch-attic" "eth3";
+                connections.eth2 = mkConnection "kroma" "lan1";
+                connections.eth3 = mkConnection "nom" "lan1";
+              };
+            })
+            {
               nodes.ward.interfaces.lan.network = "home-lan";
-              nodes.fritzbox.interfaces.eth0.network = "home-fritzbox";
-
-              nodes.switch-attic = {
-                name = "Switch Attic";
-                deviceType = "switch";
-                hardware.info = "D-Link DGS-1016D";
-                hardware.image = ./dlink-dgs1016d.png;
-
-                interfaces.eth0.sharesNetworkWith = _: true;
-                interfaces.eth1.sharesNetworkWith = _: true;
-                interfaces.eth2.sharesNetworkWith = _: true;
-
-                interfaces.eth0.physicalConnections = [
-                  {
-                    node = "ward";
-                    interface = "lan";
-                  }
-                ];
-                interfaces.eth1.physicalConnections = [
-                  {
-                    node = "sire";
-                    interface = "lan";
-                  }
-                ];
-                interfaces.eth2 = {};
-              };
-
-              nodes.switch-bedroom-1 = {
-                name = "Switch Bedroom 1";
-                deviceType = "switch";
-                hardware.info = "D-Link DGS-105";
-                hardware.image = ./dlink-dgs105.png;
-
-                interfaces.eth0.sharesNetworkWith = _: true;
-                interfaces.eth1.sharesNetworkWith = _: true;
-                interfaces.eth2.sharesNetworkWith = _: true;
-
-                interfaces.eth0.physicalConnections = [
-                  {
-                    node = "switch-attic";
-                    interface = "eth2";
-                  }
-                ];
-                interfaces.eth1.physicalConnections = [
-                  {
-                    node = "kroma";
-                    interface = "lan1";
-                  }
-                ];
-                interfaces.eth2.physicalConnections = [
-                  {
-                    node = "nom";
-                    interface = "lan1";
-                  }
-                ];
-              };
-
-              #nodes.fritzbox-no-img = {
-              #  name = "FritzBox No HImg";
-              #  deviceType = "router";
-              #  interfaces.wan0.physicalConnections = [
-              #    {
-              #      node = "ward";
-              #      interface = "wan";
-              #    }
-              #  ];
-              #};
-
-              #nodes.fritzbox-device-nd = {
-              #  name = "FritzBox No DImg";
-              #  deviceType = "device";
-              #  hardware.image = ./fritzbox.png;
-              #  interfaces.wan0.physicalConnections = [
-              #    {
-              #      node = "ward";
-              #      interface = "wan";
-              #    }
-              #  ];
-              #};
-
-              #nodes.fritzbox-device = {
-              #  name = "FritzBox No D&HImg";
-              #  deviceType = "device";
-              #  interfaces.wan0.physicalConnections = [
-              #    {
-              #      node = "ward";
-              #      interface = "wan";
-              #    }
-              #  ];
-              #};
-
-              # TODO:
-              #nodes.fritzbox = config.lib.nodes.mkRouter {};
-              #nodes.fritzbox = config.lib.nodes.mkSwitch {};
-              #nodes.fritzbox = config.lib.nodes.mkWifiAP {};
-              #nodes.printer = config.lib.nodes.mkWifiAP {};
+              nodes.fritzbox.interfaces.eth1.network = "home-fritzbox";
             }
           ];
         };

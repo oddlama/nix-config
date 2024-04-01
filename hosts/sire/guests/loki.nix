@@ -64,6 +64,7 @@ in {
     }
   ];
 
+  topology.self.services.loki.info = "https://" + lokiDomain;
   services.loki = let
     lokiDir = "/var/lib/loki";
   in {

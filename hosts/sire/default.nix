@@ -20,6 +20,9 @@
     ./net.nix
   ];
 
+  topology.self.hardware.info = "AMD Ryzen Threadripper 1950X, 96GB RAM";
+  topology.self.interfaces.lan.sharesNetworkWith = x: x == "lan-self";
+
   boot.mode = "efi";
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "e1000e" "alx"];
 
@@ -81,6 +84,13 @@
           networking.nftables.firewall = {
             zones.untrusted.interfaces = [config.guests.${guestName}.networking.mainLinkName];
           };
+          topology.self.interfaces.lan.physicalConnections = [
+            {
+              node = config.node.name;
+              interface = "lan-self";
+              renderer.reverse = true;
+            }
+          ];
         }
       ];
     };

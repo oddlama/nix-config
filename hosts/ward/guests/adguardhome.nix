@@ -48,6 +48,7 @@ in {
     allowedUDPPorts = [53];
   };
 
+  topology.self.services.adguardhome.info = "https://" + adguardhomeDomain;
   services.adguardhome = {
     enable = true;
     # TODO allow mutable settings, replace 123.123.123.123 with

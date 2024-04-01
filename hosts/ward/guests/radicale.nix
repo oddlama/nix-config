@@ -43,6 +43,7 @@ in {
     }
   ];
 
+  topology.self.services.radicale.info = "https://" + radicaleDomain;
   services.radicale = {
     enable = true;
     settings = {

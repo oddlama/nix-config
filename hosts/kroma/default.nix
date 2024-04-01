@@ -79,6 +79,4 @@
   ];
 
   topology.self.icon = "devices.desktop";
-  #topology.self.interfaces.lan1.connections = [{ id = "dumbswitch"; interface = "lan1"; }];
-  #topology.nodes.dumbswitch = lib.topology.mkSwitch "Dummer Switch";
 }

@@ -210,17 +210,12 @@
                 connections.wan1 = mkConnectionRev "internet" "*";
               };
 
-              # TODO: extract from kea!
-              networks.home-lan = {
-                name = "Home LAN";
-                cidrv4 = "192.168.1.0/24";
-              };
-
               networks.home-fritzbox = {
                 name = "Home Fritzbox";
                 cidrv4 = "192.168.178.0/24";
               };
 
+              networks.ward-kea.name = "Home LAN";
               nodes.switch-attic = mkSwitch "Switch Attic" {
                 info = "D-Link DGS-1016D";
                 image = ./dlink-dgs1016d.png;
@@ -240,7 +235,6 @@
               };
             })
             {
-              nodes.ward.interfaces.lan.network = "home-lan";
               nodes.fritzbox.interfaces.eth1.network = "home-fritzbox";
             }
           ];

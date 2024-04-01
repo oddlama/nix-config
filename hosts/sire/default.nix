@@ -22,6 +22,7 @@
 
   topology.self.hardware.info = "AMD Ryzen Threadripper 1950X, 96GB RAM";
   topology.self.interfaces.lan.sharesNetworkWith = x: x == "lan-self";
+  topology.self.interfaces.lan-self.sharesNetworkWith = x: x == "lan";
 
   boot.mode = "efi";
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "e1000e" "alx"];

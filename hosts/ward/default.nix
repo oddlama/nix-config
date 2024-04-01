@@ -24,6 +24,7 @@
   topology.self.hardware.image = ../../odroid-h3.png;
   topology.self.hardware.info = "ODROID H3, 64GB RAM";
   topology.self.interfaces.lan.sharesNetworkWith = x: x == "lan-self";
+  topology.self.interfaces.lan-self.sharesNetworkWith = x: x == "lan";
 
   boot.mode = "efi";
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" "r8169"];

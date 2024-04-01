@@ -59,7 +59,7 @@
     };
   };
 
-  home.shellAliases = rec {
+  home.shellAliases = {
     g = "gitui";
     ga = "git add";
     gc = "git commit -v -S";

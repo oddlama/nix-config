@@ -70,6 +70,7 @@
       "shift+page_down" = "scroll_page_down";
       "ctrl+shift+." = "change_font_size all -2.0";
       "ctrl+shift+," = "change_font_size all +2.0";
+      "ctrl+shift+w" = "no_op";
     };
     # XXX: mkForce to prevent stylix from appending theme.
     # Fix this by making a correct theme that can be used.

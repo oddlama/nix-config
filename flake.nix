@@ -179,7 +179,9 @@
         inherit pkgs;
         modules = [
           ./topology
-          {nixosConfigurations = self.nodes;}
+          {
+            inherit (self) nixosConfigurations;
+          }
         ];
       };
 

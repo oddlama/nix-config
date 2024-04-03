@@ -38,9 +38,8 @@ in {
     info = "D-Link DGS-1016D";
     image = ./images/dlink-dgs1016d.png;
     interfaceGroups = [["eth1" "eth2" "eth3" "eth4" "eth5" "eth6"]];
-    connections.eth1 = mkConnection "ward" "lan";
-    connections.eth2 = mkConnection "sire" "lan";
-    connections.eth3 = [];
+    connections.eth1 = mkConnection "ward" "lan-self";
+    connections.eth2 = mkConnection "sire" "lan-self";
   };
 
   nodes.switch-bedroom-1 = mkSwitch "Switch Bedroom 1" {

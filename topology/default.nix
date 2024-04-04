@@ -8,11 +8,11 @@
     mkConnection
     ;
 in {
-  imports = [
-    {
-      nodes.fritzbox.interfaces.eth1.network = "home-fritzbox";
-    }
-  ];
+  networks.ward-kea.name = "Home LAN";
+  networks.home-fritzbox = {
+    name = "Home Fritzbox";
+    cidrv4 = "192.168.178.0/24";
+  };
 
   nodes.internet = mkInternet {
     connections = [
@@ -29,15 +29,12 @@ in {
       ["wan1"]
     ];
     connections.eth1 = mkConnection "ward" "wan";
-    interfaces.eth1.addresses = ["192.168.178.1"];
+    interfaces.eth1 = {
+      addresses = ["192.168.178.1"];
+      network = "home-fritzbox";
+    };
   };
 
-  networks.home-fritzbox = {
-    name = "Home Fritzbox";
-    cidrv4 = "192.168.178.0/24";
-  };
-
-  networks.ward-kea.name = "Home LAN";
   nodes.switch-attic = mkSwitch "Switch Attic" {
     info = "D-Link DGS-1016D";
     image = ./images/dlink-dgs1016d.png;
@@ -57,21 +54,35 @@ in {
   };
 
   nodes.switch-livingroom = mkSwitch "Switch Livingroom" {
-    info = "D-Link DGS-105";
-    image = ./images/dlink-dgs105.png;
-    interfaceGroups = [["eth1" "eth2" "eth3" "eth4" "eth5"]];
+    info = "Sitecom LN-121";
+    image = ./images/sitecom-ln-121.png;
+    interfaceGroups = [["eth1" "eth2" "eth3" "eth4"]];
     connections.eth2 = mkConnection "tv-livingroom" "eth1";
+    connections.eth3 = mkConnection "soundbar-livingroom" "eth1";
+    connections.eth4 = mkConnection "sat-receiver-livingroom" "eth1";
   };
 
-  nodes.tv-livingroom = mkDevice "Livingroom TV" {
-    # TODO info
-    # image = ./images/epson-xp-7100.png;
+  nodes.tv-livingroom = mkDevice "TV Livingroom" {
+    info = "LG OLED65B6D";
+    image = ./images/lg-oled65b6d.png;
+    interfaces.eth1 = {};
+  };
+
+  nodes.soundbar-livingroom = mkDevice "Soundbar Livingroom" {
+    info = "Bose SoundTouch 300";
+    image = ./images/bose-soundtouch-300.png;
+    interfaces.eth1 = {};
+  };
+
+  nodes.sat-receiver-livingroom = mkDevice "Sat Receiver Livingroom" {
+    info = "TechniSat DIGIT ISIO STC+";
+    image = ./images/technisat-digit-isio-stcplus.png;
     interfaces.eth1 = {};
   };
 
   nodes.ruckus-ap = mkSwitch "Wi-Fi AP" {
-    info = "Ruckus R500";
-    image = ./images/ruckus-r500.png;
+    info = "Ruckus R600";
+    image = ./images/ruckus-r600.png;
     interfaceGroups = [["eth1" "wifi"]];
     connections.eth1 = mkConnection "switch-attic" "eth4";
   };

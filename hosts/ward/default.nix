@@ -22,7 +22,7 @@
   ];
 
   topology.self.hardware.image = ../../topology/images/odroid-h3.png;
-  topology.self.hardware.info = "ODROID H3, 64GB RAM";
+  topology.self.hardware.info = "O-Droid H3, 64GB RAM";
 
   boot.mode = "efi";
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" "r8169"];

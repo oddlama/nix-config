@@ -16,6 +16,7 @@ in {
     }
   ];
 
+  topology.self.services.home-assistant.info = "https://${homeDomain}";
   services.home-assistant = {
     enable = true;
     extraComponents = [

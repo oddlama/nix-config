@@ -9,6 +9,7 @@
     ;
 in {
   networks.ward-kea.name = "Home LAN";
+  networks.zackbiene-kea.name = "Isolated IoT Network";
   networks.home-fritzbox = {
     name = "Home Fritzbox";
     cidrv4 = "192.168.178.0/24";
@@ -38,9 +39,10 @@ in {
   nodes.switch-attic = mkSwitch "Switch Attic" {
     info = "D-Link DGS-1016D";
     image = ./images/dlink-dgs1016d.png;
-    interfaceGroups = [["eth1" "eth2" "eth3" "eth4" "eth5" "eth6"]];
+    interfaceGroups = [["eth1" "eth2" "eth3" "eth4" "eth5" "eth6" "eth7"]];
     connections.eth1 = mkConnection "ward" "lan-self";
     connections.eth2 = mkConnection "sire" "lan-self";
+    connections.eth7 = mkConnection "zackbiene" "lan1";
   };
 
   nodes.switch-bedroom-1 = mkSwitch "Switch Bedroom 1" {

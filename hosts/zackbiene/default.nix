@@ -14,15 +14,19 @@ in {
     ../../modules/optional/initrd-ssh.nix
     ../../modules/optional/zfs.nix
 
-    #./esphome.nix
+    ./esphome.nix
     ./fs.nix
     ./home-assistant.nix
     ./hostapd.nix
-    #./mosquitto.nix
+    ./mosquitto.nix
     ./kea.nix
     ./net.nix
-    #./zigbee2mqtt.nix
+    ./zigbee2mqtt.nix
   ];
+
+  topology.self.name = "🥔  zackbiene"; # yes this is 2x U+2009, don't ask (satori 🤬).
+  topology.self.hardware.image = ../../topology/images/odroid-n2plus.png;
+  topology.self.hardware.info = "O-Droid N2+";
 
   boot.mode = "efi";
   users.groups.acme.members = ["nginx"];

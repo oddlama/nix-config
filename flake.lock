@@ -1012,11 +1012,11 @@
         "pre-commit-hooks": "pre-commit-hooks_3"
       },
       "locked": {
-        "lastModified": 1712231666,
-        "narHash": "sha256-SlgbQyccioWkep10dwtJ4WBZT3FpgwC0LnCBbm3rz7Y=",
+        "lastModified": 1712238990,
+        "narHash": "sha256-I+pn/hg6T0EQoJOZbgDy0VGxUAPvSONWQyLSDa1LS9Y=",
         "owner": "oddlama",
         "repo": "nix-topology",
-        "rev": "a2e2a95a1b10ad93600351a6595c35ff1826ac8f",
+        "rev": "da89590e6c94fba7bcd895d910ee363db37ed538",
         "type": "github"
       },
       "original": {

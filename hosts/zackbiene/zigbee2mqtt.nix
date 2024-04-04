@@ -1,4 +1,11 @@
-{config, ...}: {
+{
+  config,
+  nodes,
+  ...
+}: let
+  sentinelCfg = nodes.sentinel.config;
+  zigbeeDomain = "zigbee.${sentinelCfg.repo.secrets.global.domains.personal}";
+in {
   age.secrets."mosquitto-pw-zigbee2mqtt.yaml" = {
     rekeyFile = ./secrets/mosquitto-pw-zigbee2mqtt.yaml.age;
     mode = "440";
@@ -9,6 +16,7 @@
   #security.acme.certs."home.${personalDomain}".extraDomainNames = [
   #  "zigbee.home.${personalDomain}"
   #];
+  topology.self.services.zigbee2mqtt.info = "https://${zigbeeDomain}";
   services.zigbee2mqtt = {
     enable = true;
     settings = {
@@ -37,7 +45,7 @@
         keepalive 2;
       '';
     };
-    virtualHosts."${config.repo.secrets.local.zigbee2mqtt.domain}" = {
+    virtualHosts."${zigbeeDomain}" = {
       forceSSL = true;
       #enableACME = true;
       sslCertificate = config.age.secrets."selfcert.crt".path;

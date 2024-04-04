@@ -8,6 +8,10 @@
 in {
   networking.hostId = config.repo.secrets.local.networking.hostId;
 
+  wireguard.proxy-sentinel = {
+    client.via = "sentinel";
+  };
+
   boot.initrd.systemd.network = {
     enable = true;
     networks = {inherit (config.systemd.network.networks) "10-lan1";};

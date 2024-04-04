@@ -1,4 +1,11 @@
-{config, ...}: {
+{
+  config,
+  nodes,
+  ...
+}: let
+  sentinelCfg = nodes.sentinel.config;
+  esphomeDomain = "esphome.${sentinelCfg.repo.secrets.global.domains.personal}";
+in {
   environment.persistence."/persist".directories = [
     {
       directory = "/var/lib/private/esphome";
@@ -6,6 +13,7 @@
     }
   ];
 
+  topology.self.services.esphome.info = "https://${esphomeDomain}";
   services.esphome = {
     enable = true;
     enableUnixSocket = true;
@@ -29,7 +37,7 @@
         keepalive 2;
       '';
     };
-    virtualHosts."${config.repo.secrets.local.esphome.domain}" = {
+    virtualHosts."${esphomeDomain}" = {
       forceSSL = true;
       #enableACME = true;
       sslCertificate = config.age.secrets."selfcert.crt".path;

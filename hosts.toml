@@ -18,6 +18,6 @@ system = "x86_64-linux"
 type = "nixos"
 system = "x86_64-linux"
 
-#[zackbiene]
-#type = "nixos"
-#system = "aarch64-linux"
+[zackbiene]
+type = "nixos"
+system = "aarch64-linux"

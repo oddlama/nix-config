@@ -80,6 +80,7 @@ in {
     }
   ];
 
+  topology.self.services.influxdb2.info = "https://${influxdbDomain}";
   services.influxdb2 = {
     enable = true;
     settings = {

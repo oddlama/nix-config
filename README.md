@@ -1,6 +1,6 @@
 [Hosts](#hosts) \| [Overview](#overview) \| [Structure](./STRUCTURE.md)
 
-![2024-01-04T21:24:51+01:00-fullscreen](https://github.com/oddlama/nix-config/assets/31919558/f473b473-0715-4323-89f2-5a79140ba54c)
+![preview](https://github.com/oddlama/nix-config/assets/31919558/139c94de-9ecd-4b36-ab5c-c654d9e38888)
 
 ## ❄️  My NixOS Configuration
 

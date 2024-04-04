@@ -32,4 +32,6 @@
     font = "ter-v28n";
     packages = [pkgs.terminus_font];
   };
+
+  topology.self.icon = "devices.laptop";
 }

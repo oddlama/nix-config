@@ -31,7 +31,7 @@
       pkgs.gamescope
       pkgs.obsidian
       pkgs.pavucontrol
-      pkgs.pinentry-gnome # For yubikey, gnome = gtk3 variant
+      pkgs.pinentry-gnome3 # For yubikey, gnome = gtk3 variant
       pkgs.thunderbird
       pkgs.xdg-utils
       pkgs.xdragon

@@ -1,4 +1,8 @@
-{nixosConfig, ...}: {
+{
+  nixosConfig,
+  pkgs,
+  ...
+}: {
   programs.gpg = {
     enable = true;
     scdaemonSettings.disable-ccid = true;
@@ -58,6 +62,6 @@
   services.gpg-agent = {
     enable = true;
     enableSshSupport = true;
-    pinentryFlavor = "gnome3";
+    pinentryPackage = pkgs.pinentry-gnome3;
   };
 }

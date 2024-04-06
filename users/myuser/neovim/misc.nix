@@ -19,7 +19,7 @@
       };
 
       # Commenting
-      comment-nvim.enable = true;
+      comment.enable = true;
       # Extend vim's "%" key
       vim-matchup.enable = true;
 

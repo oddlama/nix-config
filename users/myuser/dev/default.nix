@@ -2,6 +2,7 @@
   imports = [
     ./direnv.nix
     ./gdb.nix
+    ./manpager.nix
   ];
 
   home = {

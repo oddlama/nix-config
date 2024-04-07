@@ -8,28 +8,18 @@ in {
   disko.devices = {
     disk =
       {
-        ${disks.m2-ssd-1} = {
+        m2-ssd-1 = {
           type = "disk";
           device = "/dev/disk/by-id/${disks.m2-ssd-1}";
           content = with lib.disko.gpt; {
             type = "gpt";
             partitions = {
-              efi =
-                partEfi "0%" "1GiB"
-                // {
-                  # FIXME: Needed because partlabels are 💩: https://github.com/nix-community/disko/issues/551
-                  device = "/dev/disk/by-id/${disks.m2-ssd-1}-part1";
-                };
-              "rpool_${disks.m2-ssd-1}" =
-                partLuksZfs disks.m2-ssd-1 "rpool" "1GiB" "100%"
-                // {
-                  # FIXME: Needed because partlabels are 💩: https://github.com/nix-community/disko/issues/551
-                  device = "/dev/disk/by-id/${disks.m2-ssd-1}-part2";
-                };
+              efi = partEfi "1G";
+              rpool = partLuksZfs disks.m2-ssd-1 "rpool" "100%";
             };
           };
         };
-        ${disks.m2-ssd-2} = {
+        m2-ssd-2 = {
           type = "disk";
           device = "/dev/disk/by-id/${disks.m2-ssd-2}";
           content = lib.disko.content.luksZfs disks.m2-ssd-2 "rpool";

@@ -1,3 +1,5 @@
+# Desktops
+
 [kroma]
 type = "nixos"
 system = "x86_64-linux"
@@ -6,15 +8,23 @@ system = "x86_64-linux"
 type = "nixos"
 system = "x86_64-linux"
 
+# Cloud Server
+
+[envoy]
+type = "nixos"
+system = "x86_64-linux"
+
 [sentinel]
 type = "nixos"
 system = "x86_64-linux"
 
-[ward]
+# Home Server
+
+[sire]
 type = "nixos"
 system = "x86_64-linux"
 
-[sire]
+[ward]
 type = "nixos"
 system = "x86_64-linux"
 

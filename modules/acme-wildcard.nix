@@ -6,8 +6,9 @@
   inherit
     (lib)
     assertMsg
+    attrNames
     filter
-    genAttrs
+    filterAttrs
     hasInfix
     head
     mkIf
@@ -15,17 +16,19 @@
     removeSuffix
     types
     ;
+
+  wildcardDomains = attrNames (filterAttrs (_: v: v.wildcard) config.security.acme.certs);
 in {
-  options.security.acme.wildcardDomains = mkOption {
-    default = [];
-    example = ["example.org"];
-    type = types.listOf types.str;
-    description = ''
-      All domains for which a wildcard certificate will be generated.
-      This will define the given `security.acme.certs` and set `extraDomainNames` correctly,
-      but does not fill any options such as credentials or dnsProvider. These have to be set
-      individually for each cert by the user or via `security.acme.defaults`.
-    '';
+  options.security.acme.certs = mkOption {
+    type = types.attrsOf (types.submodule (submod: {
+      options.wildcard = mkOption {
+        default = false;
+        type = types.bool;
+        description = "If set to true, this will automatically append `*.<domain>` to `extraDomainNames`.";
+      };
+
+      config.extraDomainNames = mkIf submod.config.wildcard ["*.${submod.config._module.args.name}"];
+    }));
   };
 
   options.services.nginx.virtualHosts = mkOption {
@@ -36,14 +39,13 @@ in {
         description = ''Automatically set useACMEHost with the correct wildcard domain for the virtualHosts's main domain.'';
       };
       config = let
-        # This retrieves all matching wildcard certs that would include
-        # the corresponding domain. If no such domain is defined in
-        # security.acme.wildcardDomains, an assertion is triggered.
+        # This retrieves all matching wildcard certs that would include the corresponding domain.
+        # If no such domain is found then an assertion is triggered.
         domain = submod.config._module.args.name;
         matchingCerts =
           filter
           (x: !hasInfix "." (removeSuffix ".${x}" domain))
-          config.security.acme.wildcardDomains;
+          wildcardDomains;
       in
         mkIf submod.config.useACMEWildcardHost {
           useACMEHost = assert assertMsg (matchingCerts != []) "No wildcard certificate was defined that matches ${domain}";
@@ -51,8 +53,4 @@ in {
         };
     }));
   };
-
-  config.security.acme.certs = genAttrs config.security.acme.wildcardDomains (domain: {
-    extraDomainNames = ["*.${domain}"];
-  });
 }

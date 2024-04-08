@@ -16,7 +16,6 @@ in {
   security.acme = {
     acceptTerms = true;
     defaults = {
-      inherit (acme) email;
       credentialFiles = {
         CF_DNS_API_TOKEN_FILE = config.age.secrets.acme-cloudflare-dns-token.path;
         CF_ZONE_API_TOKEN_FILE = config.age.secrets.acme-cloudflare-zone-token.path;
@@ -25,6 +24,6 @@ in {
       dnsPropagationCheck = true;
       reloadServices = ["nginx"];
     };
-    wildcardDomains = acme.domains;
+    inherit (acme) certs;
   };
 }

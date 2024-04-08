@@ -1,8 +1,4 @@
-{
-  config,
-  nodes,
-  ...
-}: {
+{nodes, ...}: {
   imports = [
     ../../modules/optional/hardware/hetzner-cloud.nix
 
@@ -33,7 +29,7 @@
     enable = true;
     scrapeSensors = false;
     influxdb2 = {
-      domain = config.networking.providedDomains.influxdb;
+      domain = nodes.sentinel.config.networking.providedDomains.influxdb;
       organization = "machines";
       bucket = "telegraf";
       node = "sire-influxdb";

@@ -6,9 +6,8 @@
   inherit
     (lib)
     assertMsg
-    attrNames
     filter
-    filterAttrs
+    genAttrs
     hasInfix
     head
     mkIf
@@ -16,19 +15,14 @@
     removeSuffix
     types
     ;
-
-  wildcardDomains = attrNames (filterAttrs (_: v: v.wildcard) config.security.acme.certs);
 in {
-  options.security.acme.certs = mkOption {
-    type = types.attrsOf (types.submodule (submod: {
-      options.wildcard = mkOption {
-        default = false;
-        type = types.bool;
-        description = "If set to true, this will automatically append `*.<domain>` to `extraDomainNames`.";
-      };
-
-      config.extraDomainNames = mkIf submod.config.wildcard ["*.${submod.config._module.args.name}"];
-    }));
+  options.security.acme.wildcardDomains = mkOption {
+    type = types.listOf types.str;
+    default = [];
+    description = ''
+      List of domains to which a wilcard certificate exists under the same name in `certs`.
+      All of these certs will automatically have `*.<domain>` appended to `extraDomainNames`.
+    '';
   };
 
   options.services.nginx.virtualHosts = mkOption {
@@ -45,7 +39,7 @@ in {
         matchingCerts =
           filter
           (x: !hasInfix "." (removeSuffix ".${x}" domain))
-          wildcardDomains;
+          config.security.acme.wildcardDomains;
       in
         mkIf submod.config.useACMEWildcardHost {
           useACMEHost = assert assertMsg (matchingCerts != []) "No wildcard certificate was defined that matches ${domain}";
@@ -53,4 +47,8 @@ in {
         };
     }));
   };
+
+  config.security.acme.certs = genAttrs config.security.acme.wildcardDomains (domain: {
+    extraDomainNames = ["*.${domain}"];
+  });
 }

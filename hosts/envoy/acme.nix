@@ -24,6 +24,6 @@ in {
       dnsPropagationCheck = true;
       reloadServices = ["nginx"];
     };
-    inherit (acme) certs;
+    inherit (acme) certs wildcardDomains;
   };
 }

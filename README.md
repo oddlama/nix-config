@@ -17,7 +17,7 @@ including my homelab, external servers and my development machines.
 🖥️ | Server | sire | Threadripper 1950X | Home media server and data storage. Runs all services as microvms.
 🥔 | Server | zackbiene | ODROID N2+ | ARM SBC for home automation, isolating the sketchy stuff from my main network
 ☁️  | VPS | sentinel | Hetzner Cloud server | Proxies and protects my local services
-☁️  | VPS | envoy | Hetzner Cloud server | Mailserver (WIP, still on gentoo)
+☁️  | VPS | envoy | Hetzner Cloud server | Mailserver
 
 ## Overview
 

@@ -6,12 +6,20 @@
 }: let
   mailDomains = config.repo.secrets.global.domains.mail;
   primaryDomain = mailDomains.primary;
-  maddyBackupDir = "/var/cache/backups/maddy";
+  backupDir = "/var/cache/backups/maddy";
 in {
-  systemd.tmpfiles.settings."10-maddy".${maddyBackupDir}.d = {
+  systemd.tmpfiles.settings."10-maddy".${backupDir}.d = {
     inherit (config.services.maddy) user group;
     mode = "0770";
   };
+
+  environment.persistence."/state".directories = [
+    {
+      directory = backupDir;
+      inherit (config.services.maddy) user group;
+      mode = "0750";
+    }
+  ];
 
   environment.persistence."/persist".directories = [
     {
@@ -21,18 +29,54 @@ in {
     }
   ];
 
-  # For each mail domain, add MTA STS entry via nginx
-  # FIXME: autoconfig
-  services.nginx.virtualHosts = lib.genAttrs (map (x: "mta-sts.${x}") mailDomains.all) (_x: {
-    forceSSL = true;
-    useACMEWildcardHost = true;
-    locations."=/.well-known/mta-sts.txt".alias = pkgs.writeText "mta-sts.txt" ''
-      version: STSv1
-      mode: enforce
-      mx: mx1.${primaryDomain}
-      max_age: 86400
-    '';
-  });
+  # FIXME: hetzner storagebox backup
+  services.nginx.virtualHosts = lib.mkMerge [
+    # For each mail domain, add MTA STS entry via nginx
+    (lib.genAttrs (map (x: "mta-sts.${x}") mailDomains.all) (domain: {
+      forceSSL = true;
+      useACMEWildcardHost = true;
+      locations."=/.well-known/mta-sts.txt".alias = pkgs.writeText "mta-sts.${domain}.txt" ''
+        version: STSv1
+        mode: enforce
+        mx: mx1.${primaryDomain}
+        max_age: 86400
+      '';
+    }))
+    # For each mail domain, add an autoconfig xml file for Thunderbird
+    (lib.genAttrs (map (x: "autoconfig.${x}") mailDomains.all) (domain: {
+      forceSSL = true;
+      useACMEWildcardHost = true;
+      locations."=/mail/config-v1.1.xml".alias =
+        pkgs.writeText "autoconfig.${domain}.xml"
+        /*
+        xml
+        */
+        ''
+          <?xml version="1.0" encoding="UTF-8"?>
+          <clientConfig version="1.1">
+            <emailProvider id="${domain}">
+              <domain>${domain}</domain>
+              <displayName>%EMAILADDRESS%</displayName>
+              <displayShortName>%EMAILLOCALPART%</displayShortName>
+              <incomingServer type="imap">
+                <hostname>mail.${primaryDomain}</hostname>
+                <port>993</port>
+                <socketType>SSL</socketType>
+                <authentication>password-cleartext</authentication>
+                <username>%EMAILADDRESS%</username>
+              </incomingServer>
+              <outgoingServer type="smtp">
+                <hostname>mail.${primaryDomain}</hostname>
+                <port>465</port>
+                <socketType>SSL</socketType>
+                <authentication>password-cleartext</authentication>
+                <username>%EMAILADDRESS%</username>
+              </outgoingServer>
+            </emailProvider>
+          </clientConfig>
+        '';
+    }))
+  ];
 
   networking.firewall.allowedTCPPorts = [25 465 993];
   services.maddy = {
@@ -50,7 +94,7 @@ in {
       ];
     };
     #ensureCredentials = {
-    #  "me@${primaryDomain}".passwordFile = config.age.secrets.patrickPasswd.path;
+    #  "me@${primaryDomain}".passwordFile = ...;
     #};
     #ensureAccounts = [
     #  "me@${primaryDomain}"

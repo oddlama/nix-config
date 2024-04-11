@@ -9,6 +9,7 @@
     ./acme.nix
     ./fs.nix
     ./net.nix
+    ./maddy.nix
   ];
 
   boot.mode = "bios";

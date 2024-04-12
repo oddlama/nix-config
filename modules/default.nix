@@ -39,7 +39,6 @@
     ./provided-domains.nix
     ./secrets.nix
     ./telegraf.nix
-    ./topology-wireguard.nix
   ];
 
   nixpkgs.overlays = [

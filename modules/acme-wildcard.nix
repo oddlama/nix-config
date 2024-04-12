@@ -6,6 +6,7 @@
   inherit
     (lib)
     assertMsg
+    elem
     filter
     genAttrs
     hasInfix
@@ -37,9 +38,12 @@ in {
         # If no such domain is found then an assertion is triggered.
         domain = submod.config._module.args.name;
         matchingCerts =
-          filter
-          (x: !hasInfix "." (removeSuffix ".${x}" domain))
-          config.security.acme.wildcardDomains;
+          if elem domain config.security.acme.wildcardDomains
+          then [domain]
+          else
+            filter
+            (x: !hasInfix "." (removeSuffix ".${x}" domain))
+            config.security.acme.wildcardDomains;
       in
         mkIf submod.config.useACMEWildcardHost {
           useACMEHost = assert assertMsg (matchingCerts != []) "No wildcard certificate was defined that matches ${domain}";

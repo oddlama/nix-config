@@ -79,6 +79,8 @@ in {
   ];
 
   networking.firewall.allowedTCPPorts = [25 465 993];
+  users.groups.acme.members = ["maddy"];
+
   services.maddy = {
     enable = true;
     hostname = "mx1.${primaryDomain}";
@@ -119,7 +121,7 @@ in {
 
         table.chain local_rewrites {
             optional_step sql_query {
-                driver sqlite
+                driver sqlite3
                 dsn mailboxes.db
                 lookup "SELECT alias FROM aliases WHERE address = $1"
             }

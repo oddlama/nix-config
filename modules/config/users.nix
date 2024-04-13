@@ -30,5 +30,6 @@
     fwupd-refresh = uidGid 979;
     radicale = uidGid 978;
     podman = uidGid 977;
+    maddy = uidGid 976;
   };
 }

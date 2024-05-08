@@ -1,9 +1,25 @@
 {
+  lib,
   nixosConfig,
   pkgs,
   ...
 }: {
   programs.gpg = {
+    /*
+    low impact workaround to integrate the fix not yet merged to nixos-unstable, see:
+    - https://discourse.nixos.org/t/gpg-selecting-card-failed-service-is-not-running/44974/12
+    - https://github.com/NixOS/nixpkgs/pull/308884
+    */
+    package = pkgs.gnupg.override {
+      pcsclite = pkgs.pcsclite.overrideAttrs (old: {
+        postPatch =
+          old.postPatch
+          + (lib.optionalString (!(lib.strings.hasInfix ''--replace-fail "libpcsclite_real.so.1"'' old.postPatch)) ''
+            substituteInPlace src/libredirect.c src/spy/libpcscspy.c \
+              --replace-fail "libpcsclite_real.so.1" "$lib/lib/libpcsclite_real.so.1"
+          '');
+      });
+    };
     enable = true;
     scdaemonSettings.disable-ccid = true;
     publicKeys = [

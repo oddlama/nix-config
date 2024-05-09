@@ -9,7 +9,7 @@
 in {
   wireguard.proxy-sentinel = {
     client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.adguardhome.settings.bind_port];
+    firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.adguardhome.settings.port];
   };
 
   nodes.sentinel = {
@@ -17,7 +17,7 @@ in {
 
     services.nginx = {
       upstreams.adguardhome = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.adguardhome.settings.bind_port}" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.adguardhome.settings.port}" = {};
         extraConfig = ''
           zone adguardhome 64k;
           keepalive 2;
@@ -55,8 +55,8 @@ in {
     # simpler sed dns.host_addr logic.
     mutableSettings = false;
     settings = {
-      bind_host = "0.0.0.0";
-      bind_port = 3000;
+      host = "0.0.0.0";
+      port = 3000;
       dns = {
         bind_hosts = [
           # This dummy address passes the configuration check and will

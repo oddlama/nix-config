@@ -14,9 +14,9 @@
     types
     ;
 
-  cfg = config.meta.oauth2_proxy;
+  cfg = config.meta.oauth2-proxy;
 in {
-  options.meta.oauth2_proxy = {
+  options.meta.oauth2-proxy = {
     enable = mkEnableOption "oauth2 proxy";
 
     cookieDomain = mkOption {
@@ -33,7 +33,7 @@ in {
   options.services.nginx.virtualHosts = mkOption {
     type = types.attrsOf (types.submodule ({config, ...}: {
       options.oauth2 = {
-        enable = mkEnableOption "access protection of this resource using oauth2_proxy.";
+        enable = mkEnableOption "access protection of this resource using oauth2-proxy.";
         allowedGroups = mkOption {
           type = types.listOf types.str;
           default = [];
@@ -44,9 +44,9 @@ in {
         };
       };
       config = mkIf config.oauth2.enable {
-        locations."/".extraConfig = ''
+        extraConfig = ''
           auth_request /oauth2/auth;
-          error_page 401 = /oauth2/sign_in;
+          error_page 401 = @redirectToAuth2ProxyLogin;
 
           # pass information via X-User and X-Email headers to backend,
           # requires running with --set-xauthrequest flag
@@ -60,20 +60,20 @@ in {
           add_header Set-Cookie $auth_cookie;
         '';
 
-        locations."/oauth2/" = {
-          proxyPass = "http://oauth2_proxy";
+        locations."@redirectToAuth2ProxyLogin" = {
+          return = "307 https://${cfg.portalDomain}/oauth2/start?rd=$scheme://$host$request_uri";
           extraConfig = ''
-            proxy_set_header X-Scheme                $scheme;
-            proxy_set_header X-Auth-Request-Redirect $scheme://$host$request_uri;
+            auth_request off;
           '';
         };
 
         locations."= /oauth2/auth" = {
           proxyPass =
-            "http://oauth2_proxy/oauth2/auth"
+            "http://oauth2-proxy/oauth2/auth"
             + optionalString (config.oauth2.allowedGroups != [])
             "?allowed_groups=${concatStringsSep "," config.oauth2.allowedGroups}";
           extraConfig = ''
+            auth_request off;
             internal;
 
             proxy_set_header X-Scheme         $scheme;
@@ -87,8 +87,11 @@ in {
   };
 
   config = mkIf cfg.enable {
-    services.oauth2_proxy = {
+    services.oauth2-proxy = {
       enable = true;
+
+      # Needed to prevent evaluation error (should theoretically be fixed upstream...)
+      nginx.domain = "dummy";
 
       cookie.domain = ".${cfg.cookieDomain}";
       cookie.secure = true;
@@ -100,7 +103,7 @@ in {
 
       clientSecret = mkDefault null;
       reverseProxy = true;
-      httpAddress = "unix:///run/oauth2_proxy/oauth2_proxy.sock";
+      httpAddress = "unix:///run/oauth2-proxy/oauth2-proxy.sock";
       redirectURL = "https://${cfg.portalDomain}/oauth2/callback";
       setXauthrequest = true;
 
@@ -116,20 +119,20 @@ in {
       };
     };
 
-    systemd.services.oauth2_proxy.serviceConfig = {
-      RuntimeDirectory = "oauth2_proxy";
+    systemd.services.oauth2-proxy.serviceConfig = {
+      RuntimeDirectory = "oauth2-proxy";
       RuntimeDirectoryMode = "0750";
       UMask = "007"; # TODO remove once https://github.com/oauth2-proxy/oauth2-proxy/issues/2141 is fixed
       RestartSec = "60"; # Retry every minute
     };
 
-    users.groups.oauth2_proxy.members = ["nginx"];
+    users.groups.oauth2-proxy.members = ["nginx"];
 
     services.nginx = {
-      upstreams.oauth2_proxy = {
-        servers."unix:/run/oauth2_proxy/oauth2_proxy.sock" = {};
+      upstreams.oauth2-proxy = {
+        servers."unix:/run/oauth2-proxy/oauth2-proxy.sock" = {};
         extraConfig = ''
-          zone oauth2_proxy 64k;
+          zone oauth2-proxy 64k;
           keepalive 2;
         '';
       };
@@ -138,7 +141,15 @@ in {
         forceSSL = true;
         useACMEWildcardHost = true;
         oauth2.enable = true;
-        locations."/".proxyPass = "http://oauth2_proxy";
+        locations."/".proxyPass = "http://oauth2-proxy";
+
+        locations."/oauth2/" = {
+          proxyPass = "http://oauth2-proxy";
+          extraConfig = ''
+            proxy_set_header X-Scheme                $scheme;
+            proxy_set_header X-Auth-Request-Redirect $scheme://$host$request_uri;
+          '';
+        };
       };
     };
   };

@@ -8,8 +8,8 @@
       provisionSrc = prev.fetchFromGitHub {
         owner = "oddlama";
         repo = "kanidm-provision";
-        rev = "aa7a1c8ec04622745b385bd3b0462e1878f56b51";
-        hash = "sha256-NRolS3l2kARjkhWP7FYUG//KCEiueh48ZrADdCDb9Zg=";
+        rev = "v1.0.1";
+        hash = "sha256-tSr2I7bGEwJoC5C7BOmru2oh9ta04WVTz449KePYSK4=";
       };
     in {
       patches =

@@ -19,7 +19,7 @@
     kanidm = uidGid 990;
     loki = uidGid 989;
     vaultwarden = uidGid 988;
-    oauth2_proxy = uidGid 987;
+    oauth2-proxy = uidGid 987;
     influxdb2 = uidGid 986;
     telegraf = uidGid 985;
     rtkit = uidGid 984;

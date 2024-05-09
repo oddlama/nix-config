@@ -3,7 +3,7 @@
   nodes,
   ...
 }: {
-  meta.oauth2_proxy = {
+  meta.oauth2-proxy = {
     enable = true;
     cookieDomain = config.repo.secrets.global.domains.me;
     portalDomain = "oauth2.${config.repo.secrets.global.domains.me}";
@@ -13,7 +13,7 @@
   age.secrets.oauth2-cookie-secret = {
     rekeyFile = ./secrets/oauth2-cookie-secret.age;
     mode = "440";
-    group = "oauth2_proxy";
+    group = "oauth2-proxy";
   };
 
   # Mirror the original oauth2 secret, but prepend OAUTH2_PROXY_CLIENT_SECRET=
@@ -32,10 +32,10 @@
       ${decrypt} ${lib.escapeShellArg (lib.head deps).file}
     '';
     mode = "440";
-    group = "oauth2_proxy";
+    group = "oauth2-proxy";
   };
 
-  services.oauth2_proxy = let
+  services.oauth2-proxy = let
     clientId = "web-sentinel";
   in {
     provider = "oidc";
@@ -53,7 +53,7 @@
     };
   };
 
-  systemd.services.oauth2_proxy.serviceConfig.EnvironmentFile = [
+  systemd.services.oauth2-proxy.serviceConfig.EnvironmentFile = [
     config.age.secrets.oauth2-cookie-secret.path
     config.age.secrets.oauth2-client-secret.path
   ];

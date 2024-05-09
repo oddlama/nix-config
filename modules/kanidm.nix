@@ -169,13 +169,16 @@
 
     # Wait for the kanidm server to come online
     count=0
+    main_pid_existed=false
     while ! test -e /run/kanidmd/sock; do
       sleep 0.1
       if [[ "$count" -eq 600 ]]; then
         echo "Tried for 60 seconds, giving up..."
         exit 1
       fi
-      if [[ ! -d "/proc/$MAINPID" ]]; then
+      if [[ -d "/proc/$MAINPID" ]]; then
+        main_pid_existed=true
+      elif [[ "$main_pid_existed" == true ]]; then
         echo "Main server died, giving up..."
         exit 1
       fi

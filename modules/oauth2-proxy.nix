@@ -16,6 +16,7 @@
 
   cfg = config.meta.oauth2-proxy;
 in {
+  imports = [./oa2p.nix];
   options.meta.oauth2-proxy = {
     enable = mkEnableOption "oauth2 proxy";
 
@@ -89,9 +90,6 @@ in {
   config = mkIf cfg.enable {
     services.oauth2-proxy = {
       enable = true;
-
-      # Needed to prevent evaluation error (should theoretically be fixed upstream...)
-      nginx.domain = "dummy";
 
       cookie.domain = ".${cfg.cookieDomain}";
       cookie.secure = true;

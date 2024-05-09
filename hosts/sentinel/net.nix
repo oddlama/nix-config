@@ -35,6 +35,10 @@
   };
 
   networking.nftables.firewall.zones.untrusted.interfaces = ["wan"];
+  networking.nftables.chains.forward.dnat = {
+    after = ["conntrack"];
+    rules = ["ct status dnat accept"];
+  };
 
   wireguard.proxy-sentinel.server = {
     host = config.networking.fqdn;

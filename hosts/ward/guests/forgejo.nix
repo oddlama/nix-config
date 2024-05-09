@@ -31,10 +31,6 @@ in {
 
     # Make sure to masquerade 9922 (wan) -> 22 (proxy-sentinel)
     networking.nftables.chains = {
-      forward.dnat = {
-        after = ["conntrack"];
-        rules = ["ct status dnat accept"];
-      };
       postrouting.to-forgejo = {
         after = ["hook"];
         rules = [

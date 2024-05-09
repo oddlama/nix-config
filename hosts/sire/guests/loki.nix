@@ -97,7 +97,7 @@ in {
           from = "2023-06-01";
           store = "tsdb";
           object_store = "filesystem";
-          schema = "v12";
+          schema = "v13";
           index = {
             prefix = "index_";
             period = "24h";
@@ -110,7 +110,6 @@ in {
           active_index_directory = "${lokiDir}/tsdb-index";
           cache_location = "${lokiDir}/tsdb-cache";
           cache_ttl = "24h";
-          shared_store = "filesystem";
         };
         filesystem.directory = "${lokiDir}/chunks";
       };
@@ -119,6 +118,7 @@ in {
       limits_config = {
         reject_old_samples = true;
         reject_old_samples_max_age = "168h";
+        allow_structured_metadata = false;
       };
 
       # Do not delete old logs automatically
@@ -129,7 +129,6 @@ in {
 
       compactor = {
         working_directory = lokiDir;
-        shared_store = "filesystem";
         compactor_ring.kvstore.store = "inmemory";
       };
     };

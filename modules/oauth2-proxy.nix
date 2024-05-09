@@ -138,7 +138,6 @@ in {
       virtualHosts.${cfg.portalDomain} = {
         forceSSL = true;
         useACMEWildcardHost = true;
-        oauth2.enable = true;
         locations."/".proxyPass = "http://oauth2-proxy";
 
         locations."/oauth2/" = {

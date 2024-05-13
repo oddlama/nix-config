@@ -25,6 +25,20 @@
     kanidm-provision = prev.callPackage ./kanidm-provision.nix {};
     segoe-ui-ttf = prev.callPackage ./segoe-ui-ttf.nix {};
     zsh-histdb-skim = prev.callPackage ./zsh-skim-histdb.nix {};
+    pcsclite_fixed = prev.pcsclite.overrideAttrs (old: {
+      postPatch =
+        old.postPatch
+        + (prev.lib.optionalString (!(prev.lib.strings.hasInfix ''--replace-fail "libpcsclite_real.so.1"'' old.postPatch)) ''
+          substituteInPlace src/libredirect.c src/spy/libpcscspy.c \
+            --replace-fail "libpcsclite_real.so.1" "$lib/lib/libpcsclite_real.so.1"
+        '');
+    });
+    gnupg = prev.gnupg.override {
+      pcsclite = _final.pcsclite_fixed;
+    };
+    age-plugin-yubikey = prev.age-plugin-yubikey.override {
+      pcsclite = _final.pcsclite_fixed;
+    };
     neovim-clean = prev.neovim-unwrapped.overrideAttrs (old: {
       nativeBuildInputs = (old.nativeBuildInputs or []) ++ [prev.makeWrapper];
       postInstall =

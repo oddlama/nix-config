@@ -59,6 +59,7 @@ that most people would have. The configurations are sorted into three categories
 🗂️ Documents | 💎 | Paperless | [Link](./hosts/sire/guests/paperless.nix) | Document management system. 💎 with per-user Samba share integration (consume & archive)
 🗓️ CalDAV/CardDAV | – | Radicale | [Link](./hosts/ward/guests/radicale.nix) | Contacts, Calender and Tasks synchronization
 📁 NAS | 💎 | Samba | [Link](./hosts/sire/guests/samba.nix) | Network attached storage. 💎 Cross-integration with paperless
+🧱 Minecraft | 💎 | PaperMC | [Link](./hosts/sire/guests/minecraft.nix) | Minecraft game server. 💎 Autostart on connect, systemd service with background console, automatic backups
 📈 Dashboard | – | Grafana | [Link](./hosts/sire/guests/grafana.nix) | Logs and metrics dashboard and alerting
 📔 Logs DB | – | Loki | [Link](./hosts/sire/guests/loki.nix) | Central log aggregation service
 📔 Logs | – | Promtail | [Link](./modules/promtail.nix) | Log shipping agent

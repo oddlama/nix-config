@@ -31,5 +31,6 @@
     radicale = uidGid 978;
     podman = uidGid 977;
     maddy = uidGid 976;
+    minecraft = uidGid 975;
   };
 }

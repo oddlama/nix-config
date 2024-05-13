@@ -135,8 +135,8 @@
         enableStorageDataset = true;
       }
       // mkMicrovm "ai" {}
-      #// mkMicrovm "minecraft"
-      #// mkMicrovm "firefly"
-      #// mkMicrovm "fasten-health"
+      // mkMicrovm "minecraft" {}
+      #// mkMicrovm "firefly" {}
+      #// mkMicrovm "fasten-health" {}
     );
 }

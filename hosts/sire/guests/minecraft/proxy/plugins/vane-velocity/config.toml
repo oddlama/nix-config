@@ -1,0 +1,20 @@
+[auth_multiplex.1]
+port = 25566
+allowed_uuids = [] # anyone may use this multiplexer
+
+[managed_servers.server]
+display_name = "§6◊ §6§lTOHLSTE SERVER§6 ◊"
+
+[managed_servers.server.online]
+favicon = "./server-icon.png"
+motd = "{SERVER_DISPLAY_NAME}\n§a\\(^-^)/§7 | {QUOTE}"
+quotes = ["Shit da ist wer, du verpasst was"]
+
+[managed_servers.server.offline]
+quotes = ["Keiner da, join endlich"]
+motd = "{SERVER_DISPLAY_NAME}\n§c~(°·°)~§7 | {QUOTE}"
+
+[managed_servers.server.start]
+cmd = ["rm", "../{SERVER}/control/start.block"]
+kick_msg = "{SERVER_DISPLAY_NAME} §7wird gestartet.\n§7Jetzt WARTE DOCH EINFACH §b10 Sekunden§7 GRRRR"
+allow_anyone = true

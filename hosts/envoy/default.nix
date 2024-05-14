@@ -10,6 +10,7 @@
     ./fs.nix
     ./net.nix
     ./maddy.nix
+    #./stalwart-mail.nix
   ];
 
   boot.mode = "bios";

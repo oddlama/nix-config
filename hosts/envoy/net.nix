@@ -1,6 +1,7 @@
 {config, ...}: {
   networking.hostId = config.repo.secrets.local.networking.hostId;
-  networking.domain = config.repo.secrets.global.domains.me;
+  networking.domain = config.repo.secrets.global.domains.mail.primary;
+  networking.hosts."127.0.0.1" = ["mx1.${config.repo.secrets.global.domains.mail.primary}"];
 
   boot.initrd.systemd.network = {
     enable = true;

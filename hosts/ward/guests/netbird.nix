@@ -9,7 +9,10 @@
 in {
   wireguard.proxy-sentinel = {
     client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [3000 3001];
+    firewallRuleForNode.sentinel.allowedTCPPorts = [
+      config.services.netbird.server.management.port
+      config.services.netbird.server.signal.port
+    ];
   };
 
   # Mirror the original coturn password
@@ -44,13 +47,17 @@ in {
       dashboard.settings.AUTH_AUTHORITY = "https://${sentinelCfg.networking.providedDomains.kanidm}/oauth2/openid/netbird";
 
       management = {
-        port = 3000;
         dnsDomain = "internal.${config.repo.secrets.global.domains.me}";
         singleAccountModeDomain = "home.lan";
         oidcConfigEndpoint = "https://${sentinelCfg.networking.providedDomains.kanidm}/oauth2/openid/netbird/.well-known/openid-configuration";
         turnDomain = sentinelCfg.networking.providedDomains.coturn;
         turnPort = sentinelCfg.services.coturn.tls-listening-port;
         settings = {
+          HttpConfig = {
+            # Audience must be set here, otherwise the grpc server will not initialize the jwt validator causing:
+            # failed validating JWT token sent from peer [...] no jwt validator set
+            AuthAudience = "netbird";
+          };
           TURNConfig = {
             Secret._secret = config.age.secrets.coturn-secret.path;
             Turns = [
@@ -72,30 +79,26 @@ in {
     networking.providedDomains.netbird = netbirdDomain;
 
     services.nginx = {
-      upstreams.netbird = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:80" = {};
-        extraConfig = ''
-          zone netbird 64k;
-          keepalive 5;
-        '';
-      };
       upstreams.netbird-mgmt = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:3000" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${builtins.toString config.services.netbird.server.management.port}" = {};
         extraConfig = ''
           zone netbird 64k;
           keepalive 5;
         '';
       };
+
       upstreams.netbird-signal = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:3001" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${builtins.toString config.services.netbird.server.signal.port}" = {};
         extraConfig = ''
           zone netbird 64k;
           keepalive 5;
         '';
       };
+
       virtualHosts.${netbirdDomain} = {
         forceSSL = true;
         useACMEWildcardHost = true;
+
         locations = {
           "/" = {
             root = config.services.netbird.server.dashboard.finalDrv;
@@ -105,6 +108,7 @@ in {
 
           "/signalexchange.SignalExchange/".extraConfig = ''
             grpc_pass grpc://netbird-signal;
+            grpc_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             grpc_read_timeout 1d;
             grpc_send_timeout 1d;
             grpc_socket_keepalive on;
@@ -114,16 +118,18 @@ in {
 
           "/management.ManagementService/".extraConfig = ''
             grpc_pass grpc://netbird-mgmt;
+            grpc_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             grpc_read_timeout 1d;
             grpc_send_timeout 1d;
             grpc_socket_keepalive on;
           '';
         };
 
+        # client_body_timeout is necessary so that grpc connections do not get closed early, see https://stackoverflow.com/a/67805465
         extraConfig = ''
-          client_max_body_size 500M ;
           client_header_timeout 1d;
           client_body_timeout 1d;
+          client_max_body_size 512M;
         '';
       };
     };

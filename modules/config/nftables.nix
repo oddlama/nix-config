@@ -48,7 +48,9 @@
         inherit
           (config.networking.firewall)
           allowedTCPPorts
+          allowedTCPPortRanges
           allowedUDPPorts
+          allowedUDPPortRanges
           ;
       };
     };

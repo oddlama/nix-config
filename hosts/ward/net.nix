@@ -110,9 +110,29 @@ in {
         late = true; # Only accept after any rejects have been processed
         verdict = "accept";
       };
+
+      #masquerade-vpn = {
+      #  from = ["wg-home"];
+      #  to = ["lan"];
+      #  masquerade = true;
+      #};
+
+      #outbound-vpn = {
+      #  from = ["wg-home"];
+      #  to = ["lan"];
+      #  late = true; # Only accept after any rejects have been processed
+      #  verdict = "accept";
+      #};
     };
   };
 
   # Allow accessing influx
   wireguard.proxy-sentinel.client.via = "sentinel";
+
+  #wireguard.home.server = {
+  #  host = todo # config.networking.fqdn;
+  #  port = 51192;
+  #  reservedAddresses = ["10.10.0.1/24" "fd00:10::/120"];
+  #  openFirewall = true;
+  #};
 }

@@ -106,10 +106,22 @@ in {
         basicSecretFile = config.age.secrets.kanidm-oauth2-immich.path;
         preferShortUsername = true;
         # XXX: PKCE is currently not supported by immich
-        # XXX: Also RS256 is used instead of ES256 so additionally needed:
-        # kanidm system oauth2 warning-enable-legacy-crypto immich
         allowInsecureClientDisablePkce = true;
+        # XXX: RS256 is used instead of ES256 so additionally we need legacy crypto
+        enableLegacyCrypto = true;
         scopeMaps."immich.access" = ["openid" "email" "profile"];
+      };
+
+      # Netbird
+      groups."netbird.access" = {};
+      systems.oauth2.netbird = {
+        public = true;
+        displayName = "Netbird";
+        originUrl = "https://${sentinelCfg.networking.providedDomains.netbird}/";
+        preferShortUsername = true;
+        enableLocalhostRedirects = true;
+        enableLegacyCrypto = true;
+        scopeMaps."netbird.access" = ["openid" "email" "profile"];
       };
 
       # Paperless

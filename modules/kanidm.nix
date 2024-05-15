@@ -450,6 +450,12 @@ in {
           options = {
             present = mkPresentOption "oauth2 resource server";
 
+            public = mkOption {
+              description = "Whether this is a public client (enforces PKCE, doesn't use a basic secret)";
+              type = types.bool;
+              default = false;
+            };
+
             displayName = mkOption {
               description = "Display name";
               type = types.str;
@@ -479,10 +485,23 @@ in {
               default = null;
             };
 
+            enableLocalhostRedirects = mkOption {
+              description = "Allow localhost redirects. Only for public clients.";
+              type = types.bool;
+              default = false;
+            };
+
+            enableLegacyCrypto = mkOption {
+              description = "Enable legacy crypto on this client. Allows JWT signing algorthms like RS256.";
+              type = types.bool;
+              default = false;
+            };
+
             allowInsecureClientDisablePkce = mkOption {
               description = ''
                 Disable PKCE on this oauth2 resource server to work around insecure clients
                 that may not support it. You should request the client to enable PKCE!
+                Only for non-public clients.
               '';
               type = types.bool;
               default = false;
@@ -680,6 +699,21 @@ in {
             {
               assertion = (cfg.provision.enable && cfg.enableServer) -> any (xs: xs != []) (attrValues claimCfg.valuesByGroup);
               message = "services.kanidm.provision.systems.oauth2.${oauth2}.claimMaps.${claim} does not specify any values for any group";
+            }
+            # Public clients cannot define a basic secret
+            {
+              assertion = (cfg.provision.enable && cfg.enableServer && oauth2Cfg.public) -> oauth2Cfg.basicSecretFile == null;
+              message = "services.kanidm.provision.systems.oauth2.${oauth2} is a public client and thus cannot specify a basic secret";
+            }
+            # Public clients cannot disable PKCE
+            {
+              assertion = (cfg.provision.enable && cfg.enableServer && oauth2Cfg.public) -> !oauth2Cfg.allowInsecureClientDisablePkce;
+              message = "services.kanidm.provision.systems.oauth2.${oauth2} is a public client and thus cannot disable PKCE";
+            }
+            # Non-public clients cannot enable localhost redirects
+            {
+              assertion = (cfg.provision.enable && cfg.enableServer && !oauth2Cfg.public) -> !oauth2Cfg.enableLocalhostRedirects;
+              message = "services.kanidm.provision.systems.oauth2.${oauth2} is a non-public client and thus cannot enable localhost redirects";
             }
           ]))
       ));

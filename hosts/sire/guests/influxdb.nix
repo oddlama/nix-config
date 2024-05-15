@@ -27,15 +27,12 @@ in {
       };
       virtualHosts.${influxdbDomain} = let
         accessRules = ''
-          satisfy any;
           ${lib.concatMapStrings (ip: "allow ${ip};\n") sentinelCfg.wireguard.proxy-sentinel.server.reservedAddresses}
           deny all;
         '';
       in {
         forceSSL = true;
         useACMEWildcardHost = true;
-        oauth2.enable = true;
-        oauth2.allowedGroups = ["access_influxdb"];
         locations."/" = {
           proxyPass = "http://influxdb";
           proxyWebsockets = true;

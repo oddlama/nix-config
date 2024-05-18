@@ -60,6 +60,8 @@ that most people would have. The configurations are sorted into three categories
 🗓️ CalDAV/CardDAV | – | Radicale | [Link](./hosts/ward/guests/radicale.nix) | Contacts, Calender and Tasks synchronization
 📁 NAS | 💎 | Samba | [Link](./hosts/sire/guests/samba.nix) | Network attached storage. 💎 Cross-integration with paperless
 🧱 Minecraft | 💎 | PaperMC | [Link](./hosts/sire/guests/minecraft.nix) | Minecraft game server. 💎 Autostart on connect, systemd service with background console, automatic backups
+🛡️ VPN | - | Netbird | [Link](./hosts/ward/guests/netbird.nix) | Internal network gateway and wireguard VPN server with dynamic peer configuration and SSO authentication.
+📧 Mailserver | 💎 | Stalwart | [Link](./hosts/envoy/stalwart-mail.nix) | Modern mail server setup with custom self-service alias management including Bitwarden integration
 📈 Dashboard | – | Grafana | [Link](./hosts/sire/guests/grafana.nix) | Logs and metrics dashboard and alerting
 📔 Logs DB | – | Loki | [Link](./hosts/sire/guests/loki.nix) | Central log aggregation service
 📔 Logs | – | Promtail | [Link](./modules/promtail.nix) | Log shipping agent

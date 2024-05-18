@@ -7,22 +7,22 @@
     autoRepeatDelay = 235;
     autoRepeatInterval = 60;
     videoDrivers = ["modesetting"];
-    libinput = {
-      enable = true;
-      mouse = {
-        accelProfile = "flat";
-        accelSpeed = "0";
-        middleEmulation = false;
-      };
-      # touchpad = {
-      #   accelProfile = "flat";
-      #   accelSpeed = "0.5";
-      #   naturalScrolling = true;
-      #   disableWhileTyping = true;
-      # };
-    };
     xkb.layout = "de";
     xkb.variant = "nodeadkeys";
+  };
+  services.libinput = {
+    enable = true;
+    mouse = {
+      accelProfile = "flat";
+      accelSpeed = "0";
+      middleEmulation = false;
+    };
+    # touchpad = {
+    #   accelProfile = "flat";
+    #   accelSpeed = "0.5";
+    #   naturalScrolling = true;
+    #   disableWhileTyping = true;
+    # };
   };
   services.autorandr.enable = true;
 

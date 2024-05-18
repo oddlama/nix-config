@@ -2,6 +2,7 @@
   inputs,
   lib,
   minimal,
+  nodes,
   ...
 }:
 {
@@ -74,9 +75,21 @@
   #  };
   #};
 
-  nixpkgs.config.permittedInsecurePackages = lib.trace "please remove insecure nix 2.16.2 very fast ok thx bye" [
-    "nix-2.16.2"
-  ];
+  # FIXME: the ui is not directly accessible via environment.systemPackages
+  # FIXME: to control it as a user (and to allow SSO) we need to be in the netbird-home group
+  services.netbird.ui.enable = true;
+  services.netbird.clients.home = {
+    port = 51820;
+    name = "netbird-home";
+    interface = "wt-home";
+    openFirewall = true;
+    config.ServerSSHAllowed = false;
+    environment = rec {
+      NB_MANAGEMENT_URL = "https://${nodes.sentinel.config.networking.providedDomains.netbird}";
+      NB_ADMIN_URL = NB_MANAGEMENT_URL;
+      NB_HOSTNAME = "home-gateway";
+    };
+  };
 
   topology.self.icon = "devices.desktop";
 }

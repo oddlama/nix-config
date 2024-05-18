@@ -1,5 +1,9 @@
 {inputs, ...}: {
-  disabledModules = ["services/security/kanidm.nix"];
+  disabledModules = [
+    "services/security/kanidm.nix"
+    "services/networking/netbird.nix"
+  ];
+
   imports = [
     inputs.agenix-rekey.nixosModules.default
     inputs.agenix.nixosModules.default
@@ -34,6 +38,7 @@
     ./distributed-config.nix
     ./kanidm.nix
     ./meta.nix
+    ./netbird-client.nix
     ./oauth2-proxy.nix
     ./promtail.nix
     ./provided-domains.nix

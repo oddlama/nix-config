@@ -106,6 +106,7 @@
       {}
       // mkMicrovm "adguardhome"
       // mkMicrovm "forgejo"
+      // mkMicrovm "home-gateway"
       // mkMicrovm "kanidm"
       // mkMicrovm "netbird"
       // mkMicrovm "radicale"

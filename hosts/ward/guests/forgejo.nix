@@ -29,7 +29,9 @@ in {
   nodes.sentinel = {
     networking.providedDomains.forgejo = forgejoDomain;
 
-    # Make sure to masquerade 9922 (wan) -> 22 (proxy-sentinel)
+    # Rewrite destination addr with dnat on incoming connections
+    # and masquerade responses to make them look like they originate from this host.
+    # - 9922 (wan) -> 22 (proxy-sentinel)
     networking.nftables.chains = {
       postrouting.to-forgejo = {
         after = ["hook"];

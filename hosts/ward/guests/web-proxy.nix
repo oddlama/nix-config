@@ -1,6 +1,8 @@
 {config, ...}: let
   inherit (config.repo.secrets.local) acme;
 in {
+  wireguard.proxy-home.client.via = "ward";
+
   age.secrets.acme-cloudflare-dns-token = {
     rekeyFile = config.node.secretsDir + "/acme-cloudflare-dns-token.age";
     mode = "440";
@@ -26,10 +28,6 @@ in {
     };
     inherit (acme) certs wildcardDomains;
   };
-
-  #nodes.sentinel = {
-  #  # port forward 80,443 (ward) to 80,443 (web-proxy)
-  #};
 
   users.groups.acme.members = ["nginx"];
   services.nginx.enable = true;

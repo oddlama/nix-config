@@ -84,11 +84,11 @@ in {
         # Use the local mirror-proxy for some services (not necessary, just for speed)
         {
           domain = nodes.sentinel.config.networking.providedDomains.grafana;
-          answer = "192.168.1.1";
+          answer = "192.168.1.4"; # web-proxy
         }
         {
           domain = nodes.sentinel.config.networking.providedDomains.immich;
-          answer = "192.168.1.1";
+          answer = "192.168.1.4"; # web-proxy
         }
       ];
       filters = [

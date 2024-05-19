@@ -7,6 +7,7 @@
   inherit (lib) net;
   lanCidrv4 = "192.168.1.0/24";
   dnsIp = net.cidr.host 3 lanCidrv4;
+  webProxyIp = net.cidr.host 4 lanCidrv4;
 in {
   # TODO make meta.kea module?
   # TODO reserve by default using assignIps algo?
@@ -48,6 +49,10 @@ in {
             {
               hw-address = nodes.ward-adguardhome.config.lib.microvm.mac;
               ip-address = dnsIp;
+            }
+            {
+              hw-address = nodes.ward-web-proxy.config.lib.microvm.mac;
+              ip-address = webProxyIp;
             }
             {
               hw-address = nodes.sire-samba.config.lib.microvm.mac;

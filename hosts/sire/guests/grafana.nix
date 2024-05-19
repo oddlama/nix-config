@@ -9,6 +9,10 @@ in {
   wireguard.proxy-sentinel = {
     client.via = "sentinel";
     firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.grafana.settings.server.http_port];
+  };
+
+  wireguard.proxy-home = {
+    client.via = "ward";
     firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [config.services.grafana.settings.server.http_port];
   };
 
@@ -82,7 +86,7 @@ in {
   nodes.ward-web-proxy = {
     services.nginx = {
       upstreams.grafana = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.grafana.settings.server.http_port}" = {};
+        servers."${config.wireguard.proxy-home.ipv4}:${toString config.services.grafana.settings.server.http_port}" = {};
         extraConfig = ''
           zone grafana 64k;
           keepalive 2;

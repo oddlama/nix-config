@@ -360,8 +360,9 @@ in {
   ];
 
   nodes.sentinel = {
-    # Make sure to masquerade 25565 (wan) -> 25565 (proxy-sentinel)
-    # Make sure to masquerade 25566 (wan) -> 25566 (proxy-sentinel)
+    # Rewrite destination addr with dnat on incoming connections
+    # and masquerade responses to make them look like they originate from this host.
+    # - 25565,25566 (wan) -> 25565,25566 (proxy-sentinel)
     networking.nftables.chains = {
       postrouting.to-minecraft = {
         after = ["hook"];

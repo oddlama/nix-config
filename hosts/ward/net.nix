@@ -111,6 +111,20 @@ in {
         verdict = "accept";
       };
 
+      lan-to-local = {
+        from = ["lan"];
+        to = ["local"];
+
+        allowedUDPPorts = [config.wireguard.proxy-home.server.port];
+      };
+
+      # Forward traffic between participants
+      forward-proxy-home-vpn-traffic = {
+        from = ["proxy-home"];
+        to = ["proxy-home"];
+        verdict = "accept";
+      };
+
       #masquerade-vpn = {
       #  from = ["wg-home"];
       #  to = ["lan"];
@@ -135,4 +149,11 @@ in {
   #  reservedAddresses = ["10.10.0.1/24" "fd00:10::/120"];
   #  openFirewall = true;
   #};
+
+  wireguard.proxy-home.server = {
+    host = "192.168.1.1";
+    port = 51444;
+    reservedAddresses = ["10.44.0.0/24" "fd00:44::/120"];
+    openFirewall = false; # Explicitly opened only for lan
+  };
 }

@@ -51,68 +51,71 @@ in {
   topology.self.services.adguardhome.info = "https://" + adguardhomeDomain;
   services.adguardhome = {
     enable = true;
-    # TODO allow mutable settings, replace 123.123.123.123 with
-    # simpler sed dns.host_addr logic.
     mutableSettings = false;
     settings = {
       host = "0.0.0.0";
       port = 3000;
       dns = {
-        bind_hosts = [
-          # This dummy address passes the configuration check and will
-          # later be replaced by the actual interface address.
-          "123.123.123.123"
-        ];
         # allowed_clients = [
         # ];
-        #trusted_proxied = [];
+        #trusted_proxies = [];
         ratelimit = 60;
         upstream_dns = [
           "1.1.1.1"
-          "2606:4700:4700::1111"
+          # FIXME: enable ipv6 "2606:4700:4700::1111"
           "8.8.8.8"
-          "2001:4860:4860::8844"
+          # FIXME: enable ipv6 "2001:4860:4860::8844"
         ];
         bootstrap_dns = [
           "1.1.1.1"
-          "2606:4700:4700::1111"
+          # FIXME: enable ipv6 "2606:4700:4700::1111"
           "8.8.8.8"
-          "2001:4860:4860::8844"
+          # FIXME: enable ipv6 "2001:4860:4860::8844"
         ];
         dhcp.enabled = false;
+      };
+      filtering.rewrites = [
         # Undo the /etc/hosts entry so we don't answer with the internal
         # wireguard address for influxdb
-        rewrites = [
-          {
-            domain = nodes.sentinel.config.networking.providedDomains.influxdb;
-            answer = config.repo.secrets.global.domains.me;
-          }
-        ];
-        filters = [
-          {
-            name = "AdGuard DNS filter";
-            url = "https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt";
-            enabled = true;
-          }
-          {
-            name = "AdAway Default Blocklist";
-            url = "https://adaway.org/hosts.txt";
-            enabled = true;
-          }
-          {
-            name = "OISD (Big)";
-            url = "https://big.oisd.nl";
-            enabled = true;
-          }
-        ];
-      };
+        {
+          domain = nodes.sentinel.config.networking.providedDomains.influxdb;
+          answer = config.repo.secrets.global.domains.me;
+        }
+        # Use the local mirror-proxy for some services (not necessary, just for speed)
+        {
+          domain = nodes.sentinel.config.networking.providedDomains.grafana;
+          answer = "192.168.1.1";
+        }
+        {
+          domain = nodes.sentinel.config.networking.providedDomains.immich;
+          answer = "192.168.1.1";
+        }
+      ];
+      filters = [
+        {
+          name = "AdGuard DNS filter";
+          url = "https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt";
+          enabled = true;
+        }
+        {
+          name = "AdAway Default Blocklist";
+          url = "https://adaway.org/hosts.txt";
+          enabled = true;
+        }
+        {
+          name = "OISD (Big)";
+          url = "https://big.oisd.nl";
+          enabled = true;
+        }
+      ];
     };
   };
 
   systemd.services.adguardhome = {
     preStart = lib.mkAfter ''
-      INTERFACE_ADDR=$(${pkgs.iproute2}/bin/ip -family inet -brief addr show lan | grep -o "[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+")
-      sed -i -e "s/123.123.123.123/$INTERFACE_ADDR/" "$STATE_DIRECTORY/AdGuardHome.yaml"
+      INTERFACE_ADDR=$(${pkgs.iproute2}/bin/ip -family inet -brief addr show lan | grep -o "[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+") \
+        ${lib.getExe pkgs.yq-go} -i '.dns.bind_hosts = [strenv(INTERFACE_ADDR)]' \
+        "$STATE_DIRECTORY/AdGuardHome.yaml"
     '';
     serviceConfig.RestartSec = lib.mkForce "60"; # Retry every minute
   };

@@ -47,8 +47,9 @@ in {
       dashboard.settings.AUTH_AUTHORITY = "https://${sentinelCfg.networking.providedDomains.kanidm}/oauth2/openid/netbird";
 
       management = {
+        singleAccountModeDomain = "internal.${config.repo.secrets.global.domains.me}";
         dnsDomain = "internal.${config.repo.secrets.global.domains.me}";
-        singleAccountModeDomain = "home.lan";
+        disableAnonymousMetrics = true;
         oidcConfigEndpoint = "https://${sentinelCfg.networking.providedDomains.kanidm}/oauth2/openid/netbird/.well-known/openid-configuration";
         turnDomain = sentinelCfg.networking.providedDomains.coturn;
         turnPort = sentinelCfg.services.coturn.tls-listening-port;

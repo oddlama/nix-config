@@ -9,6 +9,7 @@ in {
   wireguard.proxy-sentinel = {
     client.via = "sentinel";
     firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.grafana.settings.server.http_port];
+    firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [config.services.grafana.settings.server.http_port];
   };
 
   age.secrets.grafana-secret-key = {
@@ -74,6 +75,30 @@ in {
           proxyPass = "http://grafana";
           proxyWebsockets = true;
         };
+      };
+    };
+  };
+
+  nodes.ward-web-proxy = {
+    services.nginx = {
+      upstreams.grafana = {
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.grafana.settings.server.http_port}" = {};
+        extraConfig = ''
+          zone grafana 64k;
+          keepalive 2;
+        '';
+      };
+      virtualHosts.${grafanaDomain} = {
+        forceSSL = true;
+        useACMEWildcardHost = true;
+        locations."/" = {
+          proxyPass = "http://grafana";
+          proxyWebsockets = true;
+        };
+        extraConfig = ''
+          allow 192.168.1.0/24;
+          deny all;
+        '';
       };
     };
   };

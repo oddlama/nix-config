@@ -19,9 +19,9 @@
 
   boot.mode = "bios";
 
-  users.groups.acme.members = ["nginx"];
   wireguard.proxy-sentinel.firewallRuleForAll.allowedTCPPorts = [80 443];
 
+  users.groups.acme.members = ["nginx"];
   services.nginx.enable = true;
   services.nginx.recommendedSetup = true;
 

@@ -111,5 +111,6 @@
       // mkMicrovm "netbird"
       // mkMicrovm "radicale"
       // mkMicrovm "vaultwarden"
+      // mkMicrovm "web-proxy"
     );
 }

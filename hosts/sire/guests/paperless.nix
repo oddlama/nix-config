@@ -6,11 +6,22 @@
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
+  wardWebProxyCfg = nodes.ward-web-proxy.config;
   paperlessDomain = "paperless.${config.repo.secrets.global.domains.me}";
   paperlessBackupDir = "/var/cache/paperless-backup";
 in {
   microvm.mem = 1024 * 9;
   microvm.vcpu = 8;
+
+  wireguard.proxy-sentinel = {
+    client.via = "sentinel";
+    firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.paperless.port];
+  };
+
+  wireguard.proxy-home = {
+    client.via = "ward";
+    firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [config.services.paperless.port];
+  };
 
   nodes.sentinel = {
     networking.providedDomains.paperless = paperlessDomain;
@@ -38,9 +49,30 @@ in {
     };
   };
 
-  wireguard.proxy-sentinel = {
-    client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.paperless.port];
+  nodes.ward-web-proxy = {
+    services.nginx = {
+      upstreams.paperless = {
+        servers."${config.wireguard.proxy-home.ipv4}:${toString config.services.paperless.port}" = {};
+        extraConfig = ''
+          zone paperless 64k;
+          keepalive 2;
+        '';
+      };
+      virtualHosts.${paperlessDomain} = {
+        forceSSL = true;
+        useACMEWildcardHost = true;
+        extraConfig = ''
+          client_max_body_size 512M;
+          allow 192.168.1.0/24;
+          deny all;
+        '';
+        locations."/" = {
+          proxyPass = "http://paperless";
+          proxyWebsockets = true;
+          X-Frame-Options = "SAMEORIGIN";
+        };
+      };
+    };
   };
 
   age.secrets.paperless-admin-password = {
@@ -75,7 +107,10 @@ in {
       PAPERLESS_URL = "https://${paperlessDomain}";
       PAPERLESS_ALLOWED_HOSTS = paperlessDomain;
       PAPERLESS_CORS_ALLOWED_HOSTS = "https://${paperlessDomain}";
-      PAPERLESS_TRUSTED_PROXIES = sentinelCfg.wireguard.proxy-sentinel.ipv4;
+      PAPERLESS_TRUSTED_PROXIES = lib.concatStringSep "," [
+        sentinelCfg.wireguard.proxy-sentinel.ipv4
+        wardWebProxyCfg.wireguard.proxy-home.ipv4
+      ];
 
       # Authentication via kanidm
       PAPERLESS_APPS = "allauth.socialaccount.providers.openid_connect";

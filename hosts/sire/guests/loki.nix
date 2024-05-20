@@ -1,14 +1,22 @@
 {
   config,
+  lib,
   nodes,
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
+  wardWebProxyCfg = nodes.ward-web-proxy.config;
+  wardCfg = nodes.ward.config;
   lokiDomain = "loki.${config.repo.secrets.global.domains.me}";
 in {
   wireguard.proxy-sentinel = {
     client.via = "sentinel";
     firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.loki.configuration.server.http_listen_port];
+  };
+
+  wireguard.proxy-home = {
+    client.via = "ward";
+    firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [config.services.loki.configuration.server.http_listen_port];
   };
 
   nodes.sentinel = {
@@ -23,6 +31,51 @@ in {
     services.nginx = {
       upstreams.loki = {
         servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.loki.configuration.server.http_listen_port}" = {};
+        extraConfig = ''
+          zone loki 64k;
+          keepalive 2;
+        '';
+      };
+      virtualHosts.${lokiDomain} = {
+        forceSSL = true;
+        useACMEWildcardHost = true;
+        locations."/" = {
+          proxyPass = "http://loki";
+          proxyWebsockets = true;
+          extraConfig = ''
+            auth_basic "Authentication required";
+            auth_basic_user_file ${wardWebProxyCfg.age.secrets.loki-basic-auth-hashes.path};
+
+            proxy_read_timeout 1800s;
+            proxy_connect_timeout 1600s;
+
+            ${lib.concatMapStrings (ip: "allow ${ip};\n") wardCfg.wireguard.proxy-home.server.reservedAddresses}
+            deny all;
+
+            access_log off;
+          '';
+        };
+        locations."= /ready" = {
+          proxyPass = "http://loki";
+          extraConfig = ''
+            auth_basic off;
+            access_log off;
+          '';
+        };
+      };
+    };
+  };
+
+  nodes.ward-web-proxy = {
+    age.secrets.loki-basic-auth-hashes = {
+      inherit (nodes.sentinel.config.age.secrets.loki-basic-auth-hashes) rekeyFile;
+      mode = "440";
+      group = "nginx";
+    };
+
+    services.nginx = {
+      upstreams.loki = {
+        servers."${config.wireguard.proxy-home.ipv4}:${toString config.services.loki.configuration.server.http_listen_port}" = {};
         extraConfig = ''
           zone loki 64k;
           keepalive 2;

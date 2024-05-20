@@ -74,23 +74,26 @@ in {
         ];
         dhcp.enabled = false;
       };
-      filtering.rewrites = [
-        # Undo the /etc/hosts entry so we don't answer with the internal
-        # wireguard address for influxdb
-        {
-          domain = nodes.sentinel.config.networking.providedDomains.influxdb;
-          answer = config.repo.secrets.global.domains.me;
-        }
+      filtering.rewrites =
+        [
+          # Undo the /etc/hosts entry so we don't answer with the internal
+          # wireguard address for influxdb
+          {
+            domain = nodes.sentinel.config.networking.providedDomains.influxdb;
+            answer = config.repo.secrets.global.domains.me;
+          }
+        ]
         # Use the local mirror-proxy for some services (not necessary, just for speed)
-        {
-          domain = nodes.sentinel.config.networking.providedDomains.grafana;
-          answer = "192.168.1.4"; # web-proxy
-        }
-        {
-          domain = nodes.sentinel.config.networking.providedDomains.immich;
-          answer = "192.168.1.4"; # web-proxy
-        }
-      ];
+        ++ map (domain: {
+          inherit domain;
+          answer = "192.168.1.4";
+        }) [
+          nodes.sentinel.config.networking.providedDomains.grafana
+          nodes.sentinel.config.networking.providedDomains.immich
+          nodes.sentinel.config.networking.providedDomains.influxdb
+          nodes.sentinel.config.networking.providedDomains.loki
+          nodes.sentinel.config.networking.providedDomains.paperless
+        ];
       filters = [
         {
           name = "AdGuard DNS filter";

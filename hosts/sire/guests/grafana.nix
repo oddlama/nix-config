@@ -4,6 +4,7 @@
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
+  wardWebProxyCfg = nodes.ward-web-proxy.config;
   grafanaDomain = "grafana.${config.repo.secrets.global.domains.me}";
 in {
   wireguard.proxy-sentinel = {
@@ -114,6 +115,11 @@ in {
       group = "grafana";
       mode = "0700";
     }
+  ];
+
+  networking.hosts.${wardWebProxyCfg.wireguard.proxy-home.ipv4} = [
+    sentinelCfg.networking.providedDomains.influxdb # technically a duplicate (see ./common.nix)...
+    sentinelCfg.networking.providedDomains.loki
   ];
 
   services.grafana = {

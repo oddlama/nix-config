@@ -6,12 +6,18 @@
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
+  wardCfg = nodes.ward.config;
   influxdbDomain = "influxdb.${config.repo.secrets.global.domains.me}";
   influxdbPort = 8086;
 in {
   wireguard.proxy-sentinel = {
     client.via = "sentinel";
     firewallRuleForNode.sentinel.allowedTCPPorts = [influxdbPort];
+  };
+
+  wireguard.proxy-home = {
+    client.via = "ward";
+    firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [influxdbPort];
   };
 
   nodes.sentinel = {
@@ -28,6 +34,40 @@ in {
       virtualHosts.${influxdbDomain} = let
         accessRules = ''
           ${lib.concatMapStrings (ip: "allow ${ip};\n") sentinelCfg.wireguard.proxy-sentinel.server.reservedAddresses}
+          deny all;
+        '';
+      in {
+        forceSSL = true;
+        useACMEWildcardHost = true;
+        locations."/" = {
+          proxyPass = "http://influxdb";
+          proxyWebsockets = true;
+          extraConfig = accessRules;
+        };
+        locations."/api/v2/write" = {
+          proxyPass = "http://influxdb/api/v2/write";
+          proxyWebsockets = true;
+          extraConfig = ''
+            ${accessRules}
+            access_log off;
+          '';
+        };
+      };
+    };
+  };
+
+  nodes.ward-web-proxy = {
+    services.nginx = {
+      upstreams.influxdb = {
+        servers."${config.wireguard.proxy-home.ipv4}:${toString influxdbPort}" = {};
+        extraConfig = ''
+          zone influxdb 64k;
+          keepalive 2;
+        '';
+      };
+      virtualHosts.${influxdbDomain} = let
+        accessRules = ''
+          ${lib.concatMapStrings (ip: "allow ${ip};\n") wardCfg.wireguard.proxy-home.server.reservedAddresses}
           deny all;
         '';
       in {

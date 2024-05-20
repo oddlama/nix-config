@@ -5,6 +5,7 @@
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
+  wardWebProxyCfg = nodes.ward-web-proxy.config;
   immichDomain = "immich.${config.repo.secrets.global.domains.me}";
 
   ipImmichMachineLearning = "10.89.0.10";
@@ -169,10 +170,15 @@ in {
     client.via = "sentinel";
     firewallRuleForNode.sentinel.allowedTCPPorts = [2283];
   };
+  wireguard.proxy-home = {
+    client.via = "ward";
+    firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [2283];
+  };
   networking.nftables.chains.forward.into-immich-container = {
     after = ["conntrack"];
     rules = [
       "iifname proxy-sentinel ip saddr ${sentinelCfg.wireguard.proxy-sentinel.ipv4} tcp dport 3001 accept"
+      "iifname proxy-home ip saddr ${wardWebProxyCfg.wireguard.proxy-home.ipv4} tcp dport 3001 accept"
       "iifname podman1 oifname lan accept"
     ];
   };
@@ -197,6 +203,31 @@ in {
         };
         extraConfig = ''
           client_max_body_size 10G;
+        '';
+      };
+    };
+  };
+
+  nodes.ward-web-proxy = {
+    services.nginx = {
+      upstreams.immich = {
+        servers."${config.wireguard.proxy-home.ipv4}:2283" = {};
+        extraConfig = ''
+          zone immich 64k;
+          keepalive 2;
+        '';
+      };
+      virtualHosts.${immichDomain} = {
+        forceSSL = true;
+        useACMEWildcardHost = true;
+        locations."/" = {
+          proxyPass = "http://immich";
+          proxyWebsockets = true;
+        };
+        extraConfig = ''
+          client_max_body_size 10G;
+          allow 192.168.1.0/24;
+          deny all;
         '';
       };
     };

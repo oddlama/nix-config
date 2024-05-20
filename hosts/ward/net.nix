@@ -10,7 +10,22 @@ in {
 
   boot.initrd.systemd.network = {
     enable = true;
-    networks = {inherit (config.systemd.network.networks) "10-wan";};
+    networks = {
+      inherit (config.systemd.network.networks) "10-wan";
+      "20-lan" = {
+        address = [
+          (lib.net.cidr.hostCidr 1 lanCidrv4)
+          (lib.net.cidr.hostCidr 1 lanCidrv6)
+        ];
+        matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.lan.mac;
+        networkConfig = {
+          IPForward = "yes";
+          IPv6PrivacyExtensions = "yes";
+          MulticastDNS = true;
+        };
+        linkConfig.RequiredForOnline = "routable";
+      };
+    };
   };
 
   # Create a MACVTAP for ourselves too, so that we can communicate with
@@ -95,6 +110,7 @@ in {
     zones = {
       untrusted.interfaces = ["wan"];
       lan.interfaces = ["lan-self"];
+      proxy-home.interfaces = ["proxy-home"];
     };
 
     rules = {

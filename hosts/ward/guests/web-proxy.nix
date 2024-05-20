@@ -1,7 +1,10 @@
 {config, ...}: let
   inherit (config.repo.secrets.local) acme;
 in {
-  wireguard.proxy-home.client.via = "ward";
+  wireguard.proxy-home = {
+    client.via = "ward";
+    firewallRuleForAll.allowedTCPPorts = [80 443];
+  };
 
   age.secrets.acme-cloudflare-dns-token = {
     rekeyFile = config.node.secretsDir + "/acme-cloudflare-dns-token.age";

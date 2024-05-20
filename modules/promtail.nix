@@ -17,6 +17,7 @@
 in {
   options.meta.promtail = {
     enable = mkEnableOption "promtail to push logs to a loki instance.";
+    # TODO: FIXME: this should not be named proxy. get domain from globals and name this secretAggregatorNode or smth.
     proxy = mkOption {
       type = types.str;
       description = "The node name of the proxy server which provides the https loki api endpoint.";

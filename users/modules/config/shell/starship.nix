@@ -20,7 +20,7 @@
         inherit src;
         cargoDeps = previousAttrs.cargoDeps.overrideAttrs (_: {
           inherit src;
-          outputHash = "sha256-P0U+ji/ix75Zh1a3JUx/Zgff6MGj59WrElbHGhVeDVM=";
+          outputHash = "sha256-bmswPBJi2YpnhnS77S++/+SQnlerWWRqFZPCZkBUeFg=";
         });
       });
     settings = {

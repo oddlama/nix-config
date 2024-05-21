@@ -156,9 +156,6 @@ in {
     };
   };
 
-  # Allow accessing influx
-  wireguard.proxy-sentinel.client.via = "sentinel";
-
   #wireguard.home.server = {
   #  host = todo # config.networking.fqdn;
   #  port = 51192;

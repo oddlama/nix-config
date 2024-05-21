@@ -9,7 +9,7 @@
 in {
   wireguard.proxy-sentinel = {
     client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.adguardhome.settings.port];
+    firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.adguardhome.port];
   };
 
   nodes.sentinel = {
@@ -17,7 +17,7 @@ in {
 
     services.nginx = {
       upstreams.adguardhome = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.adguardhome.settings.port}" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.adguardhome.port}" = {};
         extraConfig = ''
           zone adguardhome 64k;
           keepalive 2;
@@ -52,9 +52,9 @@ in {
   services.adguardhome = {
     enable = true;
     mutableSettings = false;
+    host = "0.0.0.0";
+    port = 3000;
     settings = {
-      host = "0.0.0.0";
-      port = 3000;
       dns = {
         # allowed_clients = [
         # ];

@@ -6,6 +6,7 @@
 }: let
   inherit (config.repo.secrets.local) acme;
   sentinelCfg = nodes.sentinel.config;
+  wardWebProxyCfg = nodes.ward-web-proxy.config;
 in {
   imports = [
     ../../modules/optional/hardware/odroid-n2plus.nix
@@ -14,14 +15,14 @@ in {
     ../../modules/optional/initrd-ssh.nix
     ../../modules/optional/zfs.nix
 
-    ./esphome.nix
+    #./esphome.nix
     ./fs.nix
-    ./home-assistant.nix
-    ./hostapd.nix
-    ./mosquitto.nix
+    #./home-assistant.nix
+    #./hostapd.nix
+    #./mosquitto.nix
     ./kea.nix
     ./net.nix
-    ./zigbee2mqtt.nix
+    #./zigbee2mqtt.nix
   ];
 
   topology.self.name = "🥔  zackbiene"; # yes this is 2x U+2009, don't ask (satori 🤬).
@@ -47,7 +48,12 @@ in {
   };
 
   # Connect safely via wireguard to skip http authentication
-  networking.hosts.${sentinelCfg.wireguard.proxy-sentinel.ipv4} = [sentinelCfg.networking.providedDomains.influxdb];
+  networking.hosts.${
+    if config.wireguard ? proxy-home
+    then wardWebProxyCfg.wireguard.proxy-home.ipv4
+    else sentinelCfg.wireguard.proxy-sentinel.ipv4
+  } = [sentinelCfg.networking.providedDomains.influxdb];
+
   meta.telegraf = {
     enable = true;
     influxdb2 = {

@@ -8,8 +8,8 @@
 in {
   networking.hostId = config.repo.secrets.local.networking.hostId;
 
-  wireguard.proxy-sentinel = {
-    client.via = "sentinel";
+  wireguard.proxy-home = {
+    client.via = "ward";
   };
 
   boot.initrd.systemd.network = {
@@ -51,6 +51,27 @@ in {
   };
 
   networking.nftables.firewall = {
-    zones.untrusted.interfaces = ["lan1"];
+    snippets.nnf-icmp.ipv6Types = ["mld-listener-query" "nd-router-solicit"];
+
+    zones = {
+      untrusted.interfaces = ["lan1"];
+      lan.interfaces = ["lan1"];
+      iot.interfaces = ["wlan1"];
+    };
+
+    rules = {
+      masquerade-iot = {
+        from = ["lan"];
+        to = ["iot"];
+        masquerade = true;
+      };
+
+      outbound = {
+        from = ["lan"];
+        to = ["iot"];
+        late = true; # Only accept after any rejects have been processed
+        verdict = "accept";
+      };
+    };
   };
 }

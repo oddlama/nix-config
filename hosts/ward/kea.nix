@@ -9,6 +9,13 @@
   dnsIp = net.cidr.host 3 lanCidrv4;
   webProxyIp = net.cidr.host 4 lanCidrv4;
 in {
+  environment.persistence."/persist".directories = [
+    {
+      directory = "/var/lib/private/kea";
+      mode = "0700";
+    }
+  ];
+
   # TODO make meta.kea module?
   # TODO reserve by default using assignIps algo?
   services.kea.dhcp4 = {

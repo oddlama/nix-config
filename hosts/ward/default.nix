@@ -33,7 +33,7 @@
   };
 
   # Connect safely via wireguard to skip authentication
-  networking.hosts.${nodes.sentinel.config.wireguard.proxy-sentinel.ipv4} = [nodes.sentinel.config.networking.providedDomains.influxdb];
+  networking.hosts.${config.wireguard.proxy-home.ipv4} = [nodes.sentinel.config.networking.providedDomains.influxdb];
   meta.telegraf = {
     enable = true;
     influxdb2 = {

@@ -4,8 +4,15 @@
   ...
 }: let
   inherit (lib) net;
-  iotCidrv4 = "10.0.90.0/24";
+  iotCidrv4 = "10.0.90.0/24"; # FIXME: make all subnet allocations accessible via global.net or smth
 in {
+  environment.persistence."/persist".directories = [
+    {
+      directory = "/var/lib/private/kea";
+      mode = "0700";
+    }
+  ];
+
   services.kea.dhcp4 = {
     enable = true;
     settings = {
@@ -14,13 +21,18 @@ in {
         persist = true;
         type = "memfile";
       };
-      valid-lifetime = 4000;
-      renew-timer = 1000;
-      rebind-timer = 2000;
+      valid-lifetime = 86400;
+      renew-timer = 3600;
       interfaces-config = {
         interfaces = ["wlan1"];
         service-sockets-max-retries = -1;
       };
+      option-data = [
+        {
+          name = "domain-name-servers";
+          data = "192.168.1.3"; # FIXME: global (also search for 192.168 and "*Ip =")
+        }
+      ];
       subnet4 = [
         {
           interface = "wlan1";

@@ -39,10 +39,10 @@ in {
             "safe/guests" = lib.disko.zfs.unmountable;
           };
       };
-      storage = mkZpool {
+      storage = lib.disko.zfs.mkZpool {
         mode = "raidz";
         datasets = {
-          "safe/guests" = unmountable;
+          "safe/guests" = lib.disko.zfs.unmountable;
         };
       };
     };

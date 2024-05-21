@@ -11,11 +11,11 @@ in {
         m2-ssd-1 = {
           type = "disk";
           device = "/dev/disk/by-id/${disks.m2-ssd-1}";
-          content = with lib.disko.gpt; {
+          content = {
             type = "gpt";
             partitions = {
-              efi = partEfi "1G";
-              rpool = partLuksZfs disks.m2-ssd-1 "rpool" "100%";
+              efi = lib.disko.gpt.partEfi "1G";
+              rpool = lib.disko.gpt.partLuksZfs disks.m2-ssd-1 "rpool" "100%";
             };
           };
         };
@@ -30,13 +30,13 @@ in {
         device = "/dev/disk/by-id/${disk}";
         content = lib.disko.content.luksZfs disk "storage";
       });
-    zpool = with lib.disko.zfs; {
-      rpool = mkZpool {
+    zpool = {
+      rpool = lib.disko.zfs.mkZpool {
         mode = "mirror";
         datasets =
-          impermanenceZfsDatasets
+          lib.disko.zfs.impermanenceZfsDatasets
           // {
-            "safe/guests" = unmountable;
+            "safe/guests" = lib.disko.zfs.unmountable;
           };
       };
       storage = mkZpool {

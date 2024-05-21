@@ -10,18 +10,18 @@ in {
       mmc = {
         type = "disk";
         device = "/dev/disk/by-id/${disks.mmc}";
-        content = with lib.disko.gpt; {
+        content = {
           type = "gpt";
           partitions = {
-            efi = partEfi "1G";
-            swap = partSwap "8G";
-            rpool = partLuksZfs disks.mmc "rpool" "100%";
+            efi = lib.disko.gpt.partEfi "1G";
+            swap = lib.disko.gpt.partSwap "8G";
+            rpool = lib.disko.gpt.partLuksZfs disks.mmc "rpool" "100%";
           };
         };
       };
     };
-    zpool = with lib.disko.zfs; {
-      rpool = mkZpool {datasets = impermanenceZfsDatasets;};
+    zpool = {
+      rpool = lib.disko.zfs.mkZpool {datasets = lib.disko.zfs.impermanenceZfsDatasets;};
     };
   };
 }

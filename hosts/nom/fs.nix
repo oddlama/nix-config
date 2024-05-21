@@ -10,27 +10,27 @@ in {
       m2-ssd = {
         type = "disk";
         device = "/dev/disk/by-id/${disks.m2-ssd}";
-        content = with lib.disko.gpt; {
+        content = {
           type = "gpt";
           partitions = {
-            rpool = partLuksZfs disks.m2-ssd "rpool" "100%";
+            rpool = lib.disko.gpt.partLuksZfs disks.m2-ssd "rpool" "100%";
           };
         };
       };
       boot-ssd = {
         type = "disk";
         device = "/dev/disk/by-id/${disks.boot-ssd}";
-        content = with lib.disko.gpt; {
+        content = {
           type = "gpt";
           partitions = {
-            efi = partEfi "8G";
-            swap = partSwap "100%";
+            efi = lib.disko.gpt.partEfi "8G";
+            swap = lib.disko.gpt.partSwap "100%";
           };
         };
       };
     };
-    zpool = with lib.disko.zfs; {
-      rpool = mkZpool {datasets = impermanenceZfsDatasets;};
+    zpool = {
+      rpool = lib.disko.zfs.mkZpool {datasets = lib.disko.zfs.impermanenceZfsDatasets;};
     };
   };
 }

@@ -10,18 +10,18 @@ in {
       main = {
         type = "disk";
         device = "/dev/disk/by-id/${disks.main}";
-        content = with lib.disko.gpt; {
+        content = {
           type = "gpt";
           partitions = {
-            grub = partGrub;
-            bios = partBoot "512M";
-            rpool = partLuksZfs disks.main "rpool" "100%";
+            grub = lib.disko.gpt.partGrub;
+            bios = lib.disko.gpt.partBoot "512M";
+            rpool = lib.disko.gpt.partLuksZfs disks.main "rpool" "100%";
           };
         };
       };
     };
-    zpool = with lib.disko.zfs; {
-      rpool = mkZpool {datasets = impermanenceZfsDatasets;};
+    zpool = {
+      rpool = lib.disko.zfs.mkZpool {datasets = lib.disko.zfs.impermanenceZfsDatasets;};
     };
   };
 

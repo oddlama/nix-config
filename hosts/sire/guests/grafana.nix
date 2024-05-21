@@ -180,7 +180,6 @@ in {
           jsonData.organization = "machines";
           jsonData.defaultBucket = "telegraf";
         }
-        # TODO duplicate above influxdb source (with scoped read tokens??) for each organization
         {
           name = "Loki";
           type = "loki";

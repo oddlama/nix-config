@@ -82,7 +82,6 @@ in {
 
     age.secrets.telegraf-influxdb-token = {
       generator.script = "alnum";
-      generator.tags = ["influxdb"];
       mode = "440";
       group = "telegraf";
     };

@@ -61,9 +61,11 @@ in {
       virtualHosts.${paperlessDomain} = {
         forceSSL = true;
         useACMEWildcardHost = true;
+        # FIXME: refer to lan 192.168... and fd10:: via globals
         extraConfig = ''
           client_max_body_size 512M;
           allow 192.168.1.0/24;
+          allow fd10::/64;
           deny all;
         '';
         locations."/" = {

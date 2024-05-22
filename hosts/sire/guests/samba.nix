@@ -155,7 +155,7 @@ in {
       # Deny access to all hosts by default.
       "hosts deny = 0.0.0.0/0"
       # Allow access to local network and TODO: wireguard
-      "hosts allow = 192.168.1.0/24"
+      "hosts allow = 192.168.1.0/24 fd10::/64"
       # Don't advertise inaccessible shares to users
       "access based share enum = yes"
 

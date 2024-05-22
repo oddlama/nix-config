@@ -1,12 +1,14 @@
 {
   lib,
   config,
-  nodes,
   ...
 }: let
-  sentinelCfg = nodes.sentinel.config;
-  homeDomain = "home.${sentinelCfg.repo.secrets.global.domains.personal}";
+  homeDomain = "home.${config.repo.secrets.global.domains.me}";
 in {
+  wireguard.proxy-home.firewallRuleForNode.ward.allowedTCPPorts = [
+    config.services.home-assistant.config.http.server_port
+  ];
+
   environment.persistence."/persist".directories = [
     {
       directory = config.services.home-assistant.configDir;
@@ -27,23 +29,24 @@ in {
       "fritzbox"
       "soundtouch"
       "spotify"
-      "zha"
+      #"zha"
       "mqtt"
     ];
     config = {
       http = {
-        server_host = ["127.0.0.1"];
+        server_host = ["0.0.0.0"];
         server_port = 8123;
         use_x_forwarded_for = true;
         trusted_proxies = ["127.0.0.1"];
       };
+
       homeassistant = {
         name = "!secret ha_name";
         latitude = "!secret ha_latitude";
         longitude = "!secret ha_longitude";
         elevation = "!secret ha_elevation";
-        currency = "!secret ha_currency";
-        time_zone = "!secret ha_time_zone";
+        currency = "EUR";
+        time_zone = "Europe/Berlin";
         unit_system = "metric";
         #external_url = "https://";
         packages = {
@@ -53,49 +56,31 @@ in {
 
       #### only selected components from default_config ####
 
-      automation = {};
-      backup = {};
+      assist_pipeline = {};
       bluetooth = {};
       #cloud = {};
-      config = {};
       #conversation = {};
-      counter = {};
       dhcp = {};
       energy = {};
-      frontend = {
-        #themes = "!include_dir_merge_named themes";
-      };
-      hardware = {};
       history = {};
       homeassistant_alerts = {};
-      image_upload = {};
-      input_boolean = {};
-      input_button = {};
-      input_datetime = {};
-      input_number = {};
-      input_select = {};
-      input_text = {};
       logbook = {};
-      logger = {};
       map = {};
       #media_source = {};
       mobile_app = {};
-      #my = {};
-      network = {};
-      person = {};
-      schedule = {};
-      scene = {};
-      script = {};
+      my = {};
       ssdp = {};
       stream = {};
       sun = {};
-      system_health = {};
-      tag = {};
-      timer = {};
       #usb = {};
       webhook = {};
       zeroconf = {};
-      zone = {};
+
+      backup = {};
+      config = {};
+      frontend = {
+        #themes = "!include_dir_merge_named themes";
+      };
     };
     extraPackages = python3Packages: with python3Packages; [psycopg2];
   };
@@ -112,49 +97,37 @@ in {
     '';
   };
 
-  # TODO
-  # - auth for zigbee2mqtt frontend
-  # - auth for esphome dashboard
-  # - only allow connections from privileged LAN to HA or from vpn range
-
   services.nginx = {
     upstreams.homeassistant = {
-      servers."localhost:${toString config.services.home-assistant.config.http.server_port}" = {};
       extraConfig = ''
         zone homeassistant 64k;
         keepalive 2;
       '';
     };
-    virtualHosts.${homeDomain} = {
-      forceSSL = true;
-      enableACME = true;
-      locations."/" = {
-        proxyPass = "http://homeassistant";
-        proxyWebsockets = true;
-      };
-      # TODO listenAddresses = ["127.0.0.1" "[::1]"];
-      # TODO dynamic definitions for the "local" network, IPv6
-      extraConfig = ''
-        allow 192.168.0.0/22;
-        deny all;
-      '';
-    };
   };
 
-  nodes.sentinel = {
+  nodes.ward = {
     services.nginx = {
-      upstreams."zackbiene" = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:80" = {};
+      upstreams."home-assistant" = {
+        servers."${config.wireguard.proxy-home.ipv4}:${toString config.services.home-assistant.config.http.server_port}" = {};
         extraConfig = ''
-          zone zackbiene 64k;
+          zone home-assistant 64k;
           keepalive 2;
         '';
       };
       virtualHosts.${homeDomain} = {
-        # useACMEWildcardHost = true;
-        # TODO add aliases
-        rejectSSL = true; # TODO TLS SNI pass with `ssl_preread on;`
-        locations."/".proxyPass = "http://zackbiene";
+        forceSSL = true;
+        enableACME = true;
+        locations."/" = {
+          proxyPass = "http://home-assistant";
+          proxyWebsockets = true;
+        };
+        # FIXME: refer to lan 192.168... and fd10:: via globals
+        extraConfig = ''
+          allow 192.168.1.0/24;
+          allow fd10::/64;
+          deny all;
+        '';
       };
     };
   };

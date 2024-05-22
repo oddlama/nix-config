@@ -17,8 +17,8 @@ in {
 
     #./esphome.nix
     ./fs.nix
-    #./home-assistant.nix
-    #./hostapd.nix
+    ./home-assistant.nix
+    ./hostapd.nix
     #./mosquitto.nix
     ./kea.nix
     ./net.nix

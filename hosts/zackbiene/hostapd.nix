@@ -1,5 +1,6 @@
 {config, ...}: {
-  # Associates each known client to a unique password
+  # Associates a mandatory and unique password to each client
+  # TODO: autogenerate? via secret generators and derived secrets?
   age.secrets.wifi-clients.rekeyFile = ./secrets/wifi-clients.age;
 
   hardware.wirelessRegulatoryDatabase = true;

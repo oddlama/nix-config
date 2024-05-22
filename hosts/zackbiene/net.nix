@@ -8,9 +8,7 @@
 in {
   networking.hostId = config.repo.secrets.local.networking.hostId;
 
-  wireguard.proxy-home = {
-    client.via = "ward";
-  };
+  wireguard.proxy-home.client.via = "ward";
 
   boot.initrd.systemd.network = {
     enable = true;
@@ -55,7 +53,12 @@ in {
 
     zones = {
       untrusted.interfaces = ["lan1"];
-      lan.interfaces = ["lan1"];
+      lan-interface.interfaces = ["lan1"];
+      lan = {
+        parent = "lan-interface";
+        ipv4Addresses = ["192.168.1.0/24"]; # FIXME: refer to via globals
+        ipv6Addresses = ["fd10::/64"]; # FIXME: refer to via globals
+      };
       iot.interfaces = ["wlan1"];
     };
 

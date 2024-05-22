@@ -49,7 +49,7 @@ in {
           option-data = [
             {
               name = "routers";
-              data = net.cidr.host 1 lanCidrv4;
+              data = net.cidr.host 1 lanCidrv4; # FIXME: how to advertise v6 address also?
             }
           ];
           reservations = [

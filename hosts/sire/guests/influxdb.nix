@@ -133,6 +133,7 @@ in {
         tokenFile = config.age.secrets.influxdb-admin-token.path;
       };
       organizations.machines.buckets.telegraf = {};
+      organizations.home.buckets.home_assistant = {};
     };
   };
 

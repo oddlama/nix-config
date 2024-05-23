@@ -1,7 +1,8 @@
 {
-  lib,
   config,
+  lib,
   nodes,
+  pkgs,
   ...
 }: let
   homeDomain = "home.${config.repo.secrets.global.domains.me}";
@@ -77,10 +78,24 @@ in {
       webhook = {};
       zeroconf = {};
 
+      ### Components not from default_config
+
       backup = {};
       config = {};
       frontend = {
         #themes = "!include_dir_merge_named themes";
+      };
+
+      influxdb = {
+        api_version = 2;
+        host = nodes.sentinel.config.networking.providedDomains.influxdb;
+        port = "443";
+        max_retries = 10;
+        ssl = true;
+        verify_ssl = true;
+        token = "!secret influxdb_token";
+        organization = "home";
+        bucket = "home_assistant";
       };
     };
     extraPackages = python3Packages:
@@ -97,9 +112,39 @@ in {
 
   systemd.services.home-assistant = {
     preStart = lib.mkBefore ''
-      ln -sf ${config.age.secrets."home-assistant-secrets.yaml".path} ${config.services.home-assistant.configDir}/secrets.yaml
+      if [[ -e ${config.services.home-assistant.configDir}/secrets.yaml ]]; then
+        rm ${config.services.home-assistant.configDir}/secrets.yaml
+      fi
+      cat ${config.age.secrets."home-assistant-secrets.yaml".path} > ${config.services.home-assistant.configDir}/secrets.yaml
+
+      # Update influxdb token
+      INFLUXDB_TOKEN="$(cat ${config.age.secrets.hass-influxdb-token.path})" \
+        ${lib.getExe pkgs.yq-go} -i '.influxdb_token = strenv(INFLUXDB_TOKEN)' \
+        ${config.services.home-assistant.configDir}/secrets.yaml
+
       touch -a ${config.services.home-assistant.configDir}/{automations,scenes,scripts,manual}.yaml
     '';
+  };
+
+  age.secrets.hass-influxdb-token = {
+    generator.script = "alnum";
+    mode = "440";
+    group = "hass";
+  };
+
+  nodes.sire-influxdb = {
+    # Mirror the original secret on the influx host
+    age.secrets."hass-influxdb-token-${config.node.name}" = {
+      inherit (config.age.secrets.hass-influxdb-token) rekeyFile;
+      mode = "440";
+      group = "influxdb2";
+    };
+
+    services.influxdb2.provision.organizations.machines.auths."home-assistant (${config.node.name})" = {
+      readBuckets = ["home_assistant"];
+      writeBuckets = ["home_assistant"];
+      tokenFile = nodes.sire-influxdb.config.age.secrets."hass-influxdb-token-${config.node.name}".path;
+    };
   };
 
   nodes.ward-web-proxy = {

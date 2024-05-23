@@ -29,7 +29,14 @@ in {
     group = "grafana";
   };
 
-  age.secrets.grafana-influxdb-token = {
+  age.secrets.grafana-influxdb-token-machines = {
+    generator.script = "alnum";
+    generator.tags = ["influxdb"];
+    mode = "440";
+    group = "grafana";
+  };
+
+  age.secrets.grafana-influxdb-token-home = {
     generator.script = "alnum";
     generator.tags = ["influxdb"];
     mode = "440";
@@ -45,8 +52,8 @@ in {
 
   nodes.sire-influxdb = {
     # Mirror the original secret on the influx host
-    age.secrets."grafana-influxdb-token-${config.node.name}" = {
-      inherit (config.age.secrets.grafana-influxdb-token) rekeyFile;
+    age.secrets."grafana-influxdb-token-machines-${config.node.name}" = {
+      inherit (config.age.secrets.grafana-influxdb-token-machines) rekeyFile;
       mode = "440";
       group = "influxdb2";
     };
@@ -54,7 +61,19 @@ in {
     services.influxdb2.provision.organizations.machines.auths."grafana machines:telegraf (${config.node.name})" = {
       readBuckets = ["telegraf"];
       writeBuckets = ["telegraf"];
-      tokenFile = nodes.sire-influxdb.config.age.secrets."grafana-influxdb-token-${config.node.name}".path;
+      tokenFile = nodes.sire-influxdb.config.age.secrets."grafana-influxdb-token-machines-${config.node.name}".path;
+    };
+
+    age.secrets."grafana-influxdb-token-home-${config.node.name}" = {
+      inherit (config.age.secrets.grafana-influxdb-token-home) rekeyFile;
+      mode = "440";
+      group = "influxdb2";
+    };
+
+    services.influxdb2.provision.organizations.machines.auths."grafana home:home_assistan (${config.node.name})" = {
+      readBuckets = ["home_assistant"];
+      writeBuckets = ["home_assistant"];
+      tokenFile = nodes.sire-influxdb.config.age.secrets."grafana-influxdb-token-home-${config.node.name}".path;
     };
   };
 
@@ -177,10 +196,21 @@ in {
           access = "proxy";
           url = "https://${sentinelCfg.networking.providedDomains.influxdb}";
           orgId = 1;
-          secureJsonData.token = "$__file{${config.age.secrets.grafana-influxdb-token.path}}";
+          secureJsonData.token = "$__file{${config.age.secrets.grafana-influxdb-token-machines.path}}";
           jsonData.version = "Flux";
           jsonData.organization = "machines";
           jsonData.defaultBucket = "telegraf";
+        }
+        {
+          name = "InfluxDB (home_assistant)";
+          type = "influxdb";
+          access = "proxy";
+          url = "https://${sentinelCfg.networking.providedDomains.influxdb}";
+          orgId = 1;
+          secureJsonData.token = "$__file{${config.age.secrets.grafana-influxdb-token-home.path}}";
+          jsonData.version = "Flux";
+          jsonData.organization = "home";
+          jsonData.defaultBucket = "home_assistant";
         }
         {
           name = "Loki";

@@ -82,12 +82,12 @@ in {
         listener = {
           jmap = {
             protocol = "jmap";
-            bind = " [::]:18080";
+            bind = " [::]:8080";
             url = "https://mail.${primaryDomain}/jmap";
           };
           imaps = {
             protocol = "imap";
-            bind = "[::]:1993";
+            bind = "[::]:993";
             tls.enable = true;
             tls.implicit = true;
           };

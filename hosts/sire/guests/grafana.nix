@@ -70,7 +70,7 @@ in {
       group = "influxdb2";
     };
 
-    services.influxdb2.provision.organizations.machines.auths."grafana home:home_assistan (${config.node.name})" = {
+    services.influxdb2.provision.organizations.home.auths."grafana home:home_assistant (${config.node.name})" = {
       readBuckets = ["home_assistant"];
       writeBuckets = ["home_assistant"];
       tokenFile = nodes.sire-influxdb.config.age.secrets."grafana-influxdb-token-home-${config.node.name}".path;

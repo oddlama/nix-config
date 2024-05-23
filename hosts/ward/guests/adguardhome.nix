@@ -94,6 +94,7 @@ in {
           nodes.sentinel.config.networking.providedDomains.loki
           nodes.sentinel.config.networking.providedDomains.paperless
           "home.${config.repo.secrets.global.domains.me}"
+          "fritzbox.${config.repo.secrets.global.domains.me}"
         ];
       filters = [
         {

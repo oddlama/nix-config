@@ -1,5 +1,6 @@
 {config, ...}: let
   inherit (config.repo.secrets.local) acme;
+  fritzboxDomain = "fritzbox.${config.repo.secrets.global.domains.me}";
 in {
   wireguard.proxy-home = {
     client.via = "ward";
@@ -30,6 +31,33 @@ in {
       reloadServices = ["nginx"];
     };
     inherit (acme) certs wildcardDomains;
+  };
+
+  services.nginx = {
+    upstreams.fritzbox = {
+      servers."192.168.178.1" = {};
+      extraConfig = ''
+        zone grafana 64k;
+        keepalive 2;
+      '';
+    };
+    virtualHosts.${fritzboxDomain} = {
+      forceSSL = true;
+      useACMEWildcardHost = true;
+      locations."/" = {
+        proxyPass = "http://fritzbox";
+        proxyWebsockets = true;
+      };
+      # Allow using self-signed certs. We just want to make sure the connection
+      # is over TLS.
+      # FIXME: refer to lan 192.168... and fd10:: via globals
+      extraConfig = ''
+        proxy_ssl_verify off;
+        allow 192.168.1.0/24;
+        allow fd10::/64;
+        deny all;
+      '';
+    };
   };
 
   users.groups.acme.members = ["nginx"];

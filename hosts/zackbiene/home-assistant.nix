@@ -6,6 +6,7 @@
   ...
 }: let
   homeDomain = "home.${config.repo.secrets.global.domains.me}";
+  fritzboxDomain = "fritzbox.${config.repo.secrets.global.domains.me}";
 in {
   wireguard.proxy-home.firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [
     config.services.home-assistant.config.http.server_port
@@ -59,7 +60,9 @@ in {
       #### only selected components from default_config ####
 
       assist_pipeline = {};
+      backup = {};
       bluetooth = {};
+      config = {};
       #cloud = {};
       #conversation = {};
       dhcp = {};
@@ -67,7 +70,6 @@ in {
       history = {};
       homeassistant_alerts = {};
       logbook = {};
-      map = {};
       #media_source = {};
       mobile_app = {};
       my = {};
@@ -80,8 +82,6 @@ in {
 
       ### Components not from default_config
 
-      backup = {};
-      config = {};
       frontend = {
         #themes = "!include_dir_merge_named themes";
       };
@@ -115,12 +115,12 @@ in {
       if [[ -e ${config.services.home-assistant.configDir}/secrets.yaml ]]; then
         rm ${config.services.home-assistant.configDir}/secrets.yaml
       fi
-      cat ${config.age.secrets."home-assistant-secrets.yaml".path} > ${config.services.home-assistant.configDir}/secrets.yaml
 
       # Update influxdb token
+      # We don't use -i because it would require chown with is a @privileged syscall
       INFLUXDB_TOKEN="$(cat ${config.age.secrets.hass-influxdb-token.path})" \
-        ${lib.getExe pkgs.yq-go} -i '.influxdb_token = strenv(INFLUXDB_TOKEN)' \
-        ${config.services.home-assistant.configDir}/secrets.yaml
+        ${lib.getExe pkgs.yq-go} '.influxdb_token = strenv(INFLUXDB_TOKEN)' \
+        ${config.age.secrets."home-assistant-secrets.yaml".path} > ${config.services.home-assistant.configDir}/secrets.yaml
 
       touch -a ${config.services.home-assistant.configDir}/{automations,scenes,scripts,manual}.yaml
     '';
@@ -140,12 +140,15 @@ in {
       group = "influxdb2";
     };
 
-    services.influxdb2.provision.organizations.machines.auths."home-assistant (${config.node.name})" = {
+    services.influxdb2.provision.organizations.home.auths."home-assistant (${config.node.name})" = {
       readBuckets = ["home_assistant"];
       writeBuckets = ["home_assistant"];
       tokenFile = nodes.sire-influxdb.config.age.secrets."hass-influxdb-token-${config.node.name}".path;
     };
   };
+
+  # Connect to fritzbox via https proxy (to ensure valid cert)
+  networking.hosts."192.168.1.4" = [fritzboxDomain];
 
   nodes.ward-web-proxy = {
     services.nginx = {

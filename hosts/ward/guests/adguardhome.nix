@@ -93,6 +93,7 @@ in {
           nodes.sentinel.config.networking.providedDomains.influxdb
           nodes.sentinel.config.networking.providedDomains.loki
           nodes.sentinel.config.networking.providedDomains.paperless
+          "home.${config.repo.secrets.global.domains.me}"
         ];
       filters = [
         {

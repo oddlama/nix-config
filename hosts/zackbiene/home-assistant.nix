@@ -1,11 +1,12 @@
 {
   lib,
   config,
+  nodes,
   ...
 }: let
   homeDomain = "home.${config.repo.secrets.global.domains.me}";
 in {
-  wireguard.proxy-home.firewallRuleForNode.ward.allowedTCPPorts = [
+  wireguard.proxy-home.firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [
     config.services.home-assistant.config.http.server_port
   ];
 
@@ -37,7 +38,7 @@ in {
         server_host = ["0.0.0.0"];
         server_port = 8123;
         use_x_forwarded_for = true;
-        trusted_proxies = ["127.0.0.1"];
+        trusted_proxies = [nodes.ward-web-proxy.config.wireguard.proxy-home.ipv4];
       };
 
       homeassistant = {
@@ -82,7 +83,11 @@ in {
         #themes = "!include_dir_merge_named themes";
       };
     };
-    extraPackages = python3Packages: with python3Packages; [psycopg2];
+    extraPackages = python3Packages:
+      with python3Packages; [
+        psycopg2
+        gtts
+      ];
   };
 
   age.secrets."home-assistant-secrets.yaml" = {
@@ -97,16 +102,7 @@ in {
     '';
   };
 
-  services.nginx = {
-    upstreams.homeassistant = {
-      extraConfig = ''
-        zone homeassistant 64k;
-        keepalive 2;
-      '';
-    };
-  };
-
-  nodes.ward = {
+  nodes.ward-web-proxy = {
     services.nginx = {
       upstreams."home-assistant" = {
         servers."${config.wireguard.proxy-home.ipv4}:${toString config.services.home-assistant.config.http.server_port}" = {};
@@ -117,7 +113,7 @@ in {
       };
       virtualHosts.${homeDomain} = {
         forceSSL = true;
-        enableACME = true;
+        useACMEWildcardHost = true;
         locations."/" = {
           proxyPass = "http://home-assistant";
           proxyWebsockets = true;

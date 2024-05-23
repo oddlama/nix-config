@@ -27,12 +27,6 @@ in {
         interfaces = ["wlan1"];
         service-sockets-max-retries = -1;
       };
-      option-data = [
-        {
-          name = "domain-name-servers";
-          data = "192.168.1.3"; # FIXME: global (also search for 192.168 and "*Ip =")
-        }
-      ];
       subnet4 = [
         {
           interface = "wlan1";

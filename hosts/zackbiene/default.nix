@@ -4,7 +4,6 @@
   nodes,
   ...
 }: let
-  inherit (config.repo.secrets.local) acme;
   sentinelCfg = nodes.sentinel.config;
   wardWebProxyCfg = nodes.ward-web-proxy.config;
 in {
@@ -30,17 +29,6 @@ in {
   topology.self.hardware.info = "O-Droid N2+";
 
   boot.mode = "efi";
-  users.groups.acme.members = ["nginx"];
-  services.nginx.enable = true;
-  services.nginx.recommendedSetup = true;
-
-  security.acme = {
-    acceptTerms = true;
-    defaults = {
-      inherit (acme) email;
-      reloadServices = ["nginx"];
-    };
-  };
 
   meta.promtail = {
     enable = true;

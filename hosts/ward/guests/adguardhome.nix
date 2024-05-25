@@ -59,12 +59,11 @@ in {
         # allowed_clients = [
         # ];
         #trusted_proxies = [];
-        ratelimit = 60;
+        ratelimit = 300;
         upstream_dns = [
-          "1.1.1.1"
-          # FIXME: enable ipv6 "2606:4700:4700::1111"
-          "8.8.8.8"
-          # FIXME: enable ipv6 "2001:4860:4860::8844"
+          "https://dns.cloudflare.com/dns-query"
+          "https://dns.google/dns-query"
+          "https://doh.mullvad.net/dns-query"
         ];
         bootstrap_dns = [
           "1.1.1.1"

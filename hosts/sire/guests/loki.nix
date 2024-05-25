@@ -1,12 +1,10 @@
 {
   config,
-  lib,
   nodes,
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
   wardWebProxyCfg = nodes.ward-web-proxy.config;
-  wardCfg = nodes.ward.config;
   lokiDomain = "loki.${config.repo.secrets.global.domains.me}";
 in {
   wireguard.proxy-sentinel = {
@@ -44,13 +42,10 @@ in {
           proxyWebsockets = true;
           extraConfig = ''
             auth_basic "Authentication required";
-            auth_basic_user_file ${wardWebProxyCfg.age.secrets.loki-basic-auth-hashes.path};
+            auth_basic_user_file ${sentinelCfg.age.secrets.loki-basic-auth-hashes.path};
 
             proxy_read_timeout 1800s;
             proxy_connect_timeout 1600s;
-
-            ${lib.concatMapStrings (ip: "allow ${ip};\n") wardCfg.wireguard.proxy-home.server.reservedAddresses}
-            deny all;
 
             access_log off;
           '';
@@ -89,7 +84,7 @@ in {
           proxyWebsockets = true;
           extraConfig = ''
             auth_basic "Authentication required";
-            auth_basic_user_file ${sentinelCfg.age.secrets.loki-basic-auth-hashes.path};
+            auth_basic_user_file ${wardWebProxyCfg.age.secrets.loki-basic-auth-hashes.path};
 
             proxy_read_timeout 1800s;
             proxy_connect_timeout 1600s;

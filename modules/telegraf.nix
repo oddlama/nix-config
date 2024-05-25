@@ -27,6 +27,15 @@ in {
       description = "Scrape sensors with lm_sensors. You should disable this for virtualized hosts.";
     };
 
+    secrets = mkOption {
+      type = types.attrsOf types.path;
+      default = {};
+      example = {
+        "@INFLUX_TOKEN@" = "/run/agenix/influx-token";
+      };
+      description = "Additional secrets to replace in pre-start. The attr name will be searched and replaced in the config with the value read from the given file.";
+    };
+
     influxdb2 = {
       domain = mkOption {
         type = types.str;
@@ -86,6 +95,8 @@ in {
       group = "telegraf";
     };
 
+    meta.telegraf.secrets."@INFLUX_TOKEN@" = config.age.secrets.telegraf-influxdb-token.path;
+
     security.elewrap.telegraf-sensors = mkIf cfg.scrapeSensors {
       command = ["${pkgs.lm_sensors}/bin/sensors" "-A" "-u"];
       targetUser = "root";
@@ -125,7 +136,7 @@ in {
         outputs = {
           influxdb_v2 = {
             urls = ["https://${cfg.influxdb2.domain}"];
-            token = "$INFLUX_TOKEN";
+            token = "@INFLUX_TOKEN@";
             inherit (cfg.influxdb2) organization bucket;
           };
         };
@@ -202,12 +213,19 @@ in {
           (pkgs.writeShellScriptBin "sensors" config.security.elewrap.telegraf-sensors.path))
       ];
       serviceConfig = {
-        Environment = "INFLUX_TOKEN=\$INFLUX_TOKEN"; # Required so the first envsubst in the original module doesn't change it
         ExecStartPre = mkAfter [
-          (pkgs.writeShellScript "pre-start-token" ''
-            export INFLUX_TOKEN=$(< ${config.age.secrets.telegraf-influxdb-token.path})
-            ${pkgs.envsubst}/bin/envsubst -i /var/run/telegraf/config.toml -o /var/run/telegraf/config.toml
-          '')
+          (
+            pkgs.writeShellScript "pre-start-token" (lib.concatLines (
+              lib.flip lib.mapAttrsToList config.meta.telegraf.secrets (
+                key: secret: ''
+                  ${lib.getExe pkgs.replace-secret} \
+                    ${lib.escapeShellArg key} \
+                    ${lib.escapeShellArg secret} \
+                    /var/run/telegraf/config.toml
+                ''
+              )
+            ))
+          )
         ];
         # For wireguard statistics
         AmbientCapabilities = ["CAP_NET_ADMIN"];

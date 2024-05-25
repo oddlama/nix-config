@@ -75,25 +75,23 @@ in {
         IPForward = "yes";
         IPv6PrivacyExtensions = "yes";
         IPv6SendRA = true;
+        IPv6AcceptRA = false;
+        DHCPPrefixDelegation = true;
         MulticastDNS = true;
       };
       # Announce a static prefix
       ipv6Prefixes = [
         {ipv6PrefixConfig.Prefix = lanCidrv6;}
       ];
-      # Delegate prefix from wan
-      #dhcpPrefixDelegationConfig = {
-      #  UplinkInterface = "wan";
-      #  Announce = true;
-      #  SubnetId = "auto";
-      #};
+      # Delegate prefix
+      dhcpPrefixDelegationConfig = {
+        SubnetId = "22";
+      };
       # Provide a DNS resolver
-      # TODO ipv6SendRAConfig = {
-      # TODO   EmitDNS = true;
-      # TODO   # TODO change to self later
-      # TODO   #DNS = lib.net.cidr.host 1 net.lan.ipv6cidr;
-      # TODO   DNS = ["2606:4700:4700::1111" "2001:4860:4860::8888"];
-      # TODO };
+      ipv6SendRAConfig = {
+        EmitDNS = true;
+        DNS = lib.net.cidr.host 3 lanCidrv6;
+      };
       linkConfig.RequiredForOnline = "routable";
     };
     # Remaining macvtap interfaces should not be touched.

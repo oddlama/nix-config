@@ -16,7 +16,6 @@
 
   cfg = config.meta.oauth2-proxy;
 in {
-  imports = [./oa2p.nix];
   options.meta.oauth2-proxy = {
     enable = mkEnableOption "oauth2 proxy";
 

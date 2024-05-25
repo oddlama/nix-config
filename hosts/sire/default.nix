@@ -42,9 +42,6 @@
     };
   };
 
-  # TODO track my github stats
-  # services.telegraf.extraConfig.inputs.github = {};
-
   guests = let
     mkGuest = guestName: {
       enableStorageDataset ? false,

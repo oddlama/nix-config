@@ -37,12 +37,12 @@ that most people would have. The configurations are sorted into three categories
 
 | ~~~~~~~~~~~~ | Program | Source | Description
 ---|---|---|---
-🐚 Shell | ZSH & Starship | [Link](./users/modules/config/shell) | ZSH configuration with FZF, starship prompt, sqlite history and histdb-skim for fancy <kbd>Ctrl</kbd><kbd>R</kbd>
+🐚 Shell | ZSH & Starship | [Link](./users/config/shell) | ZSH configuration with FZF, starship prompt, sqlite history and histdb-skim for fancy <kbd>Ctrl</kbd><kbd>R</kbd>
 🖥️ Terminal | Kitty | [Link](./users/myuser/graphical/kitty.nix) | Terminal configuration with nerdfonts and history <kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>H</kbd> to view scrollback buffer in neovim
 🪟 WM | i3 | [Link](./users/myuser/graphical/i3.nix) | Tiling window manager, heavily customized to my personal preferences
 🌐 Browser | Firefox | [Link](./users/myuser/graphical/firefox.nix) | Firefox with many privacy settings and betterfox
 🖊️ Editor | Neovim | [Link](./users/myuser/neovim) | Extensive neovim configuration, made with nixvim
-📜 Manpager | Neovim | [Link](./users/modules/config/manpager.nix) | Isolated neovim as manpager via nixvim
+📜 Manpager | Neovim | [Link](./users/config/manpager.nix) | Isolated neovim as manpager via nixvim
 📷 Screenshots | Flameshot | [Link](./users/myuser/graphical/flameshot.nix) | Screenshot tool with custom [QR code detection](./pkgs/scripts/screenshot-area-scan-qr.nix) and [OCR to clipboard](./pkgs/scripts/screenshot-area.nix)
 🗨️ Notifications | wired-notify | [Link](./users/myuser/graphical/wired-notify.nix) | Notification daemon with a very customized layout and color scheme
 🎮 Gaming | Steam & Bottles | [Link](./users/myuser/graphical/games) | Setup for gaming
@@ -74,7 +74,7 @@ that most people would have. The configurations are sorted into three categories
 
 | ~~~~~~~~~~~~ | 💎 | Source | Description
 ---|---|---|---
-🗑️ Impermanence | – | [Link](./modules/config/impermanence.nix) | Only persist what is necessary. ZFS rollback on boot. Most configuration is will be next to the respective service / program configuration.
+🗑️ Impermanence | – | [Link](./config/impermanence.nix) | Only persist what is necessary. ZFS rollback on boot. Most configuration is will be next to the respective service / program configuration.
 
 - reverse proxy with wireguard tunnel
 - restic
@@ -89,7 +89,7 @@ that most people would have. The configurations are sorted into three categories
 ## Structure
 
 If you are interested in parts of my configuration,
-you probably want to examine the contents of `users/`, `modules/` and `hosts/`.
+you probably want to examine the contents of `users/`, `config/`, `modules/` and `hosts/`.
 Also, a lot of interesting modules have been moved to [nixos-extra-modules](https://github.com/oddlama/nixos-extra-modules), a separate repository specifically for reusable stuff.
 The full structure of this flake is described in [STRUCTURE.md](./STRUCTURE.md),
 but here's a quick breakdown of the what you will find where.
@@ -98,9 +98,9 @@ but here's a quick breakdown of the what you will find where.
 |---|---|
 `hosts/<hostname>` | top-level configuration for `<hostname>`
 `lib/` | library functions overlayed on top of `nixpkgs.lib`
-`modules/config/` | global configuration for all hosts
-`modules/optional/` | optional configuration included by hosts
-`modules/*` | classical reusable configuration modules
+`config/` | global configuration for all hosts
+`config/optional/` | optional configuration included by hosts
+`modules/` | classical reusable configuration modules
 `nix/` | library functions and flake plumbing
 `pkgs/` | Custom packages and scripts
 `secrets/` | Global secrets and age identities

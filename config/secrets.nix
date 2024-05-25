@@ -9,7 +9,7 @@
     local = config.node.secretsDir + "/local.nix.age";
   in
     {
-      global = ../../secrets/global.nix.age;
+      global = ../secrets/global.nix.age;
     }
     // lib.optionalAttrs (lib.pathExists local) {inherit local;};
 

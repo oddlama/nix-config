@@ -9,12 +9,12 @@
   imports = [
     inputs.nixos-hardware.nixosModules.common-cpu-intel
     inputs.nixos-hardware.nixosModules.common-pc-ssd
-    ../../modules/optional/hardware/intel.nix
-    ../../modules/optional/hardware/physical.nix
 
-    ../../modules
-    ../../modules/optional/initrd-ssh.nix
-    ../../modules/optional/zfs.nix
+    ../../config
+    ../../config/hardware/intel.nix
+    ../../config/hardware/physical.nix
+    ../../config/optional/initrd-ssh.nix
+    ../../config/optional/zfs.nix
 
     ./fs.nix
     ./net.nix
@@ -59,7 +59,7 @@
         dataset = "safe/guests/${guestName}";
       };
       modules = [
-        ../../modules
+        ../../config
         ./guests/common.nix
         ./guests/${guestName}.nix
         {

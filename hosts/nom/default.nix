@@ -8,16 +8,18 @@
     inputs.nixos-hardware.nixosModules.common-gpu-intel
     inputs.nixos-hardware.nixosModules.common-pc-laptop
     inputs.nixos-hardware.nixosModules.common-pc-laptop-ssd
-    ../../modules/optional/hardware/intel.nix
-    ../../modules/optional/hardware/physical.nix
 
-    ../../modules
-    ../../modules/optional/initrd-ssh.nix
-    ../../modules/optional/dev
-    ../../modules/optional/graphical
-    ../../modules/optional/laptop.nix
-    ../../modules/optional/sound.nix
-    ../../modules/optional/zfs.nix
+    ../../config
+
+    ../../config/hardware/intel.nix
+    ../../config/hardware/physical.nix
+
+    ../../config/dev
+    ../../config/graphical
+    ../../config/optional/initrd-ssh.nix
+    ../../config/optional/laptop.nix
+    ../../config/optional/sound.nix
+    ../../config/optional/zfs.nix
 
     ../../users/myuser
 

@@ -1,7 +1,6 @@
 {inputs, ...}: {
   imports = [
     inputs.nixos-hardware.nixosModules.common-pc-ssd
-    ./physical.nix
   ];
 
   boot.initrd.availableKernelModules = [

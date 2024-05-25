@@ -1,7 +1,12 @@
 ## Structure
 
-If you are interested in parts of my configuration, you probably want to examine the contents of `users/`, `modules/` and `hosts/`.
+If you are interested in parts of my configuration, you probably want to examine the contents of `users/`, `config/`, `modules/` and `hosts/`.
 Make sure to utilize the github search if you know what you need!
+
+- `config/` contains common configuration that I use on all of my host
+  and which is applied by default.
+  - `config/optional/` contains optional configuration that is only needed for some hosts,
+  and which should be included explicitly by hosts that require it.
 
 - `hosts/<hostname>` contains the top-level configuration for `<hostname>`.
   Follow the imports from there to see what it entails.
@@ -9,7 +14,7 @@ Make sure to utilize the github search if you know what you need!
   By convention I place secrets related to this host in the `secrets/` subfolder, but any host
   could technically use them. Especialy important files in this folder are:
   - `host.pub` This host's public key (retrieved after initial setup). Used to rekey secrets so the host can access them at runtime.
-  - `local.nix.age` Repository-wide local secrets. Decrypted on import, see `modules/repo/secrets.nix` for more information.
+  - `local.nix.age` Repository-wide local secrets. Decrypted on import, see `modules/secrets.nix` for more information.
 
   Some hosts define guests that run as containerized or virtualized guests. Their configuration is usually just a single file
   stored in `guests/<name>.nix`. Their secrets are usually stored in a subfolder of the host's secrets folder.
@@ -17,18 +22,11 @@ Make sure to utilize the github search if you know what you need!
 - `lib/` contains extra library functions that are needed throughout the config.
 
 - `modules/` contains modularized configuration. If you are interested in reusable parts of
-  my configuration, this is probably the folder you are looking for. Unless stated otherwise,
-  all of these will be regular reusable modules like those you would find in `nixpkgs/nixos/modules`,
-  and the tree of all relevant modules is included via `modules/default.nix`.
-  - `modules/config/` contains configuration that is I use across all my host and is applied by default.
-    These just add configuration unconditionally and don't expose any further options.
-  - `modules/optional/` contains configuration that is only needed sometimes, and which should
-    be included explicitly by hosts that require it.
-  - `modules/*` contains regular modules and meta-modules that simplify the option interface of existing options.
-    I use this for stuff that I don't need on all my hosts and that may require different settings
-    for each host while sharing a common basis.
-    Some of these are "meta" in the sense that they depend on their own definitions on multiple hosts (wireguard).
-    These are probably as opinionated as stuff in `modules/config/` but may be a little more general.
+  my configuration, this is probably the folder you are looking for. These will be regular
+  reusable modules like those you would find in `nixpkgs/nixos/modules`.
+
+  Some of these simplify the option interface of existing options, others add new funtionality
+  to existing modules.
 
 - `nix/` library functions and flake plumbing
   - `generate-installer-package.nix` Helper package that that will be available in our iso images. This provides the `install-system` command that will do a full install including partitioning.

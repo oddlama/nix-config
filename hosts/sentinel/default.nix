@@ -4,11 +4,10 @@
   ...
 }: {
   imports = [
-    ../../modules/optional/hardware/hetzner-cloud.nix
-
-    ../../modules
-    ../../modules/optional/initrd-ssh.nix
-    ../../modules/optional/zfs.nix
+    ../../config
+    ../../config/hardware/hetzner-cloud.nix
+    ../../config/optional/initrd-ssh.nix
+    ../../config/optional/zfs.nix
 
     ./acme.nix
     ./coturn.nix

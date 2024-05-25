@@ -30,7 +30,7 @@ in
 
     home-manager.users.${myuser} = {
       imports = [
-        ../modules
+        ../config
         ./dev
         ./graphical
         ./neovim

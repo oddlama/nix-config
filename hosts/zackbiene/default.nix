@@ -8,11 +8,11 @@
   wardWebProxyCfg = nodes.ward-web-proxy.config;
 in {
   imports = [
-    ../../modules/optional/hardware/odroid-n2plus.nix
-
-    ../../modules
-    ../../modules/optional/initrd-ssh.nix
-    ../../modules/optional/zfs.nix
+    ../../config
+    ../../config/hardware/odroid-n2plus.nix
+    ../../config/hardware/physical.nix
+    ../../config/optional/initrd-ssh.nix
+    ../../config/optional/zfs.nix
 
     #./esphome.nix
     ./fs.nix

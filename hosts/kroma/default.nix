@@ -13,17 +13,18 @@
     inputs.nixos-hardware.nixosModules.common-pc-hdd
     inputs.nixos-hardware.nixosModules.common-pc-ssd
 
-    ../../modules/optional/hardware/physical.nix
-    ../../modules/optional/hardware/nvidia.nix
-    ../../modules/optional/hardware/bluetooth.nix
+    ../../config
 
-    ../../modules
-    ../../modules/optional/initrd-ssh.nix
-    ../../modules/optional/dev
-    ../../modules/optional/graphical
-    ../../modules/optional/laptop.nix
-    ../../modules/optional/sound.nix
-    ../../modules/optional/zfs.nix
+    ../../config/hardware/physical.nix
+    ../../config/hardware/nvidia.nix
+    ../../config/hardware/bluetooth.nix
+
+    ../../config/dev
+    ../../config/graphical
+    ../../config/optional/initrd-ssh.nix
+    ../../config/optional/laptop.nix
+    ../../config/optional/sound.nix
+    ../../config/optional/zfs.nix
 
     ../../users/myuser
 

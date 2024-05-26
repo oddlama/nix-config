@@ -20,6 +20,74 @@ in {
     firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [influxdbPort];
   };
 
+  age.secrets.github-access-token = {
+    rekeyFile = config.node.secretsDir + "/github-access-token.age";
+    mode = "440";
+    group = "telegraf";
+  };
+
+  meta.telegraf.secrets."@GITHUB_ACCESS_TOKEN@" = config.age.secrets.github-access-token.path;
+  services.telegraf.extraConfig.outputs.influxdb_v2.urls = lib.mkForce ["http://localhost:${toString influxdbPort}"];
+  services.telegraf.extraConfig.inputs = {
+    ping = [
+      {
+        method = "native";
+        urls = [
+          "192.168.178.1"
+          "192.168.1.1"
+        ];
+        tags.type = "internal";
+        fieldpass = [
+          "percent_packet_loss"
+          "average_response_ms"
+          "standard_deviation_ms"
+          "reply_received"
+          "percent_reply_loss"
+        ];
+      }
+      {
+        method = "native";
+        urls = [
+          "1.1.1.1"
+          "8.8.8.8"
+          config.repo.secrets.global.domains.me
+          config.repo.secrets.global.domains.personal
+        ];
+        tags.type = "external";
+        fieldpass = [
+          "percent_packet_loss"
+          "average_response_ms"
+          "standard_deviation_ms"
+          "reply_received"
+          "percent_reply_loss"
+        ];
+      }
+    ];
+
+    # FIXME: pls define this on the relevant hosts. Then we can ping it from multiple other hosts
+    #http_response = [
+    #  {
+    #    urls = [
+    #    ];
+    #    response_string_match = "Index of /";
+    #    response_status_code = 200;
+    #  }
+    #];
+
+    github = {
+      access_token = "@GITHUB_ACCESS_TOKEN@";
+      repositories = [
+        "oddlama/agenix-rekey"
+        "oddlama/autokernel"
+        "oddlama/gentoo-install"
+        "oddlama/nix-config"
+        "oddlama/nix-topology"
+        "oddlama/vane"
+      ];
+    };
+  };
+
+  globals.services.influxdb.domain = influxdbDomain;
   nodes.sentinel = {
     networking.providedDomains.influxdb = influxdbDomain;
 

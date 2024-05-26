@@ -77,6 +77,7 @@ in {
     };
   };
 
+  globals.services.grafana.domain = grafanaDomain;
   nodes.sentinel = {
     age.secrets.loki-basic-auth-hashes.generator.dependencies = [
       config.age.secrets.grafana-loki-basic-auth-password

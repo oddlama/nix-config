@@ -19,7 +19,7 @@ inputs: let
       specialArgs = {
         # Use the correct instance lib that has our overlays
         inherit (pkgs) lib;
-        inherit (self) nodes;
+        inherit (self) nodes globals;
         inherit inputs minimal;
       };
       modules = [

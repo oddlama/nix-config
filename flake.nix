@@ -141,6 +141,25 @@
       # Add a shorthand to easily target toplevel derivations
       "@" = mapAttrs (_: v: v.config.system.build.toplevel) self.nodes;
 
+      globals = let
+        globalsSystem = nixpkgs.lib.evalModules {
+          prefix = ["globals"];
+          modules = [
+            ./modules/globals.nix
+            ({lib, ...}: {
+              globals = lib.mkMerge (
+                lib.concatLists (lib.flip lib.mapAttrsToList self.nodes (
+                  name: cfg:
+                    builtins.addErrorContext "while aggregating globals from nixosConfigurations.${name} into flake-level globals:"
+                    cfg.config._globalsDefs
+                ))
+              );
+            })
+          ];
+        };
+      in
+        globalsSystem.config.globals;
+
       # For each true NixOS system, we want to expose an installer package that
       # can be used to do the initial setup on the node from a live environment.
       # We use the minimal sibling configuration to reduce the amount of stuff

@@ -10,7 +10,7 @@
     options = ["--cmd p"];
   };
 
-  # nix-index-database is enabled globally for each user in modules/config/home-manager.nix
+  # nix-index-database is enabled globally for each user in config/home-manager.nix
   programs.nix-index.enable = true;
   programs.nix-index.enableZshIntegration = false;
   programs.nix-index-database.comma.enable = true;

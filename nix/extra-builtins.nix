@@ -29,6 +29,4 @@ in {
     assert assertMsg (builtins.isPath nixFile) "The file to decrypt must be given as a path to prevent impurity.";
     assert assertMsg (hasSuffix ".nix.age" nixFile) "The content of the decrypted file must be a nix expression and should therefore end in .nix.age";
       exec ([./rage-decrypt-and-cache.sh nixFile] ++ identities);
-  # currentSystem
-  unsafeCurrentSystem = exec ["nix" "eval" "--impure" "--expr" "builtins.currentSystem"];
 }

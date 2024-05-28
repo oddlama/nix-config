@@ -1,6 +1,4 @@
 {
-  description = "❄️ oddlama's nix config and dotfiles";
-
   inputs = {
     agenix = {
       url = "github:ryantm/agenix";
@@ -11,7 +9,6 @@
     agenix-rekey = {
       url = "github:oddlama/agenix-rekey";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
     };
 
     devshell = {
@@ -29,7 +26,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    flake-utils.url = "github:numtide/flake-utils";
+    flake-parts.url = "github:hercules-ci/flake-parts";
 
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -41,7 +38,6 @@
     microvm = {
       url = "github:astro/microvm.nix";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
     };
 
     nix-index-database = {
@@ -52,13 +48,11 @@
     nix-topology = {
       url = "github:oddlama/nix-topology";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
     };
 
     nixos-extra-modules = {
       url = "github:oddlama/nixos-extra-modules";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
     };
 
     nixos-hardware.url = "github:NixOS/nixos-hardware";
@@ -78,7 +72,6 @@
     nixvim = {
       url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.pre-commit-hooks.follows = "pre-commit-hooks";
     };
 
     pre-commit-hooks = {
@@ -100,224 +93,143 @@
     };
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    ...
-  } @ inputs: let
-    inherit
-      (nixpkgs.lib)
-      cleanSource
-      foldl'
-      mapAttrs
-      mapAttrsToList
-      recursiveUpdate
-      ;
-  in
-    {
-      # The identities that are used to rekey agenix secrets and to
-      # decrypt all repository-wide secrets.
-      secretsConfig = {
-        masterIdentities = [./secrets/yk1-nix-rage.pub];
-        extraEncryptionPubkeys = [./secrets/backup.pub];
+  outputs = inputs:
+    inputs.flake-parts.lib.mkFlake {inherit inputs;} {
+      imports = [
+        inputs.devshell.flakeModule
+        inputs.pre-commit-hooks.flakeModule
+        ./nix/devshell.nix
+        ./nix/agenix-rekey.nix
+        ./nix/globals.nix
+        (
+          {
+            lib,
+            flake-parts-lib,
+            ...
+          }:
+            flake-parts-lib.mkTransposedPerSystemModule {
+              name = "images";
+              file = ./flake.nix;
+              option = lib.mkOption {
+                type = lib.types.unspecified;
+              };
+            }
+        )
+        (
+          {
+            lib,
+            flake-parts-lib,
+            ...
+          }:
+            flake-parts-lib.mkTransposedPerSystemModule {
+              name = "pkgs";
+              file = ./flake.nix;
+              option = lib.mkOption {
+                type = lib.types.unspecified;
+              };
+            }
+        )
+      ];
+
+      flake = {
+        config,
+        lib,
+        ...
+      }: let
+        inherit
+          (lib)
+          foldl'
+          mapAttrs
+          mapAttrsToList
+          recursiveUpdate
+          ;
+      in {
+        inherit
+          (import ./nix/hosts.nix inputs)
+          hosts
+          guestConfigs
+          nixosConfigurations
+          nixosConfigurationsMinimal
+          ;
+
+        # All nixosSystem instanciations are collected here, so that we can refer
+        # to any system via nodes.<name>
+        nodes = config.nixosConfigurations // config.guestConfigs;
+        # Add a shorthand to easily target toplevel derivations
+        "@" = mapAttrs (_: v: v.config.system.build.toplevel) config.nodes;
+
+        # For each true NixOS system, we want to expose an installer package that
+        # can be used to do the initial setup on the node from a live environment.
+        # We use the minimal sibling configuration to reduce the amount of stuff
+        # we have to copy to the live system.
+        inherit
+          (foldl' recursiveUpdate {}
+            (mapAttrsToList
+              (import ./nix/generate-installer-package.nix inputs)
+              config.nixosConfigurationsMinimal))
+          packages
+          ;
       };
 
-      agenix-rekey = inputs.agenix-rekey.configure {
-        userFlake = self;
-        inherit (self) nodes pkgs;
-      };
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
 
-      inherit
-        (import ./nix/hosts.nix inputs)
-        hosts
-        guestConfigs
-        nixosConfigurations
-        nixosConfigurationsMinimal
-        ;
+      perSystem = {
+        config,
+        pkgs,
+        system,
+        ...
+      }: {
+        _module.args.pkgs = import inputs.nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+          overlays =
+            import ./lib inputs
+            ++ import ./pkgs/default.nix
+            ++ [
+              inputs.agenix-rekey.overlays.default
+              inputs.devshell.overlays.default
+              inputs.nix-topology.overlays.default
+              inputs.nixos-extra-modules.overlays.default
+            ];
+        };
 
-      # All nixosSystem instanciations are collected here, so that we can refer
-      # to any system via nodes.<name>
-      nodes = self.nixosConfigurations // self.guestConfigs;
-      # Add a shorthand to easily target toplevel derivations
-      "@" = mapAttrs (_: v: v.config.system.build.toplevel) self.nodes;
+        inherit pkgs;
 
-      globals = let
-        globalsSystem = nixpkgs.lib.evalModules {
-          prefix = ["globals"];
+        apps.setupHetznerStorageBoxes = import (inputs.nixos-extra-modules + "/apps/setup-hetzner-storage-boxes.nix") {
+          inherit pkgs;
+          nixosConfigurations = config.nodes;
+          decryptIdentity = builtins.head config.secretsConfig.masterIdentities;
+        };
+
+        #topology = import inputs.nix-topology {
+        #  inherit pkgs;
+        #  modules = [
+        #    ./topology
+        #    {
+        #      inherit (inputs.self) nixosConfigurations;
+        #    }
+        #  ];
+        #};
+
+        # For each major system, we provide a customized installer image that
+        # has ssh and some other convenience stuff preconfigured.
+        # Not strictly necessary for new setups.
+        images.live-iso = inputs.nixos-generators.nixosGenerate {
+          inherit pkgs;
           modules = [
-            ./modules/globals.nix
-            ({lib, ...}: {
-              globals = lib.mkMerge (
-                lib.concatLists (lib.flip lib.mapAttrsToList self.nodes (
-                  name: cfg:
-                    builtins.addErrorContext "while aggregating globals from nixosConfigurations.${name} into flake-level globals:"
-                    cfg.config._globalsDefs
-                ))
-              );
-            })
+            ./nix/installer-configuration.nix
+            ./config/ssh.nix
           ];
-        };
-      in
-        globalsSystem.config.globals;
-
-      # For each true NixOS system, we want to expose an installer package that
-      # can be used to do the initial setup on the node from a live environment.
-      # We use the minimal sibling configuration to reduce the amount of stuff
-      # we have to copy to the live system.
-      inherit
-        (foldl' recursiveUpdate {}
-          (mapAttrsToList
-            (import ./nix/generate-installer-package.nix inputs)
-            self.nixosConfigurationsMinimal))
-        packages
-        ;
-    }
-    // inputs.flake-utils.lib.eachDefaultSystem (system: rec {
-      apps.setupHetznerStorageBoxes = import (inputs.nixos-extra-modules + "/apps/setup-hetzner-storage-boxes.nix") {
-        inherit pkgs;
-        nixosConfigurations = self.nodes;
-        decryptIdentity = builtins.head self.secretsConfig.masterIdentities;
-      };
-
-      pkgs = import nixpkgs {
-        inherit system;
-        config.allowUnfree = true;
-        overlays =
-          import ./lib inputs
-          ++ import ./pkgs/default.nix
-          ++ [
-            inputs.agenix-rekey.overlays.default
-            inputs.devshell.overlays.default
-            inputs.nix-topology.overlays.default
-            inputs.nixos-extra-modules.overlays.default
-          ];
-      };
-
-      topology = import inputs.nix-topology {
-        inherit pkgs;
-        modules = [
-          ./topology
-          {
-            inherit (self) nixosConfigurations;
-          }
-        ];
-      };
-
-      # For each major system, we provide a customized installer image that
-      # has ssh and some other convenience stuff preconfigured.
-      # Not strictly necessary for new setups.
-      images.live-iso = inputs.nixos-generators.nixosGenerate {
-        inherit pkgs;
-        modules = [
-          ./nix/installer-configuration.nix
-          ./modules/config/ssh.nix
-        ];
-        format =
-          {
-            x86_64-linux = "install-iso";
-            aarch64-linux = "sd-aarch64-installer";
-          }
-          .${system};
-      };
-
-      # `nix flake check`
-      checks.pre-commit-hooks = inputs.pre-commit-hooks.lib.${system}.run {
-        src = cleanSource ./.;
-        hooks = {
-          # Nix
-          alejandra.enable = true;
-          deadnix.enable = true;
-          statix.enable = true;
+          format =
+            {
+              x86_64-linux = "install-iso";
+              aarch64-linux = "sd-aarch64-installer";
+            }
+            .${system};
         };
       };
-
-      # `nix develop`
-      devShells.default = pkgs.devshell.mkShell {
-        name = "nix-config";
-        packages = [
-          pkgs.nix # Always use the nix version from this flake's nixpkgs version, so that nix-plugins (below) doesn't fail because of different nix versions.
-        ];
-
-        commands = [
-          {
-            package = pkgs.deploy;
-            help = "Build and deploy this nix config to nodes";
-          }
-          {
-            package = pkgs.agenix-rekey;
-            help = "Edit and rekey secrets";
-          }
-          {
-            package = pkgs.alejandra;
-            help = "Format nix code";
-          }
-          {
-            package = pkgs.statix;
-            help = "Lint nix code";
-          }
-          {
-            package = pkgs.deadnix;
-            help = "Find unused expressions in nix code";
-          }
-          {
-            package = pkgs.update-nix-fetchgit;
-            help = "Update fetcher hashes inside nix files";
-          }
-          {
-            package = pkgs.nix-tree;
-            help = "Interactively browse dependency graphs of Nix derivations";
-          }
-          {
-            package = pkgs.nvd;
-            help = "Diff two nix toplevels and show which packages were upgraded";
-          }
-          {
-            package = pkgs.nix-diff;
-            help = "Explain why two Nix derivations differ";
-          }
-          {
-            package = pkgs.nix-output-monitor;
-            help = "Nix Output Monitor (a drop-in alternative for `nix` which shows a build graph)";
-          }
-          {
-            package = pkgs.writeShellApplication {
-              name = "build";
-              text = ''
-                set -euo pipefail
-                [[ "$#" -ge 1 ]] \
-                  || { echo "usage: build <HOST>..." >&2; exit 1; }
-                HOSTS=()
-                for h in "$@"; do
-                  HOSTS+=(".#nixosConfigurations.$h.config.system.build.toplevel")
-                done
-                nom build --no-link --print-out-paths --show-trace "''${HOSTS[@]}"
-              '';
-            };
-            help = "Build a host configuration";
-          }
-        ];
-
-        devshell.startup.pre-commit.text = self.checks.${system}.pre-commit-hooks.shellHook;
-
-        env = [
-          {
-            # Additionally configure nix-plugins with our extra builtins file.
-            # We need this for our repo secrets.
-            name = "NIX_CONFIG";
-            value = ''
-              plugin-files = ${pkgs.nix-plugins}/lib/nix/plugins
-              extra-builtins-file = ${self.outPath}/nix/extra-builtins.nix
-            '';
-          }
-          {
-            # Always add files to git after agenix rekey and agenix generate.
-            name = "AGENIX_REKEY_ADD_TO_GIT";
-            value = "true";
-          }
-        ];
-      };
-
-      # `nix fmt`
-      formatter = pkgs.alejandra;
-    });
+    };
 }

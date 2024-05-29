@@ -51,11 +51,11 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "lastModified": 1713903302,
-        "narHash": "sha256-qPy0BYFTenmyG4EU+oXej0V/i4jSsVvWbGGrv9Sb0kQ=",
+        "lastModified": 1716983518,
+        "narHash": "sha256-LdiPzaq6IwCfEpjaZfndO1CtW1ah1ONwyXKPs7s6UVk=",
         "owner": "oddlama",
         "repo": "agenix-rekey",
-        "rev": "8da0392e75373711604a07907de25ec9d5277384",
+        "rev": "8cf73841a6fa127a64392c8603ce51af1c63b33f",
         "type": "github"
       },
       "original": {
@@ -617,11 +617,11 @@
         "systems": "systems_3"
       },
       "locked": {
-        "lastModified": 1710146030,
-        "narHash": "sha256-SZ5L6eA7HJ/nmkzGG7/ISclqe6oZdOZTNoesiInkXPQ=",
+        "lastModified": 1694529238,
+        "narHash": "sha256-zsNZZGTGnMOf9YpHKJqMSsa0dXbfmxeoJ7xHlrt+xmY=",
         "owner": "numtide",
         "repo": "flake-utils",
-        "rev": "b1d9ab70662946ef0850d488da1c9019f3a9752a",
+        "rev": "ff7b65b44d01cf9ba6a71320833626af21126384",
         "type": "github"
       },
       "original": {

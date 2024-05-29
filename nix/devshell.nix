@@ -1,4 +1,9 @@
-{
+{inputs, ...}: {
+  imports = [
+    inputs.devshell.flakeModule
+    inputs.pre-commit-hooks.flakeModule
+  ];
+
   perSystem = {
     config,
     pkgs,
@@ -28,10 +33,6 @@
           help = "Build and deploy this nix config to nodes";
         }
         {
-          package = pkgs.agenix-rekey;
-          help = "Edit and rekey secrets";
-        }
-        {
           package = pkgs.alejandra;
           help = "Format nix code";
         }
@@ -42,10 +43,6 @@
         {
           package = pkgs.deadnix;
           help = "Find unused expressions in nix code";
-        }
-        {
-          package = pkgs.update-nix-fetchgit;
-          help = "Update fetcher hashes inside nix files";
         }
         {
           package = pkgs.nix-tree;

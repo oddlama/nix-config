@@ -96,8 +96,6 @@
   outputs = inputs:
     inputs.flake-parts.lib.mkFlake {inherit inputs;} {
       imports = [
-        inputs.devshell.flakeModule
-        inputs.pre-commit-hooks.flakeModule
         ./nix/devshell.nix
         ./nix/agenix-rekey.nix
         ./nix/globals.nix
@@ -189,8 +187,6 @@
             import ./lib inputs
             ++ import ./pkgs/default.nix
             ++ [
-              inputs.agenix-rekey.overlays.default
-              inputs.devshell.overlays.default
               inputs.nix-topology.overlays.default
               inputs.nixos-extra-modules.overlays.default
             ];

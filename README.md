@@ -122,7 +122,7 @@ but here's a quick breakdown of the what you will find where.
 
 - Create a bootable iso disk image with `nix build --print-out-paths --no-link .#images.<target-system>.live-iso`, dd it to a stick and boot
 - (Alternative) Use an official NixOS live-iso and setup ssh manually
-- Copy the installer from a local machine to the live system with `nix copy --to <target> .#packages.<target-system>.installer-package.<target>`
+- Copy the installer from a local machine to the live system with `nix copy --to <target> .#nixosConfigurationsMinimal.config.system.build.installFromLive`
 
 Afterwards:
 

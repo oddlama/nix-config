@@ -12,6 +12,7 @@
     #./stalwart-mail.nix
   ];
 
+  nixpkgs.hostPlatform = "x86_64-linux";
   boot.mode = "bios";
 
   users.groups.acme.members = ["nginx"];

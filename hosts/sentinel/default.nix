@@ -16,6 +16,7 @@
     ./oauth2.nix
   ];
 
+  nixpkgs.hostPlatform = "x86_64-linux";
   boot.mode = "bios";
 
   wireguard.proxy-sentinel.firewallRuleForAll.allowedTCPPorts = [80 443];

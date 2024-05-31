@@ -19,8 +19,6 @@ Make sure to utilize the github search if you know what you need!
   Some hosts define guests that run as containerized or virtualized guests. Their configuration is usually just a single file
   stored in `guests/<name>.nix`. Their secrets are usually stored in a subfolder of the host's secrets folder.
 
-- `lib/` contains extra library functions that are needed throughout the config.
-
 - `modules/` contains modularized configuration. If you are interested in reusable parts of
   my configuration, this is probably the folder you are looking for. These will be regular
   reusable modules like those you would find in `nixpkgs/nixos/modules`.

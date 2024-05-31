@@ -24,6 +24,7 @@
   topology.self.hardware.image = ../../topology/images/odroid-h3.png;
   topology.self.hardware.info = "O-Droid H3, 64GB RAM";
 
+  nixpkgs.hostPlatform = "x86_64-linux";
   boot.mode = "efi";
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" "r8169"];
 

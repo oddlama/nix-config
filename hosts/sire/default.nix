@@ -22,6 +22,7 @@
 
   topology.self.hardware.info = "AMD Ryzen Threadripper 1950X, 96GB RAM";
 
+  nixpkgs.hostPlatform = "x86_64-linux";
   boot.mode = "efi";
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "e1000e" "alx"];
 

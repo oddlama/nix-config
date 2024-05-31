@@ -23,6 +23,7 @@
     ./home-manager.nix
     ./impermanence.nix
     ./inputrc.nix
+    ./installer.nix
     ./issue.nix
     ./net.nix
     ./nftables.nix
@@ -35,8 +36,13 @@
     ./users.nix
   ];
 
-  nixpkgs.overlays = [
-    inputs.nixvim.overlays.default
-    inputs.wired-notify.overlays.default
-  ];
+  nixpkgs.config.allowUnfree = true;
+  nixpkgs.overlays =
+    import ../pkgs/default.nix
+    ++ [
+      inputs.nix-topology.overlays.default
+      inputs.nixos-extra-modules.overlays.default
+      inputs.nixvim.overlays.default
+      inputs.wired-notify.overlays.default
+    ];
 }

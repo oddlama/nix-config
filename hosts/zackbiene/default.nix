@@ -28,6 +28,7 @@ in {
   topology.self.hardware.image = ../../topology/images/odroid-n2plus.png;
   topology.self.hardware.info = "O-Droid N2+";
 
+  nixpkgs.hostPlatform = "aarch64-linux";
   boot.mode = "efi";
 
   meta.promtail = {

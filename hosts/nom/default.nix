@@ -27,6 +27,7 @@
     ./net.nix
   ];
 
+  nixpkgs.hostPlatform = "x86_64-linux";
   boot.mode = "efi";
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod"];
 

@@ -96,136 +96,19 @@
   outputs = inputs:
     inputs.flake-parts.lib.mkFlake {inherit inputs;} {
       imports = [
-        ./nix/devshell.nix
         ./nix/agenix-rekey.nix
+        ./nix/devshell.nix
         ./nix/globals.nix
-        (
-          {
-            lib,
-            flake-parts-lib,
-            ...
-          }:
-            flake-parts-lib.mkTransposedPerSystemModule {
-              name = "images";
-              file = ./flake.nix;
-              option = lib.mkOption {
-                type = lib.types.unspecified;
-              };
-            }
-        )
-        (
-          {
-            lib,
-            flake-parts-lib,
-            ...
-          }:
-            flake-parts-lib.mkTransposedPerSystemModule {
-              name = "pkgs";
-              file = ./flake.nix;
-              option = lib.mkOption {
-                type = lib.types.unspecified;
-              };
-            }
-        )
+        ./nix/hosts.nix
+        ./nix/iso.nix
+        ./nix/pkgs.nix
+        ./nix/storage-box.nix
+        ./topology/flake-module.nix
       ];
-
-      flake = {
-        config,
-        lib,
-        ...
-      }: let
-        inherit
-          (lib)
-          foldl'
-          mapAttrs
-          mapAttrsToList
-          recursiveUpdate
-          ;
-      in {
-        inherit
-          (import ./nix/hosts.nix inputs)
-          hosts
-          guestConfigs
-          nixosConfigurations
-          nixosConfigurationsMinimal
-          ;
-
-        # All nixosSystem instanciations are collected here, so that we can refer
-        # to any system via nodes.<name>
-        nodes = config.nixosConfigurations // config.guestConfigs;
-        # Add a shorthand to easily target toplevel derivations
-        "@" = mapAttrs (_: v: v.config.system.build.toplevel) config.nodes;
-
-        # For each true NixOS system, we want to expose an installer package that
-        # can be used to do the initial setup on the node from a live environment.
-        # We use the minimal sibling configuration to reduce the amount of stuff
-        # we have to copy to the live system.
-        inherit
-          (foldl' recursiveUpdate {}
-            (mapAttrsToList
-              (import ./nix/generate-installer-package.nix inputs)
-              config.nixosConfigurationsMinimal))
-          packages
-          ;
-      };
 
       systems = [
         "x86_64-linux"
         "aarch64-linux"
       ];
-
-      perSystem = {
-        config,
-        pkgs,
-        system,
-        ...
-      }: {
-        _module.args.pkgs = import inputs.nixpkgs {
-          inherit system;
-          config.allowUnfree = true;
-          overlays =
-            import ./lib inputs
-            ++ import ./pkgs/default.nix
-            ++ [
-              inputs.nix-topology.overlays.default
-              inputs.nixos-extra-modules.overlays.default
-            ];
-        };
-
-        inherit pkgs;
-
-        apps.setupHetznerStorageBoxes = import (inputs.nixos-extra-modules + "/apps/setup-hetzner-storage-boxes.nix") {
-          inherit pkgs;
-          nixosConfigurations = config.nodes;
-          decryptIdentity = builtins.head config.secretsConfig.masterIdentities;
-        };
-
-        #topology = import inputs.nix-topology {
-        #  inherit pkgs;
-        #  modules = [
-        #    ./topology
-        #    {
-        #      inherit (inputs.self) nixosConfigurations;
-        #    }
-        #  ];
-        #};
-
-        # For each major system, we provide a customized installer image that
-        # has ssh and some other convenience stuff preconfigured.
-        # Not strictly necessary for new setups.
-        images.live-iso = inputs.nixos-generators.nixosGenerate {
-          inherit pkgs;
-          modules = [
-            ./nix/installer-configuration.nix
-            ./config/ssh.nix
-          ];
-          format =
-            {
-              x86_64-linux = "install-iso";
-              aarch64-linux = "sd-aarch64-installer";
-            }
-            .${system};
-        };
-      };
     };
 }

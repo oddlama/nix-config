@@ -1,5 +1,6 @@
 {
   config,
+  globals,
   lib,
   nodes,
   pkgs,
@@ -23,9 +24,8 @@ in {
     firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [config.services.paperless.port];
   };
 
+  globals.services.paperless.domain = paperlessDomain;
   nodes.sentinel = {
-    networking.providedDomains.paperless = paperlessDomain;
-
     services.nginx = {
       upstreams.paperless = {
         servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.paperless.port}" = {};
@@ -126,7 +126,7 @@ in {
               client_id = "paperless";
               # secret will be added dynamically
               #secret = "";
-              settings.server_url = "https://${sentinelCfg.networking.providedDomains.kanidm}/oauth2/openid/${client_id}/.well-known/openid-configuration";
+              settings.server_url = "https://${globals.services.kanidm.domain}/oauth2/openid/${client_id}/.well-known/openid-configuration";
             }
           ];
         };

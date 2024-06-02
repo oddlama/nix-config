@@ -1,8 +1,8 @@
 {
+  globals,
   inputs,
   lib,
   minimal,
-  nodes,
   ...
 }:
 {
@@ -67,11 +67,11 @@
   #};
 
   ## Connect safely via wireguard to skip authentication
-  #networking.hosts.${nodes.sentinel.config.wireguard.proxy-sentinel.ipv4} = [nodes.sentinel.config.networking.providedDomains.influxdb];
+  #networking.hosts.${nodes.sentinel.config.wireguard.proxy-sentinel.ipv4} = [globals.services.influxdb.domain];
   #meta.telegraf = {
   #  enable = true;
   #  influxdb2 = {
-  #    domain = nodes.sentinel.config.networking.providedDomains.influxdb;
+  #    domain = globals.services.influxdb.domain;
   #    organization = "machines";
   #    bucket = "telegraf";
   #    node = "sire-influxdb";
@@ -89,7 +89,7 @@
     openFirewall = true;
     config.ServerSSHAllowed = false;
     environment = rec {
-      NB_MANAGEMENT_URL = "https://${nodes.sentinel.config.networking.providedDomains.netbird}";
+      NB_MANAGEMENT_URL = "https://${globals.services.netbird.domain}";
       NB_ADMIN_URL = NB_MANAGEMENT_URL;
     };
   };

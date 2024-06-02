@@ -38,7 +38,7 @@ in {
       to = config.services.coturn.max-port;
     }
   ];
-  networking.providedDomains.coturn = coturnDomain;
+  globals.services.coturn.domain = coturnDomain;
 
   services.coturn = {
     enable = true;

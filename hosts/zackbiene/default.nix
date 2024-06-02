@@ -1,5 +1,6 @@
 {
   config,
+  globals,
   lib,
   nodes,
   ...
@@ -41,12 +42,12 @@ in {
     if config.wireguard ? proxy-home
     then wardWebProxyCfg.wireguard.proxy-home.ipv4
     else sentinelCfg.wireguard.proxy-sentinel.ipv4
-  } = [sentinelCfg.networking.providedDomains.influxdb];
+  } = [globals.services.influxdb.domain];
 
   meta.telegraf = {
     enable = true;
     influxdb2 = {
-      domain = sentinelCfg.networking.providedDomains.influxdb;
+      inherit (globals.services.influxdb) domain;
       organization = "machines";
       bucket = "telegraf";
       node = "sire-influxdb";

@@ -15,7 +15,6 @@
     ./netbird-client.nix
     ./oauth2-proxy.nix
     ./promtail.nix
-    ./provided-domains.nix
     ./secrets.nix
     ./telegraf.nix
   ];

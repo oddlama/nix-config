@@ -1,5 +1,6 @@
 {
   config,
+  globals,
   pkgs,
   ...
 }: {
@@ -44,12 +45,12 @@
   };
 
   # Connect safely via wireguard to skip authentication
-  networking.hosts.${config.wireguard.proxy-sentinel.ipv4} = [config.networking.providedDomains.influxdb];
+  networking.hosts.${config.wireguard.proxy-sentinel.ipv4} = [globals.services.influxdb.domain];
   meta.telegraf = {
     enable = true;
     scrapeSensors = false;
     influxdb2 = {
-      domain = config.networking.providedDomains.influxdb;
+      inherit (globals.services.influxdb) domain;
       organization = "machines";
       bucket = "telegraf";
       node = "sire-influxdb";

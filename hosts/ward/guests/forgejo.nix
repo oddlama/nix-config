@@ -1,11 +1,11 @@
 {
   config,
+  globals,
   lib,
   nodes,
   pkgs,
   ...
 }: let
-  sentinelCfg = nodes.sentinel.config;
   forgejoDomain = "git.${config.repo.secrets.global.domains.me}";
 in {
   wireguard.proxy-sentinel = {
@@ -26,9 +26,8 @@ in {
     inherit (config.services.forgejo) group;
   };
 
+  globals.services.forgejo.domain = forgejoDomain;
   nodes.sentinel = {
-    networking.providedDomains.forgejo = forgejoDomain;
-
     # Rewrite destination addr with dnat on incoming connections
     # and masquerade responses to make them look like they originate from this host.
     # - 9922 (wan) -> 22 (proxy-sentinel)
@@ -190,7 +189,7 @@ in {
         ["--name" providerName]
         ["--provider" "openidConnect"]
         ["--key" clientId]
-        ["--auto-discover-url" "https://${sentinelCfg.networking.providedDomains.kanidm}/oauth2/openid/${clientId}/.well-known/openid-configuration"]
+        ["--auto-discover-url" "https://${globals.services.kanidm.domain}/oauth2/openid/${clientId}/.well-known/openid-configuration"]
         ["--scopes" "email"]
         ["--scopes" "profile"]
         ["--group-claim-name" "groups"]

@@ -17,9 +17,8 @@ in {
     firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [config.services.loki.configuration.server.http_listen_port];
   };
 
+  globals.services.loki.domain = lokiDomain;
   nodes.sentinel = {
-    networking.providedDomains.loki = lokiDomain;
-
     age.secrets.loki-basic-auth-hashes = {
       generator.script = "basic-auth";
       mode = "440";

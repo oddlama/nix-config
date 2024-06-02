@@ -1,9 +1,10 @@
 {
   config,
+  globals,
   inputs,
   lib,
-  nodes,
   minimal,
+  nodes,
   ...
 }: {
   imports = [
@@ -34,11 +35,11 @@
   };
 
   # Connect safely via wireguard to skip authentication
-  networking.hosts.${config.wireguard.proxy-home.ipv4} = [nodes.sentinel.config.networking.providedDomains.influxdb];
+  networking.hosts.${config.wireguard.proxy-home.ipv4} = [globals.services.influxdb.domain];
   meta.telegraf = {
     enable = true;
     influxdb2 = {
-      domain = nodes.sentinel.config.networking.providedDomains.influxdb;
+      inherit (globals.services.influxdb) domain;
       organization = "machines";
       bucket = "telegraf";
       node = "sire-influxdb";
@@ -83,7 +84,7 @@
             baseMac = config.repo.secrets.local.networking.interfaces.lan.mac;
           };
           extraSpecialArgs = {
-            inherit (inputs.self) nodes;
+            inherit (inputs.self) nodes globals;
             inherit (inputs.self.pkgs.x86_64-linux) lib;
             inherit inputs minimal;
           };

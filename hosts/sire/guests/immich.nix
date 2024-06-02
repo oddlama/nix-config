@@ -1,7 +1,8 @@
 {
-  pkgs,
   config,
+  globals,
   nodes,
+  pkgs,
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
@@ -86,7 +87,7 @@
 
         clientId = "immich";
         # clientSecret will be dynamically added in activation script
-        issuerUrl = "https://${sentinelCfg.networking.providedDomains.kanidm}/oauth2/openid/${clientId}";
+        issuerUrl = "https://${globals.services.kanidm.domain}/oauth2/openid/${clientId}";
         scope = "openid email profile";
         storageLabelClaim = "preferred_username";
       };
@@ -183,9 +184,8 @@ in {
     ];
   };
 
+  globals.services.immich.domain = immichDomain;
   nodes.sentinel = {
-    networking.providedDomains.immich = immichDomain;
-
     services.nginx = {
       upstreams.immich = {
         servers."${config.wireguard.proxy-sentinel.ipv4}:2283" = {};

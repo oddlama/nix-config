@@ -359,6 +359,7 @@ in {
     }
   ];
 
+  globals.services.minecraft.domain = minecraftDomain;
   nodes.sentinel = {
     # Rewrite destination addr with dnat on incoming connections
     # and masquerade responses to make them look like they originate from this host.
@@ -383,8 +384,6 @@ in {
         ];
       };
     };
-
-    networking.providedDomains.minecraft = minecraftDomain;
 
     services.nginx = {
       upstreams.minecraft = {

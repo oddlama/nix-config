@@ -1,5 +1,6 @@
 {
   config,
+  globals,
   lib,
   nodes,
   ...
@@ -44,14 +45,14 @@ in {
       enable = true;
       domain = netbirdDomain;
 
-      dashboard.settings.AUTH_AUTHORITY = "https://${sentinelCfg.networking.providedDomains.kanidm}/oauth2/openid/netbird";
+      dashboard.settings.AUTH_AUTHORITY = "https://${globals.services.kanidm.domain}/oauth2/openid/netbird";
 
       management = {
         singleAccountModeDomain = "internal.${config.repo.secrets.global.domains.me}";
         dnsDomain = "internal.${config.repo.secrets.global.domains.me}";
         disableAnonymousMetrics = true;
-        oidcConfigEndpoint = "https://${sentinelCfg.networking.providedDomains.kanidm}/oauth2/openid/netbird/.well-known/openid-configuration";
-        turnDomain = sentinelCfg.networking.providedDomains.coturn;
+        oidcConfigEndpoint = "https://${globals.services.kanidm.domain}/oauth2/openid/netbird/.well-known/openid-configuration";
+        turnDomain = globals.services.coturn.domain;
         turnPort = sentinelCfg.services.coturn.tls-listening-port;
         settings = {
           HttpConfig = {
@@ -76,9 +77,8 @@ in {
     };
   };
 
+  globals.services.netbird.domain = netbirdDomain;
   nodes.sentinel = {
-    networking.providedDomains.netbird = netbirdDomain;
-
     services.nginx = {
       upstreams.netbird-mgmt = {
         servers."${config.wireguard.proxy-sentinel.ipv4}:${builtins.toString config.services.netbird.server.management.port}" = {};

@@ -6,9 +6,8 @@ in {
     firewallRuleForNode.sentinel.allowedTCPPorts = [8000];
   };
 
+  globals.services.radicale.domain = radicaleDomain;
   nodes.sentinel = {
-    networking.providedDomains.radicale = radicaleDomain;
-
     services.nginx = {
       upstreams.radicale = {
         servers."${config.wireguard.proxy-sentinel.ipv4}:8000" = {};

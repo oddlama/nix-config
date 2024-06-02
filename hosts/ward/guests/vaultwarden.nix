@@ -25,9 +25,8 @@ in {
     }
   ];
 
+  globals.services.vaultwarden.domain = vaultwardenDomain;
   nodes.sentinel = {
-    networking.providedDomains.vaultwarden = vaultwardenDomain;
-
     services.nginx = {
       upstreams.vaultwarden = {
         servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.vaultwarden.config.rocketPort}" = {};

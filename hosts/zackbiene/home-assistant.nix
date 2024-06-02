@@ -1,5 +1,6 @@
 {
   config,
+  globals,
   lib,
   nodes,
   pkgs,
@@ -88,7 +89,7 @@ in {
 
       influxdb = {
         api_version = 2;
-        host = nodes.sentinel.config.networking.providedDomains.influxdb;
+        host = globals.services.influxdb.domain;
         port = "443";
         max_retries = 10;
         ssl = true;

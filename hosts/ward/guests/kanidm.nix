@@ -1,10 +1,9 @@
 {
   config,
-  nodes,
+  globals,
   ...
 }: let
   inherit (config.repo.secrets.global) domains;
-  sentinelCfg = nodes.sentinel.config;
   kanidmDomain = "auth.${domains.me}";
   kanidmPort = 8300;
 
@@ -40,9 +39,8 @@ in {
   age.secrets.kanidm-oauth2-paperless = mkRandomSecret;
   age.secrets.kanidm-oauth2-web-sentinel = mkRandomSecret;
 
+  globals.services.kanidm.domain = kanidmDomain;
   nodes.sentinel = {
-    networking.providedDomains.kanidm = kanidmDomain;
-
     services.nginx = {
       upstreams.kanidm = {
         servers."${config.wireguard.proxy-sentinel.ipv4}:${toString kanidmPort}" = {};
@@ -102,7 +100,7 @@ in {
       groups."immich.access" = {};
       systems.oauth2.immich = {
         displayName = "Immich";
-        originUrl = "https://${sentinelCfg.networking.providedDomains.immich}/";
+        originUrl = "https://${globals.services.immich.domain}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-immich.path;
         preferShortUsername = true;
         # XXX: PKCE is currently not supported by immich
@@ -117,7 +115,7 @@ in {
       systems.oauth2.netbird = {
         public = true;
         displayName = "Netbird";
-        originUrl = "https://${sentinelCfg.networking.providedDomains.netbird}/";
+        originUrl = "https://${globals.services.netbird.domain}/";
         preferShortUsername = true;
         enableLocalhostRedirects = true;
         enableLegacyCrypto = true;
@@ -128,7 +126,7 @@ in {
       groups."paperless.access" = {};
       systems.oauth2.paperless = {
         displayName = "Paperless";
-        originUrl = "https://${sentinelCfg.networking.providedDomains.paperless}/";
+        originUrl = "https://${globals.services.paperless.domain}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-paperless.path;
         preferShortUsername = true;
         scopeMaps."paperless.access" = ["openid" "email" "profile"];
@@ -141,7 +139,7 @@ in {
       groups."grafana.server-admins" = {};
       systems.oauth2.grafana = {
         displayName = "Grafana";
-        originUrl = "https://${sentinelCfg.networking.providedDomains.grafana}/";
+        originUrl = "https://${globals.services.grafana.domain}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-grafana.path;
         preferShortUsername = true;
         scopeMaps."grafana.access" = ["openid" "email" "profile"];
@@ -160,7 +158,7 @@ in {
       groups."forgejo.admins" = {};
       systems.oauth2.forgejo = {
         displayName = "Forgejo";
-        originUrl = "https://${sentinelCfg.networking.providedDomains.forgejo}/";
+        originUrl = "https://${globals.services.forgejo.domain}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-forgejo.path;
         scopeMaps."forgejo.access" = ["openid" "email" "profile"];
         # XXX: PKCE is currently not supported by gitea/forgejo,

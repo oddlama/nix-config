@@ -28,6 +28,16 @@
         };
         modules = [
           {
+            nixpkgs.config.allowUnfree = true;
+            nixpkgs.overlays =
+              import ../pkgs/default.nix
+              ++ [
+                inputs.nix-topology.overlays.default
+                inputs.nixos-extra-modules.overlays.default
+                inputs.nixvim.overlays.default
+                inputs.wired-notify.overlays.default
+              ];
+
             node.name = name;
             node.secretsDir = ../hosts/${name}/secrets;
           }

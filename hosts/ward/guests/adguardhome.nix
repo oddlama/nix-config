@@ -1,7 +1,7 @@
 {
   config,
+  globals,
   lib,
-  nodes,
   pkgs,
   ...
 }: let
@@ -12,9 +12,8 @@ in {
     firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.adguardhome.port];
   };
 
+  globals.services.adguardhome.domain = adguardhomeDomain;
   nodes.sentinel = {
-    networking.providedDomains.adguard = adguardhomeDomain;
-
     services.nginx = {
       upstreams.adguardhome = {
         servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.adguardhome.port}" = {};
@@ -78,7 +77,7 @@ in {
           # Undo the /etc/hosts entry so we don't answer with the internal
           # wireguard address for influxdb
           {
-            domain = nodes.sentinel.config.networking.providedDomains.influxdb;
+            inherit (globals.services.influxdb) domain;
             answer = config.repo.secrets.global.domains.me;
           }
         ]
@@ -87,11 +86,12 @@ in {
           inherit domain;
           answer = "192.168.1.4";
         }) [
-          nodes.sentinel.config.networking.providedDomains.grafana
-          nodes.sentinel.config.networking.providedDomains.immich
-          nodes.sentinel.config.networking.providedDomains.influxdb
-          nodes.sentinel.config.networking.providedDomains.loki
-          nodes.sentinel.config.networking.providedDomains.paperless
+          # FIXME: dont hardcode, filter global service domains by internal state
+          globals.services.grafana.domain
+          globals.services.immich.domain
+          globals.services.influxdb.domain
+          globals.services.loki.domain
+          globals.services.paperless.domain
           "home.${config.repo.secrets.global.domains.me}"
           "fritzbox.${config.repo.secrets.global.domains.me}"
         ];

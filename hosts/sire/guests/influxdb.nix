@@ -89,8 +89,6 @@ in {
 
   globals.services.influxdb.domain = influxdbDomain;
   nodes.sentinel = {
-    networking.providedDomains.influxdb = influxdbDomain;
-
     services.nginx = {
       upstreams.influxdb = {
         servers."${config.wireguard.proxy-sentinel.ipv4}:${toString influxdbPort}" = {};

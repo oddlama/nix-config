@@ -1,9 +1,9 @@
 {
   config,
+  globals,
   nodes,
   ...
 }: let
-  sentinelCfg = nodes.sentinel.config;
   wardWebProxyCfg = nodes.ward-web-proxy.config;
   grafanaDomain = "grafana.${config.repo.secrets.global.domains.me}";
 in {
@@ -83,8 +83,6 @@ in {
       config.age.secrets.grafana-loki-basic-auth-password
     ];
 
-    networking.providedDomains.grafana = grafanaDomain;
-
     services.nginx = {
       upstreams.grafana = {
         servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.grafana.settings.server.http_port}" = {};
@@ -140,8 +138,8 @@ in {
   ];
 
   networking.hosts.${wardWebProxyCfg.wireguard.proxy-home.ipv4} = [
-    sentinelCfg.networking.providedDomains.influxdb # technically a duplicate (see ./common.nix)...
-    sentinelCfg.networking.providedDomains.loki
+    globals.services.influxdb.domain # technically a duplicate (see ./common.nix)...
+    globals.services.loki.domain
   ];
 
   services.grafana = {
@@ -178,9 +176,9 @@ in {
         client_secret = "$__file{${config.age.secrets.grafana-oauth2-client-secret.path}}";
         scopes = "openid email profile";
         login_attribute_path = "preferred_username";
-        auth_url = "https://${sentinelCfg.networking.providedDomains.kanidm}/ui/oauth2";
-        token_url = "https://${sentinelCfg.networking.providedDomains.kanidm}/oauth2/token";
-        api_url = "https://${sentinelCfg.networking.providedDomains.kanidm}/oauth2/openid/grafana/userinfo";
+        auth_url = "https://${globals.services.kanidm.domain}/ui/oauth2";
+        token_url = "https://${globals.services.kanidm.domain}/oauth2/token";
+        api_url = "https://${globals.services.kanidm.domain}/oauth2/openid/grafana/userinfo";
         use_pkce = true;
         # Allow mapping oauth2 roles to server admin
         allow_assign_grafana_admin = true;
@@ -195,7 +193,7 @@ in {
           name = "InfluxDB (machines)";
           type = "influxdb";
           access = "proxy";
-          url = "https://${sentinelCfg.networking.providedDomains.influxdb}";
+          url = "https://${globals.services.influxdb.domain}";
           orgId = 1;
           secureJsonData.token = "$__file{${config.age.secrets.grafana-influxdb-token-machines.path}}";
           jsonData.version = "Flux";
@@ -206,7 +204,7 @@ in {
           name = "InfluxDB (home_assistant)";
           type = "influxdb";
           access = "proxy";
-          url = "https://${sentinelCfg.networking.providedDomains.influxdb}";
+          url = "https://${globals.services.influxdb.domain}";
           orgId = 1;
           secureJsonData.token = "$__file{${config.age.secrets.grafana-influxdb-token-home.path}}";
           jsonData.version = "Flux";
@@ -217,7 +215,7 @@ in {
           name = "Loki";
           type = "loki";
           access = "proxy";
-          url = "https://${sentinelCfg.networking.providedDomains.loki}";
+          url = "https://${globals.services.loki.domain}";
           orgId = 1;
           basicAuth = true;
           basicAuthUser = "${config.node.name}+grafana-loki-basic-auth-password";

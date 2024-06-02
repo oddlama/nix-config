@@ -1,4 +1,8 @@
-{nodes, ...}: {
+{
+  globals,
+  nodes,
+  ...
+}: {
   imports = [
     ../../config
     ../../config/hardware/hetzner-cloud.nix
@@ -25,12 +29,12 @@
   };
 
   # Connect safely via wireguard to skip authentication
-  networking.hosts.${nodes.sentinel.config.wireguard.proxy-sentinel.ipv4} = [nodes.sentinel.config.networking.providedDomains.influxdb];
+  networking.hosts.${nodes.sentinel.config.wireguard.proxy-sentinel.ipv4} = [globals.services.influxdb.domain];
   meta.telegraf = {
     enable = true;
     scrapeSensors = false;
     influxdb2 = {
-      domain = nodes.sentinel.config.networking.providedDomains.influxdb;
+      inherit (globals.services.influxdb) domain;
       organization = "machines";
       bucket = "telegraf";
       node = "sire-influxdb";

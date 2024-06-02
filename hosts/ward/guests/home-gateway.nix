@@ -1,4 +1,4 @@
-{nodes, ...}: {
+{globals, ...}: {
   # Forwarding required to masquerade netbird network
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
 
@@ -25,7 +25,7 @@
     openFirewall = true;
     config.ServerSSHAllowed = false;
     environment = rec {
-      NB_MANAGEMENT_URL = "https://${nodes.sentinel.config.networking.providedDomains.netbird}";
+      NB_MANAGEMENT_URL = "https://${globals.services.netbird.domain}";
       NB_ADMIN_URL = NB_MANAGEMENT_URL;
       NB_HOSTNAME = "home-gateway";
     };

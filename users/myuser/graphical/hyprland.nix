@@ -108,17 +108,23 @@
       general = {
         gaps_in = 1;
         gaps_out = 0;
+        allow_tearing = true;
       };
 
       debug.disable_logs = false;
 
       misc = {
+        vfr = 1;
+        vrr = 1;
         disable_hyprland_logo = true;
         mouse_move_focuses_monitor = false;
       };
     };
     extraConfig =
+      # TODO: env = WLR_DRM_NO_ATOMIC,1
       ''
+        windowrulev2 = immediate, class:^(cs2)$
+
         binds {
           focus_preferred_method = 1
         }

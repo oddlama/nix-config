@@ -53,25 +53,39 @@ in {
           description = "The variable to set as X-User";
         };
       };
+      options.locations = mkOption {
+        type = types.attrsOf (types.submodule (locationSubmod: {
+          options.setOauth2Headers = mkOption {
+            type = types.bool;
+            default = true;
+            description = "Whether to add oauth2 specific headers to this location. Only takes effect is oauth2 is actually enabled on the parent vhost.";
+          };
+          config = mkIf (config.oauth2.enable && locationSubmod.config.setOauth2Headers) {
+            extraConfig = ''
+              proxy_set_header X-User  $user;
+              proxy_set_header X-Email $email;
+              add_header Set-Cookie $auth_cookie;
+            '';
+          };
+        }));
+      };
       config = mkIf config.oauth2.enable {
         extraConfig = ''
           auth_request /oauth2/auth;
           error_page 401 = @redirectToAuth2ProxyLogin;
 
+          # set variables that can be used in locations.<name>.extraConfig
           # pass information via X-User and X-Email headers to backend,
           # requires running with --set-xauthrequest flag
-          auth_request_set $user   ${config.oauth2.X-User};
-          auth_request_set $email  ${config.oauth2.X-Email};
-          proxy_set_header X-User  $user;
-          proxy_set_header X-Email $email;
-
+          auth_request_set $user  ${config.oauth2.X-User};
+          auth_request_set $email ${config.oauth2.X-Email};
           # if you enabled --cookie-refresh, this is needed for it to work with auth_request
           auth_request_set $auth_cookie $upstream_http_set_cookie;
-          add_header Set-Cookie $auth_cookie;
         '';
 
         locations."@redirectToAuth2ProxyLogin" = {
           # FIXME: allow refering to another node for the portaldomain
+          setOauth2Headers = false;
           return = "307 https://${cfg.portalDomain}/oauth2/start?rd=$scheme://$host$request_uri";
           extraConfig = ''
             auth_request off;
@@ -79,6 +93,7 @@ in {
         };
 
         locations."= /oauth2/auth" = {
+          setOauth2Headers = false;
           proxyPass =
             "http://oauth2-proxy/oauth2/auth"
             + optionalString (config.oauth2.allowedGroups != [])
@@ -87,10 +102,10 @@ in {
             auth_request off;
             internal;
 
-            proxy_set_header X-Scheme         $scheme;
+            proxy_set_header X-Scheme       $scheme;
             # nginx auth_request includes headers but not body
-            proxy_set_header Content-Length   "";
-            proxy_pass_request_body           off;
+            proxy_set_header Content-Length "";
+            proxy_pass_request_body         off;
           '';
         };
       };

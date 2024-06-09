@@ -37,13 +37,16 @@ in {
       DO_NOT_TRACK = "True";
       ANONYMIZED_TELEMETRY = "False";
 
-      WEBUI_AUTH = "False";
-      ENABLE_SIGNUP = "False";
+      ENABLE_COMMUNITY_SHARING = "False";
+      ENABLE_ADMIN_EXPORT = "False";
 
       OLLAMA_BASE_URL = "http://localhost:11434";
       TRANSFORMERS_CACHE = "/var/lib/open-webui/.cache/huggingface";
 
+      WEBUI_AUTH = "False";
+      ENABLE_SIGNUP = "False";
       WEBUI_AUTH_TRUSTED_EMAIL_HEADER = "X-Email";
+      DEFAULT_USER_ROLE = "user";
     };
   };
 
@@ -51,7 +54,7 @@ in {
   nodes.sentinel = {
     services.nginx = {
       upstreams.open-webui = {
-        servers."${config.wireguard.proxy-home.ipv4}:${toString config.services.open-webui.port}" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.open-webui.port}" = {};
         extraConfig = ''
           zone open-webui 64k;
           keepalive 2;
@@ -63,14 +66,10 @@ in {
         oauth2 = {
           enable = true;
           allowedGroups = ["access_openwebui"];
-          X-Email = "\${upstream_http_x_auth_request_email}@${config.repo.secrets.global.domains.personal}";
+          X-Email = "\${upstream_http_x_auth_request_preferred_username}@${config.repo.secrets.global.domains.personal}";
         };
-        # FIXME: refer to lan 192.168... and fd10:: via globals
         extraConfig = ''
-          client_max_body_size 512M;
-          allow 192.168.1.0/24;
-          allow fd10::/64;
-          deny all;
+          client_max_body_size 128M;
         '';
         locations."/" = {
           proxyPass = "http://open-webui";

@@ -92,7 +92,6 @@ in {
           globals.services.influxdb.domain
           globals.services.loki.domain
           globals.services.paperless.domain
-          globals.services.open-webui.domain
           "home.${config.repo.secrets.global.domains.me}"
           "fritzbox.${config.repo.secrets.global.domains.me}"
         ];

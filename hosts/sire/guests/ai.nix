@@ -4,11 +4,9 @@ in {
   microvm.mem = 1024 * 16;
   microvm.vcpu = 20;
 
-  wireguard.proxy-home = {
-    client.via = "ward";
-    firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [
-      config.services.open-webui.port
-    ];
+  wireguard.proxy-sentinel = {
+    client.via = "sentinel";
+    firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.open-webui.port];
   };
 
   networking.firewall.allowedTCPPorts = [config.services.ollama.port];
@@ -42,7 +40,7 @@ in {
       WEBUI_AUTH = "False";
       ENABLE_SIGNUP = "False";
 
-      OLLAMA_BASE_URL = "http://localhgost:11434";
+      OLLAMA_BASE_URL = "http://localhost:11434";
       TRANSFORMERS_CACHE = "/var/lib/open-webui/.cache/huggingface";
 
       WEBUI_AUTH_TRUSTED_EMAIL_HEADER = "X-Email";
@@ -65,7 +63,7 @@ in {
         oauth2 = {
           enable = true;
           allowedGroups = ["access_openwebui"];
-          X-Email = "\${upstream_http_x_auth_request_email}@local";
+          X-Email = "\${upstream_http_x_auth_request_email}@${config.repo.secrets.global.domains.personal}";
         };
         # FIXME: refer to lan 192.168... and fd10:: via globals
         extraConfig = ''

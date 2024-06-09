@@ -42,7 +42,7 @@
   qt = {
     enable = true;
     style.name = "kvantum";
-    platformTheme = "qtct";
+    platformTheme.name = "qtct";
   };
 
   xdg.configFile."Kvantum/kvantum.kvconfig".text = "theme=Base16Kvantum";

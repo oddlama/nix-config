@@ -44,11 +44,13 @@ in {
 
       OLLAMA_BASE_URL = "http://localhgost:11434";
       TRANSFORMERS_CACHE = "/var/lib/open-webui/.cache/huggingface";
+
+      WEBUI_AUTH_TRUSTED_EMAIL_HEADER = "X-Email";
     };
   };
 
   globals.services.open-webui.domain = openWebuiDomain;
-  nodes.ward-web-proxy = {
+  nodes.sentinel = {
     services.nginx = {
       upstreams.open-webui = {
         servers."${config.wireguard.proxy-home.ipv4}:${toString config.services.open-webui.port}" = {};
@@ -60,8 +62,11 @@ in {
       virtualHosts.${openWebuiDomain} = {
         forceSSL = true;
         useACMEWildcardHost = true;
-        oauth2.enable = true;
-        oauth2.allowedGroups = ["access_openwebui"];
+        oauth2 = {
+          enable = true;
+          allowedGroups = ["access_openwebui"];
+          X-Email = "\${upstream_http_x_auth_request_email}@local";
+        };
         # FIXME: refer to lan 192.168... and fd10:: via globals
         extraConfig = ''
           client_max_body_size 512M;

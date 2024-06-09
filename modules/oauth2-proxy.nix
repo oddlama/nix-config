@@ -42,6 +42,16 @@ in {
             empty list to allow any authenticated client.
           '';
         };
+        X-User = mkOption {
+          type = types.str;
+          default = "$upstream_http_x_auth_request_preferred_username";
+          description = "The variable to set as X-User";
+        };
+        X-Email = mkOption {
+          type = types.str;
+          default = "$upstream_http_x_auth_request_email";
+          description = "The variable to set as X-User";
+        };
       };
       config = mkIf config.oauth2.enable {
         extraConfig = ''
@@ -50,8 +60,8 @@ in {
 
           # pass information via X-User and X-Email headers to backend,
           # requires running with --set-xauthrequest flag
-          auth_request_set $user   $upstream_http_x_auth_request_user;
-          auth_request_set $email  $upstream_http_x_auth_request_email;
+          auth_request_set $user   ${config.oauth2.X-User};
+          auth_request_set $email  ${config.oauth2.X-Email};
           proxy_set_header X-User  $user;
           proxy_set_header X-Email $email;
 
@@ -61,6 +71,7 @@ in {
         '';
 
         locations."@redirectToAuth2ProxyLogin" = {
+          # FIXME: allow refering to another node for the portaldomain
           return = "307 https://${cfg.portalDomain}/oauth2/start?rd=$scheme://$host$request_uri";
           extraConfig = ''
             auth_request off;

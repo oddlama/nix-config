@@ -15,8 +15,8 @@
       patches =
         old.patches
         ++ [
-          "${provisionSrc}/patches/${old.version}-oauth2-basic-secret-modify.patch"
-          "${provisionSrc}/patches/${old.version}-recover-account.patch"
+          "${provisionSrc}/patches/1.2.0-oauth2-basic-secret-modify.patch"
+          "${provisionSrc}/patches/1.2.0-recover-account.patch"
         ];
       passthru.enableSecretProvisioning = true;
       doCheck = false;

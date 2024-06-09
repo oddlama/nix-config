@@ -174,7 +174,7 @@ in {
       # Web Sentinel
       groups."web-sentinel.access" = {};
       groups."web-sentinel.adguardhome" = {};
-      groups."web-sentinel.influxdb" = {};
+      groups."web-sentinel.openwebui" = {};
       systems.oauth2.web-sentinel = {
         displayName = "Web Sentinel";
         originUrl = "https://oauth2.${domains.me}/";
@@ -184,7 +184,7 @@ in {
         claimMaps.groups = {
           joinType = "array";
           valuesByGroup."web-sentinel.adguardhome" = ["access_adguardhome"];
-          valuesByGroup."web-sentinel.influxdb" = ["access_influxdb"];
+          valuesByGroup."web-sentinel.openwebui" = ["access_openwebui"];
         };
       };
     };

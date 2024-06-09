@@ -29,6 +29,7 @@ in {
       };
       subnet4 = [
         {
+          id = 1;
           interface = "wlan1";
           subnet = iotCidrv4;
           pools = [

@@ -5,7 +5,7 @@
 }: {
   services.resolved = {
     enable = true;
-    dnssec = "allow-downgrade";
+    dnssec = "false"; # wake me up in 20 years when DNSSEC is at least partly working
     fallbackDns = [
       "1.1.1.1"
       "2606:4700:4700::1111"

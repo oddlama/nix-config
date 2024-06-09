@@ -41,6 +41,7 @@ in {
       ];
       subnet4 = [
         {
+          id = 1;
           interface = "lan-self";
           subnet = lanCidrv4;
           pools = [

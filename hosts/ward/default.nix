@@ -4,6 +4,7 @@
   inputs,
   lib,
   minimal,
+  nodes,
   ...
 }: {
   imports = [
@@ -34,7 +35,7 @@
   };
 
   # Connect safely via wireguard to skip authentication
-  networking.hosts.${config.wireguard.proxy-home.ipv4} = [globals.services.influxdb.domain];
+  networking.hosts.${nodes.ward-web-proxy.config.wireguard.proxy-home.ipv4} = [globals.services.influxdb.domain];
   meta.telegraf = {
     enable = true;
     influxdb2 = {

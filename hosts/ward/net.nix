@@ -31,7 +31,13 @@
   boot.initrd.systemd.network = {
     enable = true;
     networks = {
-      inherit (config.systemd.network.networks) "10-wan";
+      "10-wan" = {
+        address = [globals.net.home-wan.hosts.ward.cidrv4];
+        gateway = [globals.net.home-wan.hosts.fritzbox.ipv4];
+        matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.wan.mac;
+        networkConfig.IPv6PrivacyExtensions = "yes";
+        linkConfig.RequiredForOnline = "routable";
+      };
       "20-lan" = {
         address = [
           globals.net.home-lan.hosts.ward.cidrv4
@@ -83,6 +89,11 @@
       gateway = [globals.net.home-wan.hosts.fritzbox.ipv4];
       matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.wan.mac;
       networkConfig.IPv6PrivacyExtensions = "yes";
+      dhcpV6Config.PrefixDelegationHint = "::/64";
+      # FIXME: This should not be needed, but for some reason part of networkd
+      # isn't seeing the RAs and not triggering DHCPv6. Even though some other
+      # part of networkd is properly seeing them and logging accordingly.
+      dhcpV6Config.WithoutRA = "solicit";
       linkConfig.RequiredForOnline = "routable";
     };
     "20-lan-self" = {
@@ -99,6 +110,9 @@
         DHCPPrefixDelegation = true;
         MulticastDNS = true;
       };
+      dhcpPrefixDelegationConfig.UplinkInterface = "wan";
+      dhcpPrefixDelegationConfig.Token = "::ff";
+      ipv6SendRAConfig.Managed = true;
       # Announce a static prefix
       ipv6Prefixes = [
         {ipv6PrefixConfig.Prefix = globals.net.home-lan.cidrv6;}

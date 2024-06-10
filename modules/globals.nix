@@ -38,7 +38,7 @@ in {
                       };
 
                       ipv4 = mkOption {
-                        type = types.net.ipv4;
+                        type = types.nullOr types.net.ipv4;
                         description = "The IPv4 of this host";
                         readOnly = true;
                         default =
@@ -48,7 +48,7 @@ in {
                       };
 
                       ipv6 = mkOption {
-                        type = types.net.ipv6;
+                        type = types.nullOr types.net.ipv6;
                         description = "The IPv6 of this host";
                         readOnly = true;
                         default =
@@ -58,7 +58,7 @@ in {
                       };
 
                       cidrv4 = mkOption {
-                        type = types.net.cidrv4;
+                        type = types.nullOr types.str; # FIXME: this is not types.net.cidr because it would zero out the host part
                         description = "The IPv4 of this host including CIDR mask";
                         readOnly = true;
                         default =
@@ -68,7 +68,7 @@ in {
                       };
 
                       cidrv6 = mkOption {
-                        type = types.net.cidrv6;
+                        type = types.nullOr types.str; # FIXME: this is not types.net.cidr because it would zero out the host part
                         description = "The IPv6 of this host including CIDR mask";
                         readOnly = true;
                         default =

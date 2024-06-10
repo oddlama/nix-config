@@ -110,7 +110,7 @@
       # Provide a DNS resolver
       ipv6SendRAConfig = {
         EmitDNS = true;
-        DNS = globals.net.home-lan.hosts.ward-adguardhome.ipv4;
+        DNS = globals.net.home-lan.hosts.ward-adguardhome.ipv6;
       };
       linkConfig.RequiredForOnline = "routable";
     };

@@ -39,7 +39,7 @@ that most people would have. The configurations are sorted into three categories
 ---|---|---|---
 🐚 Shell | ZSH & Starship | [Link](./users/config/shell) | ZSH configuration with FZF, starship prompt, sqlite history and histdb-skim for fancy <kbd>Ctrl</kbd><kbd>R</kbd>
 🖥️ Terminal | Kitty | [Link](./users/myuser/graphical/kitty.nix) | Terminal configuration with nerdfonts and history <kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>H</kbd> to view scrollback buffer in neovim
-🪟 WM | i3 | [Link](./users/myuser/graphical/i3.nix) | Tiling window manager, heavily customized to my personal preferences
+🪟 WM | hyprland & i3 | [Link](./users/myuser/graphical/hyprland.nix), [Link](./users/myuser/graphical/i3.nix) | Tiling window manager, heavily customized to my personal preferences
 🌐 Browser | Firefox | [Link](./users/myuser/graphical/firefox.nix) | Firefox with many privacy settings and betterfox
 🖊️ Editor | Neovim | [Link](./users/myuser/neovim) | Extensive neovim configuration, made with nixvim
 📜 Manpager | Neovim | [Link](./users/config/manpager.nix) | Isolated neovim as manpager via nixvim
@@ -67,6 +67,13 @@ that most people would have. The configurations are sorted into three categories
 📔 Logs | – | Promtail | [Link](./modules/promtail.nix) | Log shipping agent
 📚 TSDB | – | Influxdb2 | [Link](./hosts/sire/guests/influxdb.nix) | Time series database for storing host metrics
 ⏱️  Metrics | – | Telegraf | [Link](./modules/telegraf.nix) | Per-host collection of metrics
+
+<!--
+- home assistant & subcomponents
+- scrutiny
+- ollama
+- open-webui
+-->
 
 #### General & Miscellaneous
 
@@ -96,10 +103,9 @@ but here's a quick breakdown of the what you will find where.
 
 |   |   |
 |---|---|
-`hosts/<hostname>` | top-level configuration for `<hostname>`
-`lib/` | library functions overlayed on top of `nixpkgs.lib`
 `config/` | global configuration for all hosts
 `config/optional/` | optional configuration included by hosts
+`hosts/<hostname>` | top-level configuration for `<hostname>`
 `modules/` | classical reusable configuration modules
 `nix/` | library functions and flake plumbing
 `pkgs/` | Custom packages and scripts

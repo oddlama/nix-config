@@ -8,6 +8,7 @@
     mkConnection
     ;
 in {
+  # TODO: collect networks from globals
   networks.ward-kea.name = "Home LAN";
   networks.zackbiene-kea.name = "Isolated IoT Network";
   networks.home-fritzbox = {

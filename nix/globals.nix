@@ -1,4 +1,4 @@
-{
+{inputs, ...}: {
   flake = {
     config,
     lib,
@@ -7,6 +7,9 @@
     globals = let
       globalsSystem = lib.evalModules {
         prefix = ["globals"];
+        specialArgs = {
+          inherit (inputs.self.pkgs.x86_64-linux) lib;
+        };
         modules = [
           ../modules/globals.nix
           ({lib, ...}: {
@@ -23,7 +26,7 @@
     in {
       # Make sure the keys of this attrset are trivially evaluatable to avoid infinite recursion,
       # therefore we inherit relevant attributes from the config.
-      inherit (globalsSystem.config.globals) services;
+      inherit (globalsSystem.config.globals) net services;
     };
   };
 }

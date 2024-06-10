@@ -1,12 +1,32 @@
 {
   config,
-  lib,
+  globals,
   ...
-}: let
-  lanCidrv4 = "192.168.1.0/24";
-  lanCidrv6 = "fd10::/64";
-in {
+}: {
   networking.hostId = config.repo.secrets.local.networking.hostId;
+
+  globals.net = {
+    home-wan = {
+      cidrv4 = "192.168.178.0/24";
+      hosts.fritzbox.id = 1;
+      hosts.ward.id = 2;
+    };
+
+    home-lan = {
+      cidrv4 = "192.168.1.0/24";
+      cidrv6 = "fd10::/64";
+      hosts.ward.id = 1;
+      hosts.sire.id = 2;
+      hosts.ward-adguardhome.id = 3;
+      hosts.ward-web-proxy.id = 4;
+      hosts.sire-samba.id = 10;
+    };
+
+    proxy-home = {
+      cidrv4 = "10.44.0.0/24";
+      cidrv6 = "fd00:44::/120";
+    };
+  };
 
   boot.initrd.systemd.network = {
     enable = true;
@@ -14,8 +34,8 @@ in {
       inherit (config.systemd.network.networks) "10-wan";
       "20-lan" = {
         address = [
-          (lib.net.cidr.hostCidr 1 lanCidrv4)
-          (lib.net.cidr.hostCidr 1 lanCidrv6)
+          globals.net.home-lan.hosts.ward.cidrv4
+          globals.net.home-lan.hosts.ward.cidrv6
         ];
         matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.lan.mac;
         networkConfig = {
@@ -59,16 +79,16 @@ in {
       #dhcpV4Config.UseDNS = false;
       #dhcpV6Config.UseDNS = false;
       #ipv6AcceptRAConfig.UseDNS = false;
-      address = ["192.168.178.2/24"];
-      gateway = ["192.168.178.1"];
+      address = [globals.net.home-wan.hosts.ward.cidrv4];
+      gateway = [globals.net.home-wan.hosts.fritzbox.ipv4];
       matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.wan.mac;
       networkConfig.IPv6PrivacyExtensions = "yes";
       linkConfig.RequiredForOnline = "routable";
     };
     "20-lan-self" = {
       address = [
-        (lib.net.cidr.hostCidr 1 lanCidrv4)
-        (lib.net.cidr.hostCidr 1 lanCidrv6)
+        globals.net.home-lan.hosts.ward.cidrv4
+        globals.net.home-lan.hosts.ward.cidrv6
       ];
       matchConfig.Name = "lan-self";
       networkConfig = {
@@ -81,7 +101,7 @@ in {
       };
       # Announce a static prefix
       ipv6Prefixes = [
-        {ipv6PrefixConfig.Prefix = lanCidrv6;}
+        {ipv6PrefixConfig.Prefix = globals.net.home-lan.cidrv6;}
       ];
       # Delegate prefix
       dhcpPrefixDelegationConfig = {
@@ -90,7 +110,7 @@ in {
       # Provide a DNS resolver
       ipv6SendRAConfig = {
         EmitDNS = true;
-        DNS = lib.net.cidr.host 3 lanCidrv6;
+        DNS = globals.net.home-lan.hosts.ward-adguardhome.ipv4;
       };
       linkConfig.RequiredForOnline = "routable";
     };
@@ -162,9 +182,12 @@ in {
   #};
 
   wireguard.proxy-home.server = {
-    host = "192.168.1.1";
+    host = globals.net.home-lan.hosts.ward.ipv4;
     port = 51444;
-    reservedAddresses = ["10.44.0.0/24" "fd00:44::/120"];
+    reservedAddresses = [
+      globals.net.proxy-home.cidrv4
+      globals.net.proxy-home.cidrv6
+    ];
     openFirewall = false; # Explicitly opened only for lan
   };
 }

@@ -1,5 +1,6 @@
 {
   config,
+  globals,
   lib,
   ...
 }: let
@@ -56,8 +57,8 @@ in {
       lan-interface.interfaces = ["lan1"];
       lan = {
         parent = "lan-interface";
-        ipv4Addresses = ["192.168.1.0/24"]; # FIXME: refer to via globals
-        ipv6Addresses = ["fd10::/64"]; # FIXME: refer to via globals
+        ipv4Addresses = [globals.net.home-lan.cidrv4];
+        ipv6Addresses = [globals.net.home-lan.cidrv6];
       };
       iot.interfaces = ["wlan1"];
     };

@@ -1,11 +1,15 @@
-{config, ...}: {
+{
+  config,
+  globals,
+  ...
+}: {
   networking.hostId = config.repo.secrets.local.networking.hostId;
 
   boot.initrd.systemd.network = {
     enable = true;
     networks."10-lan" = {
-      address = ["192.168.1.2/24"];
-      gateway = ["192.168.1.1"];
+      address = [globals.net.home-lan.hosts.sire.cidrv4];
+      gateway = [globals.net.home-lan.hosts.ward.ipv4];
       matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.lan.mac;
       networkConfig = {
         IPv6PrivacyExtensions = "yes";
@@ -42,8 +46,8 @@
       '';
     };
     "20-lan-self" = {
-      address = ["192.168.1.2/24"];
-      gateway = ["192.168.1.1"];
+      address = [globals.net.home-lan.hosts.sire.cidrv4];
+      gateway = [globals.net.home-lan.hosts.ward.ipv4];
       matchConfig.Name = "lan-self";
       networkConfig = {
         IPv6PrivacyExtensions = "yes";

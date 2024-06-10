@@ -1,4 +1,8 @@
-{config, ...}: let
+{
+  config,
+  globals,
+  ...
+}: let
   inherit (config.repo.secrets.local) acme;
   fritzboxDomain = "fritzbox.${config.repo.secrets.global.domains.me}";
 in {
@@ -35,7 +39,7 @@ in {
 
   services.nginx = {
     upstreams.fritzbox = {
-      servers."192.168.178.1" = {};
+      servers.${globals.net.home-wan.hosts.fritzbox.ipv4} = {};
       extraConfig = ''
         zone grafana 64k;
         keepalive 2;
@@ -50,11 +54,10 @@ in {
       };
       # Allow using self-signed certs. We just want to make sure the connection
       # is over TLS.
-      # FIXME: refer to lan 192.168... and fd10:: via globals
       extraConfig = ''
         proxy_ssl_verify off;
-        allow 192.168.1.0/24;
-        allow fd10::/64;
+        allow ${globals.net.home-lan.cidrv4};
+        allow ${globals.net.home-lan.cidrv6};
         deny all;
       '';
     };

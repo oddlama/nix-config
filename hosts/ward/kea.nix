@@ -1,13 +1,11 @@
 {
   lib,
+  globals,
   utils,
   nodes,
   ...
 }: let
   inherit (lib) net;
-  lanCidrv4 = "192.168.1.0/24";
-  dnsIp = net.cidr.host 3 lanCidrv4;
-  webProxyIp = net.cidr.host 4 lanCidrv4;
 in {
   environment.persistence."/persist".directories = [
     {
@@ -36,35 +34,36 @@ in {
       option-data = [
         {
           name = "domain-name-servers";
-          data = dnsIp;
+          data = globals.net.home-lan.hosts.ward-adguardhome.ipv4;
         }
       ];
       subnet4 = [
         {
           id = 1;
           interface = "lan-self";
-          subnet = lanCidrv4;
+          subnet = globals.net.home-lan.cidrv4;
           pools = [
-            {pool = "${net.cidr.host 20 lanCidrv4} - ${net.cidr.host (-6) lanCidrv4}";}
+            {pool = "${net.cidr.host 20 globals.net.home-lan.cidrv4} - ${net.cidr.host (-6) globals.net.home-lan.cidrv4}";}
           ];
           option-data = [
             {
               name = "routers";
-              data = net.cidr.host 1 lanCidrv4; # FIXME: how to advertise v6 address also?
+              data = globals.net.home-lan.hosts.ward.ipv4; # FIXME: how to advertise v6 address also?
             }
           ];
+          # FIXME: map this over globals.guests or smth. marker tag for finding: ipv4 192.168.1.1
           reservations = [
             {
               hw-address = nodes.ward-adguardhome.config.lib.microvm.mac;
-              ip-address = dnsIp;
+              ip-address = globals.net.home-lan.hosts.ward-adguardhome.ipv4;
             }
             {
               hw-address = nodes.ward-web-proxy.config.lib.microvm.mac;
-              ip-address = webProxyIp;
+              ip-address = globals.net.home-lan.hosts.ward-web-proxy.ipv4;
             }
             {
               hw-address = nodes.sire-samba.config.lib.microvm.mac;
-              ip-address = net.cidr.host 10 lanCidrv4;
+              ip-address = globals.net.home-lan.hosts.sire-samba.ipv4;
             }
           ];
         }

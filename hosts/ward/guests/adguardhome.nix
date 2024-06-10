@@ -84,7 +84,7 @@ in {
         # Use the local mirror-proxy for some services (not necessary, just for speed)
         ++ map (domain: {
           inherit domain;
-          answer = "192.168.1.4";
+          answer = globals.net.home-lan.hosts.ward-web-proxy.ipv4;
         }) [
           # FIXME: dont hardcode, filter global service domains by internal state
           globals.services.grafana.domain

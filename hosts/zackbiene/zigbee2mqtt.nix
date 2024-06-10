@@ -53,7 +53,6 @@ in {
       locations."/".proxyPass = "http://zigbee2mqtt";
       # TODO dynamic definitions for the "local" network, IPv6
       extraConfig = ''
-        allow 192.168.0.0/22;
         deny all;
       '';
     };

@@ -224,11 +224,10 @@ in {
           proxyPass = "http://immich";
           proxyWebsockets = true;
         };
-        # FIXME: refer to lan 192.168... and fd10:: via globals
         extraConfig = ''
           client_max_body_size 10G;
-          allow 192.168.1.0/24;
-          allow fd10::/64;
+          allow ${globals.net.home-lan.cidrv4};
+          allow ${globals.net.home-lan.cidrv6};
           deny all;
         '';
       };

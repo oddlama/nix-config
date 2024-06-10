@@ -4,7 +4,6 @@
   inputs,
   lib,
   minimal,
-  nodes,
   ...
 }: {
   imports = [
@@ -99,7 +98,9 @@
           backend = "container";
           container.macvlan = "lan";
           extraSpecialArgs = {
-            inherit lib nodes inputs minimal;
+            inherit (inputs.self) nodes globals;
+            inherit (inputs.self.pkgs.x86_64-linux) lib;
+            inherit inputs minimal;
           };
         };
     };

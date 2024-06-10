@@ -1,5 +1,6 @@
 {
   config,
+  globals,
   lib,
   nodes,
   pkgs,
@@ -33,8 +34,8 @@ in {
       {
         method = "native";
         urls = [
-          "192.168.178.1"
-          "192.168.1.1"
+          globals.net.home-wan.hosts.fritzbox.ipv4
+          globals.net.home-lan.hosts.ward.ipv4
         ];
         tags.type = "internal";
         fieldpass = [

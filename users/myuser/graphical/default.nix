@@ -6,18 +6,23 @@
 }: {
   imports =
     [
-      ./wired-notify.nix
       ./discord.nix
       ./firefox.nix
-      ./flameshot.nix
       ./kitty.nix
       ./signal.nix
       ./theme.nix
       ./thunderbird.nix
+
+      # X11
       ./i3.nix
-      ./rofi.nix
+      ./flameshot.nix
+      ./wired-notify.nix
+
+      # Wayland
       ./hyprland.nix
       ./waybar.nix
+      ./rofi.nix
+      ./swaync.nix
     ]
     ++ lib.optionals nixosConfig.graphical.gaming.enable [
       ./games

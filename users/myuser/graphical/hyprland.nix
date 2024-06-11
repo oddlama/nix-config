@@ -1,3 +1,7 @@
+# TODO: waybar qr scan button
+# TODO: waybar color picker button
+# TODO: notification center toggle
+# TODO ai speech indicator / toggle
 {
   lib,
   nixosConfig,

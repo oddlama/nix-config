@@ -27,7 +27,6 @@ in
 
       ./fonts.nix
       ./steam.nix
-      ./wayland.nix
       ./xserver.nix
     ];
 

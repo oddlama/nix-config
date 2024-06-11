@@ -2,6 +2,7 @@
 # TODO: waybar color picker button
 # TODO: notification center toggle
 # TODO: screencast button with notification
+# TODO: better qr script: click button, freeze screen, highlight qrs, overlay preview detected text, click to copy.
 # TODO ai speech indicator / toggle
 {
   lib,

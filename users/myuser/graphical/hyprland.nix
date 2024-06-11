@@ -9,11 +9,12 @@
     concatMap
     elem
     flip
-    getExe
     mkIf
     mkMerge
     optionals
     ;
+
+  rofi-drun = "rofi -show drun -theme ~/.config/rofi/launchers/type-1/style-10.rasi";
 in {
   home.packages = with pkgs; [
     wl-clipboard
@@ -47,8 +48,8 @@ in {
             "SUPER + CTRL + SHIFT,q,exit"
 
             # Applications
-            "SUPER,code:49,exec,${getExe pkgs.rofi-wayland} -show drun" # SUPER+^
-            ",Menu,exec,${getExe pkgs.rofi-wayland} -show drun"
+            "SUPER,code:49,exec,${rofi-drun}" # SUPER+^
+            ",Menu,exec,${rofi-drun}"
             "SUPER,t,exec,kitty"
             "SUPER,b,exec,firefox"
 

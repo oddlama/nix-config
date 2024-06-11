@@ -14,11 +14,10 @@
       ./signal.nix
       ./theme.nix
       ./thunderbird.nix
-      # XXX: disabled for the time being because gaming under nvidia+wayland has too many bugs
-      # XXX: retest this in the future. Problems were flickering under gles, black screens and refresh issues under vulkan, black wine windows.
-      # ./sway.nix
       ./i3.nix
+      ./rofi.nix
       ./hyprland.nix
+      ./waybar.nix
     ]
     ++ lib.optionals nixosConfig.graphical.gaming.enable [
       ./games

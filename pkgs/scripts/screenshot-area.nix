@@ -1,55 +1,84 @@
 {
-  lib,
   writeShellApplication,
-  flameshot,
+  grimblast,
   libnotify,
-  moreutils,
   tesseract,
-  xclip,
+  wl-clipboard,
 }:
 writeShellApplication {
   name = "screenshot-area";
+  runtimeInputs = [
+    grimblast
+    libnotify
+    tesseract
+    wl-clipboard
+  ];
   text = ''
-    set -euo pipefail
     umask 077
 
     date=$(date +"%Y-%m-%dT%H:%M:%S%:z")
     out="''${XDG_PICTURES_DIR-$HOME/Pictures}/screenshots/$date-selection.png"
     mkdir -p "$(dirname "$out")"
 
-    # Always use native scaling to ensure flameshot is fullscreen across monitors
-    export QT_AUTO_SCREEN_SCALE_FACTOR=0
-    export QT_SCREEN_SCALE_FACTORS=""
+    grimblast --freeze save area "$out" || exit 2
+    wl-copy -t image/png < "$out"
 
-    # Use sponge to create the file on success only
-    if ${lib.getExe flameshot} gui --raw 2>&1 1> >(${moreutils}/bin/sponge "$out") | grep -q "flameshot: info:.*aborted."; then
-      exit 1
-    fi
+    declare -A NOTIFICATION_IDS
+    function notify_wait_action() {
+      id="$1"
+      shift 1
 
-    ${xclip}/bin/xclip -selection clipboard -t image/png < "$out"
-    action=$(${libnotify}/bin/notify-send \
-      "📷 Screenshot captured" "📋 copied to clipboard" \
-      --hint="string:wired-tag:screenshot-$date" \
-      --action=ocr=OCR) \
-      || true
-
-    if [[ "$action" == "ocr" ]]; then
-      ${libnotify}/bin/notify-send \
-        "📷 Screenshot captured" "⏳ Running OCR ..." \
-        --hint="string:wired-tag:screenshot-$date" \
-        || true
-
-      if ${tesseract}/bin/tesseract "$out" - -l eng+deu | ${xclip}/bin/xclip -selection clipboard; then
-        ${libnotify}/bin/notify-send \
-          "📷 Screenshot captured" "🔠 OCR copied to clipboard" \
-          --hint="string:wired-tag:screenshot-$date" \
-          || true
-      else
-        ${libnotify}/bin/notify-send \
-          "📷 Screenshot captured" "❌ Error while running OCR" \
-          --hint="string:wired-tag:screenshot-$date" \
-          || true
+      args=("--print-id")
+      if [[ -v "NOTIFICATION_IDS[$id]" ]]; then
+        args+=("--replace-id=''${NOTIFICATION_IDS[$id]}")
       fi
-    fi
+      args+=("$@")
+
+      readarray -t __notify_output < <(notify-send "''${args[@]}" || true)
+      NOTIFICATION_IDS["$id"]="''${__notify_output[0]-}"
+      echo "''${__notify_output[1]-}"
+    }
+
+    function notify_nowait() {
+      id="$1"
+      shift 1
+
+      args=("--print-id")
+      if [[ -v "NOTIFICATION_IDS[$id]" ]]; then
+        args+=("--replace-id=''${NOTIFICATION_IDS[$id]}")
+      fi
+      args+=("$@")
+
+      readarray -t __notify_output < <(notify-send "''${args[@]}" || true)
+      NOTIFICATION_IDS["$id"]="''${__notify_output[0]-}"
+      unset __notify_output
+    }
+
+    title="📷 Screenshot captured"
+    body="📋 image copied to clipboard"
+    while true; do
+      action=$(notify_wait_action main "$title" "$body" \
+        --action=ocr="Run OCR" \
+        --action=copy="Copy Image")
+
+      case "$action" in
+        ocr)
+          notify_nowait main "$title" "⏳ Running OCR ..."
+
+          if tesseract "$out" - -l eng+deu | wl-copy; then
+            body="🔠 OCR copied to clipboard"
+          else
+            body="❌ Error while running OCR"
+          fi
+          ;;
+
+        copy)
+          wl-copy -t image/png < "$out"
+          body="📋 image copied to clipboard"
+          ;;
+
+        *) exit 0 ;;
+      esac
+    done
   '';
 }

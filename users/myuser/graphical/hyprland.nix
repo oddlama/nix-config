@@ -1,6 +1,7 @@
 # TODO: waybar qr scan button
 # TODO: waybar color picker button
 # TODO: notification center toggle
+# TODO: screencast button with notification
 # TODO ai speech indicator / toggle
 {
   lib,
@@ -13,6 +14,7 @@
     concatMap
     elem
     flip
+    getExe
     mkIf
     mkMerge
     optionals
@@ -58,10 +60,9 @@ in {
             "SUPER,b,exec,firefox"
 
             # Shortcuts & Actions
-            #"SUPER + SHIFT,s,exec ${getExe pkgs.scripts.screenshot-area}"
-            #"SUPER,F11,exec ${getExe pkgs.scripts.screenshot-area-scan-qr}"
-            #"SUPER,F12,exec ${getExe pkgs.scripts.screenshot-screen}"
-            #"SUPER,Print,exec ${getExe pkgs.flameshot} gui"
+            "SUPER + SHIFT,s,exec,${getExe pkgs.scripts.screenshot-area}"
+            "SUPER,F11,exec,${getExe pkgs.scripts.screenshot-area-scan-qr}"
+            "SUPER,F12,exec,${getExe pkgs.scripts.screenshot-screen}"
 
             # Per-window actions
             "SUPER,q,killactive,"
@@ -115,7 +116,6 @@ in {
           ];
         };
 
-        cursor.no_warps = true;
         decoration.rounding = 4;
 
         input = {

@@ -3,7 +3,6 @@
     enable = true;
     package = pkgs.rofi-wayland;
     extraConfig = {
-      matching = "fuzzy";
       terminal = "kitty";
     };
   };

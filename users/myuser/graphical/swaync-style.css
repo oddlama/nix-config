@@ -205,6 +205,7 @@
 
 .notification-row .notification-background .notification .notification-action {
   /* The alternative actions below the default action */
+  font-size: 1.25rem;
   border-top: 1px solid @noti-border-color;
   border-radius: 0px;
   border-right: 1px solid @noti-border-color;

@@ -64,7 +64,7 @@
         format = " ";
         tooltip = true;
         tooltip-format = "Change wallpaper";
-        on-click = "echo";
+        on-click = "systemctl --user start swww-update-wallpaper";
       };
 
       "custom/notification" = {

@@ -2,6 +2,7 @@
   writeShellApplication,
   grimblast,
   libnotify,
+  satty,
   tesseract,
   wl-clipboard,
 }:
@@ -10,6 +11,7 @@ writeShellApplication {
   runtimeInputs = [
     grimblast
     libnotify
+    satty
     tesseract
     wl-clipboard
   ];
@@ -17,7 +19,8 @@ writeShellApplication {
     umask 077
 
     date=$(date +"%Y-%m-%dT%H:%M:%S%:z")
-    out="''${XDG_PICTURES_DIR-$HOME/Pictures}/screenshots/$date-selection.png"
+    out_base="''${XDG_PICTURES_DIR-$HOME/Pictures}/screenshots/$date-selection"
+    out="$out_base.png"
     mkdir -p "$(dirname "$out")"
 
     grimblast --freeze save area "$out" || exit 2
@@ -54,12 +57,14 @@ writeShellApplication {
       unset __notify_output
     }
 
+    edit_counter=1
     title="📷 Screenshot captured"
     body="📋 image copied to clipboard"
     while true; do
       action=$(notify_wait_action main "$title" "$body" \
-        --action=ocr="Run OCR" \
-        --action=copy="Copy Image")
+        --action=ocr="🔠 Run OCR" \
+        --action=edit="✏️ Edit" \
+        --action=copy="📋 Copy Image")
 
       case "$action" in
         ocr)
@@ -70,6 +75,18 @@ writeShellApplication {
           else
             body="❌ Error while running OCR"
           fi
+          ;;
+
+        edit)
+          satty --filename "$out" \
+            --output-filename "$out_base-edit-$edit_counter.png" \
+            --copy-command wl-copy \
+            --initial-tool brush \
+            --save-after-copy \
+            --fullscreen \
+            --early-exit
+          body="🎨 image edited"
+          edit_counter=$((edit_counter + 1))
           ;;
 
         copy)

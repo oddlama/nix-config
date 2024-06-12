@@ -1,6 +1,3 @@
-# TODO: waybar qr scan button
-# TODO: waybar color picker button
-# TODO: notification center toggle
 # TODO: screencast button with notification
 # TODO: better qr script: click button, freeze screen, highlight qrs, overlay preview detected text, click to copy.
 # TODO ai speech indicator / toggle
@@ -146,6 +143,8 @@ in {
           allow_tearing = true;
         };
 
+        general.no_cursor_warps = true;
+        # FIXME: from 0.41.0: cursor.no_warps = true;
         debug.disable_logs = false;
 
         misc = {
@@ -198,10 +197,14 @@ in {
 
     extraConfig = ''
       submap=resize
-      binde=,right,resizeactive,10 0
-      binde=,left,resizeactive,-10 0
-      binde=,up,resizeactive,0 -10
-      binde=,down,resizeactive,0 10
+      binde=,right,resizeactive,80 0
+      binde=,left,resizeactive,-80 0
+      binde=,up,resizeactive,0 -80
+      binde=,down,resizeactive,0 80
+      binde=SHIFT,right,resizeactive,10 0
+      binde=SHIFT,left,resizeactive,-10 0
+      binde=SHIFT,up,resizeactive,0 -10
+      binde=SHIFT,down,resizeactive,0 10
       bind=,escape,submap,reset
       submap=reset
 

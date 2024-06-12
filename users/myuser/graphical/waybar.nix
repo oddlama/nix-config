@@ -5,6 +5,7 @@
 }: {
   programs.waybar = {
     enable = true;
+    systemd.enable = true;
     style = builtins.readFile ./waybar-style.css;
     settings.main = {
       layer = "top";
@@ -21,8 +22,9 @@
         "hyprland/window"
       ];
       modules-right = [
-        "custom/scanqr"
-        "custom/pickcolor"
+        "custom/scan_qr"
+        "custom/pick_color"
+        "custom/cycle_wallpaper"
         #"custom/screencast"
         #"custom/gpuscreenrecorder"
 
@@ -36,6 +38,7 @@
         "bluetooth"
 
         #"temps"
+        #"temperature"
         "cpu"
         "memory"
         #"battery"
@@ -44,16 +47,25 @@
         "clock"
       ];
 
-      "custom/scanqr" = {
-        tooltip = false;
+      "custom/scan_qr" = {
+        tooltip = true;
+        tooltip-format = "Scan QR Code";
         format = "󰐲";
         on-click = lib.getExe pkgs.scripts.screenshot-area-scan-qr;
       };
 
-      "custom/pickcolor" = {
-        tooltip = false;
+      "custom/pick_color" = {
+        tooltip = true;
+        tooltip-format = "Pick color";
         format = "";
         on-click = "${lib.getExe pkgs.hyprpicker} --autocopy";
+      };
+
+      "custom/cycle_wallpaper" = {
+        format = " ";
+        tooltip = true;
+        tooltip-format = "Change wallpaper";
+        on-click = "echo";
       };
 
       "custom/notification" = {

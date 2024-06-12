@@ -23,6 +23,7 @@
       ./waybar.nix
       ./rofi.nix
       ./swaync.nix
+      ./swww.nix
     ]
     ++ lib.optionals nixosConfig.graphical.gaming.enable [
       ./games

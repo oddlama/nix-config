@@ -68,6 +68,7 @@ in {
             # Per-window actions
             "SUPER,q,killactive,"
             "SUPER,return,fullscreen,"
+            "SUPER + SHIFT,return,fakefullscreen,"
             "SUPER,f,togglefloating"
 
             "SUPER,tab,cyclenext,"
@@ -204,6 +205,7 @@ in {
       bind=,escape,submap,reset
       submap=reset
 
+      env=WLR_DRM_NO_ATOMIC,1
       windowrulev2 = immediate, class:^(cs2)$
 
       binds {

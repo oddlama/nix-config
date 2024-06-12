@@ -7,8 +7,6 @@
 writeShellApplication {
   name = "volume";
   text = ''
-    set -euo pipefail
-
     ${wireplumber}/bin/wpctl "$1" "$2" "$3"
     current_volume=$(${wireplumber}/bin/wpctl get-volume "$2")
     case "''${2,,}" in

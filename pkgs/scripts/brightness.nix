@@ -7,8 +7,6 @@
 writeShellApplication {
   name = "brightness";
   text = ''
-    set -euo pipefail
-
     ${brightnessctl}/bin/brightnessctl "$1" "$2"
     case "$2" in
       "+"*) image=${./assets}/brightness-increase.svg ;;

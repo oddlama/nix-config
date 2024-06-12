@@ -1,7 +1,30 @@
-{pkgs, ...}: {
+{
+  lib,
+  pkgs,
+  ...
+}: let
+  swww-update-wallpaper = pkgs.writeShellApplication {
+    name = "swww-update-wallpaper";
+    runtimeInputs = [
+      pkgs.swww
+    ];
+    text = ''
+      FILES=("$HOME/.local/share/wallpapers/"*)
+      TYPES=("wipe" "wave" "any")
+      ANGLES=(0 15 30 45 60 75 90 105 120 135 150 165 180 195 210 225 240 255 270 285 300 315 330 345)
+
+      swww img "''${FILES[RANDOM%''${#FILES[@]}]}" \
+        --transition-type "''${TYPES[RANDOM%''${#TYPES[@]}]}" \
+        --transition-angle "''${ANGLES[RANDOM%''${#ANGLES[@]}]}" \
+        --transition-fps 144 \
+        --transition-duration 1.5
+    '';
+  };
+in {
   systemd.user = {
     services = {
       swww = {
+        Install.WantedBy = ["graphical-session.target"];
         Unit = {
           Description = "Wayland wallpaper daemon";
           PartOf = ["graphical-session.target"];
@@ -10,30 +33,22 @@
           ExecStart = "${pkgs.swww}/bin/swww-daemon";
           Restart = "on-failure";
         };
-        Install.WantedBy = ["graphical-session.target"];
       };
-      #swww-random = {
-      #  Unit = {
-      #    Description = "switch random wallpaper powered by swww";
-      #  };
-      #  Service = {
-      #    Type = "oneshot";
-      #    ExecStart = "${pkgs.swww-switch}/bin/swww-switch random";
-      #  };
-      #  Install = {
-      #    WantedBy = ["default.target"];
-      #  };
-      #};
+      swww-update-wallpaper = {
+        Install.WantedBy = ["default.target"];
+        Unit.Description = "Update the wallpaper";
+        Service = {
+          Type = "oneshot";
+          Restart = "on-failure";
+          RestartSec = "2m";
+          ExecStart = lib.getExe swww-update-wallpaper;
+        };
+      };
     };
-    #timers.swww-random = {
-    #  Unit = {
-    #    Description = "switch random wallpaper powered by swww timer";
-    #  };
-    #  Timer = {
-    #    OnUnitActiveSec = "60min";
-    #    OnBootSec = "60min";
-    #  };
-    #  Install = {WantedBy = ["timers.target"];};
-    #};
+    timers.swww-update-wallpaper = {
+      Install.WantedBy = ["timers.target"];
+      Unit.Description = "Periodically switch to a new wallpaper";
+      Timer.OnCalendar = "*:0/5"; # Every 5 minutes
+    };
   };
 }

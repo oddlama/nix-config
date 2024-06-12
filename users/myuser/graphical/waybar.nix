@@ -37,7 +37,6 @@
         "network"
         "bluetooth"
 
-        #"temps"
         #"temperature"
         "cpu"
         "memory"

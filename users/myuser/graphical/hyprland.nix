@@ -74,6 +74,7 @@ in {
             "ALT,tab,cyclenext,"
             "SUPER + SHIFT,tab,cyclenext,prev"
             "ALT + SHIFT,tab,cyclenext,prev"
+            "SUPER,r,submap,resize"
 
             "SUPER,left,movefocus,l"
             "SUPER,right,movefocus,r"
@@ -121,6 +122,7 @@ in {
 
         input = {
           kb_layout = "de";
+          kb_variant = "nodeadkeys";
           follow_mouse = 2;
           numlock_by_default = true;
           repeat_rate = 60;
@@ -194,6 +196,14 @@ in {
     ];
 
     extraConfig = ''
+      submap=resize
+      binde=,right,resizeactive,10 0
+      binde=,left,resizeactive,-10 0
+      binde=,up,resizeactive,0 -10
+      binde=,down,resizeactive,0 10
+      bind=,escape,submap,reset
+      submap=reset
+
       windowrulev2 = immediate, class:^(cs2)$
 
       binds {

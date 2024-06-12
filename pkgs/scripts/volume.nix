@@ -38,6 +38,7 @@ writeShellApplication {
 
     ${libnotify}/bin/notify-send \
       "Volume" "$value%" \
+      --transient \
       --hint=string:image-path:"$image" \
       --hint=int:value:"$indicator_value" \
       --hint="string:wired-tag:indicator" \

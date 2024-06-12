@@ -20,6 +20,7 @@ writeShellApplication {
     value=$(${bc}/bin/bc <<< "scale=0; 100*$value/$max")
     ${libnotify}/bin/notify-send \
       "Brightness" \
+      --transient \
       --hint=string:image-path:"$image" \
       --hint=int:value:"$value" \
       --hint="string:wired-tag:indicator" \

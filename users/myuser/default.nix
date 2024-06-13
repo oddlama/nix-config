@@ -28,6 +28,12 @@ in
       mode = "640";
     };
 
+    age.secrets."my-gpg-yubikey-keygrip.tar" = {
+      rekeyFile = ./secrets/gpg-keygrip.tar.age;
+      group = myuser;
+      mode = "640";
+    };
+
     home-manager.users.${myuser} = {
       imports = [
         ../config

@@ -81,10 +81,10 @@
           dnd-inhibited-none = "";
         };
         return-type = "json";
-        exec = "swaync-client -swb";
-        on-click = "swaync-client -t -sw";
-        on-click-right = "swaync-client -d -sw";
-        on-click-middle = "swaync-client --close-all";
+        exec = "${pkgs.swaynotificationcenter}/bin/swaync-client -swb";
+        on-click = "${pkgs.swaynotificationcenter}/bin/swaync-client -t -sw";
+        on-click-right = "${pkgs.swaynotificationcenter}/bin/swaync-client -d -sw";
+        on-click-middle = "${pkgs.swaynotificationcenter}/bin/swaync-client --close-all";
         escape = true;
       };
 

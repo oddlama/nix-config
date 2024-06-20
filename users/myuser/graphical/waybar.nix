@@ -5,7 +5,8 @@
 }: {
   programs.waybar = {
     enable = true;
-    systemd.enable = true;
+    # Started via hyprland to ensure it restarts properly with hyprland
+    systemd.enable = false;
     style = builtins.readFile ./waybar-style.css;
     settings.main = {
       layer = "top";
@@ -17,6 +18,7 @@
         "tray"
         "hyprland/submap"
         "privacy"
+        "custom/whisper_overlay"
       ];
       modules-center = [
         "hyprland/window"
@@ -88,6 +90,25 @@
         escape = true;
       };
 
+      "custom/whisper_overlay" = {
+        tooltip = true;
+        format = "{icon}";
+        format-icons = {
+          disconnected = "<span foreground='gray'></span>";
+          connected = "<span foreground='#4ab0fa'></span>";
+          connected-active = "<span foreground='red'></span>";
+        };
+        return-type = "json";
+        exec = "${lib.getExe pkgs.whisper-overlay} waybar-status --address localhost:43007";
+        on-click-right = lib.getExe (pkgs.writeShellApplication {
+          name = "toggle-realtime-stt-server";
+          runtimeInputs = [];
+          text = ''
+          '';
+        });
+        escape = true;
+      };
+
       privacy = {
         icon-spacing = 4;
         icon-size = 18;
@@ -115,7 +136,7 @@
         format = "<tt>{icon} {volume}%</tt>";
         format-muted = "<tt> {volume}%</tt>";
         format-icons = ["" ""];
-        on-click = "hyprctl dispatch exec \"[float;pin;move 80% 50%;size 20% 50%;noborder]\" ${lib.getExe pkgs.pwvucontrol}";
+        on-click = "${pkgs.hyprland}/bin/hyprctl dispatch exec \"[float;pin;move 80% 50%;size 20% 50%;noborder]\" ${lib.getExe pkgs.pwvucontrol}";
         on-click-middle = "${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 100%";
         on-click-right = "${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
       };

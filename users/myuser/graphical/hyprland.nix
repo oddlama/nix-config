@@ -117,6 +117,13 @@ in {
         };
 
         decoration.rounding = 4;
+        exec-once = [
+          "${pkgs.waybar}/bin/waybar"
+          "${pkgs.swaynotificationcenter}/bin/swaync"
+          "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
+          "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
+          "systemctl --user restart xdg-desktop-portal.service"
+        ];
 
         input = {
           kb_layout = "de";

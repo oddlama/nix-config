@@ -86,4 +86,7 @@
       )
       + (builtins.readFile ./swaync-style.css);
   };
+
+  # Started via hyprland to ensure it restarts properly with hyprland
+  systemd.user.services.swaync.Install.WantedBy = lib.mkForce [];
 }

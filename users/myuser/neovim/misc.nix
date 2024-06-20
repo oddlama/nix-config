@@ -5,9 +5,7 @@
         enable = true;
         stages = "static";
         render.__raw =
-          /*
-          lua
-          */
+          # lua
           ''"compact"'';
         icons = {
           debug = "";

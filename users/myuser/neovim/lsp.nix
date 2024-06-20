@@ -35,7 +35,7 @@
         cssls.enable = true;
         html.enable = true;
         # rust-analyzer should not be set here because of rustaceanvim
-        nil_ls = {
+        nil-ls = {
           enable = true;
           settings = {
             formatting.command = [(lib.getExe pkgs.alejandra) "--quiet"];

@@ -16,24 +16,16 @@
         "z" = "close_all_nodes";
         "Z" = "expand_all_nodes";
         "a".__raw =
-          /*
-          lua
-          */
+          # lua
           ''{ "add", config = { show_path = "relative" } }'';
         "A".__raw =
-          /*
-          lua
-          */
+          # lua
           ''{ "add_directory", config = { show_path = "relative" } }'';
         "c".__raw =
-          /*
-          lua
-          */
+          # lua
           ''{ "copy", config = { show_path = "relative" } }'';
         "m".__raw =
-          /*
-          lua
-          */
+          # lua
           ''{ "move", config = { show_path = "relative" } }'';
       };
     };

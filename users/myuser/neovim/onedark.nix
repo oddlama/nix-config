@@ -11,9 +11,7 @@
 
     extraConfigLua =
       lib.mkBefore
-      /*
-      lua
-      */
+      # lua
       ''
         local onedark = require "onedark"
         onedark.setup {

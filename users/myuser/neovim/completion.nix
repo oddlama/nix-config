@@ -36,9 +36,7 @@
           ];
           mapping = {
             "<CR>" =
-              /*
-              lua
-              */
+              # lua
               ''
                 cmp.mapping.confirm({
                   behavior = cmp.ConfirmBehavior.Replace,
@@ -46,24 +44,16 @@
                 })
               '';
             "<C-d>" =
-              /*
-              lua
-              */
+              # lua
               "cmp.mapping.scroll_docs(-4)";
             "<C-f>" =
-              /*
-              lua
-              */
+              # lua
               "cmp.mapping.scroll_docs(4)";
             "<C-e>" =
-              /*
-              lua
-              */
+              # lua
               "cmp.mapping.abort()";
             "<Tab>" =
-              /*
-              lua
-              */
+              # lua
               ''
                 cmp.mapping(function(fallback)
                   local has_words_before = function()
@@ -77,17 +67,21 @@
                     require("luasnip").expand()
                   elseif require("luasnip").expand_or_locally_jumpable() then
                     require("luasnip").expand_or_jump()
-                  elseif has_words_before() then
-                    cmp.complete()
+                  --elseif has_words_before() then
+                  --  cmp.complete()
                   else
                     fallback()
                   end
                 end, {"i", "s"})
               '';
+            "<Down>" =
+              # lua
+              ''cmp.mapping(cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }), {'i'})'';
+            "<Up>" =
+              # lua
+              ''cmp.mapping(cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }), {'i'})'';
             "<S-Tab>" =
-              /*
-              lua
-              */
+              # lua
               ''
                 cmp.mapping(function(fallback)
                   if cmp.visible() then
@@ -102,9 +96,7 @@
           };
           formatting.fields = ["abbr" "kind" "menu"];
           formatting.format =
-            /*
-            lua
-            */
+            # lua
             ''
               function(_, vim_item)
                 local icons = {
@@ -154,9 +146,7 @@
               end
             '';
           snippet.expand =
-            /*
-            lua
-            */
+            # lua
             ''
               function(args)
                 require('luasnip').lsp_expand(args.body)

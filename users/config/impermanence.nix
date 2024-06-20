@@ -10,6 +10,7 @@ in {
     ".ssh/known_hosts"
   ];
 
+  home.sessionVariables.CUDA_CACHE_PATH = "\${HOME}/.cache/nv";
   home.persistence."/state".directories =
     [
       ".cache/fontconfig"
@@ -18,6 +19,7 @@ in {
     ]
     ++ optionals nixosConfig.hardware.nvidia.modesetting.enable [
       ".cache/nvidia" # GLCache
+      ".cache/nv"
     ]
     ++ optionals nixosConfig.services.pipewire.enable [
       ".local/state/wireplumber"

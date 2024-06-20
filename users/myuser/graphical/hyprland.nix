@@ -212,6 +212,7 @@ in {
       binde=SHIFT,left,resizeactive,-10 0
       binde=SHIFT,up,resizeactive,0 -10
       binde=SHIFT,down,resizeactive,0 10
+      bind=,return,submap,reset
       bind=,escape,submap,reset
       submap=reset
 

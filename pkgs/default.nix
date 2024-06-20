@@ -33,6 +33,15 @@
           wrapProgram $out/bin/nvim --add-flags "--clean"
         '';
     });
+    pythonPackagesExtensions =
+      prev.pythonPackagesExtensions
+      ++ [
+        (pythonFinal: _pythonPrev: {
+          jaxlib = pythonFinal.callPackage ./jaxlib.nix {};
+          realtime-stt = pythonFinal.callPackage ./realtime-stt.nix {};
+        })
+      ];
+    realtime-stt-server = prev.callPackage ./realtime-stt-server.nix {};
 
     formats =
       prev.formats

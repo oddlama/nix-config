@@ -99,10 +99,18 @@
           connected-active = "<span foreground='red'></span>";
         };
         return-type = "json";
-        exec = "${lib.getExe pkgs.whisper-overlay} waybar-status --address localhost:43007";
+        #exec = "${lib.getExe pkgs.whisper-overlay} waybar-status";
+        on-click-middle = lib.getExe (pkgs.writeShellApplication {
+          name = "restart-whisper-overlay";
+          runtimeInputs = [];
+          # FIXME: TODO and use libnotify
+          text = ''
+          '';
+        });
         on-click-right = lib.getExe (pkgs.writeShellApplication {
           name = "toggle-realtime-stt-server";
           runtimeInputs = [];
+          # FIXME: TODO and use libnotify
           text = ''
           '';
         });

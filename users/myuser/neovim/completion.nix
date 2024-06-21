@@ -62,7 +62,7 @@
                   end
 
                   if cmp.visible() then
-                    cmp.select_next_item()
+                    cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
                   elseif require("luasnip").expandable() then
                     require("luasnip").expand()
                   elseif require("luasnip").expand_or_locally_jumpable() then
@@ -80,12 +80,18 @@
             "<Up>" =
               # lua
               ''cmp.mapping(cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }), {'i'})'';
+            "<PageDown>" =
+              # lua
+              ''cmp.mapping(cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select, count = -10 }), {'i'})'';
+            "<PageUp>" =
+              # lua
+              ''cmp.mapping(cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select, count = 10 }), {'i'})'';
             "<S-Tab>" =
               # lua
               ''
                 cmp.mapping(function(fallback)
                   if cmp.visible() then
-                    cmp.select_prev_item()
+                    cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select })
                   elseif luasnip.jumpable(-1) then
                     luasnip.jump(-1)
                   else

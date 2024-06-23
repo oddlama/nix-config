@@ -24,6 +24,7 @@ in
   // optionalAttrs (!minimal) {
     imports = [
       inputs.stylix.nixosModules.stylix
+      inputs.whisper-overlay.nixosModules.default
 
       ./fonts.nix
       ./steam.nix
@@ -59,6 +60,7 @@ in
       };
 
       stylix = {
+        enable = true;
         # I want to choose what to style myself.
         autoEnable = false;
         image = config.lib.stylix.pixel "base00";

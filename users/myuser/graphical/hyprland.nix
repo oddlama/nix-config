@@ -150,8 +150,7 @@ in {
           allow_tearing = true;
         };
 
-        general.no_cursor_warps = true;
-        # FIXME: from 0.41.0: cursor.no_warps = true;
+        cursor.no_warps = true;
         debug.disable_logs = false;
 
         misc = {

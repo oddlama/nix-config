@@ -99,19 +99,21 @@
           connected-active = "<span foreground='red'></span>";
         };
         return-type = "json";
-        #exec = "${lib.getExe pkgs.whisper-overlay} waybar-status";
-        on-click-middle = lib.getExe (pkgs.writeShellApplication {
-          name = "restart-whisper-overlay";
-          runtimeInputs = [];
-          # FIXME: TODO and use libnotify
-          text = ''
-          '';
-        });
+        exec = "${lib.getExe pkgs.whisper-overlay} waybar-status";
         on-click-right = lib.getExe (pkgs.writeShellApplication {
           name = "toggle-realtime-stt-server";
-          runtimeInputs = [];
-          # FIXME: TODO and use libnotify
+          runtimeInputs = [
+            pkgs.systemd
+            pkgs.libnotify
+          ];
           text = ''
+            if systemctl --user is-active --quiet realtime-stt-server; then
+              systemctl --user stop realtime-stt-server.service
+              notify-send "Stopped realtime-stt-server" "⛔ Stopped" --transient || true
+            else
+              systemctl --user start realtime-stt-server.service
+              notify-send "Started realtime-stt-server" "✅ Started" --transient || true
+            fi
           '';
         });
         escape = true;
@@ -196,9 +198,9 @@
 
       network = {
         interval = 5;
-        format-ethernet = "󰈀  {ipaddr}/{cidr}";
+        format-ethernet = "󰈀  {ipaddr}/{cidr} <span color='#ffead3'>↓ {bandwidthDownBytes}</span> <span color='#ecc6d9'>↑ {bandwidthUpBytes}</span>";
         format-disconnected = "⚠  Disconnected";
-        tooltip-format = " {bandwidthUpBytes}\n {bandwidthDownBytes}";
+        tooltip-format = "↑ {bandwidthUpBytes}\n↓ {bandwidthDownBytes}";
       };
 
       bluetooth = {

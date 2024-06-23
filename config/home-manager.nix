@@ -13,6 +13,7 @@
       inputs.nix-index-database.hmModules.nix-index
       inputs.nixvim.homeManagerModules.nixvim
       inputs.wired-notify.homeManagerModules.default
+      inputs.whisper-overlay.homeManagerModules.default
       {
         home.stateVersion = config.system.stateVersion;
       }

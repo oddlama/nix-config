@@ -24,6 +24,7 @@
       ./rofi.nix
       ./swaync.nix
       ./swww.nix
+      ./whisper-overlay.nix
     ]
     ++ lib.optionals nixosConfig.graphical.gaming.enable [
       ./games

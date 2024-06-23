@@ -2041,11 +2041,11 @@
         "pre-commit-hooks": "pre-commit-hooks_6"
       },
       "locked": {
-        "lastModified": 1719155732,
-        "narHash": "sha256-YrC40vbsRYFATRHbQ6UKhU1ByH6xrbSwAfmn4Ae4zhU=",
+        "lastModified": 1719168621,
+        "narHash": "sha256-w5LbzmXlkm1uwjjS2s/0mBOqbQFD8gOr+ebd2a2varE=",
         "owner": "oddlama",
         "repo": "whisper-overlay",
-        "rev": "8e75dcae2fc1f1e26bf129a4dbdbe05cbb1e8784",
+        "rev": "4ba57d95fa85fb071d49c29e974d4bcc69e92bc1",
         "type": "github"
       },
       "original": {

@@ -34,4 +34,8 @@
     # times of 1-2 seconds. Disable the completion here and only keep the home-manager one to fix it.
     enableCompletion = false;
   };
+
+  # But still link all completions from all packages so they
+  # can be found by zsh
+  environment.pathsToLink = ["/share/zsh"];
 }

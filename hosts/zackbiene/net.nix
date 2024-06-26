@@ -43,7 +43,7 @@ in {
       };
       # Announce a static prefix
       ipv6Prefixes = [
-        {ipv6PrefixConfig.Prefix = iotCidrv6;}
+        {Prefix = iotCidrv6;}
       ];
       linkConfig.RequiredForOnline = "no";
     };

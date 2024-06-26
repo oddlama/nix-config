@@ -13,11 +13,7 @@ in {
     firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.forgejo.settings.server.HTTP_PORT];
   };
 
-  age.secrets.forgejo-mailer-password = {
-    rekeyFile = config.node.secretsDir + "/forgejo-mailer-password.age";
-    mode = "440";
-    inherit (config.services.forgejo) group;
-  };
+  age.secrets.forgejo-mailer-password.rekeyFile = config.node.secretsDir + "/forgejo-mailer-password.age";
 
   # Mirror the original oauth2 secret
   age.secrets.forgejo-oauth2-client-secret = {
@@ -107,7 +103,7 @@ in {
     user = "git";
     group = "git";
     lfs.enable = true;
-    mailerPasswordFile = config.age.secrets.forgejo-mailer-password.path;
+    secrets.mailer.PASSWD = config.age.secrets.forgejo-mailer-password.path;
     settings = {
       DEFAULT.APP_NAME = "Redlew Git"; # tungsten inert gas?
       actions = {

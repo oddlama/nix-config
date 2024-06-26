@@ -33,13 +33,13 @@
           wrapProgram $out/bin/nvim --add-flags "--clean"
         '';
     });
-    pythonPackagesExtensions =
-      prev.pythonPackagesExtensions
-      ++ [
-        (pythonFinal: _pythonPrev: {
-          jaxlib = pythonFinal.callPackage ./jaxlib.nix {};
-        })
-      ];
+    #pythonPackagesExtensions =
+    #  prev.pythonPackagesExtensions
+    #  ++ [
+    #    (pythonFinal: _pythonPrev: {
+    #      jaxlib = pythonFinal.callPackage ./jaxlib.nix {};
+    #    })
+    #  ];
 
     formats =
       prev.formats

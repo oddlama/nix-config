@@ -115,7 +115,7 @@
       ipv6SendRAConfig.Managed = true;
       # Announce a static prefix
       ipv6Prefixes = [
-        {ipv6PrefixConfig.Prefix = globals.net.home-lan.cidrv6;}
+        {Prefix = globals.net.home-lan.cidrv6;}
       ];
       # Delegate prefix
       dhcpPrefixDelegationConfig = {

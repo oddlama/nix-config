@@ -224,6 +224,9 @@ zstyle ':completion:*' squeeze-slashes true
 # provide verbose completion information
 zstyle ':completion:*' verbose true
 
+# provide .. as a completion
+zstyle ':completion:*' special-dirs ..
+
 
 # --------------------------------------------------------------------------------
 # ZSH Options

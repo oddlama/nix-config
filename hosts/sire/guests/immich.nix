@@ -10,7 +10,6 @@
   immichDomain = "immich.${config.repo.secrets.global.domains.me}";
 
   ipImmichMachineLearning = "10.89.0.10";
-  ipImmichMicroservices = "10.89.0.11";
   ipImmichPostgres = "10.89.0.12";
   ipImmichRedis = "10.89.0.13";
   ipImmichServer = "10.89.0.14";
@@ -118,7 +117,7 @@
 
   processedConfigFile = "/run/agenix/immich.config.json";
 
-  version = "v1.105.1";
+  version = "v1.106.4";
   environment = {
     DB_DATABASE_NAME = "immich";
     DB_HOSTNAME = ipImmichPostgres;
@@ -274,35 +273,6 @@ in {
     ];
   };
   systemd.services."podman-immich_machine_learning" = serviceConfig;
-  virtualisation.oci-containers.containers."immich_microservices" = {
-    image = "ghcr.io/immich-app/immich-server:${version}";
-    inherit environment;
-    volumes = [
-      "${processedConfigFile}:${environment.IMMICH_CONFIG_FILE}:ro"
-      "${config.age.secrets.postgres_password.path}:${config.age.secrets.postgres_password.path}:ro"
-      "/etc/localtime:/etc/localtime:ro"
-      "${upload_folder}:/usr/src/app/upload:rw"
-    ];
-    cmd = ["start.sh" "microservices"];
-    dependsOn = [
-      "immich_postgres"
-      "immich_redis"
-    ];
-    log-driver = "journald";
-    extraOptions = [
-      "--network-alias=immich-microservices"
-      "--network=immich-default"
-      "--ip=${ipImmichMicroservices}"
-    ];
-  };
-  systemd.services."podman-immich_microservices" =
-    serviceConfig
-    // {
-      unitConfig.UpheldBy = [
-        "podman-immich_postgres.service"
-        "podman-immich_redis.service"
-      ];
-    };
   virtualisation.oci-containers.containers."immich_postgres" = {
     image = "tensorchord/pgvecto-rs:pg14-v0.2.0@sha256:90724186f0a3517cf6914295b5ab410db9ce23190a2d9d0b9dd6463e3fa298f0";
     environment = {
@@ -344,7 +314,6 @@ in {
     ports = [
       "2283:3001/tcp"
     ];
-    cmd = ["start.sh" "immich"];
     dependsOn = [
       "immich_postgres"
       "immich_redis"

@@ -66,6 +66,7 @@
     persistence."/state".directories = [
       "Downloads" # config.xdg.userDirs.download (infinite recursion)
       ".local/share/invokeai"
+      ".local/share/orca-slicer"
     ];
 
     persistence."/persist".directories = [
@@ -76,6 +77,7 @@
       ".config/gpu-screen-recorder"
       ".config/gh"
       ".config/gh-dash"
+      ".config/OrcaSlicer"
     ];
   };
 

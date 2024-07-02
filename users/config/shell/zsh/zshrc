@@ -226,6 +226,8 @@ zstyle ':completion:*' verbose true
 
 # provide .. as a completion
 zstyle ':completion:*' special-dirs ..
+# match uppercase from lowercase
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 
 
 # --------------------------------------------------------------------------------

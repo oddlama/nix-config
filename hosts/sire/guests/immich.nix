@@ -149,6 +149,13 @@ in {
   # Forwarding required to masquerade podman network
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
 
+  environment.persistence."/state".directories = [
+    {
+      directory = "/var/lib/containers";
+      mode = "0755";
+    }
+  ];
+
   # Mirror the original oauth2 secret
   age.secrets.immich-oauth2-client-secret = {
     inherit (nodes.ward-kanidm.config.age.secrets.kanidm-oauth2-immich) rekeyFile;

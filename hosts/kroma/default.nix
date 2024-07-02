@@ -105,5 +105,6 @@
     }
   ];
 
+  programs.nix-ld.enable = true;
   topology.self.icon = "devices.desktop";
 }

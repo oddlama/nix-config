@@ -17,11 +17,6 @@
     Categories=Game
   '';
   file = "Awakened-PoE-Trade-${version}.AppImage";
-
-  icon = pkgs.fetchurl {
-    url = "https://web.poecdn.com/image/Art/2DItems/Currency/TransferOrb.png";
-    hash = "sha256-K6cG5ybC3uIveu/4JIcc5mGQFgDlQSw8L9aSzbkLe1w=";
-  };
 in
   pkgs.appimageTools.wrapType2 {
     name = "awakened-poe-trade";
@@ -32,7 +27,7 @@ in
 
     extraInstallCommands = ''
       mkdir -p $out/share/applications
-      cp ${icon} $out/share/applications/awakened-poe-trade.png
+      cp ${./TransferOrb.png} $out/share/applications/awakened-poe-trade.png
       cp ${desktopEntry} $out/share/applications/${name}.desktop
       substituteInPlace $out/share/applications/awakened-poe-trade.desktop --replace /share/ $out/share/
     '';

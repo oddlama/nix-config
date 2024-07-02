@@ -3,5 +3,5 @@
     ".local/state/realtime-stt-server"
   ];
 
-  services.realtime-stt-server.enable = true;
+  #services.realtime-stt-server.enable = true;
 }

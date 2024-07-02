@@ -112,7 +112,6 @@
       };
       dhcpPrefixDelegationConfig.UplinkInterface = "wan";
       dhcpPrefixDelegationConfig.Token = "::ff";
-      ipv6SendRAConfig.Managed = true;
       # Announce a static prefix
       ipv6Prefixes = [
         {Prefix = globals.net.home-lan.cidrv6;}
@@ -122,10 +121,12 @@
         SubnetId = "22";
       };
       # Provide a DNS resolver
-      ipv6SendRAConfig = {
-        EmitDNS = true;
-        DNS = globals.net.home-lan.hosts.ward-adguardhome.ipv6;
-      };
+      # ipv6SendRAConfig = {
+      #   Managed = true;
+      #   EmitDNS = true;
+      # FIXME: this is not the true ipv6 of adguardhome   DNS = globals.net.home-lan.hosts.ward-adguardhome.ipv6;
+      # FIXME: todo assign static additional to reservation in kea
+      # };
       linkConfig.RequiredForOnline = "routable";
     };
     # Remaining macvtap interfaces should not be touched.

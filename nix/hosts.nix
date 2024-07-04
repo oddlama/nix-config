@@ -30,7 +30,7 @@
           {
             nixpkgs.config.allowUnfree = true;
             nixpkgs.overlays =
-              import ../pkgs/default.nix
+              (import ../pkgs/default.nix inputs)
               ++ [
                 inputs.nix-topology.overlays.default
                 inputs.nixos-extra-modules.overlays.default

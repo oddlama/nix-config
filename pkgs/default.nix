@@ -1,4 +1,4 @@
-[
+inputs: [
   (import ./caddy.nix)
   (import ./scripts)
   (_final: prev: {
@@ -33,6 +33,8 @@
           wrapProgram $out/bin/nvim --add-flags "--clean"
         '';
     });
+    gpu-screen-recorder = prev.callPackage "${inputs.nixpkgs-gpu-screen-recorder}/pkgs/applications/video/gpu-screen-recorder/default.nix" {};
+    gpu-screen-recorder-gtk = prev.callPackage "${inputs.nixpkgs-gpu-screen-recorder}/pkgs/applications/video/gpu-screen-recorder/gpu-screen-recorder-gtk.nix" {};
     #pythonPackagesExtensions =
     #  prev.pythonPackagesExtensions
     #  ++ [

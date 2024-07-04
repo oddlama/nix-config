@@ -25,7 +25,7 @@
       inherit system;
       config.allowUnfree = true;
       overlays =
-        import ../pkgs/default.nix
+        (import ../pkgs/default.nix inputs)
         ++ [
           inputs.nix-topology.overlays.default
           inputs.nixos-extra-modules.overlays.default

@@ -7,7 +7,7 @@
     enable = true;
     # Started via hyprland to ensure it restarts properly with hyprland
     systemd.enable = false;
-    style = builtins.readFile ./waybar-style.css;
+    style = ./waybar-style.css;
     settings.main = {
       layer = "top";
       position = "bottom";
@@ -155,7 +155,7 @@
         format = "{format_source}";
         format-source = "<tt> {volume}%</tt>";
         format-source-muted = "<tt> {volume}%</tt>";
-        on-click = "${lib.getExe pkgs.helvum}";
+        on-click = "${pkgs.hyprland}/bin/hyprctl dispatch exec \"[float]\" ${lib.getExe pkgs.helvum}";
         on-click-middle = "${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SOURCE@ 100%";
         on-click-right = "${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
         on-scroll-up = "${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SOURCE@ 1%+";
@@ -170,7 +170,8 @@
       };
 
       clock = {
-        format = "{:%H:%M}";
+        interval = 10;
+        format = "{:%H:%M:%S}";
         format-alt = "{:%A, %B %d, %Y (%R)}";
         tooltip-format = "<tt><span size='16pt' font='JetBrains Mono'>{calendar}</span></tt>";
         calendar = {

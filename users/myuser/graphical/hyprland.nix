@@ -56,6 +56,7 @@ in {
             ",Menu,exec,${rofi-drun}"
             "SUPER,t,exec,kitty"
             "SUPER,b,exec,firefox"
+            "SUPER,c,exec,${getExe pkgs.scripts.clone-term}"
 
             # Shortcuts & Actions
             "SUPER + SHIFT,s,exec,${getExe pkgs.scripts.screenshot-area}"

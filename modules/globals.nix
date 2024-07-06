@@ -92,14 +92,20 @@ in {
                 };
               };
             });
+          };
 
-            #telegrafChecks = mkOption {
-            #  type = types.attrsOf (types.submodule {
-            #    options = {
-            #      domain = mkOption {};
-            #    };
-            #  });
-            #};
+          monitoring = {
+            ping = mkOption {
+              type = types.attrsOf (types.submodule {
+                options = {
+                  fromNetwork = mkOption {
+                    type = types.str;
+                    description = "The network from which this service is reachable.";
+                    default = "external";
+                  };
+                };
+              });
+            };
           };
         };
       };

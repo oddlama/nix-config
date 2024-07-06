@@ -41,9 +41,6 @@ in {
         fieldpass = [
           "percent_packet_loss"
           "average_response_ms"
-          "standard_deviation_ms"
-          "reply_received"
-          "percent_reply_loss"
         ];
       }
       {
@@ -58,9 +55,6 @@ in {
         fieldpass = [
           "percent_packet_loss"
           "average_response_ms"
-          "standard_deviation_ms"
-          "reply_received"
-          "percent_reply_loss"
         ];
       }
     ];

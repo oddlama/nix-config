@@ -9,20 +9,18 @@ lib.optionalAttrs (!minimal) {
   services.xserver.videoDrivers = lib.mkForce ["nvidia"];
 
   hardware = {
-    nvidia = {
-      modesetting.enable = true;
-      nvidiaPersistenced = true;
-      nvidiaSettings = true;
-      open = true;
-      powerManagement.enable = true;
-    };
-    opengl = {
+    graphics = {
       enable = true;
-      driSupport32Bit = true;
+      enable32Bit = true;
       extraPackages = with pkgs; [
         vaapiVdpau
         nvidia-vaapi-driver
       ];
+    };
+    nvidia = {
+      modesetting.enable = true;
+      open = true;
+      powerManagement.enable = true;
     };
   };
 }

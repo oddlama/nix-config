@@ -1,6 +1,5 @@
 {
   inputs,
-  lib,
   pkgs,
   ...
 }: {
@@ -11,9 +10,10 @@
 
     ../../config
 
-    ../../config/hardware/intel.nix
-    ../../config/hardware/physical.nix
     ../../config/hardware/bluetooth.nix
+    ../../config/hardware/intel.nix
+    ../../config/hardware/nvidia.nix
+    ../../config/hardware/physical.nix
 
     ../../config/dev
     ../../config/graphical
@@ -39,31 +39,12 @@
 
   # FIXME: fuck optional modules and make this more adjustable via settings
   graphical.gaming.enable = true;
-  boot.blacklistedKernelModules = ["nouveau"];
-  services.xserver.videoDrivers = lib.mkForce ["nvidia"];
 
-  hardware = {
-    nvidia = {
-      prime = {
-        offload.enable = true;
-        offload.enableOffloadCmd = true;
-        intelBusId = "PCI:0:2:0";
-        nvidiaBusId = "PCI:1:0:0";
-      };
-      modesetting.enable = true;
-      nvidiaPersistenced = true;
-      nvidiaSettings = true;
-      open = false;
-      powerManagement.enable = false;
-    };
-    opengl = {
-      enable = true;
-      driSupport32Bit = true;
-      extraPackages = with pkgs; [
-        vaapiVdpau
-        nvidia-vaapi-driver
-      ];
-    };
+  hardware.nvidia.prime = {
+    offload.enable = true;
+    offload.enableOffloadCmd = true;
+    intelBusId = "PCI:0:2:0";
+    nvidiaBusId = "PCI:1:0:0";
   };
 
   topology.self.icon = "devices.laptop";

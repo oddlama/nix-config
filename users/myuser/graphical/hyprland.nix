@@ -39,7 +39,6 @@ in {
           ++ [
             "NIXOS_OZONE_WL,1"
             "MOZ_ENABLE_WAYLAND,1"
-            "MOZ_WEBRENDER,1"
             "_JAVA_AWT_WM_NONREPARENTING,1"
             "QT_WAYLAND_DISABLE_WINDOWDECORATION,1"
             "QT_QPA_PLATFORM,wayland"
@@ -139,7 +138,7 @@ in {
           accel_profile = "flat";
 
           touchpad = {
-            natural_scroll = "no";
+            natural_scroll = false;
             disable_while_typing = true;
             clickfinger_behavior = true;
             scroll_factor = 0.7;
@@ -156,8 +155,7 @@ in {
         debug.disable_logs = false;
 
         misc = {
-          vfr = 1;
-          vrr = 1;
+          vrr = 1; # 1 = always on
           disable_hyprland_logo = true;
           mouse_move_focuses_monitor = false;
         };

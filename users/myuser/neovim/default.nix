@@ -226,6 +226,12 @@
       (keymap ["n"] "<leader>cP" "<cmd>lua require('textcase').lsp_rename('to_pascal_case')<CR><right>" "LSP Rename: To PascalCase")
       (keymap ["n"] "<leader>cT" "<cmd>lua require('textcase').lsp_rename('to_title_case')<CR><right>" "LSP Rename: To Title Case")
       (keymap ["n"] "<leader>cF" "<cmd>lua require('textcase').lsp_rename('to_path_case')<CR><right>" "LSP Rename: To path/case")
+
+      # -------------------------------------------------------------------------------------------------
+      # Plugin: Neogit
+      # -------------------------------------------------------------------------------------------------
+
+      (keymap ["n" "v"] "<space>g" "<cmd>lua require('neogit').open()<CR>" "Open Neogit")
     ];
   };
 

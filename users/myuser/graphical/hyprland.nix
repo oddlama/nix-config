@@ -2,6 +2,7 @@
 # TODO: better qr script: click button, freeze screen, highlight qrs, overlay preview detected text, click to copy.
 # TODO ai speech indicator / toggle
 {
+  config,
   lib,
   nixosConfig,
   pkgs,
@@ -61,6 +62,10 @@ in {
             "SUPER + SHIFT,s,exec,${getExe pkgs.scripts.screenshot-area}"
             "SUPER,F11,exec,${getExe pkgs.scripts.screenshot-area-scan-qr}"
             "SUPER,F12,exec,${getExe pkgs.scripts.screenshot-screen}"
+
+            "SUPER,End,exec,${getExe config.lib.gpu-screen-recorder.save-replay}"
+            "SUPER,Prior,exec,systemctl --user restart gpu-screen-recorder.service"
+            "SUPER,Next,exec,systemctl --user stop gpu-screen-recorder.service"
 
             # Per-window actions
             "SUPER,q,killactive,"

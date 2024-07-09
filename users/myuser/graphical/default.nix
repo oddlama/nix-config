@@ -19,11 +19,12 @@
       ./wired-notify.nix
 
       # Wayland
+      ./gpu-screen-recorder.nix
       ./hyprland.nix
-      ./waybar.nix
       ./rofi.nix
       ./swaync.nix
       ./swww.nix
+      ./waybar.nix
       ./whisper-overlay.nix
     ]
     ++ lib.optionals nixosConfig.graphical.gaming.enable [

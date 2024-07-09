@@ -231,7 +231,7 @@
       # Plugin: Neogit
       # -------------------------------------------------------------------------------------------------
 
-      (keymap ["n" "v"] "<space>g" "<cmd>lua require('neogit').open()<CR>" "Open Neogit")
+      (keymap ["n" "v"] "<leader>g" "<cmd>lua require('neogit').open()<CR>" "Open Neogit")
     ];
   };
 

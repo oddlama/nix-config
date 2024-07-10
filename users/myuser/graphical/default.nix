@@ -75,6 +75,7 @@
       "Pictures" # config.xdg.userDirs.pictures (infinite recursion)
       "Videos" # This is where I store clips from gpu-screen-recorder-gtk
       ".config/AusweisApp"
+      ".config/TeamSpeak"
       ".config/obsidian"
       ".config/gpu-screen-recorder"
       ".config/gh"

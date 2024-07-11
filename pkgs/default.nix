@@ -38,8 +38,7 @@ inputs: [
     #pythonPackagesExtensions =
     #  prev.pythonPackagesExtensions
     #  ++ [
-    #    (pythonFinal: _pythonPrev: {
-    #      jaxlib = pythonFinal.callPackage ./jaxlib.nix {};
+    #    (_pythonFinal: pythonPrev: {
     #    })
     #  ];
 

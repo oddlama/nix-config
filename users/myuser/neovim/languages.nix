@@ -10,20 +10,19 @@
     plugins = {
       treesitter = {
         enable = true;
-        # TODO (autocmd * zR needed) folding = true;
-        indent = true;
+        settings = {
+          indent.enable = true;
 
-        incrementalSelection = {
-          enable = true;
-          keymaps = {
-            initSelection = "<C-Space>";
-            nodeIncremental = "<C-Space>";
-            scopeIncremental = "<C-S-Space>";
-            nodeDecremental = "<C-B>";
+          incremental_selection = {
+            enable = true;
+            keymaps = {
+              init_selection = "<C-Space>";
+              node_incremental = "<C-Space>";
+              scope_incremental = "<C-S-Space>";
+              node_decremental = "<C-B>";
+            };
           };
         };
-
-        nixvimInjections = true;
       };
 
       # Cargo.toml dependency completion
@@ -37,7 +36,7 @@
       rustaceanvim = {
         enable = true;
         settings = {
-          server.settings.files.excludeDirs = [".direnv"];
+          server.default_settings.files.excludeDirs = [".direnv"];
           dap.autoloadConfigurations = true;
           dap.adapter = let
             code-lldb = pkgs.vscode-extensions.vadimcn.vscode-lldb;

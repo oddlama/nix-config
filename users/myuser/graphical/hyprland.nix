@@ -182,7 +182,7 @@ in {
           "workspace 7,class:^(discord)$"
           "workspace 7,class:^(WebCord)$"
           "workspace 7,class:^(obsidian)$"
-          "workspace 7,class:^(Signal)$"
+          "workspace 7,class:^(signal)$"
           "workspace 7,class:^(TelegramDesktop)$"
         ];
 

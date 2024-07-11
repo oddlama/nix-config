@@ -48,6 +48,7 @@
       pkgs.zathura
       pkgs.gpu-screen-recorder
       pkgs.gpu-screen-recorder-gtk
+      pkgs.orca-slicer
     ];
 
     # TODO wrap thunderbird bin and set LC_ALL=de_DE.UTF-8 because thunderbird uses wrong date and time formatting with C.UTF-8

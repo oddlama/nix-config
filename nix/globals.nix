@@ -26,7 +26,7 @@
     in {
       # Make sure the keys of this attrset are trivially evaluatable to avoid infinite recursion,
       # therefore we inherit relevant attributes from the config.
-      inherit (globalsSystem.config.globals) net services;
+      inherit (globalsSystem.config.globals) net services monitoring;
     };
   };
 }

@@ -29,6 +29,17 @@ in {
 
   meta.telegraf.secrets."@GITHUB_ACCESS_TOKEN@" = config.age.secrets.github-access-token.path;
   services.telegraf.extraConfig.outputs.influxdb_v2.urls = lib.mkForce ["http://localhost:${toString influxdbPort}"];
+
+  globals.monitoring.ping.cloudflare-dns = {
+    host = "1.1.1.1";
+    location = "external";
+  };
+
+  globals.monitoring.ping.google-dns = {
+    host = "8.8.8.8";
+    location = "external";
+  };
+
   services.telegraf.extraConfig.inputs = {
     ping = [
       {

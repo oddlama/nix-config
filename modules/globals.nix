@@ -98,10 +98,14 @@ in {
             ping = mkOption {
               type = types.attrsOf (types.submodule {
                 options = {
-                  fromNetwork = mkOption {
+                  host = mkOption {
                     type = types.str;
-                    description = "The network from which this service is reachable.";
-                    default = "external";
+                    description = "The IP/hostname to ping.";
+                  };
+
+                  location = mkOption {
+                    type = types.str;
+                    description = "A location tag added to this metric.";
                   };
                 };
               });

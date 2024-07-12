@@ -1193,11 +1193,11 @@
         "pre-commit-hooks": "pre-commit-hooks_3"
       },
       "locked": {
-        "lastModified": 1715634843,
-        "narHash": "sha256-YrECYhEXY7g8Ji5luq8mdRaLRGiwTPCSDEeVP91DyDY=",
+        "lastModified": 1720814919,
+        "narHash": "sha256-g1HYi6C+URiou9MoFOPTZUYTPHISgF2g8KbhcqLiJyM=",
         "owner": "oddlama",
         "repo": "nix-topology",
-        "rev": "9ed5c7b5c5cd5bed9e204e8b9d69f4be1954abd3",
+        "rev": "e7c64ea75a7dbdf984c0ac25fb44af88244ff5a4",
         "type": "github"
       },
       "original": {

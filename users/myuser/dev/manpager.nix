@@ -18,6 +18,8 @@
         virtualedit = "all";
         splitkeep = "screen";
         termguicolors = false;
+        ignorecase = true;
+        smartcase = true;
       };
 
       extraConfigLua = ''

@@ -42,7 +42,7 @@
         #"temperature"
         "cpu"
         "memory"
-        #"battery"
+        "battery"
 
         "custom/notification"
         "clock"
@@ -118,6 +118,16 @@
       #  });
       #  escape = true;
       #};
+
+      battery = {
+        interval = 2;
+        format = "{icon}  {capacity}%";
+        format-icons = ["" "" "" "" "" "" "" "" ""];
+        states = {
+          warning = 25;
+          critical = 15;
+        };
+      };
 
       privacy = {
         icon-spacing = 4;
@@ -200,7 +210,8 @@
       network = {
         interval = 5;
         format-ethernet = "󰈀  {ipaddr}/{cidr} <span color='#ffead3'>↓ {bandwidthDownBytes}</span> <span color='#ecc6d9'>↑ {bandwidthUpBytes}</span>";
-        format-disconnected = "⚠  Disconnected";
+        format-wifi = "  {signalStrength}% {essid} {ipaddr}/{cidr} <span color='#ffead3'>↓ {bandwidthDownBytes}</span> <span color='#ecc6d9'>↑ {bandwidthUpBytes}</span>";
+        format-disconnected = "⚠ Disconnected";
         tooltip-format = "↑ {bandwidthUpBytes}\n↓ {bandwidthDownBytes}";
       };
 

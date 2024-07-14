@@ -101,7 +101,19 @@ button:hover {
 }
 
 @keyframes blink {
-	to {
+	0% {
+		background-color: #e05f65;
+	}
+
+	49% {
+		background-color: #e05f65;
+	}
+
+	50% {
+		background-color: #000000;
+	}
+
+	100% {
 		background-color: #000000;
 	}
 }
@@ -116,9 +128,8 @@ button:hover {
 	background-color: #e05f65;
 	animation-name: blink;
 	animation-duration: 0.5s;
-	animation-timing-function: step-start;
+	animation-timing-function: steps(12);
 	animation-iteration-count: infinite;
-	animation-direction: alternate;
 }
 
 #power-profiles-daemon {

@@ -17,6 +17,8 @@ in {
         hosts.ward-adguardhome.id = 3;
         hosts.ward-web-proxy.id = 4;
         hosts.sire-samba.id = 10;
+        hosts.wallbox.id = 40;
+        hosts.home-assistant-temp.id = 85;
       };
 
       proxy-home = {

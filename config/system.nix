@@ -3,6 +3,8 @@
   pkgs,
   ...
 }: {
+  documentation.nixos.enable = false;
+
   # Disable sudo which is entierly unnecessary.
   security.sudo.enable = false;
 

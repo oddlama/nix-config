@@ -35,12 +35,20 @@ inputs: [
     });
     gpu-screen-recorder = prev.callPackage "${inputs.nixpkgs-gpu-screen-recorder}/pkgs/applications/video/gpu-screen-recorder/default.nix" {};
     gpu-screen-recorder-gtk = prev.callPackage "${inputs.nixpkgs-gpu-screen-recorder}/pkgs/applications/video/gpu-screen-recorder/gpu-screen-recorder-gtk.nix" {};
-    #pythonPackagesExtensions =
-    #  prev.pythonPackagesExtensions
-    #  ++ [
-    #    (_pythonFinal: pythonPrev: {
-    #    })
-    #  ];
+    open-webui = prev.open-webui.override {python3 = prev.python311;};
+    pythonPackagesExtensions =
+      prev.pythonPackagesExtensions
+      ++ [
+        (_pythonFinal: pythonPrev: {
+          chromadb = pythonPrev.chromadb.overrideAttrs (old: {
+            pythonRelaxDeps =
+              old.pythonRelaxDeps
+              ++ [
+                "chroma-hnswlib"
+              ];
+          });
+        })
+      ];
 
     formats =
       prev.formats

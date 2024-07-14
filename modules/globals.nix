@@ -98,14 +98,117 @@ in {
             ping = mkOption {
               type = types.attrsOf (types.submodule {
                 options = {
-                  host = mkOption {
-                    type = types.str;
-                    description = "The IP/hostname to ping.";
+                  hostv4 = mkOption {
+                    type = types.nullOr types.str;
+                    description = "The IP/hostname to ping via ipv4.";
+                    default = null;
+                  };
+
+                  hostv6 = mkOption {
+                    type = types.nullOr types.str;
+                    description = "The IP/hostname to ping via ipv6.";
+                    default = null;
                   };
 
                   location = mkOption {
                     type = types.str;
                     description = "A location tag added to this metric.";
+                  };
+
+                  network = mkOption {
+                    type = types.str;
+                    description = "The network to which this endpoint is associated.";
+                  };
+                };
+              });
+            };
+
+            http = mkOption {
+              type = types.attrsOf (types.submodule {
+                options = {
+                  url = mkOption {
+                    type = types.str;
+                    description = "The url to connect to.";
+                  };
+
+                  location = mkOption {
+                    type = types.str;
+                    description = "A location tag added to this metric.";
+                  };
+
+                  network = mkOption {
+                    type = types.str;
+                    description = "The network to which this endpoint is associated.";
+                  };
+
+                  expectedStatus = mkOption {
+                    type = types.int;
+                    default = 200;
+                    description = "The HTTP status code to expect.";
+                  };
+
+                  expectedBodyRegex = mkOption {
+                    type = types.nullOr types.str;
+                    description = "A regex pattern to expect in the body.";
+                    default = null;
+                  };
+                };
+              });
+            };
+
+            dns = mkOption {
+              type = types.attrsOf (types.submodule {
+                options = {
+                  server = mkOption {
+                    type = types.str;
+                    description = "The DNS server to query.";
+                  };
+
+                  domain = mkOption {
+                    type = types.str;
+                    description = "The domain to query.";
+                  };
+
+                  record-type = mkOption {
+                    type = types.str;
+                    description = "The record type to query.";
+                    default = "A";
+                  };
+
+                  location = mkOption {
+                    type = types.str;
+                    description = "A location tag added to this metric.";
+                  };
+
+                  network = mkOption {
+                    type = types.str;
+                    description = "The network to which this endpoint is associated.";
+                  };
+                };
+              });
+            };
+
+            tcp = mkOption {
+              type = types.attrsOf (types.submodule {
+                options = {
+                  host = mkOption {
+                    type = types.str;
+                    description = "The IP/hostname to connect to.";
+                  };
+
+                  port = mkOption {
+                    type = types.port;
+                    description = "The port to connect to.";
+                  };
+
+                  location = mkOption {
+                    type = types.str;
+                    description = "A location tag added to this metric.";
+                  };
+
+                  network = mkOption {
+                    type = types.str;
+                    description = "The network to which this endpoint is associated.";
                   };
                 };
               });

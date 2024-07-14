@@ -26,6 +26,13 @@ in {
   ];
 
   globals.services.vaultwarden.domain = vaultwardenDomain;
+  globals.monitoring.http.vaultwarden = {
+    url = "https://${vaultwardenDomain}";
+    expectedBodyRegex = "Vaultwarden";
+    location = "home";
+    network = "internet";
+  };
+
   nodes.sentinel = {
     services.nginx = {
       upstreams.vaultwarden = {

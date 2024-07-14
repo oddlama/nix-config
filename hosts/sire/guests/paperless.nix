@@ -25,6 +25,12 @@ in {
   };
 
   globals.services.paperless.domain = paperlessDomain;
+  globals.monitoring.http.paperless = {
+    url = "https://${paperlessDomain}";
+    location = "home";
+    network = "internet";
+  };
+
   nodes.sentinel = {
     services.nginx = {
       upstreams.paperless = {

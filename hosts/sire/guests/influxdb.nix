@@ -28,58 +28,13 @@ in {
   };
 
   meta.telegraf.secrets."@GITHUB_ACCESS_TOKEN@" = config.age.secrets.github-access-token.path;
+  meta.telegraf.globalMonitoring = {
+    enable = true;
+    availableNetworks = ["internet" "home-wan" "home-lan"];
+  };
   services.telegraf.extraConfig.outputs.influxdb_v2.urls = lib.mkForce ["http://localhost:${toString influxdbPort}"];
 
-  globals.monitoring.ping.cloudflare-dns = {
-    host = "1.1.1.1";
-    location = "external";
-  };
-
-  globals.monitoring.ping.google-dns = {
-    host = "8.8.8.8";
-    location = "external";
-  };
-
   services.telegraf.extraConfig.inputs = {
-    ping = [
-      {
-        method = "native";
-        urls = [
-          globals.net.home-wan.hosts.fritzbox.ipv4
-          globals.net.home-lan.hosts.ward.ipv4
-        ];
-        tags.type = "internal";
-        fieldpass = [
-          "percent_packet_loss"
-          "average_response_ms"
-        ];
-      }
-      {
-        method = "native";
-        urls = [
-          "1.1.1.1"
-          "8.8.8.8"
-          config.repo.secrets.global.domains.me
-          config.repo.secrets.global.domains.personal
-        ];
-        tags.type = "external";
-        fieldpass = [
-          "percent_packet_loss"
-          "average_response_ms"
-        ];
-      }
-    ];
-
-    # FIXME: pls define this on the relevant hosts. Then we can ping it from multiple other hosts
-    #http_response = [
-    #  {
-    #    urls = [
-    #    ];
-    #    response_string_match = "Index of /";
-    #    response_status_code = 200;
-    #  }
-    #];
-
     github = {
       access_token = "@GITHUB_ACCESS_TOKEN@";
       repositories = [
@@ -94,6 +49,12 @@ in {
   };
 
   globals.services.influxdb.domain = influxdbDomain;
+  globals.monitoring.http.influxdb = {
+    url = "https://${influxdbDomain}";
+    location = "home";
+    network = "internet";
+  };
+
   nodes.sentinel = {
     services.nginx = {
       upstreams.influxdb = {

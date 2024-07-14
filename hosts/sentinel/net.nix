@@ -1,6 +1,19 @@
-{config, ...}: {
+{
+  config,
+  lib,
+  ...
+}: let
+  icfg = config.repo.secrets.local.networking.interfaces.wan;
+in {
   networking.hostId = config.repo.secrets.local.networking.hostId;
   networking.domain = config.repo.secrets.global.domains.me;
+
+  globals.monitoring.ping.sentinel = {
+    hostv4 = lib.net.cidr.ip icfg.hostCidrv4;
+    hostv6 = lib.net.cidr.ip icfg.hostCidrv6;
+    location = "external";
+    network = "internet";
+  };
 
   # Forwarding required for forgejo 9922->22
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
@@ -11,9 +24,7 @@
   };
 
   systemd.network.networks = {
-    "10-wan" = let
-      icfg = config.repo.secrets.local.networking.interfaces.wan;
-    in {
+    "10-wan" = {
       address = [
         icfg.hostCidrv4
         icfg.hostCidrv6

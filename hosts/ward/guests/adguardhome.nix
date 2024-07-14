@@ -13,6 +13,18 @@ in {
   };
 
   globals.services.adguardhome.domain = adguardhomeDomain;
+  globals.monitoring.dns.adguardhome = {
+    server = globals.net.home-lan.hosts.ward-adguardhome.ipv4;
+    domain = ".";
+    location = "home";
+    network = "home-lan";
+  };
+  globals.monitoring.http.adguardhome = {
+    url = "https://${adguardhomeDomain}";
+    location = "home";
+    network = "internet";
+  };
+
   nodes.sentinel = {
     services.nginx = {
       upstreams.adguardhome = {

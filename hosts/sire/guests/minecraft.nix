@@ -1,3 +1,4 @@
+# FIXME: todo: host the proxy on sentinel so the IPs are not lost in natting
 {
   config,
   pkgs,
@@ -360,6 +361,13 @@ in {
   ];
 
   globals.services.minecraft.domain = minecraftDomain;
+  globals.monitoring.tcp.minecraft = {
+    host = minecraftDomain;
+    port = 25565;
+    location = "home";
+    network = "internet";
+  };
+
   nodes.sentinel = {
     # Rewrite destination addr with dnat on incoming connections
     # and masquerade responses to make them look like they originate from this host.

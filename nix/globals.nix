@@ -12,6 +12,7 @@
         };
         modules = [
           ../modules/globals.nix
+          ../globals.nix
           ({lib, ...}: {
             globals = lib.mkMerge (
               lib.concatLists (lib.flip lib.mapAttrsToList config.nodes (

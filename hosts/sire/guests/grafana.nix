@@ -78,6 +78,12 @@ in {
   };
 
   globals.services.grafana.domain = grafanaDomain;
+  globals.monitoring.http.grafana = {
+    url = "https://${grafanaDomain}";
+    location = "home";
+    network = "internet";
+  };
+
   nodes.sentinel = {
     age.secrets.loki-basic-auth-hashes.generator.dependencies = [
       config.age.secrets.grafana-loki-basic-auth-password

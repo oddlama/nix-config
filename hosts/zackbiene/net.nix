@@ -9,6 +9,13 @@
 in {
   networking.hostId = config.repo.secrets.local.networking.hostId;
 
+  globals.monitoring.ping.zackbiene = {
+    hostv4 = "zackbiene.local";
+    hostv6 = "zackbiene.local";
+    location = "home";
+    network = "home-lan";
+  };
+
   wireguard.proxy-home.client.via = "ward";
 
   boot.initrd.systemd.network = {

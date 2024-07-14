@@ -78,6 +78,12 @@ in {
   };
 
   globals.services.netbird.domain = netbirdDomain;
+  globals.monitoring.http.netbird = {
+    url = "https://${netbirdDomain}";
+    location = "home";
+    network = "internet";
+  };
+
   nodes.sentinel = {
     services.nginx = {
       upstreams.netbird-mgmt = {

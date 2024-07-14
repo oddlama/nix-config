@@ -1,5 +1,6 @@
 {
   config,
+  globals,
   lib,
   minimal,
   nodes,
@@ -8,11 +9,18 @@
 }: let
   inherit
     (lib)
+    concatLists
+    elem
+    flip
+    forEach
+    mapAttrsToList
     mkAfter
     mkEnableOption
     mkIf
     mkOption
+    optional
     optionalAttrs
+    optionals
     types
     ;
 
@@ -34,6 +42,18 @@ in {
         "@INFLUX_TOKEN@" = "/run/agenix/influx-token";
       };
       description = "Additional secrets to replace in pre-start. The attr name will be searched and replaced in the config with the value read from the given file.";
+    };
+
+    globalMonitoring = {
+      enable = mkEnableOption "monitor the global infrastructure from this node.";
+      availableNetworks = mkOption {
+        type = types.listOf types.str;
+        example = ["internet"];
+        description = ''
+          The networks that can be reached from this node.
+          Only global entries with a matching network will be monitored from here.
+        '';
+      };
     };
 
     influxdb2 = {
@@ -165,8 +185,6 @@ in {
             };
             temp = {};
             wireguard = {};
-            # http_response = { urls = [ "http://localhost/" ]; };
-            # ping = { urls = [ "9.9.9.9" ]; };
           }
           // optionalAttrs config.services.smartd.enable {
             sensors = {};
@@ -182,6 +200,74 @@ in {
           }
           // optionalAttrs (config.networking.wireless.enable || config.networking.wireless.iwd.enable) {
             wireless = {};
+          }
+          // optionalAttrs cfg.globalMonitoring.enable {
+            ping = concatLists (flip mapAttrsToList globals.monitoring.ping (
+              name: pingCfg:
+                optionals (elem pingCfg.network cfg.globalMonitoring.availableNetworks) (
+                  concatLists (forEach ["hostv4" "hostv6"] (
+                    attr:
+                      optional (pingCfg.${attr} != null) {
+                        method = "native";
+                        urls = [pingCfg.${attr}];
+                        ipv4 = attr == "hostv4";
+                        ipv6 = attr == "hostv6";
+                        tags = {
+                          inherit name;
+                          inherit (pingCfg) location network;
+                          ip_version =
+                            if attr == "hostv4"
+                            then "v4"
+                            else "v6";
+                        };
+                        fieldpass = [
+                          "percent_packet_loss"
+                          "average_response_ms"
+                        ];
+                      }
+                  ))
+                )
+            ));
+
+            http_response = concatLists (flip mapAttrsToList globals.monitoring.http (
+              name: httpCfg:
+                optional (elem httpCfg.network cfg.globalMonitoring.availableNetworks) {
+                  urls = [httpCfg.url];
+                  method = "GET";
+                  response_status_code = httpCfg.expectedStatus;
+                  response_string_match = mkIf (httpCfg.expectedBodyRegex != null) httpCfg.expectedBodyRegex;
+                  tags = {
+                    inherit name;
+                    inherit (httpCfg) location network;
+                  };
+                }
+            ));
+
+            dns_query = concatLists (flip mapAttrsToList globals.monitoring.dns (
+              name: dnsCfg:
+                optional (elem dnsCfg.network cfg.globalMonitoring.availableNetworks) {
+                  servers = [dnsCfg.server];
+                  domains = [dnsCfg.domain];
+                  record_type = dnsCfg.record-type;
+                  tags = {
+                    inherit name;
+                    inherit (dnsCfg) location network;
+                  };
+                }
+            ));
+
+            net_response = concatLists (flip mapAttrsToList globals.monitoring.tcp (
+              name: tcpCfg:
+                optional (elem tcpCfg.network cfg.globalMonitoring.availableNetworks) {
+                  address = "${tcpCfg.host}:${toString tcpCfg.port}";
+                  protocol = "tcp";
+                  tags = {
+                    inherit name;
+                    inherit (tcpCfg) location network;
+                  };
+                  fieldexclude = ["result_type" "string_found"];
+                }
+            ));
           };
       };
     };

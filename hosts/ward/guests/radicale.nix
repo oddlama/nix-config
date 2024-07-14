@@ -7,6 +7,12 @@ in {
   };
 
   globals.services.radicale.domain = radicaleDomain;
+  globals.monitoring.http.radicale = {
+    url = "https://${radicaleDomain}";
+    location = "home";
+    network = "internet";
+  };
+
   nodes.sentinel = {
     services.nginx = {
       upstreams.radicale = {

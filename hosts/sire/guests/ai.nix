@@ -51,6 +51,12 @@ in {
   };
 
   globals.services.open-webui.domain = openWebuiDomain;
+  globals.monitoring.http.ollama-webui = {
+    url = "https://${openWebuiDomain}";
+    location = "home";
+    network = "internet";
+  };
+
   nodes.sentinel = {
     services.nginx = {
       upstreams.open-webui = {

@@ -23,6 +23,12 @@ in {
   };
 
   globals.services.forgejo.domain = forgejoDomain;
+  globals.monitoring.http.forgejo = {
+    url = "https://${forgejoDomain}";
+    location = "home";
+    network = "internet";
+  };
+
   nodes.sentinel = {
     # Rewrite destination addr with dnat on incoming connections
     # and masquerade responses to make them look like they originate from this host.

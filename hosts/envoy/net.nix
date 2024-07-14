@@ -1,7 +1,20 @@
-{config, ...}: {
+{
+  config,
+  lib,
+  ...
+}: let
+  icfg = config.repo.secrets.local.networking.interfaces.wan;
+in {
   networking.hostId = config.repo.secrets.local.networking.hostId;
   networking.domain = config.repo.secrets.global.domains.mail.primary;
   networking.hosts."127.0.0.1" = ["mx1.${config.repo.secrets.global.domains.mail.primary}"];
+
+  globals.monitoring.ping.envoy = {
+    hostv4 = lib.net.cidr.ip icfg.hostCidrv4;
+    hostv6 = lib.net.cidr.ip icfg.hostCidrv6;
+    location = "external";
+    network = "internet";
+  };
 
   boot.initrd.systemd.network = {
     enable = true;
@@ -9,9 +22,7 @@
   };
 
   systemd.network.networks = {
-    "10-wan" = let
-      icfg = config.repo.secrets.local.networking.interfaces.wan;
-    in {
+    "10-wan" = {
       address = [
         icfg.hostCidrv4
         icfg.hostCidrv6

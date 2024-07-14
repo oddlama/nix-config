@@ -1,9 +1,17 @@
 {
   config,
   globals,
+  lib,
   ...
 }: {
   networking.hostId = config.repo.secrets.local.networking.hostId;
+
+  globals.monitoring.ping.sire = {
+    hostv4 = lib.net.cidr.ip globals.net.home-lan.hosts.sire.cidrv4;
+    hostv6 = lib.net.cidr.ip globals.net.home-lan.hosts.sire.cidrv6;
+    location = "home";
+    network = "home-lan";
+  };
 
   boot.initrd.systemd.network = {
     enable = true;

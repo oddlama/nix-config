@@ -40,6 +40,12 @@ in {
   age.secrets.kanidm-oauth2-web-sentinel = mkRandomSecret;
 
   globals.services.kanidm.domain = kanidmDomain;
+  globals.monitoring.http.kanidm = {
+    url = "https://${kanidmDomain}";
+    location = "home";
+    network = "internet";
+  };
+
   nodes.sentinel = {
     services.nginx = {
       upstreams.kanidm = {

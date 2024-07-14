@@ -191,6 +191,12 @@ in {
   };
 
   globals.services.immich.domain = immichDomain;
+  globals.monitoring.http.immich = {
+    url = "https://${immichDomain}";
+    location = "home";
+    network = "internet";
+  };
+
   nodes.sentinel = {
     services.nginx = {
       upstreams.immich = {

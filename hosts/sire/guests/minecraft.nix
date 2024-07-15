@@ -364,7 +364,11 @@ in {
   globals.monitoring.tcp.minecraft = {
     host = minecraftDomain;
     port = 25565;
-    location = "home";
+    network = "internet";
+  };
+  globals.monitoring.http.minecraft-map = {
+    url = "https://${minecraftDomain}";
+    expectedBodyRegex = "Minecraft Dynamic Map";
     network = "internet";
   };
 
@@ -400,6 +404,10 @@ in {
           zone minecraft 64k;
           keepalive 2;
         '';
+        monitoring = {
+          enable = true;
+          expectedBodyRegex = "Minecraft Dynamic Map";
+        };
       };
       virtualHosts.${minecraftDomain} = {
         forceSSL = true;

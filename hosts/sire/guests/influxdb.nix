@@ -1,6 +1,5 @@
 {
   config,
-  globals,
   lib,
   nodes,
   pkgs,
@@ -28,10 +27,6 @@ in {
   };
 
   meta.telegraf.secrets."@GITHUB_ACCESS_TOKEN@" = config.age.secrets.github-access-token.path;
-  meta.telegraf.globalMonitoring = {
-    enable = true;
-    availableNetworks = ["internet" "home-wan" "home-lan"];
-  };
   services.telegraf.extraConfig.outputs.influxdb_v2.urls = lib.mkForce ["http://localhost:${toString influxdbPort}"];
 
   services.telegraf.extraConfig.inputs = {
@@ -49,11 +44,6 @@ in {
   };
 
   globals.services.influxdb.domain = influxdbDomain;
-  globals.monitoring.http.influxdb = {
-    url = "https://${influxdbDomain}";
-    location = "home";
-    network = "internet";
-  };
 
   nodes.sentinel = {
     services.nginx = {
@@ -63,6 +53,10 @@ in {
           zone influxdb 64k;
           keepalive 2;
         '';
+        monitoring = {
+          enable = true;
+          expectedBodyRegex = "InfluxDB";
+        };
       };
       virtualHosts.${influxdbDomain} = let
         accessRules = ''
@@ -97,6 +91,10 @@ in {
           zone influxdb 64k;
           keepalive 2;
         '';
+        monitoring = {
+          enable = true;
+          expectedBodyRegex = "InfluxDB";
+        };
       };
       virtualHosts.${influxdbDomain} = let
         accessRules = ''

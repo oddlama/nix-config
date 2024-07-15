@@ -80,7 +80,7 @@ in {
   globals.services.grafana.domain = grafanaDomain;
   globals.monitoring.http.grafana = {
     url = "https://${grafanaDomain}";
-    location = "home";
+    expectedBodyRegex = "Grafana";
     network = "internet";
   };
 
@@ -96,6 +96,10 @@ in {
           zone grafana 64k;
           keepalive 2;
         '';
+        monitoring = {
+          enable = true;
+          expectedBodyRegex = "Grafana";
+        };
       };
       virtualHosts.${grafanaDomain} = {
         forceSSL = true;
@@ -116,6 +120,10 @@ in {
           zone grafana 64k;
           keepalive 2;
         '';
+        monitoring = {
+          enable = true;
+          expectedBodyRegex = "Grafana";
+        };
       };
       virtualHosts.${grafanaDomain} = {
         forceSSL = true;

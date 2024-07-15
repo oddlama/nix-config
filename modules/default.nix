@@ -13,6 +13,7 @@
     ./kanidm.nix
     ./meta.nix
     ./netbird-client.nix
+    ./nginx-upstream-monitoring.nix
     ./oauth2-proxy.nix
     ./promtail.nix
     ./secrets.nix

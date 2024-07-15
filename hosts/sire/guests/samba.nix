@@ -136,7 +136,6 @@ in {
   globals.monitoring.tcp.samba = {
     host = globals.net.home-lan.hosts.sire-samba.ipv4;
     port = 445;
-    location = "home";
     network = "home-lan";
   };
 

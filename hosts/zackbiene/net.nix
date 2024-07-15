@@ -12,7 +12,6 @@ in {
   globals.monitoring.ping.zackbiene = {
     hostv4 = "zackbiene.local";
     hostv6 = "zackbiene.local";
-    location = "home";
     network = "home-lan";
   };
 

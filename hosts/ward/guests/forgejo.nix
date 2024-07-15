@@ -24,8 +24,8 @@ in {
 
   globals.services.forgejo.domain = forgejoDomain;
   globals.monitoring.http.forgejo = {
-    url = "https://${forgejoDomain}";
-    location = "home";
+    url = "https://${forgejoDomain}/user/login";
+    expectedBodyRegex = "Redlew Git";
     network = "internet";
   };
 
@@ -57,6 +57,11 @@ in {
           zone forgejo 64k;
           keepalive 2;
         '';
+        monitoring = {
+          enable = true;
+          path = "/user/login";
+          expectedBodyRegex = "Redlew Git";
+        };
       };
       virtualHosts.${forgejoDomain} = {
         forceSSL = true;

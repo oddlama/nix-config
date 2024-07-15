@@ -41,9 +41,10 @@ in {
 
   globals.services.kanidm.domain = kanidmDomain;
   globals.monitoring.http.kanidm = {
-    url = "https://${kanidmDomain}";
-    location = "home";
+    url = "https://${kanidmDomain}/status";
     network = "internet";
+    expectedBodyRegex = "true";
+    skipTlsVerification = true;
   };
 
   nodes.sentinel = {
@@ -54,6 +55,13 @@ in {
           zone kanidm 64k;
           keepalive 2;
         '';
+        monitoring = {
+          enable = true;
+          path = "/status";
+          expectedBodyRegex = "true";
+          skipTlsVerification = true;
+          useHttps = true;
+        };
       };
       virtualHosts.${kanidmDomain} = {
         forceSSL = true;

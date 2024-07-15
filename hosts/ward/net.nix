@@ -9,7 +9,6 @@
   globals.monitoring.ping.ward = {
     hostv4 = lib.net.cidr.ip globals.net.home-lan.hosts.ward.cidrv4;
     hostv6 = lib.net.cidr.ip globals.net.home-lan.hosts.ward.cidrv6;
-    location = "home";
     network = "home-lan";
   };
 

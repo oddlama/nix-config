@@ -51,10 +51,10 @@ in {
   };
 
   globals.services.open-webui.domain = openWebuiDomain;
-  globals.monitoring.http.ollama-webui = {
-    url = "https://${openWebuiDomain}";
-    location = "home";
-    network = "internet";
+  globals.monitoring.http.ollama = {
+    url = config.services.open-webui.environment.OLLAMA_BASE_URL;
+    expectedBodyRegex = "Ollama is running";
+    network = "local-${config.node.name}";
   };
 
   nodes.sentinel = {
@@ -65,6 +65,10 @@ in {
           zone open-webui 64k;
           keepalive 2;
         '';
+        monitoring = {
+          enable = true;
+          expectedBodyRegex = "Open WebUI";
+        };
       };
       virtualHosts.${openWebuiDomain} = {
         forceSSL = true;

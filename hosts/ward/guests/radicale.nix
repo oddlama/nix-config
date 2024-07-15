@@ -9,7 +9,7 @@ in {
   globals.services.radicale.domain = radicaleDomain;
   globals.monitoring.http.radicale = {
     url = "https://${radicaleDomain}";
-    location = "home";
+    expectedBodyRegex = "Radicale Web Interface";
     network = "internet";
   };
 
@@ -21,6 +21,10 @@ in {
           zone radicale 64k;
           keepalive 2;
         '';
+        monitoring = {
+          enable = true;
+          expectedBodyRegex = "Radicale Web Interface";
+        };
       };
       virtualHosts.${radicaleDomain} = {
         forceSSL = true;

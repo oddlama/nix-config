@@ -28,31 +28,35 @@ in {
     };
 
     monitoring = {
-      dns.cloudflare = {
-        server = "1.1.1.1";
-        domain = ".";
-        location = "home";
-        network = "home-lan";
+      dns = {
+        cloudflare = {
+          server = "1.1.1.1";
+          domain = ".";
+          network = "internet";
+        };
+
+        google = {
+          server = "8.8.8.8";
+          domain = ".";
+          network = "internet";
+        };
       };
 
       ping = {
         cloudflare = {
           hostv4 = "1.1.1.1";
           hostv6 = "2606:4700:4700::1111";
-          location = "external";
           network = "internet";
         };
 
         google = {
           hostv4 = "8.8.8.8";
           hostv6 = "2001:4860:4860::8888";
-          location = "external";
           network = "internet";
         };
 
         fritz-box = {
           hostv4 = globals.net.home-wan.hosts.fritzbox.ipv4;
-          location = "home";
           network = "home-wan";
         };
       };

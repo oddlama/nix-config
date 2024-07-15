@@ -27,7 +27,7 @@ in {
   globals.services.paperless.domain = paperlessDomain;
   globals.monitoring.http.paperless = {
     url = "https://${paperlessDomain}";
-    location = "home";
+    expectedBodyRegex = "Paperless-ngx";
     network = "internet";
   };
 
@@ -39,6 +39,10 @@ in {
           zone paperless 64k;
           keepalive 2;
         '';
+        # direct upstream monitoring doesn't work because
+        # paperless allowed hosts fails for ip-based queries.
+        # But that's fine, we just monitor it via the domain above anyway.
+        #monitoring.enable = true;
       };
       virtualHosts.${paperlessDomain} = {
         forceSSL = true;
@@ -63,6 +67,10 @@ in {
           zone paperless 64k;
           keepalive 2;
         '';
+        monitoring = {
+          enable = true;
+          expectedBodyRegex = "Paperless-ngx";
+        };
       };
       virtualHosts.${paperlessDomain} = {
         forceSSL = true;

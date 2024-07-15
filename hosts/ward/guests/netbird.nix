@@ -79,8 +79,9 @@ in {
 
   globals.services.netbird.domain = netbirdDomain;
   globals.monitoring.http.netbird = {
-    url = "https://${netbirdDomain}";
-    location = "home";
+    url = "https://${netbirdDomain}/api/users";
+    expectedStatus = 401;
+    expectedBodyRegex = "no valid authentication";
     network = "internet";
   };
 
@@ -92,6 +93,12 @@ in {
           zone netbird 64k;
           keepalive 5;
         '';
+        monitoring = {
+          enable = true;
+          path = "/api/users";
+          expectedStatus = 401;
+          expectedBodyRegex = "no valid authentication";
+        };
       };
 
       upstreams.netbird-signal = {

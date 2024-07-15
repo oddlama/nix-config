@@ -18,11 +18,6 @@ in {
   };
 
   globals.services.loki.domain = lokiDomain;
-  globals.monitoring.http.loki = {
-    url = "https://${lokiDomain}";
-    location = "home";
-    network = "internet";
-  };
 
   nodes.sentinel = {
     age.secrets.loki-basic-auth-hashes = {
@@ -38,6 +33,11 @@ in {
           zone loki 64k;
           keepalive 2;
         '';
+        monitoring = {
+          enable = true;
+          path = "/ready";
+          expectedBodyRegex = "^ready";
+        };
       };
       virtualHosts.${lokiDomain} = {
         forceSSL = true;
@@ -80,6 +80,11 @@ in {
           zone loki 64k;
           keepalive 2;
         '';
+        monitoring = {
+          enable = true;
+          path = "/ready";
+          expectedBodyRegex = "^ready";
+        };
       };
       virtualHosts.${lokiDomain} = {
         forceSSL = true;

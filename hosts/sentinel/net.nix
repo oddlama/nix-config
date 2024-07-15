@@ -11,7 +11,6 @@ in {
   globals.monitoring.ping.sentinel = {
     hostv4 = lib.net.cidr.ip icfg.hostCidrv4;
     hostv6 = lib.net.cidr.ip icfg.hostCidrv6;
-    location = "external";
     network = "internet";
   };
 

@@ -55,5 +55,8 @@
       bucket = "telegraf";
       node = "sire-influxdb";
     };
+
+    # This node shall monitor the infrastructure
+    availableMonitoringNetworks = ["internet"];
   };
 }

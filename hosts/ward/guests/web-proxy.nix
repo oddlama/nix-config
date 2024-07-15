@@ -11,6 +11,9 @@ in {
     firewallRuleForAll.allowedTCPPorts = [80 443];
   };
 
+  # This node shall monitor the infrastructure
+  meta.telegraf.availableMonitoringNetworks = ["internet" "home-wan" "home-lan"];
+
   age.secrets.acme-cloudflare-dns-token = {
     rekeyFile = config.node.secretsDir + "/acme-cloudflare-dns-token.age";
     mode = "440";

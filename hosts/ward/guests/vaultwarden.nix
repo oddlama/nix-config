@@ -28,8 +28,7 @@ in {
   globals.services.vaultwarden.domain = vaultwardenDomain;
   globals.monitoring.http.vaultwarden = {
     url = "https://${vaultwardenDomain}";
-    expectedBodyRegex = "Vaultwarden";
-    location = "home";
+    expectedBodyRegex = "Vaultwarden Web";
     network = "internet";
   };
 
@@ -41,6 +40,10 @@ in {
           zone vaultwarden 64k;
           keepalive 2;
         '';
+        monitoring = {
+          enable = true;
+          expectedBodyRegex = "Vaultwarden Web";
+        };
       };
       virtualHosts.${vaultwardenDomain} = {
         forceSSL = true;

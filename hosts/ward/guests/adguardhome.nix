@@ -16,13 +16,7 @@ in {
   globals.monitoring.dns.adguardhome = {
     server = globals.net.home-lan.hosts.ward-adguardhome.ipv4;
     domain = ".";
-    location = "home";
     network = "home-lan";
-  };
-  globals.monitoring.http.adguardhome = {
-    url = "https://${adguardhomeDomain}";
-    location = "home";
-    network = "internet";
   };
 
   nodes.sentinel = {
@@ -33,6 +27,10 @@ in {
           zone adguardhome 64k;
           keepalive 2;
         '';
+        monitoring = {
+          enable = true;
+          expectedBodyRegex = "AdGuard Home";
+        };
       };
       virtualHosts.${adguardhomeDomain} = {
         forceSSL = true;

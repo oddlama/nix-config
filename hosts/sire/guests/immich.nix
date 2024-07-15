@@ -193,7 +193,7 @@ in {
   globals.services.immich.domain = immichDomain;
   globals.monitoring.http.immich = {
     url = "https://${immichDomain}";
-    location = "home";
+    expectedBodyRegex = "immutable.entry.app";
     network = "internet";
   };
 
@@ -205,6 +205,10 @@ in {
           zone immich 64k;
           keepalive 2;
         '';
+        monitoring = {
+          enable = true;
+          expectedBodyRegex = "immutable.entry.app";
+        };
       };
       virtualHosts.${immichDomain} = {
         forceSSL = true;
@@ -228,6 +232,10 @@ in {
           zone immich 64k;
           keepalive 2;
         '';
+        monitoring = {
+          enable = true;
+          expectedBodyRegex = "immutable.entry.app";
+        };
       };
       virtualHosts.${immichDomain} = {
         forceSSL = true;

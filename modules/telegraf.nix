@@ -194,6 +194,7 @@ in {
                   concatLists (forEach ["hostv4" "hostv6"] (
                     attr:
                       optional (pingCfg.${attr} != null) {
+                        interval = "1m";
                         method = "native";
                         urls = [pingCfg.${attr}];
                         ipv4 = attr == "hostv4";
@@ -218,6 +219,7 @@ in {
             http_response = concatLists (flip mapAttrsToList globals.monitoring.http (
               name: httpCfg:
                 optional (elem httpCfg.network cfg.availableMonitoringNetworks) {
+                  interval = "1m";
                   urls = toList httpCfg.url;
                   method = "GET";
                   response_status_code = httpCfg.expectedStatus;
@@ -234,6 +236,7 @@ in {
             dns_query = concatLists (flip mapAttrsToList globals.monitoring.dns (
               name: dnsCfg:
                 optional (elem dnsCfg.network cfg.availableMonitoringNetworks) {
+                  interval = "1m";
                   servers = [dnsCfg.server];
                   domains = [dnsCfg.domain];
                   record_type = dnsCfg.record-type;
@@ -247,6 +250,7 @@ in {
             net_response = concatLists (flip mapAttrsToList globals.monitoring.tcp (
               name: tcpCfg:
                 optional (elem tcpCfg.network cfg.availableMonitoringNetworks) {
+                  interval = "1m";
                   address = "${tcpCfg.host}:${toString tcpCfg.port}";
                   protocol = "tcp";
                   tags = {

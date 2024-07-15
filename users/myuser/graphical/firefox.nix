@@ -147,6 +147,7 @@ in {
         "dom.push.enabled" = false; # no notifications, really...
         "dom.push.connection.enabled" = false;
         "dom.battery.enabled" = false; # you don't need to see my battery...
+        "dom.private-attribution.submission.enabled" = false; # No PPA for me pls
       };
 
       search = {

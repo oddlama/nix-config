@@ -10,6 +10,7 @@
     plugins = {
       treesitter = {
         enable = true;
+        folding = false;
         settings = {
           indent.enable = true;
 
@@ -29,7 +30,7 @@
       crates-nvim = {
         enable = true;
         extraOptions = {
-          src.cmp.enabled = true;
+          completion.cmp.enabled = true;
         };
       };
 

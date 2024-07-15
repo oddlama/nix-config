@@ -41,7 +41,6 @@
     registry = rec {
       nixpkgs.flake = inputs.nixpkgs;
       p = nixpkgs;
-      templates.flake = inputs.templates;
     };
   };
 

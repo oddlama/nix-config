@@ -86,8 +86,6 @@
       inputs.home-manager.follows = "home-manager";
     };
 
-    templates.url = "github:NixOS/templates";
-
     whisper-overlay = {
       url = "github:oddlama/whisper-overlay";
       inputs.nixpkgs.follows = "nixpkgs";

@@ -23,8 +23,8 @@
         '';
     });
 in {
-  home.packages = builtins.trace "WARN: reenable pwndbg later!" [
-    #pwndbgWithDebuginfod
+  home.packages = [
+    pwndbgWithDebuginfod
     pkgs.hotspot
   ];
 

@@ -68,7 +68,6 @@
     };
 
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs-gpu-screen-recorder.url = "github:NixOS/nixpkgs/032e70533b134ea30c0359886dcdec547134dbdd";
 
     nixvim = {
       url = "github:nix-community/nixvim";

@@ -1318,22 +1318,6 @@
         "type": "github"
       }
     },
-    "nixpkgs-gpu-screen-recorder": {
-      "locked": {
-        "lastModified": 1720133070,
-        "narHash": "sha256-fo/KKxICtGyQAyYwlvwxuCZSyGhoY4MPR55zf02Q104=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "032e70533b134ea30c0359886dcdec547134dbdd",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "032e70533b134ea30c0359886dcdec547134dbdd",
-        "type": "github"
-      }
-    },
     "nixpkgs-lib": {
       "locked": {
         "lastModified": 1719876945,
@@ -1686,7 +1670,6 @@
         "nixos-hardware": "nixos-hardware",
         "nixos-nftables-firewall": "nixos-nftables-firewall",
         "nixpkgs": "nixpkgs",
-        "nixpkgs-gpu-screen-recorder": "nixpkgs-gpu-screen-recorder",
         "nixvim": "nixvim",
         "pre-commit-hooks": "pre-commit-hooks_5",
         "stylix": "stylix",

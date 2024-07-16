@@ -1,5 +1,4 @@
 {
-  inputs,
   config,
   lib,
   pkgs,
@@ -68,6 +67,5 @@ in
     services.getty.autologinUser = myuser;
 
     # Allow screen recorder to access the framebuffer as root
-    imports = ["${inputs.nixpkgs-gpu-screen-recorder}/nixos/modules/programs/gpu-screen-recorder.nix"];
-    programs.gpu-screen-recorder.wrapCapabilities = true;
+    programs.gpu-screen-recorder.enable = true;
   }

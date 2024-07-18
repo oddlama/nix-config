@@ -26,6 +26,7 @@
     ;
 
   cfg = config.meta.telegraf;
+  mkIfNotEmpty = xs: mkIf (xs != []) xs;
 in {
   options.meta.telegraf = {
     enable = mkEnableOption "telegraf to push metrics to influx.";
@@ -188,7 +189,7 @@ in {
             temp = {};
             wireguard = {};
 
-            ping = concatLists (flip mapAttrsToList globals.monitoring.ping (
+            ping = mkIfNotEmpty (concatLists (flip mapAttrsToList globals.monitoring.ping (
               name: pingCfg:
                 optionals (elem pingCfg.network cfg.availableMonitoringNetworks) (
                   concatLists (forEach ["hostv4" "hostv6"] (
@@ -214,9 +215,9 @@ in {
                       }
                   ))
                 )
-            ));
+            )));
 
-            http_response = concatLists (flip mapAttrsToList globals.monitoring.http (
+            http_response = mkIfNotEmpty (concatLists (flip mapAttrsToList globals.monitoring.http (
               name: httpCfg:
                 optional (elem httpCfg.network cfg.availableMonitoringNetworks) {
                   interval = "1m";
@@ -231,9 +232,9 @@ in {
                     inherit (httpCfg) network;
                   };
                 }
-            ));
+            )));
 
-            dns_query = concatLists (flip mapAttrsToList globals.monitoring.dns (
+            dns_query = mkIfNotEmpty (concatLists (flip mapAttrsToList globals.monitoring.dns (
               name: dnsCfg:
                 optional (elem dnsCfg.network cfg.availableMonitoringNetworks) {
                   interval = "1m";
@@ -245,9 +246,9 @@ in {
                     inherit (dnsCfg) network;
                   };
                 }
-            ));
+            )));
 
-            net_response = concatLists (flip mapAttrsToList globals.monitoring.tcp (
+            net_response = mkIfNotEmpty (concatLists (flip mapAttrsToList globals.monitoring.tcp (
               name: tcpCfg:
                 optional (elem tcpCfg.network cfg.availableMonitoringNetworks) {
                   interval = "1m";
@@ -259,7 +260,7 @@ in {
                   };
                   fieldexclude = ["result_type" "string_found"];
                 }
-            ));
+            )));
           }
           // optionalAttrs config.services.smartd.enable {
             sensors = {};

@@ -2,6 +2,7 @@
   config,
   globals,
   nodes,
+  pkgs,
   ...
 }: let
   wardWebProxyCfg = nodes.ward-web-proxy.config;
@@ -233,6 +234,19 @@ in {
           basicAuth = true;
           basicAuthUser = "${config.node.name}+grafana-loki-basic-auth-password";
           secureJsonData.basicAuthPassword = "$__file{${config.age.secrets.grafana-loki-basic-auth-password.path}}";
+        }
+      ];
+      dashboards.settings.providers = [
+        {
+          name = "default";
+          options.path = pkgs.stdenv.mkDerivation {
+            name = "grafana-dashboards";
+            src = ./grafana-dashboards;
+            installPhase = ''
+              mkdir -p $out/
+              install -D -m755 $src/*.json $out/
+            '';
+          };
         }
       ];
     };

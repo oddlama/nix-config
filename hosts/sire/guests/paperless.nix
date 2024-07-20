@@ -67,10 +67,10 @@ in {
           zone paperless 64k;
           keepalive 2;
         '';
-        monitoring = {
-          enable = true;
-          expectedBodyRegex = "Paperless-ngx";
-        };
+        # direct upstream monitoring doesn't work because
+        # paperless allowed hosts fails for ip-based queries.
+        # But that's fine, we just monitor it via the domain above anyway.
+        #monitoring.enable = true;
       };
       virtualHosts.${paperlessDomain} = {
         forceSSL = true;

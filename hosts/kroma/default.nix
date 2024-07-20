@@ -106,4 +106,11 @@
 
   programs.nix-ld.enable = true;
   topology.self.icon = "devices.desktop";
+
+  #virtualisation.containers.enable = true;
+  #virtualisation.podman = {
+  #  enable = true;
+  #  dockerCompat = true;
+  #  defaultNetwork.settings.dns_enabled = true;
+  #};
 }

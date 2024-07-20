@@ -1,0 +1,907 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_INFLUXDB_(MACHINES)",
+      "label": "InfluxDB (machines)",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "11.1.0"
+    },
+    {
+      "type": "datasource",
+      "id": "influxdb",
+      "name": "InfluxDB",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "state-timeline",
+      "name": "State timeline",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "limit": 100,
+        "name": "Annotations & Alerts",
+        "showIn": 0,
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "A very simple and visual Dashboard to monitor HTTP Responses using the native http_response from Telegraf. It just works automatically once the sources are added to telegraf.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "gnetId": 11777,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 30,
+      "panels": [],
+      "title": "Row title",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB_(MACHINES)}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed"
+          },
+          "custom": {
+            "fillOpacity": 70,
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": 120000,
+            "lineWidth": 0,
+            "spanNulls": false
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "success"
+                },
+                "1": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "response_string_mismatch"
+                },
+                "2": {
+                  "color": "red",
+                  "index": 2,
+                  "text": "body_read_error"
+                },
+                "3": {
+                  "color": "red",
+                  "index": 3,
+                  "text": "connection_failed"
+                },
+                "4": {
+                  "color": "red",
+                  "index": 4,
+                  "text": "timeout"
+                },
+                "5": {
+                  "color": "red",
+                  "index": 5,
+                  "text": "dns_error"
+                },
+                "6": {
+                  "color": "red",
+                  "index": 6,
+                  "text": "response_status_code_mismatch"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 19,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
+      "id": 26,
+      "options": {
+        "alignValue": "left",
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "mergeValues": true,
+        "rowHeight": 0.9,
+        "showValue": "auto",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB_(MACHINES)}"
+          },
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"http_response\")\n  |> filter(fn: (r) => r[\"_field\"] == \"result_code\")\n // |> filter(fn: (r) => r[\"_value\"] != \"success\")\n  |> keep(columns: [\"_time\", \"_value\", \"name\", \"host\", \"server\"])\n",
+          "refId": "A"
+        }
+      ],
+      "title": "HTTP Service Uptime",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "{host=\"(.*)\".*name=\"(.*)\".*server=\"(.*)\"}",
+            "renamePattern": "$2    $1"
+          }
+        }
+      ],
+      "type": "state-timeline"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB_(MACHINES)}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed"
+          },
+          "custom": {
+            "fillOpacity": 70,
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": 120000,
+            "lineWidth": 0,
+            "spanNulls": false
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "success"
+                },
+                "1": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "timeout"
+                },
+                "2": {
+                  "color": "red",
+                  "index": 2,
+                  "text": "connection failed"
+                },
+                "3": {
+                  "color": "red",
+                  "index": 3,
+                  "text": "read failed"
+                },
+                "4": {
+                  "color": "red",
+                  "index": 4,
+                  "text": "string mismatch"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "id": 29,
+      "options": {
+        "alignValue": "left",
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "mergeValues": true,
+        "rowHeight": 0.9,
+        "showValue": "auto",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB_(MACHINES)}"
+          },
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"net_response\")\n  |> filter(fn: (r) => r[\"_field\"] == \"result_code\")\n // |> filter(fn: (r) => r[\"_value\"] != \"success\")\n  |> keep(columns: [\"_time\", \"_value\", \"name\", \"host\", \"port\", \"server\"])\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Socket uptime",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "{host=\"(.*)\".*name=\"(.*)\".*port=\"(.*)\".*server=\"(.*)\"}",
+            "renamePattern": "$4:$3    $2    $1"
+          }
+        }
+      ],
+      "type": "state-timeline"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB_(MACHINES)}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed"
+          },
+          "custom": {
+            "fillOpacity": 70,
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": 120000,
+            "lineWidth": 0,
+            "spanNulls": false
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "success"
+                },
+                "1": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "timeout"
+                },
+                "2": {
+                  "color": "red",
+                  "index": 2,
+                  "text": "connection failed"
+                },
+                "3": {
+                  "color": "red",
+                  "index": 3,
+                  "text": "read failed"
+                },
+                "4": {
+                  "color": "red",
+                  "index": 4,
+                  "text": "string mismatch"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 25
+      },
+      "id": 31,
+      "options": {
+        "alignValue": "left",
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "mergeValues": true,
+        "rowHeight": 0.9,
+        "showValue": "auto",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB_(MACHINES)}"
+          },
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"dns_query\")\n  |> filter(fn: (r) => r[\"_field\"] == \"result_code\")\n // |> filter(fn: (r) => r[\"_value\"] != \"success\")\n  |> keep(columns: [\"_time\", \"_value\", \"name\", \"host\", \"server\"])\n",
+          "refId": "A"
+        }
+      ],
+      "title": "DNS uptime",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "{host=\"(.*)\".*name=\"(.*)\".*server=\"(.*)\"}",
+            "renamePattern": "$3    $2    $1"
+          }
+        }
+      ],
+      "type": "state-timeline"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB_(MACHINES)}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "fillOpacity": 70,
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": 120000,
+            "lineWidth": 0,
+            "spanNulls": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "semi-dark-green",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 20
+              },
+              {
+                "color": "super-light-yellow",
+                "value": 50
+              },
+              {
+                "color": "yellow",
+                "value": 100
+              },
+              {
+                "color": "orange",
+                "value": 200
+              },
+              {
+                "color": "red",
+                "value": 1000
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 13,
+        "w": 24,
+        "x": 0,
+        "y": 30
+      },
+      "id": 27,
+      "options": {
+        "alignValue": "left",
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "mergeValues": true,
+        "rowHeight": 0.9,
+        "showValue": "never",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB_(MACHINES)}"
+          },
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"ping\")\n  |> filter(fn: (r) => r[\"_field\"] == \"average_response_ms\")\n // |> filter(fn: (r) => r[\"_value\"] != \"success\")\n  |> keep(columns: [\"_time\", \"_value\", \"name\", \"host\", \"ip_version\", \"url\"])\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Ping Response Time",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "{host=\"(.*)\".*ip_version=\"(.*)\".*name=\"(.*)\".*url=\"(.*)\"}",
+            "renamePattern": "$4    $3    $1    $2"
+          }
+        }
+      ],
+      "type": "state-timeline"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB_(MACHINES)}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "fillOpacity": 70,
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": 120000,
+            "lineWidth": 0,
+            "spanNulls": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "semi-dark-green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 50
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 19,
+        "w": 24,
+        "x": 0,
+        "y": 43
+      },
+      "id": 28,
+      "options": {
+        "alignValue": "left",
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "mergeValues": true,
+        "rowHeight": 0.9,
+        "showValue": "never",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB_(MACHINES)}"
+          },
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"ping\")\n  |> filter(fn: (r) => r[\"_field\"] == \"percent_packet_loss\")\n  |> keep(columns: [\"_time\", \"_value\", \"name\", \"host\", \"ip_version\", \"url\"])\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Ping Packet Loss Percentage",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "{host=\"(.*)\".*ip_version=\"(.*)\".*name=\"(.*)\".*url=\"(.*)\"}",
+            "renamePattern": "$4    $3    $1    $2"
+          }
+        }
+      ],
+      "type": "state-timeline"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 62
+      },
+      "id": 25,
+      "panels": [],
+      "title": "Table, and advanced HTTP statistics",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB_(MACHINES)}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "noValue": "Error",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "result"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "applyToRow": false,
+                  "mode": "gradient",
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "semi-dark-red",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "success": {
+                        "color": "dark-green",
+                        "index": 0
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "status_code"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 144
+              },
+              {
+                "id": "custom.align",
+                "value": "center"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "name"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 317
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 21,
+        "w": 24,
+        "x": 0,
+        "y": 63
+      },
+      "id": 9,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "enablePagination": true,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "Name"
+          }
+        ]
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "alias": "$tag_server",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB_(MACHINES)}"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: v.defaultBucket)\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"http_response\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"result_code\")\r\n  |> filter(fn: (r) => \"${failed_only}\" == \"OFF\" or r[\"_value\"] != 0)\r\n  |> last()",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {
+            "labelsToFields": true,
+            "reducers": [
+              "lastNotNull"
+            ]
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Field": true,
+              "Last *": true,
+              "Time": false,
+              "host": false,
+              "method": true,
+              "network": false,
+              "result": false,
+              "result_code": true,
+              "server": false,
+              "status_code": false
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Field": 7,
+              "Last *": 8,
+              "host": 2,
+              "method": 6,
+              "name": 1,
+              "network": 5,
+              "result": 0,
+              "server": 3,
+              "status_code": 4
+            },
+            "renameByName": {
+              "Last *": "",
+              "host": "Host",
+              "method": "",
+              "name": "Name",
+              "network": "Network",
+              "result": "Result",
+              "server": "Server",
+              "status_code": "HTTP Status"
+            }
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "table"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 39,
+  "tags": [
+    "http",
+    "http_response"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "ON",
+          "value": "ON"
+        },
+        "description": "Only show endpoints that have errors",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Only show failed",
+        "multi": false,
+        "name": "failed_only",
+        "options": [
+          {
+            "selected": false,
+            "text": "ON",
+            "value": "ON"
+          },
+          {
+            "selected": true,
+            "text": "OFF",
+            "value": "OFF"
+          }
+        ],
+        "query": "ON, OFF",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ]
+  },
+  "timezone": "",
+  "title": "HTTP Response Monitoring",
+  "uid": "Os3hdxQZk",
+  "version": 15,
+  "weekStart": ""
+}

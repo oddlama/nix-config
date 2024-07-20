@@ -48,6 +48,6 @@
     extraSystemBuilderCmds = ''
       ln -sv ${inputs.nixpkgs} $out/nixpkgs
     '';
-    stateVersion = "23.11";
+    stateVersion = "24.11";
   };
 }

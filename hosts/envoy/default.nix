@@ -12,8 +12,8 @@
     ./acme.nix
     ./fs.nix
     ./net.nix
-    ./maddy.nix
-    #./stalwart-mail.nix
+    #./maddy.nix
+    ./stalwart-mail.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";

@@ -1,27 +1,24 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   mailDomains = config.repo.secrets.global.domains.mail;
   primaryDomain = mailDomains.primary;
+  stalwartDomain = "mail.${primaryDomain}";
+  dataDir = "/var/lib/stalwart-mail";
 in {
   environment.persistence."/persist".directories = [
     {
-      directory = "/var/lib/stalwart-mail";
-      owner = "stalwart-mail";
+      directory = dataDir;
+      user = "stalwart-mail";
       group = "stalwart-mail";
       mode = "0700";
     }
   ];
 
   users.groups.acme.members = ["stalwart-mail"];
-  users.groups.stalwart-mail = {};
-  users.users.stalwart-mail = {
-    isSystemUser = true;
-    home = "/var/lib/stalwart-mail";
-    group = "stalwart-mail";
-  };
 
   networking.firewall.allowedTCPPorts = [
     25 # smtp
@@ -29,45 +26,66 @@ in {
     # 587 # submission starttls
     993 # imap tls
     # 143 # imap starttls
-    8080 # stalwart-mail http
     4190 # manage sieve
   ];
 
-  systemd.services.stalwart-mail = {
-    serviceConfig = {
-      DynamicUser = lib.mkForce false;
-      StandardOutput = lib.mkForce "journal";
-      StandardError = lib.mkForce "journal";
-      SupplementaryGroups = ["acme"];
-    };
+  globals.services.stalwart.domain = stalwartDomain;
+  globals.monitoring.http.stalwart = {
+    url = "https://${stalwartDomain}";
+    expectedBodyRegex = "Stalwart Management";
+    network = "internet";
   };
 
   services.stalwart-mail = {
     enable = true;
 
-    settings = {
-      #include.files = [secrets."stalwart.toml".path];
-      #config.local-keys = [
-      #  "store.*"
-      #  "directory.*"
-      #  "tracer.*"
-      #  "server.*"
-      #  "!server.blocked-ip.*"
-      #  "authentication.fallback-admin.*"
-      #  "cluster.node-id"
-      #  "storage.data"
-      #  "storage.blob"
-      #  "storage.lookup"
-      #  "storage.fts"
-      #  "storage.directory"
-      #  "lookup.default.hostname"
-      #  "certificate.*"
-      #];
+    settings = lib.mkForce {
+      authentication.fallback-admin = {
+        user = "admin";
+        secret = "$6$tOo2HQnlyAcgyfx5$aMI3uELtqsjkN.gHn8f2W2yxl2ovo.6PU9XxT9jvjJ2CNXpwpumlBq.ZaERPQcTzl4.o1vklB.sdBevXBrLPp0";
+      };
 
-      global.tracing.level = "trace";
-      resolver.public-suffix = [
-        "https://publicsuffix.org/list/public_suffix_list.dat"
-      ];
+      tracer.stdout = {
+        # Do not use the built-in journal tracer, as it shows much less auxiliary
+        # information for the same loglevel
+        type = "stdout";
+        level = "info";
+        ansi = false; # no colour markers to journald
+        enable = true;
+      };
+
+      store.db = {
+        type = "sqlite";
+        path = "${dataDir}/database.sqlite3";
+      };
+
+      storage = {
+        data = "db";
+        fts = "db";
+        lookup = "db";
+        blob = "db";
+        directory = "internal";
+      };
+
+      directory.internal = {
+        type = "internal";
+        store = "db";
+      };
+
+      resolver = {
+        type = "system";
+        public-suffix = [
+          "file://${pkgs.publicsuffix-list}/share/publicsuffix/public_suffix_list.dat"
+        ];
+      };
+
+      config.resource.spam-filter = "file://${config.services.stalwart-mail.package}/etc/stalwart/spamfilter.toml";
+
+      certificate.default = {
+        cert = "%{file:${config.security.acme.certs.${primaryDomain}.directory}/fullchain.pem}%";
+        private-key = "%{file:${config.security.acme.certs.${primaryDomain}.directory}/key.pem}%";
+        default = true;
+      };
 
       server = {
         hostname = "mx1.${primaryDomain}";
@@ -80,72 +98,72 @@ in {
           reuse-addr = true;
         };
         listener = {
-          jmap = {
-            protocol = "jmap";
-            bind = " [::]:8080";
-            url = "https://mail.${primaryDomain}/jmap";
+          smtp = {
+            protocol = "smtp";
+            bind = "[::]:25";
+          };
+          submissions = {
+            protocol = "smtp";
+            bind = "[::]:465";
+            tls.implicit = true;
           };
           imaps = {
             protocol = "imap";
             bind = "[::]:993";
-            tls.enable = true;
+            tls.implicit = true;
+          };
+          http = {
+            # jmap, web interface
+            protocol = "http";
+            bind = "[::]:8080";
+            url = "https://${stalwartDomain}/jmap";
+          };
+          sieve = {
+            protocol = "managesieve";
+            bind = "[::]:4190";
             tls.implicit = true;
           };
         };
       };
+    };
+  };
 
-      session = {
-        rcpt = {
-          directory = "default";
-          relay = [
-            {
-              "if" = "authenticated-as";
-              ne = "";
-              "then" = true;
-            }
-            {"else" = false;}
-          ];
-        };
+  services.nginx = {
+    upstreams.stalwart = {
+      servers."localhost:8080" = {};
+      extraConfig = ''
+        zone stalwart 64k;
+        keepalive 2;
+      '';
+    };
+    virtualHosts.${stalwartDomain} = {
+      forceSSL = true;
+      useACMEWildcardHost = true;
+      extraConfig = ''
+        client_max_body_size 512M;
+      '';
+      locations."/" = {
+        proxyPass = "http://stalwart";
+        proxyWebsockets = true;
       };
+    };
+  };
 
-      queue = {
-        outbound = {
-          next-hop = [
-            {
-              "if" = "rcpt-domain";
-              in-list = "default/domains";
-              "then" = "local";
-            }
-            {"else" = "relay";}
-          ];
-          tls = {
-            mta-sts = "disable";
-            dane = "disable";
-          };
-        };
-      };
-
-      remote.relay = {
-        protocol = "smtp";
-        address = "127.0.0.1";
-        port = 25;
-      };
-
-      jmap = {
-        directory = "default";
-        http.headers = [
-          "Access-Control-Allow-Origin: *"
-          "Access-Control-Allow-Methods: POST, GET, HEAD, OPTIONS"
-          "Access-Control-Allow-Headers: *"
-        ];
-      };
-
-      management.directory = "default";
-
-      certificate.default = {
-        cert = "file://${cfg.certFile}";
-        private-key = "file://${cfg.keyFile}";
-      };
+  systemd.services.stalwart-mail = let
+    cfg = config.services.stalwart-mail;
+    configFormat = pkgs.formats.toml {};
+    configFile = configFormat.generate "stalwart-mail.toml" cfg.settings;
+  in {
+    preStart = lib.mkAfter ''
+      cat ${configFile} > /run/stalwart-mail/config.toml
+    '';
+    serviceConfig = {
+      RuntimeDirectory = "stalwart-mail";
+      ExecStart = lib.mkForce [
+        ""
+        "${cfg.package}/bin/stalwart-mail --config=/run/stalwart-mail/config.toml"
+      ];
+      RestartSec = "60"; # Retry every minute
     };
   };
 }

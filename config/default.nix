@@ -10,6 +10,7 @@
     inputs.disko.nixosModules.disko
     inputs.elewrap.nixosModules.default
     inputs.home-manager.nixosModules.default
+    inputs.idmail.nixosModules.default
     inputs.impermanence.nixosModules.impermanence
     inputs.nix-topology.nixosModules.default
     inputs.nixos-extra-modules.nixosModules.default

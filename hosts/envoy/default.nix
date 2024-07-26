@@ -12,7 +12,7 @@
     ./acme.nix
     ./fs.nix
     ./net.nix
-    #./maddy.nix
+    ./idmail.nix
     ./stalwart-mail.nix
   ];
 

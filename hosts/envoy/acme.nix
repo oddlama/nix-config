@@ -22,7 +22,7 @@ in {
       };
       dnsProvider = "cloudflare";
       dnsPropagationCheck = true;
-      reloadServices = ["nginx" "maddy"];
+      reloadServices = ["nginx" "stalwart-mail"];
     };
     inherit (acme) certs wildcardDomains;
   };

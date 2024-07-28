@@ -1240,11 +1240,11 @@
         "pre-commit-hooks": "pre-commit-hooks_3"
       },
       "locked": {
-        "lastModified": 1721997987,
-        "narHash": "sha256-Ck9CSO05AMNFI6e0QH0NnOC02cb8fSZ1r60XVSBBs10=",
+        "lastModified": 1722122164,
+        "narHash": "sha256-oMpuAsd/XqDkFjlnawWokObslzeOjt0ivAumrUy5xnM=",
         "owner": "oddlama",
         "repo": "idmail",
-        "rev": "a6516dbdabd7b1473936c9bf79a31ee5515095e6",
+        "rev": "788f7dbae0f05810892968c74033b5d43c581cc2",
         "type": "github"
       },
       "original": {

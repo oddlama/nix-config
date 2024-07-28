@@ -33,6 +33,7 @@ in {
       "fritzbox"
       "soundtouch"
       "spotify"
+      "matter"
       #"zha"
       "mqtt"
     ];

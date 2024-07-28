@@ -14,12 +14,12 @@
     ];
 
     extraOutputsToInstall = ["man" "doc" "devdoc"];
-    packages = with pkgs; [
-      git-lfs
-      d2
-      cloc
-      jq
-      python3
+    packages = [
+      pkgs.git-lfs
+      pkgs.d2
+      pkgs.cloc
+      pkgs.jq
+      pkgs.python3
     ];
   };
 }

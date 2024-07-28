@@ -102,12 +102,6 @@
         template = "{{y}}/{{MM}}/{{filename}}";
       };
       theme.customCss = "";
-      thumbnail = {
-        colorspace = "p3";
-        jpegSize = 1440;
-        quality = 80;
-        webpSize = 250;
-      };
       trash = {
         days = 30;
         enabled = true;

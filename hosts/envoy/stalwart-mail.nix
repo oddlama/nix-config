@@ -336,8 +336,9 @@ in {
           default = true;
         };
 
+        lookup.default.hostname = config.networking.fqdn;
         server = {
-          hostname = "mx1.${primaryDomain}";
+          hostname = config.networking.fqdn;
           tls = {
             certificate = "default";
             ignore-client-order = true;

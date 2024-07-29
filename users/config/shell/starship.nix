@@ -1,28 +1,6 @@
-{
-  lib,
-  pkgs,
-  ...
-}: {
-  disabledModules = ["programs/starship.nix"];
-  imports = [./starship-module.nix];
-
+{lib, ...}: {
   programs.starship = {
     enable = true;
-    package = let
-      src = pkgs.fetchFromGitHub {
-        owner = "oddlama";
-        repo = "starship";
-        rev = "feat-more-dynamic-username-and-hostname";
-        hash = "sha256-afZO5WSVy9hWRz8Mki3ayCwdvZDZt9L1yegrjRnqYko=";
-      };
-    in
-      pkgs.starship.overrideAttrs (_finalAttrs: previousAttrs: {
-        inherit src;
-        cargoDeps = previousAttrs.cargoDeps.overrideAttrs (_: {
-          inherit src;
-          outputHash = "sha256-bmswPBJi2YpnhnS77S++/+SQnlerWWRqFZPCZkBUeFg=";
-        });
-      });
     settings = {
       add_newline = false;
       format = lib.concatStrings [
@@ -45,17 +23,16 @@
       ];
       command_timeout = 60; # 60ms must be enough. I like a responsive prompt more than additional git information.
       username = {
-        format = "[$user]($style) ";
-        show_if_root = false;
-        show_if_ssh = false;
-        style = "yellow";
+        format = "[$user]($style)";
+        style_root = "bold red";
+        style_user = "bold purple";
+        aliases.root = "";
       };
       hostname = {
         format = "[$hostname]($style)[$ssh_symbol](green)";
-        ssh_only = false;
+        ssh_only = true;
         ssh_symbol = " 󰣀";
-        style = "bold purple";
-        user_overrides.root.style = "bold red";
+        style = "bold red";
       };
       directory = {
         format = "[$path]($style)[$read_only]($read_only_style)";

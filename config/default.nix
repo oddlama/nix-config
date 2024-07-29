@@ -4,6 +4,8 @@
     "services/networking/netbird.nix"
   ];
 
+  hardware.nvidia.modesetting.enable = builtins.trace "remove once #330748 is merged" true;
+
   imports = [
     inputs.agenix-rekey.nixosModules.default
     inputs.agenix.nixosModules.default

@@ -44,10 +44,6 @@ in {
 
   services.stalwart-mail = {
     enable = true;
-    package = pkgs.stalwart-mail.overrideAttrs (old: {
-      patches = old.patches ++ [./stalwart.patch];
-    });
-
     settings = let
       case = field: check: value: data: {
         "if" = field;
@@ -64,7 +60,7 @@ in {
       lib.mkForce {
         authentication.fallback-admin = {
           user = "admin";
-          secret = "%{file:/run/stalwart-mail/admin-hash}%";
+          secret = "%{file:${config.age.secrets.stalwart-admin-hash.path}}%";
         };
 
         tracer.stdout = {
@@ -336,9 +332,8 @@ in {
           default = true;
         };
 
-        lookup.default.hostname = config.networking.fqdn;
+        lookup.default.hostname = stalwartDomain;
         server = {
-          hostname = config.networking.fqdn;
           tls = {
             certificate = "default";
             ignore-client-order = true;
@@ -366,7 +361,8 @@ in {
               # jmap, web interface
               protocol = "http";
               bind = "[::]:8080";
-              url = "https://${stalwartDomain}/jmap";
+              url = "https://${stalwartDomain}";
+              use-x-forwarded = true;
             };
             sieve = {
               protocol = "managesieve";
@@ -375,19 +371,6 @@ in {
             };
           };
         };
-
-        #queue.outbound.next-hop = [
-        #  (case "rcpt_domain" "in-list" "default/domains" "local")
-        #  (otherwise false)
-        #];
-
-        #queue.schedule = {
-        #  retry = ["2m" "5m" "10m" "15m" "30m" "1h" "2h"];
-        #  notify = ["1d" "3d"];
-        #  expire = "5d";
-        #};
-
-        # XXX: needed? jmap.directory = "idmail";
 
         imap = {
           request.max-size = 52428800;
@@ -443,7 +426,6 @@ in {
         };
 
         session.rcpt = {
-          # XXX: needed? directory = "idmail";
           catch-all = true;
           relay = [
             (is-authenticated true)
@@ -456,23 +438,31 @@ in {
 
   services.nginx = {
     upstreams.stalwart = {
-      servers."localhost:8080" = {};
+      servers."127.0.0.1:8080" = {};
       extraConfig = ''
         zone stalwart 64k;
         keepalive 2;
       '';
     };
-    virtualHosts.${stalwartDomain} = {
-      forceSSL = true;
-      useACMEWildcardHost = true;
-      extraConfig = ''
-        client_max_body_size 512M;
-      '';
-      locations."/" = {
-        proxyPass = "http://stalwart";
-        proxyWebsockets = true;
-      };
-    };
+    virtualHosts =
+      {
+        ${stalwartDomain} = {
+          forceSSL = true;
+          useACMEWildcardHost = true;
+          extraConfig = ''
+            client_max_body_size 512M;
+          '';
+          locations."/" = {
+            proxyPass = "http://stalwart";
+            proxyWebsockets = true;
+          };
+        };
+      }
+      // lib.genAttrs ["autoconfig.${primaryDomain}" "autodiscover.${primaryDomain}" "mta-sts.${primaryDomain}"] (_: {
+        forceSSL = true;
+        useACMEWildcardHost = true;
+        locations."/".proxyPass = "http://stalwart";
+      });
   };
 
   systemd.services.stalwart-mail = let
@@ -482,9 +472,6 @@ in {
   in {
     preStart = lib.mkAfter ''
       cat ${configFile} > /run/stalwart-mail/config.toml
-      ${pkgs.gnugrep}/bin/grep -v '^\s*$\|^\s*#' \
-        < ${config.age.secrets.stalwart-admin-hash.path} \
-        | tr -d '\n' > /run/stalwart-mail/admin-hash
     '';
     serviceConfig = {
       RuntimeDirectory = "stalwart-mail";

@@ -1,4 +1,8 @@
-{config, ...}: let
+{
+  config,
+  lib,
+  ...
+}: let
   mailDomains = config.repo.secrets.global.domains.mail;
   primaryDomain = mailDomains.primary;
   idmailDomain = "alias.${primaryDomain}";
@@ -12,6 +16,12 @@ in {
   #    mode = "0700";
   #  }
   #];
+
+  age.secrets.idmail-admin-hash = {
+    rekeyFile = ./secrets/idmail-admin-hash.age;
+    mode = "440";
+    group = "stalwart-mail";
+  };
 
   globals.services.idmail.domain = idmailDomain;
   globals.monitoring.http.idmail = {
@@ -28,24 +38,12 @@ in {
       enable = true;
       users.admin = {
         admin = true;
-        # FIXME: 8e8e1c2eb2f1b8c84f1ef294d2fd746b
-        password_hash = "$argon2id$v=19$m=4096,t=3,p=1$c29tZXJhbmRvbXNhbHQ$Hf0sBCqn5Zp5+7LalZNLKhG0exNsXN2M5T+y3QAjpMM";
+        password_hash = "%{file:${config.age.secrets.idmail-admin-hash.path}}%";
       };
-      # users.test.password_hash = "$argon2id$v=19$m=4096,t=3,p=1$YXJnbGluYXJsZ2luMjRvaQ$DXdfVNRSFS1QSvJo7OmXIhAYYtT/D92Ku16DiJwxn8U";
-      # domains."example.com" = {
-      #   owner = "admin";
-      #   public = true;
-      # };
-      # mailboxes."me@example.com" = {
-      #   password_hash = "$argon2id$v=19$m=4096,t=3,p=1$YXJnbGluYXJsZ2luMjRvaQ$fiD9Bp3KidVI/E+mGudu6+h9XmF9TU9Bx4VGX0PniDE";
-      #   owner = "test";
-      #   api_token = "%{file:${pkgs.writeText "token" token}}%";
-      # };
-      # aliases."somealias@example.com" = {
-      #   target = "me@example.com";
-      #   owner = "me@example.com";
-      #   comment = "Used for xyz";
-      # };
+      domains = lib.genAttrs mailDomains.all (_: {
+        owner = "admin";
+        public = true;
+      });
     };
   };
   systemd.services.idmail.serviceConfig.RestartSec = "60"; # Retry every minute

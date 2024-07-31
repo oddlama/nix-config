@@ -1,5 +1,9 @@
-{config, ...}: let
-  openWebuiDomain = "chat.${config.repo.secrets.global.domains.me}";
+{
+  config,
+  globals,
+  ...
+}: let
+  openWebuiDomain = "chat.${globals.domains.me}";
 in {
   microvm.mem = 1024 * 16;
   microvm.vcpu = 20;
@@ -76,7 +80,7 @@ in {
         oauth2 = {
           enable = true;
           allowedGroups = ["access_openwebui"];
-          X-Email = "\${upstream_http_x_auth_request_preferred_username}@${config.repo.secrets.global.domains.personal}";
+          X-Email = "\${upstream_http_x_auth_request_preferred_username}@${globals.domains.personal}";
         };
         extraConfig = ''
           client_max_body_size 128M;

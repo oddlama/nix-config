@@ -9,6 +9,7 @@
         prefix = ["globals"];
         specialArgs = {
           inherit (inputs.self.pkgs.x86_64-linux) lib;
+          inherit inputs;
         };
         modules = [
           ../modules/globals.nix
@@ -27,7 +28,18 @@
     in {
       # Make sure the keys of this attrset are trivially evaluatable to avoid infinite recursion,
       # therefore we inherit relevant attributes from the config.
-      inherit (globalsSystem.config.globals) net services monitoring;
+      inherit
+        (globalsSystem.config.globals)
+        domains
+        hetzner
+        kanidm
+        macs
+        monitoring
+        myuser
+        net
+        root
+        services
+        ;
     };
   };
 }

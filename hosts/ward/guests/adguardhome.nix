@@ -5,7 +5,7 @@
   pkgs,
   ...
 }: let
-  adguardhomeDomain = "adguardhome.${config.repo.secrets.global.domains.me}";
+  adguardhomeDomain = "adguardhome.${globals.domains.me}";
 in {
   wireguard.proxy-sentinel = {
     client.via = "sentinel";
@@ -88,7 +88,7 @@ in {
           # wireguard address for influxdb
           {
             inherit (globals.services.influxdb) domain;
-            answer = config.repo.secrets.global.domains.me;
+            answer = globals.domains.me;
           }
         ]
         # Use the local mirror-proxy for some services (not necessary, just for speed)
@@ -102,8 +102,8 @@ in {
           globals.services.influxdb.domain
           globals.services.loki.domain
           globals.services.paperless.domain
-          "home.${config.repo.secrets.global.domains.me}"
-          "fritzbox.${config.repo.secrets.global.domains.me}"
+          "home.${globals.domains.me}"
+          "fritzbox.${globals.domains.me}"
         ];
       filters = [
         {

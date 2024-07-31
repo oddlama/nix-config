@@ -1,12 +1,13 @@
 {
   config,
+  globals,
   lib,
   ...
 }: let
   icfg = config.repo.secrets.local.networking.interfaces.wan;
 in {
   networking.hostId = config.repo.secrets.local.networking.hostId;
-  networking.domain = config.repo.secrets.global.domains.me;
+  networking.domain = globals.domains.me;
 
   globals.monitoring.ping.sentinel = {
     hostv4 = lib.net.cidr.ip icfg.hostCidrv4;

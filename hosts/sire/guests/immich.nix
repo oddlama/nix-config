@@ -7,7 +7,7 @@
 }: let
   sentinelCfg = nodes.sentinel.config;
   wardWebProxyCfg = nodes.ward-web-proxy.config;
-  immichDomain = "immich.${config.repo.secrets.global.domains.me}";
+  immichDomain = "immich.${globals.domains.me}";
 
   ipImmichMachineLearning = "10.89.0.10";
   ipImmichPostgres = "10.89.0.12";

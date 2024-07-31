@@ -8,10 +8,7 @@
   repo.secretFiles = let
     local = config.node.secretsDir + "/local.nix.age";
   in
-    {
-      global = ../secrets/global.nix.age;
-    }
-    // lib.optionalAttrs (lib.pathExists local) {inherit local;};
+    lib.optionalAttrs (lib.pathExists local) {inherit local;};
 
   # Setup secret rekeying parameters
   age.rekey = {

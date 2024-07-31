@@ -1,5 +1,9 @@
-{config, ...}: let
-  radicaleDomain = "radicale.${config.repo.secrets.global.domains.personal}";
+{
+  config,
+  globals,
+  ...
+}: let
+  radicaleDomain = "radicale.${globals.domains.personal}";
 in {
   wireguard.proxy-sentinel = {
     client.via = "sentinel";

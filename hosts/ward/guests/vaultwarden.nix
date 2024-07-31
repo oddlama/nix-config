@@ -1,9 +1,10 @@
 {
   config,
+  globals,
   lib,
   ...
 }: let
-  vaultwardenDomain = "pw.${config.repo.secrets.global.domains.personal}";
+  vaultwardenDomain = "pw.${globals.domains.personal}";
 in {
   wireguard.proxy-sentinel = {
     client.via = "sentinel";

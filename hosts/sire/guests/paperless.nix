@@ -8,7 +8,7 @@
 }: let
   sentinelCfg = nodes.sentinel.config;
   wardWebProxyCfg = nodes.ward-web-proxy.config;
-  paperlessDomain = "paperless.${config.repo.secrets.global.domains.me}";
+  paperlessDomain = "paperless.${globals.domains.me}";
   paperlessBackupDir = "/var/cache/paperless-backup";
 in {
   microvm.mem = 1024 * 9;

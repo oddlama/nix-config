@@ -21,6 +21,24 @@ in {
       default = {};
       type = types.submodule {
         options = {
+          root = {
+            hashedPassword = mkOption {
+              type = types.str;
+              description = "My root user's password hash.";
+            };
+          };
+
+          myuser = {
+            name = mkOption {
+              type = types.str;
+              description = "My unix username.";
+            };
+            hashedPassword = mkOption {
+              type = types.str;
+              description = "My unix password hash.";
+            };
+          };
+
           net = mkOption {
             type = types.attrsOf (types.submodule (netSubmod: {
               options = {
@@ -194,6 +212,97 @@ in {
                   };
               });
             };
+          };
+
+          domains = {
+            me = mkOption {
+              type = types.str;
+              description = "My main domain.";
+            };
+
+            personal = mkOption {
+              type = types.str;
+              description = "My personal domain.";
+            };
+
+            mail.all = mkOption {
+              type = types.listOf types.str;
+              description = "All domains to configure on the mail server.";
+            };
+
+            mail.primary = mkOption {
+              type = types.str;
+              description = "The primary mail domain.";
+            };
+          };
+
+          macs = mkOption {
+            default = {};
+            type = types.attrsOf types.str;
+            description = "Known MAC addresses for external devices.";
+          };
+
+          hetzner.storageboxes = mkOption {
+            default = {};
+            description = "Storage box configurations.";
+            type = types.attrsOf (types.submodule {
+              options = {
+                mainUser = mkOption {
+                  type = types.str;
+                  description = "Main username for the storagebox";
+                };
+
+                users = mkOption {
+                  default = {};
+                  description = "Subuser configurations.";
+                  type = types.attrsOf (types.submodule {
+                    options = {
+                      subUid = mkOption {
+                        type = types.int;
+                        description = "The subuser id";
+                      };
+
+                      path = mkOption {
+                        type = types.str;
+                        description = "The home path for this subuser (i.e. backup destination)";
+                      };
+                    };
+                  });
+                };
+              };
+            });
+          };
+
+          # Mirror of the kanidm.persons option.
+          kanidm.persons = mkOption {
+            description = "Provisioning of kanidm persons";
+            default = {};
+            type = types.attrsOf (types.submodule {
+              options = {
+                displayName = mkOption {
+                  description = "Display name";
+                  type = types.str;
+                };
+
+                legalName = mkOption {
+                  description = "Full legal name";
+                  type = types.nullOr types.str;
+                  default = null;
+                };
+
+                mailAddresses = mkOption {
+                  description = "Mail addresses. First given address is considered the primary address.";
+                  type = types.listOf types.str;
+                  default = [];
+                };
+
+                groups = mkOption {
+                  description = "List of groups this person should belong to.";
+                  type = types.listOf types.str;
+                  default = [];
+                };
+              };
+            });
           };
         };
       };

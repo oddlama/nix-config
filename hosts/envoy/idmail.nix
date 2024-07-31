@@ -1,9 +1,10 @@
 {
   config,
+  globals,
   lib,
   ...
 }: let
-  mailDomains = config.repo.secrets.global.domains.mail;
+  mailDomains = globals.domains.mail;
   primaryDomain = mailDomains.primary;
   idmailDomain = "alias.${primaryDomain}";
 in {

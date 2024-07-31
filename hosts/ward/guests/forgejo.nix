@@ -6,7 +6,7 @@
   pkgs,
   ...
 }: let
-  forgejoDomain = "git.${config.repo.secrets.global.domains.me}";
+  forgejoDomain = "git.${globals.domains.me}";
 in {
   wireguard.proxy-sentinel = {
     client.via = "sentinel";

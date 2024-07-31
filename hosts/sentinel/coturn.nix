@@ -1,5 +1,6 @@
 {
   config,
+  globals,
   lib,
   pkgs,
   ...
@@ -11,7 +12,7 @@
     mkForce
     ;
 
-  hostDomain = config.repo.secrets.global.domains.me;
+  hostDomain = globals.domains.me;
   coturnDomain = "coturn.${hostDomain}";
 in {
   age.secrets.coturn-password-netbird = {

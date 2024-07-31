@@ -1,5 +1,6 @@
 {
   config,
+  globals,
   lib,
   ...
 }: let
@@ -19,13 +20,13 @@ in {
     type = types.attrsOf (types.submodule (submod: {
       options = {
         name = mkOption {
-          description = "The name of the storage box to backup to. The box must be defined in the global secrets. Defaults to the attribute name.";
+          description = "The name of the storage box to backup to. The box must be defined in the globals. Defaults to the attribute name.";
           default = submod.config._module.args.name;
           type = types.str;
         };
 
         subuser = mkOption {
-          description = "The name of the storage box subuser as defined in the global secrets, mapping this user to a subuser id.";
+          description = "The name of the storage box subuser as defined in the globals, mapping this user to a subuser id.";
           type = types.str;
         };
 
@@ -45,7 +46,7 @@ in {
       (boxCfg: {
         "storage-box-${boxCfg.name}" = {
           hetznerStorageBox = let
-            box = config.repo.secrets.global.hetzner.storageboxes.${boxCfg.name};
+            box = globals.hetzner.storageboxes.${boxCfg.name};
           in {
             enable = true;
             inherit (box) mainUser;

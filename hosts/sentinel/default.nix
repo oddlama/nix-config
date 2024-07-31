@@ -26,7 +26,7 @@
   services.nginx.enable = true;
   services.nginx.recommendedSetup = true;
 
-  services.nginx.virtualHosts.${config.repo.secrets.global.domains.me} = {
+  services.nginx.virtualHosts.${globals.domains.me} = {
     forceSSL = true;
     useACMEWildcardHost = true;
     locations."/".root = pkgs.runCommand "index.html" {} ''

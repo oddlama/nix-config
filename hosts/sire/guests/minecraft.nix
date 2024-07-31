@@ -1,13 +1,14 @@
 # FIXME: todo: host the proxy on sentinel so the IPs are not lost in natting
 {
   config,
-  pkgs,
+  globals,
   lib,
+  pkgs,
   ...
 }: let
   inherit (lib) getExe;
 
-  minecraftDomain = "mc.${config.repo.secrets.global.domains.me}";
+  minecraftDomain = "mc.${globals.domains.me}";
   dataDir = "/var/lib/minecraft";
 
   minecraft-attach = pkgs.writeShellApplication {

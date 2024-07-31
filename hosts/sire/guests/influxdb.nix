@@ -1,5 +1,6 @@
 {
   config,
+  globals,
   lib,
   nodes,
   pkgs,
@@ -7,7 +8,7 @@
 }: let
   sentinelCfg = nodes.sentinel.config;
   wardCfg = nodes.ward.config;
-  influxdbDomain = "influxdb.${config.repo.secrets.global.domains.me}";
+  influxdbDomain = "influxdb.${globals.domains.me}";
   influxdbPort = 8086;
 in {
   wireguard.proxy-sentinel = {

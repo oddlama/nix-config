@@ -1,5 +1,4 @@
 {
-  config,
   lib,
   globals,
   utils,
@@ -67,11 +66,11 @@ in {
               ip-address = globals.net.home-lan.hosts.sire-samba.ipv4;
             }
             {
-              hw-address = config.repo.secrets.global.macs.wallbox;
+              hw-address = globals.macs.wallbox;
               ip-address = globals.net.home-lan.hosts.wallbox.ipv4;
             }
             {
-              hw-address = config.repo.secrets.global.macs.home-assistant;
+              hw-address = globals.macs.home-assistant;
               ip-address = globals.net.home-lan.hosts.home-assistant-temp.ipv4;
             }
           ];

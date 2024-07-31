@@ -6,7 +6,7 @@
   ...
 }: let
   wardWebProxyCfg = nodes.ward-web-proxy.config;
-  grafanaDomain = "grafana.${config.repo.secrets.global.domains.me}";
+  grafanaDomain = "grafana.${globals.domains.me}";
 in {
   wireguard.proxy-sentinel = {
     client.via = "sentinel";

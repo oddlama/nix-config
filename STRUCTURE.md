@@ -35,7 +35,7 @@ Make sure to utilize the github search if you know what you need!
 - `pkgs/` Custom packages and scripts
 
 - `secrets/` Global secrets and age identities
-  - `global.nix.age` Repository-wide global secrets. Available on nodes via the repo module as `config.repo.secrets.global`.
+  - `global.nix.age` Repository-wide global secrets. Will be merged with regular globals, structure is defined by `modules/globals.nix`.
   - `backup.pub` Backup age-identity in case I ever lose my YubiKey or it breaks.
   - `yk1-nix-rage.pub` Master YubiKey split-identity. Used as a key-grab.
 

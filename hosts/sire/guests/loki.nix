@@ -1,11 +1,12 @@
 {
   config,
+  globals,
   nodes,
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
   wardWebProxyCfg = nodes.ward-web-proxy.config;
-  lokiDomain = "loki.${config.repo.secrets.global.domains.me}";
+  lokiDomain = "loki.${globals.domains.me}";
 in {
   wireguard.proxy-sentinel = {
     client.via = "sentinel";

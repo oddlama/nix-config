@@ -1,17 +1,18 @@
 {
   config,
   lib,
+  globals,
   pkgs,
   minimal,
   ...
 }: let
-  myuser = config.repo.secrets.global.myuser.name;
+  myuser = globals.myuser.name;
 in
   lib.optionalAttrs (!minimal) {
     users.groups.${myuser}.gid = config.users.users.${myuser}.uid;
     users.users.${myuser} = {
       uid = 1000;
-      inherit (config.repo.secrets.global.myuser) hashedPassword;
+      inherit (globals.myuser) hashedPassword;
       createHome = true;
       group = myuser;
       extraGroups = ["wheel" "input" "video"];

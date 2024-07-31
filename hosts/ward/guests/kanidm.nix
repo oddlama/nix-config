@@ -3,8 +3,7 @@
   globals,
   ...
 }: let
-  inherit (config.repo.secrets.global) domains;
-  kanidmDomain = "auth.${domains.me}";
+  kanidmDomain = "auth.${globals.domains.me}";
   kanidmPort = 8300;
 
   mkRandomSecret = {
@@ -108,7 +107,7 @@ in {
       adminPasswordFile = config.age.secrets.kanidm-admin-password.path;
       idmAdminPasswordFile = config.age.secrets.kanidm-idm-admin-password.path;
 
-      inherit (config.repo.secrets.global.kanidm) persons;
+      inherit (globals.kanidm) persons;
 
       # Immich
       groups."immich.access" = {};
@@ -191,7 +190,7 @@ in {
       groups."web-sentinel.openwebui" = {};
       systems.oauth2.web-sentinel = {
         displayName = "Web Sentinel";
-        originUrl = "https://oauth2.${domains.me}/";
+        originUrl = "https://oauth2.${globals.domains.me}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-web-sentinel.path;
         preferShortUsername = true;
         scopeMaps."web-sentinel.access" = ["openid" "email"];

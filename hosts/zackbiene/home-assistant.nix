@@ -6,8 +6,8 @@
   pkgs,
   ...
 }: let
-  homeDomain = "home.${config.repo.secrets.global.domains.me}";
-  fritzboxDomain = "fritzbox.${config.repo.secrets.global.domains.me}";
+  homeDomain = "home.${globals.domains.me}";
+  fritzboxDomain = "fritzbox.${globals.domains.me}";
 in {
   wireguard.proxy-home.firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [
     config.services.home-assistant.config.http.server_port

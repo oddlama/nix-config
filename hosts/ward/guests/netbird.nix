@@ -6,7 +6,7 @@
   ...
 }: let
   sentinelCfg = nodes.sentinel.config;
-  netbirdDomain = "netbird.${config.repo.secrets.global.domains.me}";
+  netbirdDomain = "netbird.${globals.domains.me}";
 in {
   wireguard.proxy-sentinel = {
     client.via = "sentinel";
@@ -48,8 +48,8 @@ in {
       dashboard.settings.AUTH_AUTHORITY = "https://${globals.services.kanidm.domain}/oauth2/openid/netbird";
 
       management = {
-        singleAccountModeDomain = "internal.${config.repo.secrets.global.domains.me}";
-        dnsDomain = "internal.${config.repo.secrets.global.domains.me}";
+        singleAccountModeDomain = "internal.${globals.domains.me}";
+        dnsDomain = "internal.${globals.domains.me}";
         disableAnonymousMetrics = true;
         oidcConfigEndpoint = "https://${globals.services.kanidm.domain}/oauth2/openid/netbird/.well-known/openid-configuration";
         turnDomain = globals.services.coturn.domain;

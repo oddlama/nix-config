@@ -1,10 +1,11 @@
 {
   config,
+  globals,
   lib,
   pkgs,
   ...
 }: let
-  mailDomains = config.repo.secrets.global.domains.mail;
+  mailDomains = globals.domains.mail;
   primaryDomain = mailDomains.primary;
   stalwartDomain = "mail.${primaryDomain}";
   dataDir = "/var/lib/stalwart-mail";

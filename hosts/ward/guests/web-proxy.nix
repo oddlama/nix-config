@@ -4,7 +4,7 @@
   ...
 }: let
   inherit (config.repo.secrets.local) acme;
-  fritzboxDomain = "fritzbox.${config.repo.secrets.global.domains.me}";
+  fritzboxDomain = "fritzbox.${globals.domains.me}";
 in {
   wireguard.proxy-home = {
     client.via = "ward";

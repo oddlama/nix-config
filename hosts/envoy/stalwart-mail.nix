@@ -85,7 +85,7 @@ in {
 
         store.idmail = {
           type = "sqlite";
-          path = "${dataDir}/idmail.db";
+          path = "${config.services.idmail.dataDir}/idmail.db";
           query = let
             # Remove comments from SQL and make it single-line
             toSingleLineSql = sql:
@@ -481,6 +481,7 @@ in {
     '';
     serviceConfig = {
       RuntimeDirectory = "stalwart-mail";
+      ReadWritePaths = [config.services.idmail.dataDir];
       ExecStart = lib.mkForce [
         ""
         "${cfg.package}/bin/stalwart-mail --config=/run/stalwart-mail/config.toml"

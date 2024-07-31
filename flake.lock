@@ -1183,11 +1183,11 @@
         "pre-commit-hooks": "pre-commit-hooks_3"
       },
       "locked": {
-        "lastModified": 1722176502,
-        "narHash": "sha256-RQcVfsu1rJhNCHqCoRo5TKXz4SioNAuRYfcPCi0TLeI=",
+        "lastModified": 1722465026,
+        "narHash": "sha256-ARhBk+MO+/35IlnApuag1hK2Q7XZL16tO/suXB6KCrg=",
         "owner": "oddlama",
         "repo": "idmail",
-        "rev": "eb829345b2180bbffcb598f51dcb57f805ca1c4a",
+        "rev": "5f8a184cb8be04e7b80fea4f57b266687c67d09d",
         "type": "github"
       },
       "original": {

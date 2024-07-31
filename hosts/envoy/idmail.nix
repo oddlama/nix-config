@@ -21,12 +21,12 @@
 
   shortHash = x: lib.substring 0 16 (builtins.hashString "sha256" "${globals.salt}:${x}");
 in {
-  environment.persistence."/persist".directories = [
+  environment.persistence."/persist".directories = lib.trace "stalwart backups to dusk!" [
     {
-      directory = "/var/lib/idmail";
-      user = "idmail";
-      group = "idmail";
-      mode = "0700";
+      directory = config.services.idmail.dataDir;
+      user = "stalwart-mail";
+      group = "stalwart-mail";
+      mode = "4770";
     }
   ];
 
@@ -52,15 +52,12 @@ in {
     network = "internet";
   };
 
-  #systemd.tmpfiles.settings."50-idmail"."${dataDir}".d = {
-  #  user = "idmail";
-  #  mode = "0750";
-  #};
-
   services.idmail = {
     enable = true;
+    # Stalwart will change permissions due to SQLite implementation.
+    # Therefore, run as stalwart-mail since we don't allow reading
+    # stalwarts folder anyway (sandboxing is on).
     user = "stalwart-mail";
-    dataDir = "/var/lib/stalwart-mail";
     provision = {
       enable = true;
       users.admin = {

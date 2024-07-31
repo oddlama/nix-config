@@ -42,6 +42,22 @@
         || die "Failure while aggregating basic auth hashes"
     '');
 
+  age.generators.argon2id = {
+    pkgs,
+    lib,
+    decrypt,
+    deps,
+    ...
+  }: let
+    dep = builtins.head deps;
+  in ''
+    echo " -> Deriving argon2id hash from [32m"${lib.escapeShellArg dep.host}":[m[33m"${lib.escapeShellArg dep.name}"[m" >&2
+    ${decrypt} ${lib.escapeShellArg dep.file} \
+      | tr -d '\n' \
+      | ${pkgs.libargon2}/bin/argon2 "$(${pkgs.openssl}/bin/openssl rand -base64 16)" -id \
+      || die "Failure while generating argon2id hash"
+  '';
+
   # Just before switching, remove the agenix directory if it exists.
   # This can happen when a secret is used in the initrd because it will
   # then be copied to the initramfs under the same path. This materializes

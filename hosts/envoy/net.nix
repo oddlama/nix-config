@@ -7,8 +7,8 @@
   icfg = config.repo.secrets.local.networking.interfaces.wan;
 in {
   networking.hostId = config.repo.secrets.local.networking.hostId;
-  networking.domain = globals.domains.mail.primary;
-  networking.hosts."127.0.0.1" = ["mail.${globals.domains.mail.primary}"];
+  networking.domain = globals.mail.primary;
+  networking.hosts."127.0.0.1" = ["mail.${globals.mail.primary}"];
 
   globals.monitoring.ping.envoy = {
     hostv4 = lib.net.cidr.ip icfg.hostCidrv4;

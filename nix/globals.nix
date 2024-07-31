@@ -34,10 +34,12 @@
         hetzner
         kanidm
         macs
+        mail
         monitoring
         myuser
         net
         root
+        salt
         services
         ;
     };

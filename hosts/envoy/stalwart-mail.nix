@@ -5,8 +5,7 @@
   pkgs,
   ...
 }: let
-  mailDomains = globals.domains.mail;
-  primaryDomain = mailDomains.primary;
+  primaryDomain = globals.mail.primary;
   stalwartDomain = "mail.${primaryDomain}";
   dataDir = "/var/lib/stalwart-mail";
 in {
@@ -19,8 +18,14 @@ in {
     }
   ];
 
+  age.secrets.stalwart-admin-pw = {
+    generator.script = "alnum";
+    mode = "000";
+  };
+
   age.secrets.stalwart-admin-hash = {
-    rekeyFile = ./secrets/stalwart-admin-hash.age;
+    generator.dependencies = [config.age.secrets.stalwart-admin-pw];
+    generator.script = "argon2id";
     mode = "440";
     group = "stalwart-mail";
   };

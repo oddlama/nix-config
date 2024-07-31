@@ -108,6 +108,11 @@ in {
             }));
           };
 
+          salt = mkOption {
+            type = types.str;
+            description = "A salt value to use for hashes. Not secret, but also not public so you sneaky little buggers can't brute force my mail domains.";
+          };
+
           services = mkOption {
             type = types.attrsOf (types.submodule {
               options = {
@@ -214,6 +219,26 @@ in {
             };
           };
 
+          mail = {
+            domains = mkOption {
+              default = {};
+              description = "All domains on which we receive mail.";
+              type = types.attrsOf (types.submodule {
+                options = {
+                  public = mkOption {
+                    type = types.bool;
+                    description = "Whether the domain should be available for use by any user";
+                  };
+                };
+              });
+            };
+
+            primary = mkOption {
+              type = types.str;
+              description = "The primary mail domain.";
+            };
+          };
+
           domains = {
             me = mkOption {
               type = types.str;
@@ -223,16 +248,6 @@ in {
             personal = mkOption {
               type = types.str;
               description = "My personal domain.";
-            };
-
-            mail.all = mkOption {
-              type = types.listOf types.str;
-              description = "All domains to configure on the mail server.";
-            };
-
-            mail.primary = mkOption {
-              type = types.str;
-              description = "The primary mail domain.";
             };
           };
 

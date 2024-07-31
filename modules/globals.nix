@@ -108,11 +108,6 @@ in {
             }));
           };
 
-          salt = mkOption {
-            type = types.str;
-            description = "A salt value to use for hashes. Not secret, but also not public so you sneaky little buggers can't brute force my mail domains.";
-          };
-
           services = mkOption {
             type = types.attrsOf (types.submodule {
               options = {

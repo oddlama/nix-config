@@ -18,8 +18,6 @@
     mode = "440";
     group = "stalwart-mail";
   };
-
-  shortHash = x: lib.substring 0 16 (builtins.hashString "sha256" "${globals.salt}:${x}");
 in {
   environment.persistence."/persist".directories = lib.trace "stalwart backups to dusk!" [
     {
@@ -30,20 +28,12 @@ in {
     }
   ];
 
-  age.secrets = lib.mergeAttrsList (
-    [
-      {
-        idmail-user-pw_admin = mkRandomSecret;
-        idmail-user-hash_admin = mkArgon2id "idmail-user-pw_admin";
-      }
-    ]
-    ++ lib.forEach (lib.attrNames globals.mail.domains) (
-      domain: {
-        "idmail-mailbox-pw_catch-all@${shortHash domain}" = mkRandomSecret;
-        "idmail-mailbox-hash_catch-all@${shortHash domain}" = mkArgon2id "idmail-mailbox-pw_catch-all@${shortHash domain}";
-      }
-    )
-  );
+  age.secrets = {
+    idmail-user-pw_admin = mkRandomSecret;
+    idmail-user-hash_admin = mkArgon2id "idmail-user-pw_admin";
+    idmail-mailbox-pw_catch-all = mkRandomSecret;
+    idmail-mailbox-hash_catch-all = mkArgon2id "idmail-mailbox-pw_catch-all";
+  };
 
   globals.services.idmail.domain = idmailDomain;
   globals.monitoring.http.idmail = {
@@ -64,15 +54,15 @@ in {
         admin = true;
         password_hash = "%{file:${config.age.secrets.idmail-user-hash_admin.path}}%";
       };
-      domains = lib.flip lib.mapAttrs globals.mail.domains (domain: domainCfg: {
+      domains = lib.flip lib.mapAttrs globals.mail.domains (_domain: domainCfg: {
         owner = "admin";
-        catch_all = "catch-all@${domain}";
+        catch_all = "catch-all@${primaryDomain}";
         inherit (domainCfg) public;
       });
       mailboxes = lib.flip lib.mapAttrs' globals.mail.domains (
-        domain: _domainCfg:
-          lib.nameValuePair "catch-all@${domain}" {
-            password_hash = "%{file:${config.age.secrets."idmail-mailbox-hash_catch-all@${shortHash domain}".path}}%";
+        _domain: _domainCfg:
+          lib.nameValuePair "catch-all@${primaryDomain}" {
+            password_hash = "%{file:${config.age.secrets.idmail-mailbox-hash_catch-all.path}}%";
             owner = "admin";
           }
       );

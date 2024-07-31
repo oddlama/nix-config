@@ -39,7 +39,6 @@
         myuser
         net
         root
-        salt
         services
         ;
     };

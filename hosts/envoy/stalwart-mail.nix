@@ -66,7 +66,7 @@ in {
       lib.mkForce {
         authentication.fallback-admin = {
           user = "admin";
-          secret = "%{file:${config.age.secrets.stalwart-admin-hash.path}}%";
+          secret = "%{file:/run/stalwart-mail/admin-hash}%";
         };
 
         tracer.stdout = {
@@ -478,6 +478,8 @@ in {
   in {
     preStart = lib.mkAfter ''
       cat ${configFile} > /run/stalwart-mail/config.toml
+      cat ${config.age.secrets.stalwart-admin-hash.path} \
+        | tr -d '\n' > /run/stalwart-mail/admin-hash
     '';
     serviceConfig = {
       RuntimeDirectory = "stalwart-mail";

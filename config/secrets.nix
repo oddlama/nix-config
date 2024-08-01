@@ -55,7 +55,6 @@
     ${decrypt} ${lib.escapeShellArg dep.file} \
       | tr -d '\n' \
       | ${pkgs.libargon2}/bin/argon2 "$(${pkgs.openssl}/bin/openssl rand -base64 16)" -id -e \
-      | tr -d '\n' \
       || die "Failure while generating argon2id hash"
   '';
 

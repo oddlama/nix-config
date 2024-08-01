@@ -56,6 +56,10 @@ in {
         ${check} = value;
         "then" = data;
       };
+      ifthen = field: data: {
+        "if" = field;
+        "then" = data;
+      };
       otherwise = value: {"else" = value;};
       is-smtp = case "listener" "eq" "smtp";
       is-authenticated = data: {
@@ -64,6 +68,26 @@ in {
       };
     in
       lib.mkForce {
+        config.local-keys = [
+          "store.*"
+          "directory.*"
+          "tracer.*"
+          "server.*"
+          "!server.blocked-ip.*"
+          "!server.allowed-ip.*"
+          "authentication.fallback-admin.*"
+          "cluster.node-id"
+          "storage.data"
+          "storage.blob"
+          "storage.lookup"
+          "storage.fts"
+          "storage.directory"
+          "lookup.default.hostname"
+          "certificate.*"
+          "auth.dkim.*"
+          "signature.*"
+        ];
+
         authentication.fallback-admin = {
           user = "admin";
           secret = "%{file:/run/stalwart-mail/admin-hash}%";
@@ -395,6 +419,36 @@ in {
           };
         };
 
+        auth.dkim.sign = [
+          (ifthen "is_local_domain('*', sender_domain)" "['rsa-' + sender_domain, 'ed25519-' + sender_domain]")
+          (otherwise false)
+        ];
+
+        signature = lib.mergeAttrsList (
+          lib.forEach (builtins.attrNames globals.mail.domains) (domain: {
+            "ed25519-${domain}" = {
+              private-key = "%{file:/var/lib/stalwart-mail/dkim/ed25519-${domain}.key}%";
+              inherit domain;
+              selector = "ed_default";
+              headers = ["From" "To" "Date" "Subject" "Message-ID"];
+              algorithm = "ed25519-sha256";
+              canonicalization = "relaxed/relaxed";
+              set-body-length = false;
+              report = true;
+            };
+            "rsa-${domain}" = {
+              private-key = "%{file:/var/lib/stalwart-mail/dkim/rsa-${domain}.key}%";
+              inherit domain;
+              selector = "rsa_default";
+              headers = ["From" "To" "Date" "Subject" "Message-ID"];
+              algorithm = "rsa-sha256";
+              canonicalization = "relaxed/relaxed";
+              set-body-length = false;
+              report = true;
+            };
+          })
+        );
+
         session.extensions = {
           pipelining = true;
           chunking = true;
@@ -476,11 +530,29 @@ in {
     configFormat = pkgs.formats.toml {};
     configFile = configFormat.generate "stalwart-mail.toml" cfg.settings;
   in {
-    preStart = lib.mkAfter ''
-      cat ${configFile} > /run/stalwart-mail/config.toml
-      cat ${config.age.secrets.stalwart-admin-hash.path} \
-        | tr -d '\n' > /run/stalwart-mail/admin-hash
-    '';
+    preStart = lib.mkAfter (
+      ''
+        cat ${configFile} > /run/stalwart-mail/config.toml
+        cat ${config.age.secrets.stalwart-admin-hash.path} \
+          | tr -d '\n' > /run/stalwart-mail/admin-hash
+
+        mkdir -p /var/lib/stalwart-mail/dkim
+      ''
+      # Generate DKIM keys if necessary
+      + lib.concatLines (
+        lib.forEach (builtins.attrNames globals.mail.domains) (domain: ''
+          if [[ ! -e /var/lib/stalwart-mail/dkim/rsa-${domain}.key ]]; then
+            echo "Generating DKIM key for ${domain} (rsa)"
+            ${lib.getExe pkgs.openssl} genrsa -out /var/lib/stalwart-mail/dkim/rsa-${domain}.key 2048
+          fi
+          if [[ ! -e /var/lib/stalwart-mail/dkim/ed25519-${domain}.key ]]; then
+            echo "Generating DKIM key for ${domain} (ed25519)"
+            ${lib.getExe pkgs.openssl} genpkey -algorithm ed25519 -out /var/lib/stalwart-mail/dkim/ed25519-${domain}.key
+          fi
+        '')
+      )
+    );
+
     serviceConfig = {
       RuntimeDirectory = "stalwart-mail";
       ReadWritePaths = [config.services.idmail.dataDir];

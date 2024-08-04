@@ -1,0 +1,27 @@
+diff --git a/crates/jmap/src/api/management/domain.rs b/crates/jmap/src/api/management/domain.rs
+index e3890df5..7083aaf6 100644
+--- a/crates/jmap/src/api/management/domain.rs
++++ b/crates/jmap/src/api/management/domain.rs
+@@ -123,6 +123,8 @@ impl JMAP {
+     }
+ 
+     async fn build_dns_records(&self, domain_name: &str) -> trc::Result<Vec<DnsRecord>> {
++        let signature_config = self.core.storage.config.build_config("signature").await?;
++
+         // Obtain server name
+         let server_name = self
+             .core
+@@ -143,7 +145,11 @@ impl JMAP {
+                 }
+                 _ => (),
+             }
+-            keys.insert(key, value);
++            let val = signature_config.keys
++                .get(&format!("signature.{key}"))
++                .cloned()
++                .unwrap_or(value.clone());
++            keys.insert(key, val);
+         }
+ 
+         // Add MX and CNAME records
+

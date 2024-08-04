@@ -50,6 +50,14 @@ in {
 
   services.stalwart-mail = {
     enable = true;
+    package = pkgs.stalwart-mail.overrideAttrs (old: {
+      patches =
+        old.patches
+        ++ [
+          ./a.patch
+        ];
+      doCheck = false;
+    });
     settings = let
       case = field: check: value: data: {
         "if" = field;
@@ -139,68 +147,63 @@ in {
             members = "";
             # "SELECT name FROM emails WHERE address = ?1";
             recipients = toSingleLineSql ''
-              -- It is important that we return only one value here, but these three UNIONed
+              -- It is important that we return only one value here, but in theory three UNIONed
               -- queries are guaranteed to be distinct. This is because a mailbox address
               -- and alias address can never be the same, their cross-table uniqueness is guaranteed on insert.
               -- The catch-all union can also only return something if @domain.tld is given as a parameter,
               -- which is invalid for aliases and mailboxes.
-
-              -- Select the primary mailbox address if it matches and
-              -- all related parts are active
-              SELECT m.address AS name
-                FROM mailboxes AS m
-                JOIN domains AS d ON m.domain = d.domain
-                JOIN users AS u ON m.owner = u.username
-                WHERE m.address = ?1
-                  AND m.active = true
-                  AND d.active = true
-                  AND u.active = true
-              -- Then select the target of a matching alias
-              -- but make sure that all related parts are active.
-              UNION
-              SELECT a.target AS name
-                FROM aliases AS a
-                JOIN domains AS d ON a.domain = d.domain
-                JOIN (
-                  -- To check whether the owner is active we need to make a subquery
-                  -- because the owner could be a user or mailbox
-                  SELECT username
-                    FROM users
-                    WHERE active = true
-                  UNION
-                  SELECT m.address AS username
-                    FROM mailboxes AS m
-                    JOIN users AS u ON m.owner = u.username
-                    WHERE m.active = true
-                      AND u.active = true
-                ) AS u ON a.owner = u.username
-                WHERE a.address = ?1
-                  AND a.active = true
-                  AND d.active = true
-              -- Finally, select any catch_all address that would catch this.
-              -- Again make sure everything is active.
-              UNION
-              SELECT d.catch_all AS name
-                FROM domains AS d
-                JOIN mailboxes AS m ON d.catch_all = m.address
-                JOIN users AS u ON m.owner = u.username
-                WHERE ?1 = ('@' || d.domain)
-                  AND d.active = true
-                  AND m.active = true
-                  AND u.active = true
-
-              -- This alternative catch-all query would expand catch-alls directly, but would
-              -- also require sorting the resulting table by precedence and LIMIT 1
-              -- to always return just one result.
-              -- UNION
-              -- SELECT d.catch_all AS name
-              --   FROM domains AS d
-              --   JOIN mailboxes AS m ON d.catch_all = m.address
-              --   JOIN users AS u ON m.owner = u.username
-              --   WHERE ?1 LIKE ('%@' || d.domain)
-              --     AND d.active = true
-              --     AND m.active = true
-              --     AND u.active = true
+              --
+              -- Nonetheless, it may be beneficial to allow an alias to override an existing mailbox,
+              -- so we can have send-only mailboxes which have their incoming mail redirected somewhere else.
+              -- Therefore, we make sure to order the query by (aliases -> mailboxes -> catch all) and only return the
+              -- highest priority one.
+              SELECT name FROM (
+                -- Select the target of a matching alias (if any)
+                -- but make sure that all related parts are active.
+                SELECT a.target AS name, 1 AS rowOrder
+                  FROM aliases AS a
+                  JOIN domains AS d ON a.domain = d.domain
+                  JOIN (
+                    -- To check whether the owner is active we need to make a subquery
+                    -- because the owner could be a user or mailbox
+                    SELECT username
+                      FROM users
+                      WHERE active = true
+                    UNION
+                    SELECT m.address AS username
+                      FROM mailboxes AS m
+                      JOIN users AS u ON m.owner = u.username
+                      WHERE m.active = true
+                        AND u.active = true
+                  ) AS u ON a.owner = u.username
+                  WHERE a.address = ?1
+                    AND a.active = true
+                    AND d.active = true
+                -- Select the primary mailbox address if it matches and
+                -- all related parts are active.
+                UNION
+                SELECT m.address AS name, 2 AS rowOrder
+                  FROM mailboxes AS m
+                  JOIN domains AS d ON m.domain = d.domain
+                  JOIN users AS u ON m.owner = u.username
+                  WHERE m.address = ?1
+                    AND m.active = true
+                    AND d.active = true
+                    AND u.active = true
+                -- Finally, select any catch_all address that would catch this.
+                -- Again make sure everything is active.
+                UNION
+                SELECT d.catch_all, 3 AS rowOrder AS name
+                  FROM domains AS d
+                  JOIN mailboxes AS m ON d.catch_all = m.address
+                  JOIN users AS u ON m.owner = u.username
+                  WHERE ?1 = ('@' || d.domain)
+                    AND d.active = true
+                    AND m.active = true
+                    AND u.active = true
+                ORDER BY rowOrder, name ASC
+                LIMIT 1
+              )
             '';
             # "SELECT address FROM emails WHERE name = ?1 AND type != 'list' ORDER BY type DESC, address ASC";
             emails = toSingleLineSql ''
@@ -414,8 +417,8 @@ in {
             idle = "30m";
           };
           rate-limit = {
-            requests = "2000/1m";
-            concurrent = 4;
+            requests = "20000/1m";
+            concurrent = 32;
           };
         };
 
@@ -543,7 +546,7 @@ in {
         lib.forEach (builtins.attrNames globals.mail.domains) (domain: ''
           if [[ ! -e /var/lib/stalwart-mail/dkim/rsa-${domain}.key ]]; then
             echo "Generating DKIM key for ${domain} (rsa)"
-            ${lib.getExe pkgs.openssl} genrsa -out /var/lib/stalwart-mail/dkim/rsa-${domain}.key 2048
+            ${lib.getExe pkgs.openssl} genrsa -traditional -out /var/lib/stalwart-mail/dkim/rsa-${domain}.key 2048
           fi
           if [[ ! -e /var/lib/stalwart-mail/dkim/ed25519-${domain}.key ]]; then
             echo "Generating DKIM key for ${domain} (ed25519)"
@@ -563,4 +566,37 @@ in {
       RestartSec = "60"; # Retry every minute
     };
   };
+
+  # systemd.services.stalwart-backup = {
+  #   description = "Stalwart and idmail backup";
+  #   serviceConfig = {
+  #     ExecStart = "${config.services.paperless.package}/bin/paperless-ngx document_exporter -na -nt -f -d ${stalwartBackupDir}";
+  #     ReadWritePaths = [
+  #       dataDir
+  #       config.services.idmail.dataDir
+  #       stalwartBackupDir
+  #     ];
+  #     Restart = "no";
+  #     Type = "oneshot";
+  #   };
+  #   inherit (cfg) environment;
+  #   requiredBy = ["restic-backups-storage-box-dusk.service"];
+  #   before = ["restic-backups-storage-box-dusk.service"];
+  # };
+  #
+  # # Needed so we don't run out of tmpfs space for large backups.
+  # # Technically this could be cleared each boot but whatever.
+  # environment.persistence."/state".directories = [
+  #   {
+  #     directory = stalwartBackupDir;
+  #     user = "stalwart-mail";
+  #     group = "stalwart-mail";
+  #     mode = "0700";
+  #   }
+  # ];
+  #
+  # backups.storageBoxes.dusk = {
+  #   subuser = "stalwart";
+  #   paths = [stalwartBackupDir];
+  # };
 }

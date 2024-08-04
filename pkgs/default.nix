@@ -4,6 +4,7 @@ _inputs: [
   (_final: prev: {
     deploy = prev.callPackage ./deploy.nix {};
     git-fuzzy = prev.callPackage ./git-fuzzy {};
+    stalwart-mail = prev.callPackage ./stal.nix {};
     kanidm = prev.kanidm.overrideAttrs (old: let
       provisionSrc = prev.fetchFromGitHub {
         owner = "oddlama";

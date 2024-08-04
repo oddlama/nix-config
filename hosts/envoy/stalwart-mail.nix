@@ -8,6 +8,7 @@
   primaryDomain = globals.mail.primary;
   stalwartDomain = "mail.${primaryDomain}";
   dataDir = "/var/lib/stalwart-mail";
+  mailBackupDir = "/var/cache/mail-backup";
 in {
   environment.persistence."/persist".directories = [
     {
@@ -193,7 +194,7 @@ in {
                 -- Finally, select any catch_all address that would catch this.
                 -- Again make sure everything is active.
                 UNION
-                SELECT d.catch_all, 3 AS rowOrder AS name
+                SELECT d.catch_all AS name, 3 AS rowOrder
                   FROM domains AS d
                   JOIN mailboxes AS m ON d.catch_all = m.address
                   JOIN users AS u ON m.owner = u.username
@@ -567,36 +568,51 @@ in {
     };
   };
 
-  # systemd.services.stalwart-backup = {
-  #   description = "Stalwart and idmail backup";
-  #   serviceConfig = {
-  #     ExecStart = "${config.services.paperless.package}/bin/paperless-ngx document_exporter -na -nt -f -d ${stalwartBackupDir}";
-  #     ReadWritePaths = [
-  #       dataDir
-  #       config.services.idmail.dataDir
-  #       stalwartBackupDir
-  #     ];
-  #     Restart = "no";
-  #     Type = "oneshot";
-  #   };
-  #   inherit (cfg) environment;
-  #   requiredBy = ["restic-backups-storage-box-dusk.service"];
-  #   before = ["restic-backups-storage-box-dusk.service"];
-  # };
-  #
-  # # Needed so we don't run out of tmpfs space for large backups.
-  # # Technically this could be cleared each boot but whatever.
-  # environment.persistence."/state".directories = [
-  #   {
-  #     directory = stalwartBackupDir;
-  #     user = "stalwart-mail";
-  #     group = "stalwart-mail";
-  #     mode = "0700";
-  #   }
-  # ];
-  #
-  # backups.storageBoxes.dusk = {
-  #   subuser = "stalwart";
-  #   paths = [stalwartBackupDir];
-  # };
+  systemd.services.backup-mail = {
+    description = "Mail backup";
+    environment = {
+      STALWART_DATA = dataDir;
+      IDMAIL_DATA = config.services.idmail.dataDir;
+      BACKUP_DIR = mailBackupDir;
+    };
+    serviceConfig = {
+      SyslogIdentifier = "backup-mail";
+      Type = "oneshot";
+      User = "stalwart-mail";
+      Group = "stalwart-mail";
+      ExecStart = lib.getExe (pkgs.writeShellApplication {
+        name = "backup-mail";
+        runtimeInputs = [pkgs.sqlite];
+        text = ''
+          sqlite3 "$STALWART_DATA/database.sqlite3" ".backup '$BACKUP_DIR/database.sqlite3'"
+          sqlite3 "$IDMAIL_DATA/database.sqlite3" ".backup '$BACKUP_DIR/idmail.db'"
+          cp -r "$STALWART_DATA/dkim" "$BACKUP_DIR/"
+        '';
+      });
+      ReadWritePaths = [
+        dataDir
+        config.services.idmail.dataDir
+        mailBackupDir
+      ];
+      Restart = "no";
+    };
+    requiredBy = ["restic-backups-storage-box-dusk.service"];
+    before = ["restic-backups-storage-box-dusk.service"];
+  };
+
+  # Needed so we don't run out of tmpfs space for large backups.
+  # Technically this could be cleared each boot but whatever.
+  environment.persistence."/state".directories = [
+    {
+      directory = mailBackupDir;
+      user = "stalwart-mail";
+      group = "stalwart-mail";
+      mode = "0700";
+    }
+  ];
+
+  backups.storageBoxes.dusk = {
+    subuser = "stalwart";
+    paths = [mailBackupDir];
+  };
 }

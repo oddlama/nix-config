@@ -178,6 +178,8 @@ in {
           "workspace 1,class:^(firefox)$"
           "workspace 5,class:^(bottles)$"
           "workspace 5,class:^(steam)$"
+          "float, class:^(SDL Application)$, title:^(Friends List)$"
+          "workspace 5,class:^(SDL Application)$, title:^(Steam)$"
           "workspace 5,class:^(prismlauncher)$"
           "workspace 7,class:^(discord)$"
           "workspace 7,class:^(WebCord)$"
@@ -222,6 +224,15 @@ in {
 
       env=WLR_DRM_NO_ATOMIC,1
       windowrulev2 = immediate, class:^(cs2)$
+
+      windowrulev2 = tag +apt, title:(Awakened PoE Trade)
+      windowrulev2 = float, tag:apt
+      windowrulev2 = noblur, tag:apt
+      windowrulev2 = nofocus, tag:apt # Disable auto-focus
+      windowrulev2 = noshadow, tag:apt
+      windowrulev2 = noborder, tag:apt
+      windowrulev2 = size 100% 100%, tag:apt
+      windowrulev2 = center, tag:apt
 
       binds {
         focus_preferred_method = 1

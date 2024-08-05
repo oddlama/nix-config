@@ -19,7 +19,7 @@
     group = "stalwart-mail";
   };
 in {
-  environment.persistence."/persist".directories = lib.trace "stalwart backups to dusk!" [
+  environment.persistence."/persist".directories = [
     {
       directory = config.services.idmail.dataDir;
       user = "stalwart-mail";

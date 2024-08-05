@@ -68,12 +68,13 @@ in {
           };
           initialize = true;
           passwordFile = config.age.secrets.restic-encryption-password.path;
-          pruneOpts = [
-            "--keep-daily 14"
-            "--keep-weekly 7"
-            "--keep-monthly 12"
-            "--keep-yearly 75"
-          ];
+          # We cannot prune ourselves, since the remote repository will be append-only
+          # pruneOpts = [
+          #   "--keep-daily 14"
+          #   "--keep-weekly 7"
+          #   "--keep-monthly 12"
+          #   "--keep-yearly 75"
+          # ];
         };
       }));
   };

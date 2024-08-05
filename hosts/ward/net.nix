@@ -29,7 +29,7 @@
         ];
         matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.lan.mac;
         networkConfig = {
-          IPForward = "yes";
+          IPv4Forwarding = "yes";
           IPv6PrivacyExtensions = "yes";
           MulticastDNS = true;
         };
@@ -87,7 +87,7 @@
       ];
       matchConfig.Name = "lan-self";
       networkConfig = {
-        IPForward = "yes";
+        IPv4Forwarding = "yes";
         IPv6PrivacyExtensions = "yes";
         IPv6SendRA = true;
         IPv6AcceptRA = false;

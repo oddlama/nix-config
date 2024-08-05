@@ -3,17 +3,9 @@
   # Also make it the default gdb.
   pwndbgWithDebuginfod =
     (pkgs.pwndbg.override {
-      gdb =
-        (pkgs.gdb.override {
-          enableDebuginfod = true;
-        })
-        .overrideAttrs (_finalAttrs: previousAttrs: {
-          patches =
-            previousAttrs.patches
-            ++ [
-              ./0001-gdb-show-libraries-in-coredump-backtrace.patch
-            ];
-        });
+      gdb = pkgs.gdb.override {
+        enableDebuginfod = true;
+      };
     })
     .overrideAttrs (_finalAttrs: previousAttrs: {
       installPhase =

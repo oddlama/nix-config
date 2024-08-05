@@ -42,7 +42,7 @@ in {
       ];
       matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.wlan1.mac;
       networkConfig = {
-        IPForward = "yes";
+        IPv4Forwarding = "yes";
         IPv6PrivacyExtensions = "yes";
         IPv6SendRA = true;
         MulticastDNS = true;

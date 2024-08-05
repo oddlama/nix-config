@@ -4,7 +4,10 @@
     "services/networking/netbird.nix"
   ];
 
-  hardware.nvidia.modesetting.enable = builtins.trace "remove once #330748 is merged" true;
+  # Not setting this causes infinite recursion because it has a very weird default.
+  # The default should probably be removed upstream and only applied with mkDefault
+  # if hardware.nvidia.enable is true
+  hardware.nvidia.modesetting.enable = true;
 
   imports = [
     inputs.agenix-rekey.nixosModules.default

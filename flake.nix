@@ -56,7 +56,7 @@
     };
 
     nixos-extra-modules = {
-      url = "github:oddlama/nixos-extra-modules";
+      url = "github:oddlama/nixos-extra-modules/append-only-backups";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

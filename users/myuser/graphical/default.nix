@@ -49,6 +49,7 @@
       pkgs.gpu-screen-recorder
       pkgs.gpu-screen-recorder-gtk
       pkgs.orca-slicer
+      pkgs.spotify
     ];
 
     # TODO wrap thunderbird bin and set LC_ALL=de_DE.UTF-8 because thunderbird uses wrong date and time formatting with C.UTF-8
@@ -70,6 +71,7 @@
       "Downloads" # config.xdg.userDirs.download (infinite recursion)
       ".local/share/invokeai"
       ".local/share/orca-slicer"
+      ".cache/spotify"
     ];
 
     persistence."/persist".directories = [
@@ -77,11 +79,12 @@
       "Pictures" # config.xdg.userDirs.pictures (infinite recursion)
       "Videos" # This is where I store clips from gpu-screen-recorder-gtk
       ".config/AusweisApp"
-      ".config/obsidian"
-      ".config/gpu-screen-recorder"
+      ".config/OrcaSlicer"
       ".config/gh"
       ".config/gh-dash"
-      ".config/OrcaSlicer"
+      ".config/gpu-screen-recorder"
+      ".config/obsidian"
+      ".config/spotify"
     ];
   };
 

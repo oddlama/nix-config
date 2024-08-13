@@ -70,7 +70,7 @@
       name = "git-fixup-fzf";
       runtimeInputs = [pkgs.fzf pkgs.gnugrep];
       text = ''
-        if ! commit=$(git log --graph --color=always --format="%C(auto)%h%d %s %C(reset)%C(bold)%cr" "$@" \
+        if ! commit=$(set +o pipefail; git log --graph --color=always --format="%C(auto)%h%d %s %C(reset)%C(bold)%cr" "$@" \
           | fzf --ansi --multi --no-sort --reverse --print-query --expect=ctrl-d --toggle-sort=\`); then
           echo aborted
           exit 0

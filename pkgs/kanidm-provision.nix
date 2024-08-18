@@ -5,16 +5,16 @@
 }:
 rustPlatform.buildRustPackage rec {
   pname = "kanidm-provision";
-  version = "1.1.0";
+  version = "1.1.1";
 
   src = fetchFromGitHub {
     owner = "oddlama";
     repo = "kanidm-provision";
     rev = "v${version}";
-    hash = "sha256-pFOFFKh3la/sZGXj+pAM8x4SMeffvvbOvTjPeHS1XPU=";
+    hash = "sha256-tX24cszmWu7kB5Eoa3OrPqU1bayD62OpAV12U0ayoEo=";
   };
 
-  cargoHash = "sha256-oiKlKIL23xH67tCDbny9Gj97JQQm4mYt0IHXB5hzJ/A=";
+  cargoHash = "sha256-Ok8A47z5Z3QW4teql/4RyDlox/nrhkdA6IN/qJm13bM=";
 
   meta = with lib; {
     description = "A small utility to help with kanidm provisioning";

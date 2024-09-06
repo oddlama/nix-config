@@ -48,7 +48,6 @@
       pkgs.zathura
       pkgs.gpu-screen-recorder
       pkgs.gpu-screen-recorder-gtk
-      pkgs.orca-slicer
       pkgs.spotify
     ];
 
@@ -71,6 +70,7 @@
       "Downloads" # config.xdg.userDirs.download (infinite recursion)
       ".local/share/invokeai"
       ".local/share/orca-slicer"
+      ".local/share/kicad"
       ".cache/spotify"
     ];
 
@@ -80,6 +80,7 @@
       "Videos" # This is where I store clips from gpu-screen-recorder-gtk
       ".config/AusweisApp"
       ".config/OrcaSlicer"
+      ".config/kicad"
       ".config/gh"
       ".config/gh-dash"
       ".config/gpu-screen-recorder"

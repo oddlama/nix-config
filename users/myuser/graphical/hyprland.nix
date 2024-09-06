@@ -33,17 +33,17 @@ in {
           optionals (elem "nvidia" nixosConfig.services.xserver.videoDrivers) [
             # See https://wiki.hyprland.org/Nvidia/
             "LIBVA_DRIVER_NAME,nvidia"
-            "XDG_SESSION_TYPE,wayland"
             "GBM_BACKEND,nvidia-drm"
-            "__GLX_VENDOR_LIBRARY_NAME,nvidia"
+            # "__GLX_VENDOR_LIBRARY_NAME,nvidia" breaks orcaslicer and doesn't seem like a good idea in general
           ]
           ++ [
+            "XDG_SESSION_TYPE,wayland"
             "NIXOS_OZONE_WL,1"
             "MOZ_ENABLE_WAYLAND,1"
             "_JAVA_AWT_WM_NONREPARENTING,1"
             "QT_WAYLAND_DISABLE_WINDOWDECORATION,1"
             "QT_QPA_PLATFORM,wayland"
-            "SDL_VIDEODRIVER,wayland"
+            # "SDL_VIDEODRIVER,wayland"
             "GDK_BACKEND,wayland"
           ];
 
@@ -70,7 +70,7 @@ in {
             # Per-window actions
             "SUPER,q,killactive,"
             "SUPER,return,fullscreen,"
-            "SUPER + SHIFT,return,fakefullscreen,"
+            "SUPER + SHIFT,return,fullscreenstate,0 2"
             "SUPER,f,togglefloating"
 
             "SUPER,tab,cyclenext,"

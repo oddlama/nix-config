@@ -3,7 +3,7 @@
     plugins = {
       luasnip = {
         enable = true;
-        extraConfig = {
+        settings = {
           history = true;
           # Update dynamic snippets while typing
           updateevents = "TextChanged,TextChangedI";

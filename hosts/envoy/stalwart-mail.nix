@@ -51,14 +51,6 @@ in {
 
   services.stalwart-mail = {
     enable = true;
-    package = pkgs.stalwart-mail.overrideAttrs (old: {
-      patches =
-        old.patches
-        ++ [
-          ./a.patch
-        ];
-      doCheck = false;
-    });
     settings = let
       case = field: check: value: data: {
         "if" = field;

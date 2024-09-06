@@ -1,6 +1,7 @@
 {
   config,
   globals,
+  pkgs,
   ...
 }: let
   kanidmDomain = "auth.${globals.domains.me}";
@@ -85,6 +86,7 @@ in {
   ];
 
   services.kanidm = {
+    package = pkgs.kanidm.withSecretProvisioning;
     enableServer = true;
     serverSettings = {
       domain = kanidmDomain;
@@ -114,6 +116,7 @@ in {
       systems.oauth2.immich = {
         displayName = "Immich";
         originUrl = "https://${globals.services.immich.domain}/";
+        originLanding = "https://${globals.services.immich.domain}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-immich.path;
         preferShortUsername = true;
         # XXX: PKCE is currently not supported by immich
@@ -129,6 +132,7 @@ in {
         public = true;
         displayName = "Netbird";
         originUrl = "https://${globals.services.netbird.domain}/";
+        originLanding = "https://${globals.services.netbird.domain}/";
         preferShortUsername = true;
         enableLocalhostRedirects = true;
         enableLegacyCrypto = true;
@@ -140,6 +144,7 @@ in {
       systems.oauth2.paperless = {
         displayName = "Paperless";
         originUrl = "https://${globals.services.paperless.domain}/";
+        originLanding = "https://${globals.services.paperless.domain}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-paperless.path;
         preferShortUsername = true;
         scopeMaps."paperless.access" = ["openid" "email" "profile"];
@@ -153,6 +158,7 @@ in {
       systems.oauth2.grafana = {
         displayName = "Grafana";
         originUrl = "https://${globals.services.grafana.domain}/";
+        originLanding = "https://${globals.services.grafana.domain}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-grafana.path;
         preferShortUsername = true;
         scopeMaps."grafana.access" = ["openid" "email" "profile"];
@@ -172,6 +178,7 @@ in {
       systems.oauth2.forgejo = {
         displayName = "Forgejo";
         originUrl = "https://${globals.services.forgejo.domain}/";
+        originLanding = "https://${globals.services.forgejo.domain}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-forgejo.path;
         scopeMaps."forgejo.access" = ["openid" "email" "profile"];
         # XXX: PKCE is currently not supported by gitea/forgejo,
@@ -191,6 +198,7 @@ in {
       systems.oauth2.web-sentinel = {
         displayName = "Web Sentinel";
         originUrl = "https://oauth2.${globals.domains.me}/";
+        originLanding = "https://oauth2.${globals.domains.me}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-web-sentinel.path;
         preferShortUsername = true;
         scopeMaps."web-sentinel.access" = ["openid" "email"];

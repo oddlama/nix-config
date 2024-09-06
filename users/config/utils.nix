@@ -6,8 +6,7 @@
 }:
 lib.optionalAttrs (!minimal) {
   home = {
-    packages = builtins.trace "reenable bandwhich later" (with pkgs; [
-      #bandwhich
+    packages = with pkgs; [
       btop
       delta
       fd
@@ -29,7 +28,7 @@ lib.optionalAttrs (!minimal) {
       wget
       usbutils
       pciutils
-    ]);
+    ];
   };
 
   programs = {

@@ -1,9 +1,4 @@
 {inputs, ...}: {
-  disabledModules = [
-    "services/security/kanidm.nix"
-    "services/networking/netbird.nix"
-  ];
-
   # Not setting this causes infinite recursion because it has a very weird default.
   # The default should probably be removed upstream and only applied with mkDefault
   # if hardware.nvidia.enable is true

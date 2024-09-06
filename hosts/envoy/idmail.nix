@@ -1,4 +1,5 @@
 {
+  inputs,
   config,
   globals,
   lib,
@@ -43,6 +44,7 @@ in {
   };
 
   services.idmail = {
+    package = inputs.idmail.packages."x86_64-linux".default;
     enable = true;
     # Stalwart will change permissions due to SQLite implementation.
     # Therefore, run as stalwart-mail since we don't allow reading

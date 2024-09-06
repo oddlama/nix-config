@@ -34,5 +34,6 @@
     minecraft = uidGid 975;
     stalwart-mail = uidGid 974;
     netbird-home = uidGid 973;
+    gamemode = uidGid 972;
   };
 }

@@ -14,5 +14,7 @@
           ];
       };
     };
+
+    programs.gamemode.enable = true;
   };
 }

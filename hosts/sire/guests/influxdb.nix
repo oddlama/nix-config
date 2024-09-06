@@ -32,11 +32,13 @@ in {
 
   services.telegraf.extraConfig.inputs = {
     github = {
+      interval = "10m";
       access_token = "@GITHUB_ACCESS_TOKEN@";
       repositories = [
         "oddlama/agenix-rekey"
         "oddlama/autokernel"
         "oddlama/gentoo-install"
+        "oddlama/idmail"
         "oddlama/nix-config"
         "oddlama/nix-topology"
         "oddlama/vane"

@@ -33,7 +33,7 @@ in {
   };
 
   services.open-webui = {
-    enable = builtins.trace "open-webui disabled because opentelemetry python is broken" false;
+    enable = true;
     host = "0.0.0.0";
     port = 11222;
     environment = {

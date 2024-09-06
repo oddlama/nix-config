@@ -424,7 +424,12 @@ in {
     description = "Minecraft Server Service";
     wantedBy = ["multi-user.target"];
     after = ["network.target"];
-    path = [pkgs.ncurses]; # for infocmp
+    path = [
+      # for infocmp
+      pkgs.ncurses
+      # for dynmap
+      pkgs.libwebp
+    ];
 
     serviceConfig =
       commonServiceConfig

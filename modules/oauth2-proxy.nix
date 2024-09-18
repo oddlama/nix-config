@@ -84,7 +84,7 @@ in {
         '';
 
         locations."@redirectToAuth2ProxyLogin" = {
-          # FIXME: allow refering to another node for the portaldomain
+          # FIXME: allow referring to another node for the portaldomain
           setOauth2Headers = false;
           return = "307 https://${cfg.portalDomain}/oauth2/start?rd=$scheme://$host$request_uri";
           extraConfig = ''

@@ -195,6 +195,7 @@ in {
       groups."web-sentinel.access" = {};
       groups."web-sentinel.adguardhome" = {};
       groups."web-sentinel.openwebui" = {};
+      groups."web-sentinel.analytics" = {};
       systems.oauth2.web-sentinel = {
         displayName = "Web Sentinel";
         originUrl = "https://oauth2.${globals.domains.me}/";
@@ -206,6 +207,7 @@ in {
           joinType = "array";
           valuesByGroup."web-sentinel.adguardhome" = ["access_adguardhome"];
           valuesByGroup."web-sentinel.openwebui" = ["access_openwebui"];
+          valuesByGroup."web-sentinel.analytics" = ["access_analytics"];
         };
       };
     };

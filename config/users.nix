@@ -35,5 +35,6 @@
     stalwart-mail = uidGid 974;
     netbird-home = uidGid 973;
     gamemode = uidGid 972;
+    plausible = uidGid 971;
   };
 }

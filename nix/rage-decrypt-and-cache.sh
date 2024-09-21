@@ -31,10 +31,14 @@ mkdir -p "$(dirname "$out")"
 if [[ ! -e "$out" ]]; then
 	args=()
 	for i in "${identities[@]}"; do
-		args+=("-i" "$i")
+		args+=("--identity" "$i")
 	done
-	rage -d "${args[@]}" -o "$out" "$file"
+	rage --decrypt "${args[@]}" --output "$out" "$file"
 fi
 
 # Print out path or decrypted content
-[[ "$print_out_path" == true ]] && echo "$out" || cat "$out"
+if [[ "$print_out_path" == true ]]; then
+	echo "$out"
+else
+	cat "$out"
+fi

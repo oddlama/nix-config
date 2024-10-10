@@ -6,6 +6,8 @@
   inherit (config.repo.secrets.local) acme;
   fritzboxDomain = "fritzbox.${globals.domains.me}";
 in {
+  microvm.mem = 1024 * 4; # Need more /tmp space so nginx can store intermediary files
+
   wireguard.proxy-home = {
     client.via = "ward";
     firewallRuleForAll.allowedTCPPorts = [80 443];

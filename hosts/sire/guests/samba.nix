@@ -70,6 +70,9 @@
       }
     );
 in {
+  # For influxdb communication channel
+  wireguard.proxy-home.client.via = "ward";
+
   age.secrets."samba-passdb.tdb" = {
     rekeyFile = config.node.secretsDir + "/samba-passdb.tdb.age";
     mode = "600";
@@ -145,72 +148,76 @@ in {
 
     # Disable Samba's nmbd, because we don't want to reply to NetBIOS over IP
     # requests, since all of our clients hardcode the server shares.
-    enableNmbd = false;
+    nmbd.enable = false;
     # Disable Samba's winbindd, which provides a number of services to the Name
     # Service Switch capability found in most modern C libraries, to arbitrary
     # applications via PAM and ntlm_auth and to Samba itself.
-    enableWinbindd = false;
-    extraConfig = lib.concatLines [
-      # Show the server host name in the printer comment box in print manager
-      # and next to the IPC connection in net view.
-      "server string = SambaOelig"
-      # Set the NetBIOS name by which the Samba server is known.
-      "netbios name = SambaOelig"
-      # Disable netbios support. We don't need to support browsing since all
-      # clients hardcode the host and share names.
-      "disable netbios = yes"
-      # Deny access to all hosts by default.
-      "hosts deny = 0.0.0.0/0"
-      # Allow access to local network and TODO: wireguard
-      "hosts allow = ${globals.net.home-lan.cidrv4} ${globals.net.home-lan.cidrv6}"
-      # Don't advertise inaccessible shares to users
-      "access based share enum = yes"
+    winbindd.enable = false;
+    settings = lib.mkMerge ([
+        {
+          global = {
+            # Show the server host name in the printer comment box in print manager
+            # and next to the IPC connection in net view.
+            "server string" = "SambaOelig";
+            # Set the NetBIOS name by which the Samba server is known.
+            "netbios name" = "SambaOelig";
+            # Disable netbios support. We don't need to support browsing since all
+            # clients hardcode the host and share names.
+            "disable netbios" = "yes";
+            # Deny access to all hosts by default.
+            "hosts deny" = "0.0.0.0/0";
+            # Allow access to local network and TODO: wireguard
+            "hosts allow" = "${globals.net.home-lan.cidrv4} ${globals.net.home-lan.cidrv6}";
+            # Don't advertise inaccessible shares to users
+            "access based share enum" = "yes";
 
-      # Set sane logging options
-      "log level = 0 auth:2 passdb:2"
-      "log file = /dev/null"
-      "max log size = 0"
-      "logging = systemd"
+            # Set sane logging options
+            "log level" = "0 auth:2 passdb:2";
+            "log file" = "/dev/null";
+            "max log size" = "0";
+            "logging" = "systemd";
 
-      # TODO: allow based on wireguard ip without username and password
-      # Users always have to login with an account and are never mapped
-      # to a guest account.
-      "passdb backend = tdbsam:${config.age.secrets."samba-passdb.tdb".path}"
-      "server role = standalone"
-      "guest account = nobody"
-      "map to guest = never"
+            # TODO: allow based on wireguard ip without username and password
+            # Users always have to login with an account and are never mapped
+            # to a guest account.
+            "passdb backend" = "tdbsam:${config.age.secrets."samba-passdb.tdb".path}";
+            "server role" = "standalone";
+            "guest account" = "nobody";
+            "map to guest" = "never";
 
-      # Clients should only connect using the latest SMB3 protocol (e.g., on
-      # clients running Windows 8 and later).
-      "server min protocol = SMB3_11"
-      # Require native SMB transport encryption by default.
-      "server smb encrypt = required"
+            # Clients should only connect using the latest SMB3 protocol (e.g., on
+            # clients running Windows 8 and later).
+            "server min protocol" = "SMB3_11";
+            # Require native SMB transport encryption by default.
+            "server smb encrypt" = "required";
 
-      # Never map anything to the excutable bit.
-      "map archive = no"
-      "map system = no"
-      "map hidden = no"
+            # Never map anything to the excutable bit.
+            "map archive" = "no";
+            "map system" = "no";
+            "map hidden" = "no";
 
-      # Disable printer sharing. By default Samba shares printers configured
-      # using CUPS.
-      "load printers = no"
-      "printing = bsd"
-      "printcap name = /dev/null"
-      "disable spoolss = yes"
-      "show add printer wizard = no"
+            # Disable printer sharing. By default Samba shares printers configured
+            # using CUPS.
+            "load printers" = "no";
+            "printing" = "bsd";
+            "printcap name" = "/dev/null";
+            "disable spoolss" = "yes";
+            "show add printer wizard" = "no";
 
-      # Load in modules (order is critical!) and enable AAPL extensions.
-      "vfs objects = catia fruit streams_xattr"
-      # Enable Apple's SMB2+ extension.
-      "fruit:aapl = yes"
-      # Clean up unused or empty files created by the OS or Samba.
-      "fruit:wipe_intentionally_left_blank_rfork = yes"
-      "fruit:delete_empty_adfiles = yes"
-    ];
-    shares = lib.mkMerge (lib.flatten (
-      lib.mapAttrsToList mkUserShares smbUsers
-      ++ lib.mapAttrsToList mkGroupShares smbGroups
-    ));
+            # Load in modules (order is critical!) and enable AAPL extensions.
+            "vfs objects" = "catia fruit streams_xattr";
+            # Enable Apple's SMB2+ extension.
+            "fruit:aapl" = "yes";
+            # Clean up unused or empty files created by the OS or Samba.
+            "fruit:wipe_intentionally_left_blank_rfork" = "yes";
+            "fruit:delete_empty_adfiles" = "yes";
+          };
+        }
+      ]
+      ++ lib.flatten (
+        lib.mapAttrsToList mkUserShares smbUsers
+        ++ lib.mapAttrsToList mkGroupShares smbGroups
+      ));
   };
 
   systemd.tmpfiles.settings = lib.mkMerge (

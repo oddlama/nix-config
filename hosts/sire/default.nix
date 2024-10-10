@@ -26,6 +26,7 @@
   nixpkgs.hostPlatform = "x86_64-linux";
   boot.mode = "efi";
   boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "e1000e" "alx"];
+  systemd.units."dev-tpmrm0.device".enable = false; # https://github.com/systemd/systemd/issues/33412
 
   meta.promtail = {
     enable = true;
@@ -121,6 +122,7 @@
   in
     lib.mkIf (!minimal) (
       {}
+      // mkMicrovm "actual" {}
       // mkMicrovm "samba" {
         enableStorageDataset = true;
         enableBunkerDataset = true;

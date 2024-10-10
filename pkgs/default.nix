@@ -7,6 +7,7 @@ _inputs: [
     awakened-poe-trade = prev.callPackage ./awakened-poe-trade.nix {};
     segoe-ui-ttf = prev.callPackage ./segoe-ui-ttf.nix {};
     zsh-histdb-skim = prev.callPackage ./zsh-skim-histdb.nix {};
+    actual-server = prev.callPackage ./actual-server.nix {};
     neovim-clean = prev.neovim-unwrapped.overrideAttrs (old: {
       nativeBuildInputs = (old.nativeBuildInputs or []) ++ [prev.makeWrapper];
       postInstall =

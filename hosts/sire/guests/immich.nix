@@ -111,7 +111,7 @@
 
   processedConfigFile = "/run/agenix/immich.config.json";
 
-  version = "v1.114.0";
+  version = "v1.117.0";
   environment = {
     DB_DATABASE_NAME = "immich";
     DB_HOSTNAME = ipImmichPostgres;

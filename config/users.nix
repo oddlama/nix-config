@@ -36,5 +36,6 @@
     netbird-home = uidGid 973;
     gamemode = uidGid 972;
     plausible = uidGid 971;
+    actual = uidGid 970;
   };
 }

@@ -351,6 +351,8 @@ in {
         };
 
         config.resource.spam-filter = "file://${config.services.stalwart-mail.package}/etc/stalwart/spamfilter.toml";
+        config.resource.webadmin = "file://${config.services.stalwart-mail.package.webadmin}/webadmin.zip";
+        webadmin.path = "/var/cache/stalwart-mail";
 
         certificate.default = {
           cert = "%{file:${config.security.acme.certs.${primaryDomain}.directory}/fullchain.pem}%";
@@ -557,6 +559,7 @@ in {
         "${cfg.package}/bin/stalwart-mail --config=/run/stalwart-mail/config.toml"
       ];
       RestartSec = "60"; # Retry every minute
+      CacheDirectory = "stalwart-mail";
     };
   };
 

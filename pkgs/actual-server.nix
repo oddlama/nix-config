@@ -71,8 +71,7 @@ in
       cp -r ./ $out/lib/actual
 
       makeWrapper ${lib.getExe nodejs} "$out/bin/actual-server" \
-        --add-flags "$out/app.js" \
-        --chdir $out/lib/actual \
+        --add-flags "$out/lib/actual/app.js" \
         --set NODE_PATH "$out/node_modules"
 
       runHook postInstall

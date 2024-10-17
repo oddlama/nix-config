@@ -86,6 +86,6 @@ in
       homepage = "https://actualbudget.com/";
       license = licenses.mit;
       mainProgram = "actual-server";
-      maintainers = with maintainers; [patrickdag oddlama];
+      maintainers = with maintainers; [oddlama patrickdag];
     };
   }

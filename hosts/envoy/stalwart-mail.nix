@@ -559,7 +559,7 @@ in {
         "${cfg.package}/bin/stalwart-mail --config=/run/stalwart-mail/config.toml"
       ];
       RestartSec = "60"; # Retry every minute
-      CacheDirectory = "stalwart-mail";
+      CacheDirectory = lib.trace "remove stalwart cache soon, it's upstream" "stalwart-mail";
     };
   };
 

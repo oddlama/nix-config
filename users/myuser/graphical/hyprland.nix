@@ -157,6 +157,7 @@ in {
         };
 
         cursor.no_warps = true;
+        cursor.no_hardware_cursors = true;
         debug.disable_logs = false;
 
         misc = {

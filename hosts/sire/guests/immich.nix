@@ -69,11 +69,7 @@
         };
         url = "http://${ipImmichMachineLearning}:3003";
       };
-      map = {
-        enabled = true;
-        darkStyle = "";
-        lightStyle = "";
-      };
+      map.enabled = true;
       newVersionCheck.enabled = true;
       oauth = rec {
         enabled = true;
@@ -212,7 +208,12 @@ in {
           proxyWebsockets = true;
         };
         extraConfig = ''
-          client_max_body_size 10G;
+          client_max_body_size 50G;
+          proxy_buffering off;
+          proxy_request_buffering off;
+          proxy_read_timeout 600s;
+          proxy_send_timeout 600s;
+          send_timeout       600s;
         '';
       };
     };
@@ -237,9 +238,16 @@ in {
         locations."/" = {
           proxyPass = "http://immich";
           proxyWebsockets = true;
+          extraConfig = ''
+          '';
         };
         extraConfig = ''
-          client_max_body_size 10G;
+          client_max_body_size 50G;
+          proxy_buffering off;
+          proxy_request_buffering off;
+          proxy_read_timeout 600s;
+          proxy_send_timeout 600s;
+          send_timeout       600s;
           allow ${globals.net.home-lan.cidrv4};
           allow ${globals.net.home-lan.cidrv6};
           deny all;

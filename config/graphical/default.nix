@@ -4,6 +4,7 @@
   lib,
   minimal,
   pkgs,
+  globals,
   ...
 }: let
   inherit
@@ -29,6 +30,7 @@ in
       ./fonts.nix
       ./steam.nix
       ./xserver.nix
+      # ./cosmic.nix
     ];
 
     config = {
@@ -57,6 +59,22 @@ in
           pkgs.xdg-desktop-portal-hyprland
           pkgs.xdg-desktop-portal-gtk
         ];
+      };
+
+      services.displayManager.enable = true;
+      programs.uwsm = {
+        enable = true;
+        waylandCompositors.sway = {
+          prettyName = "Sway";
+          comment = "Sway";
+          binPath = lib.getExe config.home-manager.users.${globals.myuser.name}.wayland.windowManager.sway.package;
+        };
+
+        waylandCompositors.hyprland = {
+          prettyName = "Hyprland";
+          comment = "Hyprland";
+          binPath = lib.getExe config.home-manager.users.${globals.myuser.name}.wayland.windowManager.hyprland.package;
+        };
       };
 
       stylix = {

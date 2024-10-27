@@ -33,6 +33,7 @@
               (import ../pkgs/default.nix inputs)
               ++ [
                 inputs.idmail.overlays.default
+                # inputs.nixos-cosmic.overlays.default
                 inputs.nix-topology.overlays.default
                 inputs.nixos-extra-modules.overlays.default
                 inputs.nixvim.overlays.default

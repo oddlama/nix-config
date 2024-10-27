@@ -5,8 +5,7 @@
 }: {
   programs.waybar = {
     enable = true;
-    # Started via hyprland to ensure it restarts properly with hyprland
-    systemd.enable = false;
+    systemd.enable = true;
     style = ./waybar-style.css;
     settings.main = {
       layer = "top";
@@ -245,5 +244,10 @@
         spacing = 10;
       };
     };
+  };
+
+  systemd.user.services.waybar = {
+    Unit.After = ["graphical-session.target"];
+    Service.Slice = ["app-graphical.slice"];
   };
 }

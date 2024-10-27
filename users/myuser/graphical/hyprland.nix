@@ -49,7 +49,7 @@ in {
 
         bind =
           [
-            "SUPER + CTRL + SHIFT,q,exit"
+            "SUPER + CTRL + SHIFT,q,exec,uwsm stop"
 
             # Applications
             "SUPER,code:49,exec,${rofi-drun}" # SUPER+^
@@ -123,12 +123,10 @@ in {
 
         decoration.rounding = 4;
         exec-once = [
-          "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
-          "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
-          "systemctl --user restart xdg-desktop-portal.service"
-          "${pkgs.waybar}/bin/waybar"
-          "${pkgs.swaynotificationcenter}/bin/swaync"
-          "${lib.getExe pkgs.whisper-overlay}"
+          "uwsm finalize"
+          # "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
+          # "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
+          # "systemctl --user restart xdg-desktop-portal.service"
         ];
 
         input = {

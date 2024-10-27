@@ -55,6 +55,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # nixos-cosmic = {
+    #   url = "github:lilyinstarlight/nixos-cosmic";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
+
     nixos-extra-modules = {
       url = "github:oddlama/nixos-extra-modules";
       inputs.nixpkgs.follows = "nixpkgs";

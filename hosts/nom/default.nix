@@ -47,5 +47,15 @@
     nvidiaBusId = "PCI:1:0:0";
   };
 
+  services.mullvad-vpn.enable = true;
+  environment.persistence."/persist".directories = [
+    {
+      directory = "/etc/mullvad-vpn";
+      user = "root";
+      group = "root";
+      mode = "0700";
+    }
+  ];
+
   topology.self.icon = "devices.laptop";
 }

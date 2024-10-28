@@ -71,6 +71,7 @@
       ".local/share/invokeai"
       ".local/share/orca-slicer"
       ".local/share/kicad"
+      ".cache/kicad"
       ".cache/spotify"
     ];
 

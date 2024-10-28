@@ -4,6 +4,7 @@
   lib,
   ...
 }: {
+  boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
   networking.hostId = config.repo.secrets.local.networking.hostId;
 
   globals.monitoring.ping.ward = {

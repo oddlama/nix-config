@@ -1,44 +1,118 @@
-{pkgs, ...}: {
-  programs.nixvim = {
-    extraPlugins = with pkgs.vimPlugins; [
-      nvim-web-devicons
-    ];
-
-    extraConfigLuaPost = ''
-      require("nvim-web-devicons").setup {
-      	override = {
-      		default_icon = { icon = "󰈚", name = "Default", },
-      		c = { icon = "", name = "c", },
-      		css = { icon = "", name = "css", },
-      		dart = { icon = "", name = "dart", },
-      		deb = { icon = "", name = "deb", },
-      		Dockerfile = { icon = "", name = "Dockerfile", },
-      		html = { icon = "", name = "html", },
-      		jpeg = { icon = "󰉏", name = "jpeg", },
-      		jpg = { icon = "󰉏", name = "jpg", },
-      		js = { icon = "󰌞", name = "js", },
-      		kt = { icon = "󱈙", name = "kt", },
-      		lock = { icon = "󰌾", name = "lock", },
-      		lua = { icon = "", name = "lua", },
-      		mp3 = { icon = "󰎆", name = "mp3", },
-      		mp4 = { icon = "", name = "mp4", },
-      		out = { icon = "", name = "out", },
-      		png = { icon = "󰉏", name = "png", },
-      		py = { icon = "", name = "py", },
-      		["robots.txt"] = { icon = "󰚩", name = "robots", },
-      		toml = { icon = "", name = "toml", },
-      		ts = { icon = "󰛦", name = "ts", },
-      		ttf = { icon = "", name = "TrueTypeFont", },
-      		rb = { icon = "", name = "rb", },
-      		rpm = { icon = "", name = "rpm", },
-      		vue = { icon = "󰡄", name = "vue", },
-      		woff = { icon = "", name = "WebOpenFontFormat", },
-      		woff2 = { icon = "", name = "WebOpenFontFormat2", },
-      		xz = { icon = "", name = "xz", },
-      		zip = { icon = "", name = "zip", },
-      	},
-      	default = true,
-      }
-    '';
+{
+  programs.nixvim.plugins.web-devicons = {
+    enable = true;
+    # customIcons.c = {
+    #   icon = "";
+    #   name = "c";
+    # };
+    # customIcons.css = {
+    #   icon = "";
+    #   name = "css";
+    # };
+    # customIcons.dart = {
+    #   icon = "";
+    #   name = "dart";
+    # };
+    # customIcons.deb = {
+    #   icon = "";
+    #   name = "deb";
+    # };
+    # customIcons.Dockerfile = {
+    #   icon = "";
+    #   name = "Dockerfile";
+    # };
+    # customIcons.html = {
+    #   icon = "";
+    #   name = "html";
+    # };
+    # customIcons.jpeg = {
+    #   icon = "󰉏";
+    #   name = "jpeg";
+    # };
+    # customIcons.jpg = {
+    #   icon = "󰉏";
+    #   name = "jpg";
+    # };
+    # customIcons.js = {
+    #   icon = "󰌞";
+    #   name = "js";
+    # };
+    # customIcons.kt = {
+    #   icon = "󱈙";
+    #   name = "kt";
+    # };
+    # customIcons.lock = {
+    #   icon = "󰌾";
+    #   name = "lock";
+    # };
+    # customIcons.lua = {
+    #   icon = "";
+    #   name = "lua";
+    # };
+    # customIcons.mp3 = {
+    #   icon = "󰎆";
+    #   name = "mp3";
+    # };
+    # customIcons.mp4 = {
+    #   icon = "";
+    #   name = "mp4";
+    # };
+    # customIcons.out = {
+    #   icon = "";
+    #   name = "out";
+    # };
+    # customIcons.png = {
+    #   icon = "󰉏";
+    #   name = "png";
+    # };
+    # customIcons.py = {
+    #   icon = "";
+    #   name = "py";
+    # };
+    # customIcons."robots.txt" = {
+    #   icon = "󰚩";
+    #   name = "robots";
+    # };
+    # customIcons.toml = {
+    #   icon = "";
+    #   name = "toml";
+    # };
+    # customIcons.ts = {
+    #   icon = "󰛦";
+    #   name = "ts";
+    # };
+    # customIcons.ttf = {
+    #   icon = "";
+    #   name = "TrueTypeFont";
+    # };
+    # customIcons.rb = {
+    #   icon = "";
+    #   name = "rb";
+    # };
+    # customIcons.rpm = {
+    #   icon = "";
+    #   name = "rpm";
+    # };
+    # customIcons.vue = {
+    #   icon = "󰡄";
+    #   name = "vue";
+    # };
+    # customIcons.woff = {
+    #   icon = "";
+    #   name = "WebOpenFontFormat";
+    # };
+    # customIcons.woff2 = {
+    #   icon = "";
+    #   name = "WebOpenFontFormat2";
+    # };
+    # customIcons.xz = {
+    #   icon = "";
+    #   name = "xz";
+    # };
+    # customIcons.zip = {
+    #   icon = "";
+    #   name = "zip";
+    # };
+    defaultIcon.icon = "󰈚";
   };
 }

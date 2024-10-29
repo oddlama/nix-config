@@ -11,4 +11,7 @@
 
   # Install the kitty terminfo package for all systems.
   environment.systemPackages = [pkgs.kitty.terminfo];
+
+  # And a reasonable inputrc please
+  environment.etc."inputrc".source = ./inputrc;
 }

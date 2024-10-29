@@ -4,7 +4,6 @@
   lib,
   minimal,
   pkgs,
-  globals,
   ...
 }: let
   inherit
@@ -30,7 +29,6 @@ in
       ./fonts.nix
       ./steam.nix
       ./xserver.nix
-      # ./cosmic.nix
     ];
 
     config = {
@@ -67,13 +65,13 @@ in
         waylandCompositors.sway = {
           prettyName = "Sway";
           comment = "Sway";
-          binPath = lib.getExe config.home-manager.users.${globals.myuser.name}.wayland.windowManager.sway.package;
+          binPath = lib.getExe pkgs.sway;
         };
 
         waylandCompositors.hyprland = {
           prettyName = "Hyprland";
           comment = "Hyprland";
-          binPath = lib.getExe config.home-manager.users.${globals.myuser.name}.wayland.windowManager.hyprland.package;
+          binPath = lib.getExe pkgs.hyprland;
         };
       };
 

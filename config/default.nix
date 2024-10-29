@@ -23,7 +23,6 @@
     ./boot.nix
     ./home-manager.nix
     ./impermanence.nix
-    ./inputrc.nix
     ./installer.nix
     ./issue.nix
     ./net.nix

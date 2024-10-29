@@ -17,7 +17,6 @@
 
     ../../config/dev
     ../../config/graphical
-    ../../config/optional/initrd-ssh.nix
     ../../config/optional/laptop.nix
     ../../config/optional/sound.nix
     ../../config/optional/zfs.nix

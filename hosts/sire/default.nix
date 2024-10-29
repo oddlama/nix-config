@@ -14,7 +14,6 @@
     ../../config
     ../../config/hardware/intel.nix
     ../../config/hardware/physical.nix
-    ../../config/optional/initrd-ssh.nix
     ../../config/optional/zfs.nix
 
     ./fs.nix

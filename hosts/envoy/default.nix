@@ -6,7 +6,6 @@
   imports = [
     ../../config
     ../../config/hardware/hetzner-cloud.nix
-    ../../config/optional/initrd-ssh.nix
     ../../config/optional/zfs.nix
 
     ./acme.nix

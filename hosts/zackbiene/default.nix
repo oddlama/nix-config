@@ -12,7 +12,6 @@ in {
     ../../config
     ../../config/hardware/odroid-n2plus.nix
     ../../config/hardware/physical.nix
-    ../../config/optional/initrd-ssh.nix
     ../../config/optional/zfs.nix
 
     #./esphome.nix

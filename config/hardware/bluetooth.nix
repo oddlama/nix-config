@@ -1,5 +1,5 @@
 {pkgs, ...}: {
-  environment.systemPackages = with pkgs; [bluetuith];
+  environment.systemPackages = with pkgs; [bluetui];
   environment.persistence."/persist".directories = [
     "/var/lib/bluetooth"
   ];

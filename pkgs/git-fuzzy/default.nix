@@ -10,7 +10,7 @@
 }: let
   binPath = lib.makeBinPath ([gitAndTools.hub gitAndTools.delta bc bat] ++ extraPackages);
 in
-  stdenvNoCC.mkDerivation rec {
+  stdenvNoCC.mkDerivation {
     pname = "git-fuzzy";
     version = "unstable-2023-09-18";
     src = fetchFromGitHub {

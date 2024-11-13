@@ -1,5 +1,4 @@
 _inputs: [
-  (import ./caddy.nix)
   (import ./scripts)
   (_final: prev: {
     deploy = prev.callPackage ./deploy.nix {};

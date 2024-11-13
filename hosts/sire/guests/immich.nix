@@ -107,7 +107,7 @@
 
   processedConfigFile = "/run/agenix/immich.config.json";
 
-  version = "v1.117.0";
+  version = "v1.119.1";
   environment = {
     DB_DATABASE_NAME = "immich";
     DB_HOSTNAME = ipImmichPostgres;
@@ -115,7 +115,7 @@
     DB_USERNAME = "postgres";
     IMMICH_VERSION = "${version}";
     UPLOAD_LOCATION = upload_folder;
-    IMMICH_SERVER_URL = "http://${ipImmichServer}:3001/";
+    IMMICH_SERVER_URL = "http://${ipImmichServer}:2283/";
     IMMICH_MACHINE_LEARNING_URL = "http://${ipImmichMachineLearning}:3003";
     REDIS_HOSTNAME = ipImmichRedis;
     IMMICH_CONFIG_FILE = "/immich.config.json";
@@ -174,8 +174,8 @@ in {
   networking.nftables.chains.forward.into-immich-container = {
     after = ["conntrack"];
     rules = [
-      "iifname proxy-sentinel ip saddr ${sentinelCfg.wireguard.proxy-sentinel.ipv4} tcp dport 3001 accept"
-      "iifname proxy-home ip saddr ${wardWebProxyCfg.wireguard.proxy-home.ipv4} tcp dport 3001 accept"
+      "iifname proxy-sentinel ip saddr ${sentinelCfg.wireguard.proxy-sentinel.ipv4} tcp dport 2283 accept"
+      "iifname proxy-home ip saddr ${wardWebProxyCfg.wireguard.proxy-home.ipv4} tcp dport 2283 accept"
       "iifname podman1 oifname lan accept"
     ];
   };
@@ -335,7 +335,7 @@ in {
       "${upload_folder}:/usr/src/app/upload:rw"
     ];
     ports = [
-      "2283:3001/tcp"
+      "2283:2283/tcp"
     ];
     dependsOn = [
       "immich_postgres"

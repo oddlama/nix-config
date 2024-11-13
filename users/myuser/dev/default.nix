@@ -15,11 +15,13 @@
 
     extraOutputsToInstall = ["man" "doc" "devdoc"];
     packages = [
-      pkgs.git-lfs
-      pkgs.d2
+      (pkgs.python3.withPackages (p: with p; [numpy]))
       pkgs.cloc
+      pkgs.d2
+      pkgs.gh
+      pkgs.gh-dash
+      pkgs.git-lfs
       pkgs.jq
-      pkgs.python3
     ];
   };
 }

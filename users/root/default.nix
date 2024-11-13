@@ -20,7 +20,6 @@
     ];
 
     home = {
-      inherit (config.users.users.root) uid;
       username = config.users.users.root.name;
 
       packages = with pkgs; [

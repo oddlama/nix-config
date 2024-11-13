@@ -51,7 +51,6 @@ in
       # avoid triggering infinite recursion.
       userSecretsName = "user-myuser";
       home = {
-        inherit (config.users.users.${myuser}) uid;
         username = config.users.users.${myuser}.name;
       };
 

@@ -17,7 +17,7 @@
   };
 
   perSystem = {config, ...}: {
-    agenix-rekey.nodes = self.nodes;
+    agenix-rekey.nixosConfigurations = self.nodes;
     devshells.default = {
       commands = [
         {

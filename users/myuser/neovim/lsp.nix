@@ -38,7 +38,7 @@
         nil_ls = {
           enable = true;
           settings = {
-            formatting.command = [(lib.getExe pkgs.alejandra) "--quiet"];
+            formatting.command = [(lib.getExe pkgs.nixfmt-rfc-style) "--quiet"];
           };
         };
         nixd.enable = true;
@@ -70,7 +70,6 @@
           protolint.enable = true;
         };
         formatting = {
-          alejandra.enable = true;
           markdownlint.enable = true;
           sqlfluff.enable = true;
           shfmt.enable = true;

@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   imports = [
     ./direnv.nix
     ./gdb.nix
@@ -13,9 +14,13 @@
       ".local/share/rustup"
     ];
 
-    extraOutputsToInstall = ["man" "doc" "devdoc"];
+    extraOutputsToInstall = [
+      "man"
+      "doc"
+      "devdoc"
+    ];
     packages = [
-      (pkgs.python3.withPackages (p: with p; [numpy]))
+      (pkgs.python3.withPackages (p: with p; [ numpy ]))
       pkgs.cloc
       pkgs.d2
       pkgs.gh

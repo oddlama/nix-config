@@ -5,7 +5,8 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   inherit (lib) getExe;
 
   minecraftDomain = "mc.${globals.domains.me}";
@@ -13,7 +14,7 @@
 
   minecraft-attach = pkgs.writeShellApplication {
     name = "minecraft-attach";
-    runtimeInputs = [pkgs.tmux];
+    runtimeInputs = [ pkgs.tmux ];
     text = ''
       shopt -s nullglob
 
@@ -40,9 +41,7 @@
   };
 
   helper-functions =
-    /*
-    bash
-    */
+    # bash
     ''
       ################################################################
       # General helper functions
@@ -171,7 +170,7 @@
 
   server-backup-script = pkgs.writeShellApplication {
     name = "minecraft-backup";
-    runtimeInputs = [pkgs.rdiff-backup];
+    runtimeInputs = [ pkgs.rdiff-backup ];
     text = ''
       BACKUP_LOG_FILE="logs/backup.log"
       BACKUP_TO="backups"
@@ -199,7 +198,10 @@
 
   server-start-script = pkgs.writeShellApplication {
     name = "minecraft-server-start";
-    runtimeInputs = [pkgs.procps pkgs.gnugrep];
+    runtimeInputs = [
+      pkgs.procps
+      pkgs.gnugrep
+    ];
     text = ''
       cd ${dataDir}/server
 
@@ -252,7 +254,11 @@
 
   server-update-script = pkgs.writeShellApplication {
     name = "minecraft-server-update";
-    runtimeInputs = [pkgs.wget pkgs.curl pkgs.jq];
+    runtimeInputs = [
+      pkgs.wget
+      pkgs.curl
+      pkgs.jq
+    ];
     text = ''
       cd ${dataDir}/server || exit 1
       ${helper-functions}
@@ -285,7 +291,11 @@
 
   proxy-update-script = pkgs.writeShellApplication {
     name = "minecraft-proxy-update";
-    runtimeInputs = [pkgs.wget pkgs.curl pkgs.jq];
+    runtimeInputs = [
+      pkgs.wget
+      pkgs.curl
+      pkgs.jq
+    ];
     text = ''
       cd ${dataDir}/proxy || exit 1
       ${helper-functions}
@@ -313,8 +323,8 @@
     User = "minecraft";
 
     # Hardening
-    AmbientCapabilities = ["CAP_KILL"];
-    CapabilityBoundingSet = ["CAP_KILL"];
+    AmbientCapabilities = [ "CAP_KILL" ];
+    CapabilityBoundingSet = [ "CAP_KILL" ];
     LockPersonality = true;
     NoNewPrivileges = true;
     PrivateDevices = true;
@@ -335,16 +345,21 @@
     SystemCallArchitectures = "native";
     UMask = "0027";
   };
-in {
+in
+{
   microvm.mem = 1024 * 24;
   microvm.vcpu = 16;
 
   wireguard.proxy-sentinel = {
     client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [80 25565 25566];
+    firewallRuleForNode.sentinel.allowedTCPPorts = [
+      80
+      25565
+      25566
+    ];
   };
 
-  users.groups.minecraft.members = ["nginx"];
+  users.groups.minecraft.members = [ "nginx" ];
   users.users.minecraft = {
     description = "Minecraft server service user";
     home = dataDir;
@@ -379,7 +394,7 @@ in {
     # - 25565,25566 (wan) -> 25565,25566 (proxy-sentinel)
     networking.nftables.chains = {
       postrouting.to-minecraft = {
-        after = ["hook"];
+        after = [ "hook" ];
         rules = [
           "iifname wan ip daddr ${config.wireguard.proxy-sentinel.ipv4} tcp dport 25565 masquerade random"
           "iifname wan ip6 daddr ${config.wireguard.proxy-sentinel.ipv6} tcp dport 25565 masquerade random"
@@ -388,7 +403,7 @@ in {
         ];
       };
       prerouting.to-minecraft = {
-        after = ["hook"];
+        after = [ "hook" ];
         rules = [
           "iifname wan tcp dport 25565 dnat ip to ${config.wireguard.proxy-sentinel.ipv4}"
           "iifname wan tcp dport 25565 dnat ip6 to ${config.wireguard.proxy-sentinel.ipv6}"
@@ -400,7 +415,7 @@ in {
 
     services.nginx = {
       upstreams.minecraft = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:80" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:80" = { };
         extraConfig = ''
           zone minecraft 64k;
           keepalive 2;
@@ -422,8 +437,8 @@ in {
 
   systemd.services.minecraft-server = {
     description = "Minecraft Server Service";
-    wantedBy = ["multi-user.target"];
-    after = ["network.target"];
+    wantedBy = [ "multi-user.target" ];
+    after = [ "network.target" ];
     path = [
       # for infocmp
       pkgs.ncurses
@@ -431,18 +446,19 @@ in {
       pkgs.libwebp
     ];
 
-    serviceConfig =
-      commonServiceConfig
-      // {
-        Type = "forking";
-        ExecStart = ''${getExe pkgs.tmux} -S /run/minecraft-server/tmux set -g default-shell ${getExe pkgs.bashInteractive} ";" new-session -d "${getExe pkgs.python3} ${./minecraft/server-loop.py} --block control/start.block ./start.sh :POST: ./backup.sh"'';
-        ExecStop = "${getExe pkgs.tmux} -S /run/minecraft-server/tmux kill-server";
+    serviceConfig = commonServiceConfig // {
+      Type = "forking";
+      ExecStart = ''${getExe pkgs.tmux} -S /run/minecraft-server/tmux set -g default-shell ${getExe pkgs.bashInteractive} ";" new-session -d "${getExe pkgs.python3} ${./minecraft/server-loop.py} --block control/start.block ./start.sh :POST: ./backup.sh"'';
+      ExecStop = "${getExe pkgs.tmux} -S /run/minecraft-server/tmux kill-server";
 
-        WorkingDirectory = "${dataDir}/server";
-        RuntimeDirectory = "minecraft-server";
-        ReadWritePaths = ["${dataDir}/server" "${dataDir}/web"];
-        ReadOnlyPaths = "${dataDir}/proxy";
-      };
+      WorkingDirectory = "${dataDir}/server";
+      RuntimeDirectory = "minecraft-server";
+      ReadWritePaths = [
+        "${dataDir}/server"
+        "${dataDir}/web"
+      ];
+      ReadOnlyPaths = "${dataDir}/proxy";
+    };
 
     preStart = ''
       ln -sfT ${getExe server-start-script} start.sh
@@ -470,21 +486,22 @@ in {
 
   systemd.services.minecraft-proxy = {
     description = "Minecraft Proxy Service";
-    wantedBy = ["multi-user.target"];
-    after = ["network.target"];
-    path = [pkgs.ncurses]; # for infocmp
+    wantedBy = [ "multi-user.target" ];
+    after = [ "network.target" ];
+    path = [ pkgs.ncurses ]; # for infocmp
 
-    serviceConfig =
-      commonServiceConfig
-      // {
-        Type = "forking";
-        ExecStart = ''${getExe pkgs.tmux} -S /run/minecraft-proxy/tmux set -g default-shell ${getExe pkgs.bashInteractive} ";" new-session -d "${getExe pkgs.python3} ${./minecraft/server-loop.py} ./start.sh"'';
-        ExecStop = "${getExe pkgs.tmux} -S /run/minecraft-proxy/tmux kill-server";
+    serviceConfig = commonServiceConfig // {
+      Type = "forking";
+      ExecStart = ''${getExe pkgs.tmux} -S /run/minecraft-proxy/tmux set -g default-shell ${getExe pkgs.bashInteractive} ";" new-session -d "${getExe pkgs.python3} ${./minecraft/server-loop.py} ./start.sh"'';
+      ExecStop = "${getExe pkgs.tmux} -S /run/minecraft-proxy/tmux kill-server";
 
-        WorkingDirectory = "${dataDir}/proxy";
-        RuntimeDirectory = "minecraft-proxy";
-        ReadWritePaths = ["${dataDir}/proxy" "${dataDir}/server/control"];
-      };
+      WorkingDirectory = "${dataDir}/proxy";
+      RuntimeDirectory = "minecraft-proxy";
+      ReadWritePaths = [
+        "${dataDir}/proxy"
+        "${dataDir}/server/control"
+      ];
+    };
 
     preStart = ''
       ln -sfT ${getExe proxy-start-script} start.sh

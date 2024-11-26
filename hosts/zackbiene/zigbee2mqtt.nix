@@ -2,10 +2,12 @@
   config,
   nodes,
   ...
-}: let
+}:
+let
   sentinelCfg = nodes.sentinel.config;
   zigbeeDomain = "zigbee.${sentinelCfg.repo.secrets.global.domains.personal}";
-in {
+in
+{
   age.secrets."mosquitto-pw-zigbee2mqtt.yaml" = {
     rekeyFile = ./secrets/mosquitto-pw-zigbee2mqtt.yaml.age;
     mode = "440";
@@ -39,7 +41,7 @@ in {
 
   services.nginx = {
     upstreams."zigbee2mqtt" = {
-      servers."localhost:8072" = {};
+      servers."localhost:8072" = { };
       extraConfig = ''
         zone zigbee2mqtt 64k;
         keepalive 2;

@@ -2,10 +2,12 @@
   config,
   nodes,
   ...
-}: let
+}:
+let
   sentinelCfg = nodes.sentinel.config;
   esphomeDomain = "esphome.${sentinelCfg.repo.secrets.global.domains.personal}";
-in {
+in
+{
   environment.persistence."/persist".directories = [
     {
       directory = "/var/lib/private/esphome";
@@ -25,13 +27,13 @@ in {
   #  "esphome.home.${personalDomain}"
   #];
   systemd.services.nginx = {
-    serviceConfig.SupplementaryGroups = ["esphome"];
-    requires = ["esphome.service"];
+    serviceConfig.SupplementaryGroups = [ "esphome" ];
+    requires = [ "esphome.service" ];
   };
 
   services.nginx = {
     upstreams."esphome" = {
-      servers."unix:/run/esphome/esphome.sock" = {};
+      servers."unix:/run/esphome/esphome.sock" = { };
       extraConfig = ''
         zone esphome 64k;
         keepalive 2;

@@ -4,9 +4,9 @@
   lib,
   pkgs,
   ...
-}: let
-  inherit
-    (lib)
+}:
+let
+  inherit (lib)
     getExe
     mkAfter
     mkForce
@@ -14,7 +14,8 @@
 
   hostDomain = globals.domains.me;
   coturnDomain = "coturn.${hostDomain}";
-in {
+in
+{
   age.secrets.coturn-password-netbird = {
     generator.script = "alnum";
     group = "turnserver";
@@ -58,23 +59,25 @@ in {
     pkey = "@pkey@";
   };
 
-  systemd.services.coturn = let
-    certsDir = config.security.acme.certs.${hostDomain}.directory;
-  in {
-    preStart = mkAfter ''
-      ${getExe pkgs.replace-secret} @password@ ${config.age.secrets.coturn-password-netbird.path} /run/coturn/turnserver.cfg
-      ${getExe pkgs.replace-secret} @cert@ <(echo "$CREDENTIALS_DIRECTORY/cert.pem") /run/coturn/turnserver.cfg
-      ${getExe pkgs.replace-secret} @pkey@ <(echo "$CREDENTIALS_DIRECTORY/pkey.pem") /run/coturn/turnserver.cfg
-    '';
-    serviceConfig = {
-      LoadCredential = [
-        "cert.pem:${certsDir}/fullchain.pem"
-        "pkey.pem:${certsDir}/key.pem"
-      ];
-      Restart = mkForce "always";
-      RestartSec = "60"; # Retry every minute
+  systemd.services.coturn =
+    let
+      certsDir = config.security.acme.certs.${hostDomain}.directory;
+    in
+    {
+      preStart = mkAfter ''
+        ${getExe pkgs.replace-secret} @password@ ${config.age.secrets.coturn-password-netbird.path} /run/coturn/turnserver.cfg
+        ${getExe pkgs.replace-secret} @cert@ <(echo "$CREDENTIALS_DIRECTORY/cert.pem") /run/coturn/turnserver.cfg
+        ${getExe pkgs.replace-secret} @pkey@ <(echo "$CREDENTIALS_DIRECTORY/pkey.pem") /run/coturn/turnserver.cfg
+      '';
+      serviceConfig = {
+        LoadCredential = [
+          "cert.pem:${certsDir}/fullchain.pem"
+          "pkey.pem:${certsDir}/key.pem"
+        ];
+        Restart = mkForce "always";
+        RestartSec = "60"; # Retry every minute
+      };
     };
-  };
 
   security.acme.certs.${hostDomain}.postRun = ''
     systemctl restart coturn.service

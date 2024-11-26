@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   fonts = {
     # Always prefer emojis even if the original font would provide a glyph
     fontconfig.localConf = ''
@@ -27,7 +28,7 @@
     '';
 
     packages = with pkgs; [
-      (pkgs.nerdfonts.override {fonts = ["NerdFontsSymbolsOnly"];})
+      (pkgs.nerdfonts.override { fonts = [ "NerdFontsSymbolsOnly" ]; })
       noto-fonts
       noto-fonts-cjk-sans
       noto-fonts-cjk-serif

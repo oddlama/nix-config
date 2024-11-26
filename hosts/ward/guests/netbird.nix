@@ -4,10 +4,12 @@
   lib,
   nodes,
   ...
-}: let
+}:
+let
   sentinelCfg = nodes.sentinel.config;
   netbirdDomain = "netbird.${globals.domains.me}";
-in {
+in
+{
   wireguard.proxy-sentinel = {
     client.via = "sentinel";
     firewallRuleForNode.sentinel.allowedTCPPorts = [
@@ -26,9 +28,11 @@ in {
   };
 
   age.secrets.netbird-data-store-encryption-key = {
-    generator.script = {pkgs, ...}: ''
-      ${lib.getExe pkgs.openssl} rand -base64 32
-    '';
+    generator.script =
+      { pkgs, ... }:
+      ''
+        ${lib.getExe pkgs.openssl} rand -base64 32
+      '';
   };
 
   environment.persistence."/persist".directories = [
@@ -88,7 +92,8 @@ in {
   nodes.sentinel = {
     services.nginx = {
       upstreams.netbird-mgmt = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:${builtins.toString config.services.netbird.server.management.port}" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${builtins.toString config.services.netbird.server.management.port}" =
+          { };
         extraConfig = ''
           zone netbird 64k;
           keepalive 5;
@@ -102,7 +107,8 @@ in {
       };
 
       upstreams.netbird-signal = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:${builtins.toString config.services.netbird.server.signal.port}" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${builtins.toString config.services.netbird.server.signal.port}" =
+          { };
         extraConfig = ''
           zone netbird 64k;
           keepalive 5;

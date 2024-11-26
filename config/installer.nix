@@ -3,7 +3,8 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   disko-script = pkgs.writeShellScriptBin "disko-script" "${config.system.build.diskoScript}";
   disko-mount = pkgs.writeShellScriptBin "disko-mount" "${config.system.build.mountScript}";
   disko-format = pkgs.writeShellScriptBin "disko-format" "${config.system.build.formatScript}";
@@ -30,7 +31,8 @@
       install-system
     ];
   };
-in {
+in
+{
   options.system.build.installFromLive = lib.mkOption {
     type = lib.types.package;
     description = ''

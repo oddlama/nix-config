@@ -2,19 +2,28 @@
   config,
   globals,
   ...
-}: let
+}:
+let
   inherit (config.repo.secrets.local) acme;
   fritzboxDomain = "fritzbox.${globals.domains.me}";
-in {
+in
+{
   microvm.mem = 1024 * 4; # Need more /tmp space so nginx can store intermediary files
 
   wireguard.proxy-home = {
     client.via = "ward";
-    firewallRuleForAll.allowedTCPPorts = [80 443];
+    firewallRuleForAll.allowedTCPPorts = [
+      80
+      443
+    ];
   };
 
   # This node shall monitor the infrastructure
-  meta.telegraf.availableMonitoringNetworks = ["internet" "home-wan" "home-lan"];
+  meta.telegraf.availableMonitoringNetworks = [
+    "internet"
+    "home-wan"
+    "home-lan"
+  ];
 
   age.secrets.acme-cloudflare-dns-token = {
     rekeyFile = config.node.secretsDir + "/acme-cloudflare-dns-token.age";
@@ -37,14 +46,14 @@ in {
       };
       dnsProvider = "cloudflare";
       dnsPropagationCheck = true;
-      reloadServices = ["nginx"];
+      reloadServices = [ "nginx" ];
     };
     inherit (acme) certs wildcardDomains;
   };
 
   services.nginx = {
     upstreams.fritzbox = {
-      servers.${globals.net.home-wan.hosts.fritzbox.ipv4} = {};
+      servers.${globals.net.home-wan.hosts.fritzbox.ipv4} = { };
       extraConfig = ''
         zone grafana 64k;
         keepalive 2;
@@ -68,7 +77,7 @@ in {
     };
   };
 
-  users.groups.acme.members = ["nginx"];
+  users.groups.acme.members = [ "nginx" ];
   services.nginx.enable = true;
   services.nginx.recommendedSetup = true;
 }

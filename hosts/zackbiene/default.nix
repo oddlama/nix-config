@@ -4,10 +4,12 @@
   lib,
   nodes,
   ...
-}: let
+}:
+let
   sentinelCfg = nodes.sentinel.config;
   wardWebProxyCfg = nodes.ward-web-proxy.config;
-in {
+in
+{
   imports = [
     ../../config
     ../../config/hardware/odroid-n2plus.nix
@@ -38,10 +40,11 @@ in {
 
   # Connect safely via wireguard to skip http authentication
   networking.hosts.${
-    if config.wireguard ? proxy-home
-    then wardWebProxyCfg.wireguard.proxy-home.ipv4
-    else sentinelCfg.wireguard.proxy-sentinel.ipv4
-  } = [globals.services.influxdb.domain];
+    if config.wireguard ? proxy-home then
+      wardWebProxyCfg.wireguard.proxy-home.ipv4
+    else
+      sentinelCfg.wireguard.proxy-sentinel.ipv4
+  } = [ globals.services.influxdb.domain ];
 
   meta.telegraf = {
     enable = true;

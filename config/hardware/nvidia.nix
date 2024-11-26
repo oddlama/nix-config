@@ -5,8 +5,8 @@
   ...
 }:
 lib.optionalAttrs (!minimal) {
-  boot.blacklistedKernelModules = ["nouveau"];
-  services.xserver.videoDrivers = lib.mkForce ["nvidia"];
+  boot.blacklistedKernelModules = [ "nouveau" ];
+  services.xserver.videoDrivers = lib.mkForce [ "nvidia" ];
 
   hardware = {
     graphics = {

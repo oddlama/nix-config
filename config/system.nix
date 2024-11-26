@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   documentation.nixos.enable = false;
 
   # Disable sudo which is entirely unnecessary.
@@ -10,7 +11,7 @@
   console.keyMap = "de-latin1-nodeadkeys";
 
   # Install the kitty terminfo package for all systems.
-  environment.systemPackages = [pkgs.kitty.terminfo];
+  environment.systemPackages = [ pkgs.kitty.terminfo ];
 
   # And a reasonable inputrc please
   environment.etc."inputrc".source = ./inputrc;

@@ -25,14 +25,14 @@
         enable = true;
         settings = {
           sources = [
-            {name = "nvim_lsp_signature_help";}
-            {name = "nvim_lsp";}
-            {name = "nvim_lsp_document_symbol";}
-            {name = "path";}
-            {name = "treesitter";}
-            {name = "dap";}
+            { name = "nvim_lsp_signature_help"; }
+            { name = "nvim_lsp"; }
+            { name = "nvim_lsp_document_symbol"; }
+            { name = "path"; }
+            { name = "treesitter"; }
+            { name = "dap"; }
             # {name = "luasnip";}
-            {name = "emoji";}
+            { name = "emoji"; }
           ];
           mapping = {
             "<CR>" =
@@ -100,7 +100,11 @@
                 end, {"i", "s"})
               '';
           };
-          formatting.fields = ["abbr" "kind" "menu"];
+          formatting.fields = [
+            "abbr"
+            "kind"
+            "menu"
+          ];
           formatting.format =
             # lua
             ''

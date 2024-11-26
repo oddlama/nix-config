@@ -3,9 +3,9 @@
   pkgs,
   config,
   ...
-}: let
-  inherit
-    (lib)
+}:
+let
+  inherit (lib)
     getExe
     mkEnableOption
     mkIf
@@ -18,11 +18,12 @@
   configFile = formatType.generate "config.json" cfg.settings;
   dataDir = "/var/lib/actual";
 
-  formatType = pkgs.formats.json {};
-in {
+  formatType = pkgs.formats.json { };
+in
+{
   options.services.actual = {
     enable = mkEnableOption "actual, a privacy focused app for managing your finances";
-    package = mkPackageOption pkgs "actual-server" {};
+    package = mkPackageOption pkgs "actual-server" { };
 
     user = mkOption {
       type = types.str;
@@ -59,7 +60,7 @@ in {
     };
 
     settings = mkOption {
-      default = {};
+      default = { };
       type = types.submodule {
         freeformType = formatType.type;
 
@@ -87,10 +88,10 @@ in {
   };
 
   config = mkIf cfg.enable {
-    networking.firewall.allowedTCPPorts = mkIf cfg.openFirewall [cfg.settings.port];
+    networking.firewall.allowedTCPPorts = mkIf cfg.openFirewall [ cfg.settings.port ];
 
     users.groups = mkIf (cfg.group == "actual") {
-      ${cfg.group} = {};
+      ${cfg.group} = { };
     };
 
     users.users = mkIf (cfg.user == "actual") {
@@ -103,7 +104,7 @@ in {
 
     systemd.services.actual = {
       description = "Actual server, a local-first personal finance app";
-      after = ["network.target"];
+      after = [ "network.target" ];
       environment.ACTUAL_CONFIG_PATH = configFile;
       serviceConfig = {
         ExecStart = getExe cfg.package;
@@ -146,7 +147,7 @@ in {
         ];
         UMask = "0077";
       };
-      wantedBy = ["multi-user.target"];
+      wantedBy = [ "multi-user.target" ];
     };
   };
 }

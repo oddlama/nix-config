@@ -7,7 +7,7 @@ rustPlatform.buildRustPackage rec {
   pname = "zsh-histdb-skim";
   version = "0.8.6";
 
-  buildInputs = [sqlite];
+  buildInputs = [ sqlite ];
   src = fetchFromGitHub {
     owner = "m42e";
     repo = "zsh-histdb-skim";

@@ -4,12 +4,14 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   adguardhomeDomain = "adguardhome.${globals.domains.me}";
-in {
+in
+{
   wireguard.proxy-sentinel = {
     client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.adguardhome.port];
+    firewallRuleForNode.sentinel.allowedTCPPorts = [ config.services.adguardhome.port ];
   };
 
   globals.services.adguardhome.domain = adguardhomeDomain;
@@ -22,7 +24,8 @@ in {
   nodes.sentinel = {
     services.nginx = {
       upstreams.adguardhome = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.adguardhome.port}" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.adguardhome.port}" =
+          { };
         extraConfig = ''
           zone adguardhome 64k;
           keepalive 2;
@@ -36,7 +39,7 @@ in {
         forceSSL = true;
         useACMEWildcardHost = true;
         oauth2.enable = true;
-        oauth2.allowedGroups = ["access_adguardhome"];
+        oauth2.allowedGroups = [ "access_adguardhome" ];
         locations."/" = {
           proxyPass = "http://adguardhome";
           proxyWebsockets = true;
@@ -53,8 +56,8 @@ in {
   ];
 
   networking.firewall = {
-    allowedTCPPorts = [53];
-    allowedUDPPorts = [53];
+    allowedTCPPorts = [ 53 ];
+    allowedUDPPorts = [ 53 ];
   };
 
   topology.self.services.adguardhome.info = "https://" + adguardhomeDomain;
@@ -92,19 +95,22 @@ in {
           }
         ]
         # Use the local mirror-proxy for some services (not necessary, just for speed)
-        ++ map (domain: {
-          inherit domain;
-          answer = globals.net.home-lan.hosts.ward-web-proxy.ipv4;
-        }) [
-          # FIXME: dont hardcode, filter global service domains by internal state
-          globals.services.grafana.domain
-          globals.services.immich.domain
-          globals.services.influxdb.domain
-          globals.services.loki.domain
-          globals.services.paperless.domain
-          "home.${globals.domains.me}"
-          "fritzbox.${globals.domains.me}"
-        ];
+        ++
+          map
+            (domain: {
+              inherit domain;
+              answer = globals.net.home-lan.hosts.ward-web-proxy.ipv4;
+            })
+            [
+              # FIXME: dont hardcode, filter global service domains by internal state
+              globals.services.grafana.domain
+              globals.services.immich.domain
+              globals.services.influxdb.domain
+              globals.services.loki.domain
+              globals.services.paperless.domain
+              "home.${globals.domains.me}"
+              "fritzbox.${globals.domains.me}"
+            ];
       filters = [
         {
           name = "AdGuard DNS filter";

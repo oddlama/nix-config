@@ -1,7 +1,8 @@
 {
   bc,
   writeShellApplication,
-}: let
+}:
+let
   deploy = writeShellApplication {
     name = "deploy";
     text = ''
@@ -116,4 +117,4 @@
     '';
   };
 in
-  deploy
+deploy

@@ -2,16 +2,19 @@
   config,
   lib,
   ...
-}: {
-  accounts.email.accounts = lib.flip lib.mapAttrs' config.userSecrets.accounts.email (_n: v:
+}:
+{
+  accounts.email.accounts = lib.flip lib.mapAttrs' config.userSecrets.accounts.email (
+    _n: v:
     lib.nameValuePair v.address (
       lib.recursiveUpdate v {
         thunderbird = {
           enable = true;
-          profiles = ["personal"];
+          profiles = [ "personal" ];
         };
       }
-    ));
+    )
+  );
 
   programs.thunderbird = {
     enable = true;
@@ -81,8 +84,8 @@
   ];
 
   xdg.mimeApps.defaultApplications = {
-    "x-scheme-handler/mailto" = ["thunderbird.desktop"];
-    "x-scheme-handler/mid" = ["thunderbird.desktop"];
-    "message/rfc822" = ["thunderbird.desktop"];
+    "x-scheme-handler/mailto" = [ "thunderbird.desktop" ];
+    "x-scheme-handler/mid" = [ "thunderbird.desktop" ];
+    "message/rfc822" = [ "thunderbird.desktop" ];
   };
 }

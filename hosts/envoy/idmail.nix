@@ -4,7 +4,8 @@
   globals,
   lib,
   ...
-}: let
+}:
+let
   primaryDomain = globals.mail.primary;
   idmailDomain = "alias.${primaryDomain}";
 
@@ -14,12 +15,13 @@
   };
 
   mkArgon2id = secret: {
-    generator.dependencies = [config.age.secrets.${secret}];
+    generator.dependencies = [ config.age.secrets.${secret} ];
     generator.script = "argon2id";
     mode = "440";
     group = "stalwart-mail";
   };
-in {
+in
+{
   environment.persistence."/persist".directories = [
     {
       directory = config.services.idmail.dataDir;
@@ -56,17 +58,19 @@ in {
         admin = true;
         password_hash = "%{file:${config.age.secrets.idmail-user-hash_admin.path}}%";
       };
-      domains = lib.flip lib.mapAttrs globals.mail.domains (_domain: domainCfg: {
-        owner = "admin";
-        catch_all = "catch-all@${primaryDomain}";
-        inherit (domainCfg) public;
-      });
+      domains = lib.flip lib.mapAttrs globals.mail.domains (
+        _domain: domainCfg: {
+          owner = "admin";
+          catch_all = "catch-all@${primaryDomain}";
+          inherit (domainCfg) public;
+        }
+      );
       mailboxes = lib.flip lib.mapAttrs' globals.mail.domains (
         _domain: _domainCfg:
-          lib.nameValuePair "catch-all@${primaryDomain}" {
-            password_hash = "%{file:${config.age.secrets.idmail-mailbox-hash_catch-all.path}}%";
-            owner = "admin";
-          }
+        lib.nameValuePair "catch-all@${primaryDomain}" {
+          password_hash = "%{file:${config.age.secrets.idmail-mailbox-hash_catch-all.path}}%";
+          owner = "admin";
+        }
       );
       # XXX: create mailboxes for git@ vaultwarden@ and simultaneously alias them to the catch all for a send only mail.
     };
@@ -75,7 +79,7 @@ in {
 
   services.nginx = {
     upstreams.idmail = {
-      servers."127.0.0.1:3000" = {};
+      servers."127.0.0.1:3000" = { };
       extraConfig = ''
         zone idmail 64k;
         keepalive 2;

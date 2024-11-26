@@ -7,9 +7,9 @@
   nixosConfig,
   pkgs,
   ...
-}: let
-  inherit
-    (lib)
+}:
+let
+  inherit (lib)
     concatMap
     elem
     flip
@@ -20,7 +20,8 @@
     ;
 
   rofi-drun = "rofi -show drun -theme ~/.config/rofi/launchers/type-1/style-10.rasi";
-in {
+in
+{
   home.packages = with pkgs; [
     wl-clipboard
   ];
@@ -94,12 +95,10 @@ in {
             "SUPER + SHIFT,comma,movetoworkspacesilent,-1"
             "SUPER + SHIFT,period,movetoworkspacesilent,+1"
           ]
-          ++ flip concatMap (map toString (lib.lists.range 1 9)) (
-            x: [
-              "SUPER,${x},workspace,${x}"
-              "SUPER + SHIFT,${x},movetoworkspacesilent,${x}"
-            ]
-          );
+          ++ flip concatMap (map toString (lib.lists.range 1 9)) (x: [
+            "SUPER,${x},workspace,${x}"
+            "SUPER + SHIFT,${x},movetoworkspacesilent,${x}"
+          ]);
 
         bindm = [
           # mouse movements
@@ -200,10 +199,12 @@ in {
         ];
       })
       (mkIf (nixosConfig.node.name == "nom") {
-        monitor = [
-        ];
-        workspace = [
-        ];
+        monitor =
+          [
+          ];
+        workspace =
+          [
+          ];
       })
     ];
 

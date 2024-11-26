@@ -1,4 +1,5 @@
-{config, ...}: {
+{ config, ... }:
+{
   networking = {
     inherit (config.repo.secrets.local.networking) hostId;
     wireless.iwd.enable = true;
@@ -6,7 +7,9 @@
 
   boot.initrd.systemd.network = {
     enable = true;
-    networks = {inherit (config.systemd.network.networks) "10-lan1";};
+    networks = {
+      inherit (config.systemd.network.networks) "10-lan1";
+    };
   };
 
   systemd.network.networks = {
@@ -33,6 +36,9 @@
   };
 
   networking.nftables.firewall = {
-    zones.untrusted.interfaces = ["lan1" "wlan1"];
+    zones.untrusted.interfaces = [
+      "lan1"
+      "wlan1"
+    ];
   };
 }

@@ -3,9 +3,9 @@
   lib,
   pkgs,
   ...
-}: let
-  inherit
-    (lib)
+}:
+let
+  inherit (lib)
     attrValues
     concatLists
     concatStringsSep
@@ -32,8 +32,7 @@
     versionOlder
     ;
 
-  inherit
-    (lib.types)
+  inherit (lib.types)
     attrsOf
     bool
     enum
@@ -54,7 +53,8 @@
   hardenedClients = filterAttrs (_: client: client.hardened) cfg.clients;
   toHardenedClientList = fn: map fn (attrValues hardenedClients);
   toHardenedClientAttrs = fn: mapAttrs' (_: fn) hardenedClients;
-in {
+in
+{
   meta.maintainers = with maintainers; [
     misuzu
     thubrecht
@@ -62,8 +62,11 @@ in {
   ];
 
   imports = [
-    (mkRemovedOptionModule ["services" "netbird" "tunnels"]
-      "The option `services.netbird.tunnels` has been renamed to `services.netbird.clients`")
+    (mkRemovedOptionModule [
+      "services"
+      "netbird"
+      "tunnels"
+    ] "The option `services.netbird.tunnels` has been renamed to `services.netbird.clients`")
   ];
 
   options.services.netbird = {
@@ -85,17 +88,17 @@ in {
         ```
       '';
     };
-    package = mkPackageOption pkgs "netbird" {};
+    package = mkPackageOption pkgs "netbird" { };
 
     ui.enable = mkOption {
       type = bool;
-      default = config.services.displayManager.sessionPackages != [];
+      default = config.services.displayManager.sessionPackages != [ ];
       defaultText = literalExpression ''config.services.displayManager.sessionPackages != [ ]'';
       description = ''
         Controls presence `netbird-ui` wrappers, defaults to presence of graphical sessions.
       '';
     };
-    ui.package = mkPackageOption pkgs "netbird-ui" {};
+    ui.package = mkPackageOption pkgs "netbird-ui" { };
 
     clients = mkOption {
       type = attrsOf (
@@ -104,7 +107,8 @@ in {
             name,
             config,
             ...
-          }: {
+          }:
+          {
             options = {
               port = mkOption {
                 type = port;
@@ -211,18 +215,21 @@ in {
               wrapper = mkOption {
                 type = package;
                 internal = true;
-                default = let
-                  makeWrapperArgs = concatLists (
-                    mapAttrsToList
-                    (key: value: ["--set-default" key value])
-                    config.environment
-                  );
-                in
+                default =
+                  let
+                    makeWrapperArgs = concatLists (
+                      mapAttrsToList (key: value: [
+                        "--set-default"
+                        key
+                        value
+                      ]) config.environment
+                    );
+                  in
                   pkgs.stdenv.mkDerivation {
                     name = "${cfg.package.name}-wrapper-${name}";
                     meta.mainProgram = "netbird-${name}";
-                    nativeBuildInputs = with pkgs; [makeWrapper];
-                    phases = ["installPhase"];
+                    nativeBuildInputs = with pkgs; [ makeWrapper ];
+                    phases = [ "installPhase" ];
                     installPhase = concatStringsSep "\n" [
                       ''
                         mkdir -p "$out/bin"
@@ -246,7 +253,7 @@ in {
 
               # see https://github.com/netbirdio/netbird/blob/88747e3e0191abc64f1e8c7ecc65e5e50a1527fd/client/internal/config.go#L49-L82
               config = mkOption {
-                inherit (pkgs.formats.json {}) type;
+                inherit (pkgs.formats.json { }) type;
                 defaultText = literalExpression ''
                   {
                     DisableAutoConnect = !config.autoStart;
@@ -292,7 +299,7 @@ in {
           }
         )
       );
-      default = {};
+      default = { };
       description = ''
         Attribute set of Netbird client daemons, by default each one will:
 
@@ -327,7 +334,8 @@ in {
       let
         name = "wt0";
         client = cfg.clients."${name}";
-      in {
+      in
+      {
         services.netbird.clients."${name}" = {
           port = mkDefault 51820;
           name = mkDefault "netbird";
@@ -336,36 +344,39 @@ in {
         };
 
         environment.systemPackages = [
-          (lib.hiPrio (pkgs.runCommand "${name}-as-default" {} ''
-            mkdir -p "$out/bin"
-            for binary in netbird ${optionalString cfg.ui.enable "netbird-ui"} ; do
-              ln -s "${client.wrapper}/bin/$binary-${name}" "$out/bin/$binary"
-            done
-          ''))
+          (lib.hiPrio (
+            pkgs.runCommand "${name}-as-default" { } ''
+              mkdir -p "$out/bin"
+              for binary in netbird ${optionalString cfg.ui.enable "netbird-ui"} ; do
+                ln -s "${client.wrapper}/bin/$binary-${name}" "$out/bin/$binary"
+              done
+            ''
+          ))
         ];
       }
     ))
     {
-      boot.extraModulePackages =
-        optional
-        (cfg.clients != {} && (versionOlder kernel.version "5.6"))
-        kernelPackages.wireguard;
+      boot.extraModulePackages = optional (
+        cfg.clients != { } && (versionOlder kernel.version "5.6")
+      ) kernelPackages.wireguard;
 
-      environment.systemPackages =
-        toClientList (client: client.wrapper)
-        # omitted due to https://github.com/netbirdio/netbird/issues/1562
-        #++ optional (cfg.clients != { }) cfg.package
-        # omitted due to https://github.com/netbirdio/netbird/issues/1581
-        #++ optional (cfg.clients != { } && cfg.ui.enable) cfg.ui.package
-        ;
+      environment.systemPackages = toClientList (client: client.wrapper)
+      # omitted due to https://github.com/netbirdio/netbird/issues/1562
+      #++ optional (cfg.clients != { }) cfg.package
+      # omitted due to https://github.com/netbirdio/netbird/issues/1581
+      #++ optional (cfg.clients != { } && cfg.ui.enable) cfg.ui.package
+      ;
 
       networking.dhcpcd.denyInterfaces = toClientList (client: client.interface);
       networking.networkmanager.unmanaged = toClientList (client: "interface-name:${client.interface}");
 
-      networking.firewall.allowedUDPPorts = concatLists (toClientList (client: optional client.openFirewall client.port));
+      networking.firewall.allowedUDPPorts = concatLists (
+        toClientList (client: optional client.openFirewall client.port)
+      );
 
-      systemd.network.networks = mkIf config.networking.useNetworkd (toClientAttrs (
-        client:
+      systemd.network.networks = mkIf config.networking.useNetworkd (
+        toClientAttrs (
+          client:
           nameValuePair "50-netbird-${client.interface}" {
             matchConfig = {
               Name = client.interface;
@@ -375,22 +386,26 @@ in {
               ActivationPolicy = "manual";
             };
           }
-      ));
+        )
+      );
 
-      environment.etc = toClientAttrs (client:
+      environment.etc = toClientAttrs (
+        client:
         nameValuePair "${client.name}/config.d/50-nixos.json" {
           text = builtins.toJSON client.config;
           mode = "0444";
-        });
+        }
+      );
 
-      systemd.services = toClientAttrs (client:
+      systemd.services = toClientAttrs (
+        client:
         nameValuePair client.name {
           description = "A WireGuard-based mesh network that connects your devices into a single private network";
 
-          documentation = ["https://netbird.io/docs/"];
+          documentation = [ "https://netbird.io/docs/" ];
 
-          after = ["network.target"];
-          wantedBy = ["multi-user.target"];
+          after = [ "network.target" ];
+          wantedBy = [ "multi-user.target" ];
 
           path = optional (!config.services.resolved.enable) pkgs.openresolv;
 
@@ -413,52 +428,59 @@ in {
           };
 
           stopIfChanged = false;
-        });
+        }
+      );
     }
     # Hardening section
-    (mkIf (hardenedClients != {}) {
-      users.groups = toHardenedClientAttrs (client: nameValuePair client.name {});
-      users.users = toHardenedClientAttrs (client:
+    (mkIf (hardenedClients != { }) {
+      users.groups = toHardenedClientAttrs (client: nameValuePair client.name { });
+      users.users = toHardenedClientAttrs (
+        client:
         nameValuePair client.name {
           isSystemUser = true;
           home = "/var/lib/${client.name}";
           group = client.name;
-        });
+        }
+      );
 
-      systemd.services = toHardenedClientAttrs (client:
-        nameValuePair client.name (mkIf client.hardened {
-          serviceConfig = {
-            RuntimeDirectoryMode = "0750";
+      systemd.services = toHardenedClientAttrs (
+        client:
+        nameValuePair client.name (
+          mkIf client.hardened {
+            serviceConfig = {
+              RuntimeDirectoryMode = "0750";
 
-            User = client.name;
-            Group = client.name;
+              User = client.name;
+              Group = client.name;
 
-            # settings implied by DynamicUser=true, without actully using it,
-            # see https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#DynamicUser=
-            RemoveIPC = true;
-            PrivateTmp = true;
-            ProtectSystem = "strict";
-            ProtectHome = "yes";
+              # settings implied by DynamicUser=true, without actully using it,
+              # see https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#DynamicUser=
+              RemoveIPC = true;
+              PrivateTmp = true;
+              ProtectSystem = "strict";
+              ProtectHome = "yes";
 
-            AmbientCapabilities =
-              [
-                # see https://man7.org/linux/man-pages/man7/capabilities.7.html
-                # see https://docs.netbird.io/how-to/installation#running-net-bird-in-docker
-                #
-                # seems to work fine without CAP_SYS_ADMIN and CAP_SYS_RESOURCE
-                # CAP_NET_BIND_SERVICE could be added to allow binding on low ports, but is not required,
-                #  see https://github.com/netbirdio/netbird/pull/1513
+              AmbientCapabilities =
+                [
+                  # see https://man7.org/linux/man-pages/man7/capabilities.7.html
+                  # see https://docs.netbird.io/how-to/installation#running-net-bird-in-docker
+                  #
+                  # seems to work fine without CAP_SYS_ADMIN and CAP_SYS_RESOURCE
+                  # CAP_NET_BIND_SERVICE could be added to allow binding on low ports, but is not required,
+                  #  see https://github.com/netbirdio/netbird/pull/1513
 
-                # failed creating tunnel interface wt-priv: [operation not permitted
-                "CAP_NET_ADMIN"
-                # failed to pull up wgInterface [wt-priv]: failed to create ipv4 raw socket: socket: operation not permitted
-                "CAP_NET_RAW"
-              ]
-              # required for eBPF filter, used to be subset of CAP_SYS_ADMIN
-              ++ optional (versionAtLeast kernel.version "5.8") "CAP_BPF"
-              ++ optional (versionOlder kernel.version "5.8") "CAP_SYS_ADMIN";
-          };
-        }));
+                  # failed creating tunnel interface wt-priv: [operation not permitted
+                  "CAP_NET_ADMIN"
+                  # failed to pull up wgInterface [wt-priv]: failed to create ipv4 raw socket: socket: operation not permitted
+                  "CAP_NET_RAW"
+                ]
+                # required for eBPF filter, used to be subset of CAP_SYS_ADMIN
+                ++ optional (versionAtLeast kernel.version "5.8") "CAP_BPF"
+                ++ optional (versionOlder kernel.version "5.8") "CAP_SYS_ADMIN";
+            };
+          }
+        )
+      );
 
       # see https://github.com/systemd/systemd/blob/17f3e91e8107b2b29fe25755651b230bbc81a514/src/resolve/org.freedesktop.resolve1.policy#L43-L43
       security.polkit.extraConfig = mkIf config.services.resolved.enable ''
@@ -478,13 +500,23 @@ in {
     })
     # migration & temporary fixups section
     {
-      systemd.services = toClientAttrs (client:
+      systemd.services = toClientAttrs (
+        client:
         nameValuePair client.name {
           preStart = ''
             set -eEuo pipefail
             ${optionalString (client.logLevel == "trace" || client.logLevel == "debug") "set -x"}
 
-            PATH="${makeBinPath (with pkgs; [coreutils jq diffutils])}:$PATH"
+            PATH="${
+              makeBinPath (
+                with pkgs;
+                [
+                  coreutils
+                  jq
+                  diffutils
+                ]
+              )
+            }:$PATH"
             export ${toShellVars client.environment}
 
             # merge /etc/${client.name}/config.d' into "$NB_CONFIG"
@@ -507,7 +539,8 @@ in {
               fi
             }
           '';
-        });
+        }
+      );
     }
   ];
 }

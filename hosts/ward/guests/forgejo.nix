@@ -5,15 +5,20 @@
   nodes,
   pkgs,
   ...
-}: let
+}:
+let
   forgejoDomain = "git.${globals.domains.me}";
-in {
+in
+{
   wireguard.proxy-sentinel = {
     client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.forgejo.settings.server.HTTP_PORT];
+    firewallRuleForNode.sentinel.allowedTCPPorts = [
+      config.services.forgejo.settings.server.HTTP_PORT
+    ];
   };
 
-  age.secrets.forgejo-mailer-password.rekeyFile = config.node.secretsDir + "/forgejo-mailer-password.age";
+  age.secrets.forgejo-mailer-password.rekeyFile =
+    config.node.secretsDir + "/forgejo-mailer-password.age";
 
   # Mirror the original oauth2 secret
   age.secrets.forgejo-oauth2-client-secret = {
@@ -35,14 +40,14 @@ in {
     # - 9922 (wan) -> 22 (proxy-sentinel)
     networking.nftables.chains = {
       postrouting.to-forgejo = {
-        after = ["hook"];
+        after = [ "hook" ];
         rules = [
           "iifname wan ip daddr ${config.wireguard.proxy-sentinel.ipv4} tcp dport 22 masquerade random"
           "iifname wan ip6 daddr ${config.wireguard.proxy-sentinel.ipv6} tcp dport 22 masquerade random"
         ];
       };
       prerouting.to-forgejo = {
-        after = ["hook"];
+        after = [ "hook" ];
         rules = [
           "iifname wan tcp dport 9922 dnat ip to ${config.wireguard.proxy-sentinel.ipv4}:22"
           "iifname wan tcp dport 9922 dnat ip6 to ${config.wireguard.proxy-sentinel.ipv6}:22"
@@ -52,7 +57,8 @@ in {
 
     services.nginx = {
       upstreams.forgejo = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.forgejo.settings.server.HTTP_PORT}" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.forgejo.settings.server.HTTP_PORT}" =
+          { };
         extraConfig = ''
           zone forgejo 64k;
           keepalive 2;
@@ -83,7 +89,7 @@ in {
     };
   };
 
-  users.groups.git = {};
+  users.groups.git = { };
   users.users.git = {
     isSystemUser = true;
     useDefaultShell = true;
@@ -188,22 +194,49 @@ in {
 
   systemd.services.forgejo = {
     serviceConfig.RestartSec = "60"; # Retry every minute
-    preStart = let
-      exe = lib.getExe config.services.forgejo.package;
-      providerName = "kanidm";
-      clientId = "forgejo";
-      args = lib.escapeShellArgs (lib.concatLists [
-        ["--name" providerName]
-        ["--provider" "openidConnect"]
-        ["--key" clientId]
-        ["--auto-discover-url" "https://${globals.services.kanidm.domain}/oauth2/openid/${clientId}/.well-known/openid-configuration"]
-        ["--scopes" "email"]
-        ["--scopes" "profile"]
-        ["--group-claim-name" "groups"]
-        ["--admin-group" "admin"]
-        ["--skip-local-2fa"]
-      ]);
-    in
+    preStart =
+      let
+        exe = lib.getExe config.services.forgejo.package;
+        providerName = "kanidm";
+        clientId = "forgejo";
+        args = lib.escapeShellArgs (
+          lib.concatLists [
+            [
+              "--name"
+              providerName
+            ]
+            [
+              "--provider"
+              "openidConnect"
+            ]
+            [
+              "--key"
+              clientId
+            ]
+            [
+              "--auto-discover-url"
+              "https://${globals.services.kanidm.domain}/oauth2/openid/${clientId}/.well-known/openid-configuration"
+            ]
+            [
+              "--scopes"
+              "email"
+            ]
+            [
+              "--scopes"
+              "profile"
+            ]
+            [
+              "--group-claim-name"
+              "groups"
+            ]
+            [
+              "--admin-group"
+              "admin"
+            ]
+            [ "--skip-local-2fa" ]
+          ]
+        );
+      in
       lib.mkAfter ''
         provider_id=$(${exe} admin auth list | ${pkgs.gnugrep}/bin/grep -w '${providerName}' | cut -f1)
         SECRET="$(< ${config.age.secrets.forgejo-oauth2-client-secret.path})"

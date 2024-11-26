@@ -4,18 +4,24 @@
   nodes,
   pkgs,
   ...
-}: let
+}:
+let
   wardWebProxyCfg = nodes.ward-web-proxy.config;
   grafanaDomain = "grafana.${globals.domains.me}";
-in {
+in
+{
   wireguard.proxy-sentinel = {
     client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.grafana.settings.server.http_port];
+    firewallRuleForNode.sentinel.allowedTCPPorts = [
+      config.services.grafana.settings.server.http_port
+    ];
   };
 
   wireguard.proxy-home = {
     client.via = "ward";
-    firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [config.services.grafana.settings.server.http_port];
+    firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [
+      config.services.grafana.settings.server.http_port
+    ];
   };
 
   age.secrets.grafana-secret-key = {
@@ -32,14 +38,14 @@ in {
 
   age.secrets.grafana-influxdb-token-machines = {
     generator.script = "alnum";
-    generator.tags = ["influxdb"];
+    generator.tags = [ "influxdb" ];
     mode = "440";
     group = "grafana";
   };
 
   age.secrets.grafana-influxdb-token-home = {
     generator.script = "alnum";
-    generator.tags = ["influxdb"];
+    generator.tags = [ "influxdb" ];
     mode = "440";
     group = "grafana";
   };
@@ -60,9 +66,10 @@ in {
     };
 
     services.influxdb2.provision.organizations.machines.auths."grafana machines:telegraf (${config.node.name})" = {
-      readBuckets = ["telegraf"];
-      writeBuckets = ["telegraf"];
-      tokenFile = nodes.sire-influxdb.config.age.secrets."grafana-influxdb-token-machines-${config.node.name}".path;
+      readBuckets = [ "telegraf" ];
+      writeBuckets = [ "telegraf" ];
+      tokenFile =
+        nodes.sire-influxdb.config.age.secrets."grafana-influxdb-token-machines-${config.node.name}".path;
     };
 
     age.secrets."grafana-influxdb-token-home-${config.node.name}" = {
@@ -72,9 +79,10 @@ in {
     };
 
     services.influxdb2.provision.organizations.home.auths."grafana home:home_assistant (${config.node.name})" = {
-      readBuckets = ["home_assistant"];
-      writeBuckets = ["home_assistant"];
-      tokenFile = nodes.sire-influxdb.config.age.secrets."grafana-influxdb-token-home-${config.node.name}".path;
+      readBuckets = [ "home_assistant" ];
+      writeBuckets = [ "home_assistant" ];
+      tokenFile =
+        nodes.sire-influxdb.config.age.secrets."grafana-influxdb-token-home-${config.node.name}".path;
     };
   };
 
@@ -92,7 +100,8 @@ in {
 
     services.nginx = {
       upstreams.grafana = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.grafana.settings.server.http_port}" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.grafana.settings.server.http_port}" =
+          { };
         extraConfig = ''
           zone grafana 64k;
           keepalive 2;
@@ -116,7 +125,8 @@ in {
   nodes.ward-web-proxy = {
     services.nginx = {
       upstreams.grafana = {
-        servers."${config.wireguard.proxy-home.ipv4}:${toString config.services.grafana.settings.server.http_port}" = {};
+        servers."${config.wireguard.proxy-home.ipv4}:${toString config.services.grafana.settings.server.http_port}" =
+          { };
         extraConfig = ''
           zone grafana 64k;
           keepalive 2;

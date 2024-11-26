@@ -1,4 +1,5 @@
-{pkgs, ...}: let
+{ pkgs, ... }:
+let
   ts3 = pkgs.writeShellApplication {
     name = "teamspeak3";
     runtimeInputs = [
@@ -9,8 +10,9 @@
       exec ts3client
     '';
   };
-in {
-  home.packages = [ts3];
+in
+{
+  home.packages = [ ts3 ];
   home.persistence."/persist".directories = [
     ".config/teamspeak3"
   ];

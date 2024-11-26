@@ -2,9 +2,11 @@
   config,
   lib,
   ...
-}: let
+}:
+let
   inherit (config.repo.secrets.local) disks;
-in {
+in
+{
   disko.devices = {
     disk = {
       m2-ssd = {
@@ -30,7 +32,7 @@ in {
       };
     };
     zpool = {
-      rpool = lib.disko.zfs.mkZpool {datasets = lib.disko.zfs.impermanenceZfsDatasets;};
+      rpool = lib.disko.zfs.mkZpool { datasets = lib.disko.zfs.impermanenceZfsDatasets; };
     };
   };
 }

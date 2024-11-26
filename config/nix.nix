@@ -2,7 +2,8 @@
   inputs,
   pkgs,
   ...
-}: {
+}:
+{
   environment.etc."nixos/configuration.nix".source = pkgs.writeText "configuration.nix" ''
     assert builtins.trace "This is a dummy config, please deploy via the flake!" false;
     { }
@@ -11,8 +12,8 @@
   nix = {
     settings = {
       auto-optimise-store = true;
-      allowed-users = ["@wheel"];
-      trusted-users = ["root"];
+      allowed-users = [ "@wheel" ];
+      trusted-users = [ "root" ];
       substituters = [
         "https://cache.nixos.org"
         "https://nix-community.cachix.org"
@@ -30,7 +31,7 @@
       experimental-features = nix-command flakes
       flake-registry = /etc/nix/registry.json
     '';
-    nixPath = ["nixpkgs=/run/current-system/nixpkgs"];
+    nixPath = [ "nixpkgs=/run/current-system/nixpkgs" ];
     optimise.automatic = true;
     gc = {
       automatic = true;

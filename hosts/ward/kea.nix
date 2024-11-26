@@ -4,9 +4,11 @@
   utils,
   nodes,
   ...
-}: let
+}:
+let
   inherit (lib) net;
-in {
+in
+{
   environment.persistence."/persist".directories = [
     {
       directory = "/var/lib/private/kea";
@@ -28,7 +30,7 @@ in {
       renew-timer = 3600;
       interfaces-config = {
         # XXX: BUG: why does this bind other macvtaps?
-        interfaces = ["lan-self"];
+        interfaces = [ "lan-self" ];
         service-sockets-max-retries = -1;
       };
       option-data = [
@@ -43,7 +45,11 @@ in {
           interface = "lan-self";
           subnet = globals.net.home-lan.cidrv4;
           pools = [
-            {pool = "${net.cidr.host 20 globals.net.home-lan.cidrv4} - ${net.cidr.host (-6) globals.net.home-lan.cidrv4}";}
+            {
+              pool = "${net.cidr.host 20 globals.net.home-lan.cidrv4} - ${
+                net.cidr.host (-6) globals.net.home-lan.cidrv4
+              }";
+            }
           ];
           option-data = [
             {
@@ -79,5 +85,7 @@ in {
     };
   };
 
-  systemd.services.kea-dhcp4-server.after = ["sys-subsystem-net-devices-${utils.escapeSystemdPath "lan-self"}.device"];
+  systemd.services.kea-dhcp4-server.after = [
+    "sys-subsystem-net-devices-${utils.escapeSystemdPath "lan-self"}.device"
+  ];
 }

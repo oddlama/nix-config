@@ -2,7 +2,8 @@
   lib,
   pkgs,
   ...
-}: {
+}:
+{
   programs.nixvim.plugins = {
     nvim-jdtls = {
       enable = true;
@@ -14,9 +15,7 @@
     lsp = {
       enable = true;
       preConfig =
-        /*
-        lua
-        */
+        # lua
         ''
           local lsp_symbol = function(name, icon)
           vim.fn.sign_define(
@@ -38,7 +37,10 @@
         nil_ls = {
           enable = true;
           settings = {
-            formatting.command = [(lib.getExe pkgs.nixfmt-rfc-style) "--quiet"];
+            formatting.command = [
+              (lib.getExe pkgs.nixfmt-rfc-style)
+              "--quiet"
+            ];
           };
         };
         nixd.enable = true;

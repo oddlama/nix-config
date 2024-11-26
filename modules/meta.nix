@@ -1,10 +1,11 @@
-{lib, ...}: let
-  inherit
-    (lib)
+{ lib, ... }:
+let
+  inherit (lib)
     mkOption
     types
     ;
-in {
+in
+{
   options.node.secretsDir = mkOption {
     description = "Path to the secrets directory for this node.";
     type = types.path;

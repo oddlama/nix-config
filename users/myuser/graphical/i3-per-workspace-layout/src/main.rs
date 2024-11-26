@@ -139,7 +139,7 @@ fn cmd_toggle_layout(config: &Config, workspace: &Node) -> Option<String> {
 
         // Don't do anything if the layout is already correct
         if &con.layout == desired_layout {
-            return None
+            return None;
         }
 
         con = &con.nodes[0];

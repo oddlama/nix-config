@@ -1,4 +1,5 @@
-{inputs, ...}: {
+{ inputs, ... }:
+{
   imports = [
     inputs.nixos-hardware.nixosModules.common-pc-ssd
   ];
@@ -22,5 +23,8 @@
     "drm"
     "display_connector"
   ];
-  boot.kernelParams = ["console=ttyAML0,115200n8" "console=tty0"];
+  boot.kernelParams = [
+    "console=ttyAML0,115200n8"
+    "console=tty0"
+  ];
 }

@@ -15,7 +15,10 @@ lib.optionalAttrs (!minimal) {
     info.enable = lib.mkForce false;
   };
 
-  environment.systemPackages = [pkgs.man-pages pkgs.man-pages-posix];
+  environment.systemPackages = [
+    pkgs.man-pages
+    pkgs.man-pages-posix
+  ];
   environment.enableDebugInfo = true;
 
   environment.persistence."/state".directories = [
@@ -28,5 +31,5 @@ lib.optionalAttrs (!minimal) {
   services.nixseparatedebuginfod.enable = true;
 
   # For embedded development
-  services.udev.packages = [pkgs.stlink];
+  services.udev.packages = [ pkgs.stlink ];
 }

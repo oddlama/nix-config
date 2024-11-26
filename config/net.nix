@@ -2,7 +2,8 @@
   config,
   lib,
   ...
-}: {
+}:
+{
   systemd.network.enable = true;
 
   networking = {
@@ -11,8 +12,8 @@
     dhcpcd.enable = false;
 
     # Rename known network interfaces from local secrets
-    renameInterfacesByMac =
-      lib.mapAttrs (_: v: v.mac)
-      (config.repo.secrets.local.networking.interfaces or {});
+    renameInterfacesByMac = lib.mapAttrs (_: v: v.mac) (
+      config.repo.secrets.local.networking.interfaces or { }
+    );
   };
 }

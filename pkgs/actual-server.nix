@@ -8,7 +8,8 @@
   gitMinimal,
   nodejs,
   yarn,
-}: let
+}:
+let
   version = "24.10.1";
   src = fetchFromGitHub {
     owner = "actualbudget";
@@ -30,9 +31,20 @@
     ];
 
     SUPPORTED_ARCHITECTURES = builtins.toJSON {
-      os = ["darwin" "linux"];
-      cpu = ["arm" "arm64" "ia32" "x64"];
-      libc = ["glibc" "musl"];
+      os = [
+        "darwin"
+        "linux"
+      ];
+      cpu = [
+        "arm"
+        "arm64"
+        "ia32"
+        "x64"
+      ];
+      libc = [
+        "glibc"
+        "musl"
+      ];
     };
 
     buildPhase = ''
@@ -54,38 +66,41 @@
     outputHash = "sha256-eNpOS21pkamugoYVhzsEnstxeVN/J06yDZcshfr0Ek4=";
   };
 in
-  stdenv.mkDerivation {
-    pname = "actual-server";
-    inherit version src;
+stdenv.mkDerivation {
+  pname = "actual-server";
+  inherit version src;
 
-    nativeBuildInputs = [
-      makeWrapper
-      yarn
+  nativeBuildInputs = [
+    makeWrapper
+    yarn
+  ];
+
+  installPhase = ''
+    runHook preInstall
+
+    mkdir -p $out/{bin,lib,lib/actual}
+    cp -r ${offlineCache}/node_modules/ $out/lib/actual
+    cp -r ./ $out/lib/actual
+
+    makeWrapper ${lib.getExe nodejs} "$out/bin/actual-server" \
+      --add-flags "$out/lib/actual/app.js" \
+      --set NODE_PATH "$out/node_modules"
+
+    runHook postInstall
+  '';
+
+  passthru = {
+    inherit offlineCache;
+  };
+
+  meta = with lib; {
+    description = "A super fast privacy-focused app for managing your finances";
+    homepage = "https://actualbudget.com/";
+    license = licenses.mit;
+    mainProgram = "actual-server";
+    maintainers = with maintainers; [
+      oddlama
+      patrickdag
     ];
-
-    installPhase = ''
-      runHook preInstall
-
-      mkdir -p $out/{bin,lib,lib/actual}
-      cp -r ${offlineCache}/node_modules/ $out/lib/actual
-      cp -r ./ $out/lib/actual
-
-      makeWrapper ${lib.getExe nodejs} "$out/bin/actual-server" \
-        --add-flags "$out/lib/actual/app.js" \
-        --set NODE_PATH "$out/node_modules"
-
-      runHook postInstall
-    '';
-
-    passthru = {
-      inherit offlineCache;
-    };
-
-    meta = with lib; {
-      description = "A super fast privacy-focused app for managing your finances";
-      homepage = "https://actualbudget.com/";
-      license = licenses.mit;
-      mainProgram = "actual-server";
-      maintainers = with maintainers; [oddlama patrickdag];
-    };
-  }
+  };
+}

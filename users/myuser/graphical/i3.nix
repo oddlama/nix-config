@@ -4,9 +4,9 @@
   nixosConfig,
   pkgs,
   ...
-}: let
-  inherit
-    (lib)
+}:
+let
+  inherit (lib)
     escapeShellArg
     getExe
     mapAttrs'
@@ -26,7 +26,7 @@
     meta = with lib; {
       description = "A helper utility to allow assigning a layout to each workspace in i3";
       license = licenses.mit;
-      maintainers = with maintainers; [oddlama];
+      maintainers = with maintainers; [ oddlama ];
       mainProgram = "i3-per-workspace-layout";
     };
   };
@@ -46,11 +46,12 @@
     meta = with lib; {
       description = "Better focus navigation for sway and i3";
       license = licenses.mit;
-      maintainers = with maintainers; [oddlama];
+      maintainers = with maintainers; [ oddlama ];
       mainProgram = "sway-overfocus";
     };
   };
-in {
+in
+{
   xsession.numlock.enable = true;
   xsession.windowManager.i3 = {
     enable = true;
@@ -148,107 +149,126 @@ in {
       window.titlebar = false;
 
       floating.criteria = [
-        {class = "^Pavucontrol$";}
+        { class = "^Pavucontrol$"; }
         #{class = "^awakened-poe-trade$";}
       ];
 
       assigns = {
         "1" = [
-          {class = "^firefox$";}
+          { class = "^firefox$"; }
         ];
         "5" = [
-          {class = "^bottles$";}
-          {class = "^steam$";}
-          {class = "^prismlauncher$";}
+          { class = "^bottles$"; }
+          { class = "^steam$"; }
+          { class = "^prismlauncher$"; }
         ];
         "7" = [
-          {class = "^obsidian$";}
-          {class = "^discord$";}
-          {class = "^Signal$";}
-          {class = "^TelegramDesktop$";}
+          { class = "^obsidian$"; }
+          { class = "^discord$"; }
+          { class = "^Signal$"; }
+          { class = "^TelegramDesktop$"; }
         ];
         "8" = [
-          {class = "^Spotify$";}
+          { class = "^Spotify$"; }
         ];
       };
       # TODO eww -> bars = [ ];
 
       workspaceOutputAssign =
         {
-          kroma = let
-            monitorMain = "DP-2";
-            monitorLeft = "DP-4";
-          in
-            map (x: {
-              workspace = x;
-              output = monitorMain;
-            }) ["1" "2" "3" "4" "5" "6"]
-            ++ map (x: {
-              workspace = x;
-              output = monitorLeft;
-            }) ["7" "8" "9"];
+          kroma =
+            let
+              monitorMain = "DP-2";
+              monitorLeft = "DP-4";
+            in
+            map
+              (x: {
+                workspace = x;
+                output = monitorMain;
+              })
+              [
+                "1"
+                "2"
+                "3"
+                "4"
+                "5"
+                "6"
+              ]
+            ++
+              map
+                (x: {
+                  workspace = x;
+                  output = monitorLeft;
+                })
+                [
+                  "7"
+                  "8"
+                  "9"
+                ];
         }
-        .${nixosConfig.node.name}
-        or [];
+        .${nixosConfig.node.name} or [ ];
 
-      startup = let
-        configLayouts = (pkgs.formats.toml {}).generate "per-workspace-layouts.toml" {
-          force = true;
-          layouts = {
-            "1" = "tabbed";
-            "5" = "tabbed";
-            "7" = "tabbed";
-            "8" = "tabbed";
-            "9" = "tabbed";
+      startup =
+        let
+          configLayouts = (pkgs.formats.toml { }).generate "per-workspace-layouts.toml" {
+            force = true;
+            layouts = {
+              "1" = "tabbed";
+              "5" = "tabbed";
+              "7" = "tabbed";
+              "8" = "tabbed";
+              "9" = "tabbed";
+            };
           };
-        };
-      in [
-        {
-          command = "${getExe i3-per-workspace-layout} --config ${configLayouts}";
-          always = false;
-          notification = false;
-        }
-      ];
+        in
+        [
+          {
+            command = "${getExe i3-per-workspace-layout} --config ${configLayouts}";
+            always = false;
+            notification = false;
+          }
+        ];
     };
   };
 
   systemd.user.services = {
-    wired.Install.WantedBy = lib.mkForce ["i3-session.target"];
-    flameshot.Install.WantedBy = lib.mkForce ["i3-session.target"];
+    wired.Install.WantedBy = lib.mkForce [ "i3-session.target" ];
+    flameshot.Install.WantedBy = lib.mkForce [ "i3-session.target" ];
   };
 
   programs.autorandr.enable = true;
   programs.autorandr.profiles =
     {
-      kroma = let
-        monitorMain = "DP-2";
-        monitorLeft = "DP-4";
-      in {
-        main = {
-          config = {
-            ${monitorLeft} = {
-              enable = true;
-              mode = "3840x2160";
-              rate = "60.00";
-              position = "0x0";
+      kroma =
+        let
+          monitorMain = "DP-2";
+          monitorLeft = "DP-4";
+        in
+        {
+          main = {
+            config = {
+              ${monitorLeft} = {
+                enable = true;
+                mode = "3840x2160";
+                rate = "60.00";
+                position = "0x0";
+              };
+              ${monitorMain} = {
+                enable = true;
+                primary = true;
+                mode = "3840x2160";
+                rate = "144.00";
+                position = "3840x0";
+              };
             };
-            ${monitorMain} = {
-              enable = true;
-              primary = true;
-              mode = "3840x2160";
-              rate = "144.00";
-              position = "3840x0";
+            fingerprint = {
+              ${monitorMain} = "00ffffffffffff001e6d9a5b078e0a000b1f0104b53c2278f919c1ae5044af260e5054210800d1c061404540314001010101010101014dd000a0f0703e803020350058542100001a000000fd0c3090505086010a202020202020000000fc003237474e3935300a2020202020000000ff003131314e5447594c423731390a02e602032d7123090707830100004410040301e2006ae305c000e60605017360216d1a0000020b309000047321602900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f47012790300030128d8060284ff0e9f002f801f006f08910002000400404f0104ff0e9f002f801f006f086200020004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006d90";
+              ${monitorLeft} = "00ffffffffffff001e6d095b39790700081a0104b53c22789f3035a7554ea3260f50542108007140818081c0a9c0d1c08100010101014dd000a0f0703e803020650c58542100001a286800a0f0703e800890650c58542100001a000000fd00283d878738010a202020202020000000fc004c4720556c7472612048440a2001850203117144900403012309070783010000023a801871382d40582c450058542100001e565e00a0a0a029503020350058542100001a0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c8";
             };
-          };
-          fingerprint = {
-            ${monitorMain} = "00ffffffffffff001e6d9a5b078e0a000b1f0104b53c2278f919c1ae5044af260e5054210800d1c061404540314001010101010101014dd000a0f0703e803020350058542100001a000000fd0c3090505086010a202020202020000000fc003237474e3935300a2020202020000000ff003131314e5447594c423731390a02e602032d7123090707830100004410040301e2006ae305c000e60605017360216d1a0000020b309000047321602900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f47012790300030128d8060284ff0e9f002f801f006f08910002000400404f0104ff0e9f002f801f006f086200020004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006d90";
-            ${monitorLeft} = "00ffffffffffff001e6d095b39790700081a0104b53c22789f3035a7554ea3260f50542108007140818081c0a9c0d1c08100010101014dd000a0f0703e803020650c58542100001a286800a0f0703e800890650c58542100001a000000fd00283d878738010a202020202020000000fc004c4720556c7472612048440a2001850203117144900403012309070783010000023a801871382d40582c450058542100001e565e00a0a0a029503020350058542100001a0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c8";
           };
         };
-      };
     }
-    .${nixosConfig.node.name}
-    or {};
+    .${nixosConfig.node.name} or { };
 
   home.sessionVariables = {
     # Make gtk apps bigger

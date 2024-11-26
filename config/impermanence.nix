@@ -2,9 +2,9 @@
   config,
   lib,
   ...
-}: let
-  inherit
-    (lib)
+}:
+let
+  inherit (lib)
     attrNames
     flip
     isAttrs
@@ -14,9 +14,10 @@
     optionals
     types
     ;
-in {
+in
+{
   # Give agenix access to the hostkey independent of impermanence activation
-  age.identityPaths = ["/persist/etc/ssh/ssh_host_ed25519_key"];
+  age.identityPaths = [ "/persist/etc/ssh/ssh_host_ed25519_key" ];
 
   # Expose a home manager module for each user that allows extending
   # environment.persistence.${sourceDir}.users.${userName} simply by
@@ -25,63 +26,57 @@ in {
     {
       options.home.persistence = mkOption {
         description = "Additional persistence config for the given source path";
-        default = {};
-        type = types.attrsOf (types.submodule {
-          options = {
-            files = mkOption {
-              description = "Additional files to persist via NixOS impermanence.";
-              type = types.listOf (types.either types.attrs types.str);
-              default = [];
-            };
+        default = { };
+        type = types.attrsOf (
+          types.submodule {
+            options = {
+              files = mkOption {
+                description = "Additional files to persist via NixOS impermanence.";
+                type = types.listOf (types.either types.attrs types.str);
+                default = [ ];
+              };
 
-            directories = mkOption {
-              description = "Additional directories to persist via NixOS impermanence.";
-              type = types.listOf (types.either types.attrs types.str);
-              default = [];
+              directories = mkOption {
+                description = "Additional directories to persist via NixOS impermanence.";
+                type = types.listOf (types.either types.attrs types.str);
+                default = [ ];
+              };
             };
-          };
-        });
+          }
+        );
       };
     }
   ];
 
   # For each user that has a home-manager config, merge the locally defined
   # persistence options that we defined above.
-  imports = let
-    mkUserFiles = map (x:
-      {parentDirectory.mode = "700";}
-      // (
-        if isAttrs x
-        then x
-        else {file = x;}
-      ));
-    mkUserDirs = map (x:
-      {mode = "700";}
-      // (
-        if isAttrs x
-        then x
-        else {directory = x;}
-      ));
-  in [
-    {
-      environment.persistence = mkMerge (
-        flip map
-        (attrNames config.home-manager.users)
-        (
-          user: let
-            hmUserCfg = config.home-manager.users.${user};
-          in
-            flip mapAttrs hmUserCfg.home.persistence
-            (_: sourceCfg: {
-              users.${user} = {
-                files = mkUserFiles sourceCfg.files;
-                directories = mkUserDirs sourceCfg.directories;
-              };
-            })
-        )
+  imports =
+    let
+      mkUserFiles = map (
+        x: { parentDirectory.mode = "700"; } // (if isAttrs x then x else { file = x; })
       );
-    }
-  ];
+      mkUserDirs = map (x: { mode = "700"; } // (if isAttrs x then x else { directory = x; }));
+    in
+    [
+      {
+        environment.persistence = mkMerge (
+          flip map (attrNames config.home-manager.users) (
+            user:
+            let
+              hmUserCfg = config.home-manager.users.${user};
+            in
+            flip mapAttrs hmUserCfg.home.persistence (
+              _: sourceCfg: {
+                users.${user} = {
+                  files = mkUserFiles sourceCfg.files;
+                  directories = mkUserDirs sourceCfg.directories;
+                };
+              }
+            )
+          )
+        );
+      }
+    ];
 
   # State that should be kept across reboots, but is otherwise
   # NOT important information in any way that needs to be backed up.

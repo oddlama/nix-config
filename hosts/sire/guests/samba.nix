@@ -3,7 +3,8 @@
   globals,
   lib,
   ...
-}: let
+}:
+let
   smbUsers = config.repo.secrets.local.samba.users;
   smbGroups = config.repo.secrets.local.samba.groups;
 
@@ -19,19 +20,22 @@
   };
 
   mkShare = id: path: cfg: {
-    ${id} =
-      {
-        inherit path;
-        public = "no";
-        writable = "yes";
-        "create mask" = "0740";
-        "directory mask" = "0750";
-        "acl allow execute always" = "yes";
-      }
-      // cfg;
+    ${id} = {
+      inherit path;
+      public = "no";
+      writable = "yes";
+      "create mask" = "0740";
+      "directory mask" = "0750";
+      "acl allow execute always" = "yes";
+    } // cfg;
   };
 
-  mkGroupShares = group: {enableBunker ? false, ...}:
+  mkGroupShares =
+    group:
+    {
+      enableBunker ? false,
+      ...
+    }:
     [
       (mkShare group "/shares/groups/${group}" {
         "valid users" = "@${group}";
@@ -47,11 +51,13 @@
       }
     );
 
-  mkUserShares = user: {
-    enableBunker ? false,
-    enablePaperless ? false,
-    ...
-  }:
+  mkUserShares =
+    user:
+    {
+      enableBunker ? false,
+      enablePaperless ? false,
+      ...
+    }:
     [
       (mkShare user "/shares/users/${user}" {
         "valid users" = user;
@@ -69,7 +75,8 @@
         "force group" = "paperless";
       }
     );
-in {
+in
+{
   # For influxdb communication channel
   wireguard.proxy-home.client.via = "ward";
 
@@ -81,7 +88,7 @@ in {
   services.openssh = {
     # You really have to hate them. Thanks Brother ADS-4300N.
     settings = {
-      Macs = ["hmac-sha2-512"];
+      Macs = [ "hmac-sha2-512" ];
       HostkeyAlgorithms = "+ssh-rsa";
       PubkeyAcceptedAlgorithms = "+ssh-rsa";
     };
@@ -115,18 +122,22 @@ in {
     ]
     ++ lib.flatten (
       lib.flip lib.mapAttrsToList smbUsers (
-        name: {enableBunker ? false, ...}:
-          [(mkPersistent "/storage" "/shares/users/${name}" name)]
-          ++ lib.optional enableBunker (
-            mkPersistent "/bunker" "/shares/users/${name}-bunker" name
-          )
+        name:
+        {
+          enableBunker ? false,
+          ...
+        }:
+        [ (mkPersistent "/storage" "/shares/users/${name}" name) ]
+        ++ lib.optional enableBunker (mkPersistent "/bunker" "/shares/users/${name}-bunker" name)
       )
       ++ lib.flip lib.mapAttrsToList smbGroups (
-        name: {enableBunker ? false, ...}:
-          [(mkPersistent "/storage" "/shares/groups/${name}" name)]
-          ++ lib.optional enableBunker (
-            mkPersistent "/bunker" "/shares/groups/${name}-bunker" name
-          )
+        name:
+        {
+          enableBunker ? false,
+          ...
+        }:
+        [ (mkPersistent "/storage" "/shares/groups/${name}" name) ]
+        ++ lib.optional enableBunker (mkPersistent "/bunker" "/shares/groups/${name}-bunker" name)
       )
     )
   );
@@ -153,7 +164,8 @@ in {
     # Service Switch capability found in most modern C libraries, to arbitrary
     # applications via PAM and ntlm_auth and to Samba itself.
     winbindd.enable = false;
-    settings = lib.mkMerge ([
+    settings = lib.mkMerge (
+      [
         {
           global = {
             # Show the server host name in the printer comment box in print manager
@@ -215,9 +227,9 @@ in {
         }
       ]
       ++ lib.flatten (
-        lib.mapAttrsToList mkUserShares smbUsers
-        ++ lib.mapAttrsToList mkGroupShares smbGroups
-      ));
+        lib.mapAttrsToList mkUserShares smbUsers ++ lib.mapAttrsToList mkGroupShares smbGroups
+      )
+    );
   };
 
   systemd.tmpfiles.settings = lib.mkMerge (
@@ -255,8 +267,9 @@ in {
     ]
     # For each paperless share, make sure the necessary sub-folders for that user are created
     # at boot so we can bind-mount them into the shares.
-    ++ lib.flatten (lib.flip lib.mapAttrsToList smbUsers (
-      user: userCfg:
+    ++ lib.flatten (
+      lib.flip lib.mapAttrsToList smbUsers (
+        user: userCfg:
         lib.optional (userCfg.enablePaperless or false) {
           "10-smb-paperless" = {
             "/shares/users/${user}-paperless".d = {
@@ -293,7 +306,8 @@ in {
             };
           };
         }
-    ))
+      )
+    )
   );
 
   # For each paperless share, bind-mount create the necessary folders using tmpfiles.
@@ -306,43 +320,50 @@ in {
     ]
     ++ lib.flip lib.mapAttrsToList smbUsers (
       user: userCfg:
-        lib.optionalAttrs (userCfg.enablePaperless or false) {
-          "/shares/users/${user}-paperless/consume" = {
-            fsType = "none";
-            options = ["bind"];
-            device = "/paperless/consume/${user}";
-          };
-          "/shares/users/${user}-paperless/documents" = {
-            fsType = "none";
-            options = ["bind" "ro"];
-            device = "/paperless/media/documents/archive/${user}";
-          };
-          "/shares/users/${user}-paperless/originals" = {
-            fsType = "none";
-            options = ["bind" "ro"];
-            device = "/paperless/media/documents/originals/${user}";
-          };
-        }
+      lib.optionalAttrs (userCfg.enablePaperless or false) {
+        "/shares/users/${user}-paperless/consume" = {
+          fsType = "none";
+          options = [ "bind" ];
+          device = "/paperless/consume/${user}";
+        };
+        "/shares/users/${user}-paperless/documents" = {
+          fsType = "none";
+          options = [
+            "bind"
+            "ro"
+          ];
+          device = "/paperless/media/documents/archive/${user}";
+        };
+        "/shares/users/${user}-paperless/originals" = {
+          fsType = "none";
+          options = [
+            "bind"
+            "ro"
+          ];
+          device = "/paperless/media/documents/originals/${user}";
+        };
+      }
     )
   );
 
-  users.users = let
-    mkUser = name: id: groups: {
-      isNormalUser = true;
-      uid = id;
-      group = name;
-      extraGroups = groups;
-      createHome = false;
-      home = "/var/empty";
-      useDefaultShell = false;
-      autoSubUidGidRange = false;
-    };
-  in
+  users.users =
+    let
+      mkUser = name: id: groups: {
+        isNormalUser = true;
+        uid = id;
+        group = name;
+        extraGroups = groups;
+        createHome = false;
+        home = "/var/empty";
+        useDefaultShell = false;
+        autoSubUidGidRange = false;
+      };
+    in
     lib.mkMerge [
       (
-        {}
+        { }
         // lib.mapAttrs (name: cfg: mkUser name cfg.id cfg.groups) smbUsers
-        // lib.mapAttrs (name: cfg: mkUser name cfg.id []) smbGroups
+        // lib.mapAttrs (name: cfg: mkUser name cfg.id [ ]) smbGroups
       )
       {
         scanner.openssh.authorizedKeys.keys = [
@@ -357,14 +378,12 @@ in {
       }
     ];
 
-  users.groups =
-    {
-      paperless.gid = config.ids.gids.paperless;
-    }
-    // lib.mapAttrs (_: cfg: {gid = cfg.id;}) (smbUsers // smbGroups);
+  users.groups = {
+    paperless.gid = config.ids.gids.paperless;
+  } // lib.mapAttrs (_: cfg: { gid = cfg.id; }) (smbUsers // smbGroups);
 
   backups.storageBoxes.dusk = {
     subuser = "samba";
-    paths = ["/bunker"];
+    paths = [ "/bunker" ];
   };
 }

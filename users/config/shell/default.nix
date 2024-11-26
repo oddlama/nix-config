@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   imports = [
     ./starship.nix
     ./nushell
@@ -7,7 +8,7 @@
 
   programs.zoxide = {
     enable = true;
-    options = ["--cmd p"];
+    options = [ "--cmd p" ];
   };
 
   # nix-index-database is enabled globally for each user in config/home-manager.nix

@@ -3,12 +3,14 @@
   globals,
   lib,
   ...
-}: let
+}:
+let
   vaultwardenDomain = "pw.${globals.domains.personal}";
-in {
+in
+{
   wireguard.proxy-sentinel = {
     client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.vaultwarden.config.rocketPort];
+    firewallRuleForNode.sentinel.allowedTCPPorts = [ config.services.vaultwarden.config.rocketPort ];
   };
 
   age.secrets.vaultwarden-env = {
@@ -36,7 +38,8 @@ in {
   nodes.sentinel = {
     services.nginx = {
       upstreams.vaultwarden = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.vaultwarden.config.rocketPort}" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.vaultwarden.config.rocketPort}" =
+          { };
         extraConfig = ''
           zone vaultwarden 64k;
           keepalive 2;
@@ -110,6 +113,6 @@ in {
 
   backups.storageBoxes.dusk = {
     subuser = "vaultwarden";
-    paths = [config.services.vaultwarden.backupDir];
+    paths = [ config.services.vaultwarden.backupDir ];
   };
 }

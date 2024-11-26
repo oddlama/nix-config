@@ -2,18 +2,20 @@
   config,
   globals,
   ...
-}: let
+}:
+let
   openWebuiDomain = "chat.${globals.domains.me}";
-in {
+in
+{
   microvm.mem = 1024 * 16;
   microvm.vcpu = 20;
 
   wireguard.proxy-sentinel = {
     client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.open-webui.port];
+    firewallRuleForNode.sentinel.allowedTCPPorts = [ config.services.open-webui.port ];
   };
 
-  networking.firewall.allowedTCPPorts = [config.services.ollama.port];
+  networking.firewall.allowedTCPPorts = [ config.services.ollama.port ];
 
   environment.persistence."/state".directories = [
     {
@@ -64,7 +66,7 @@ in {
   nodes.sentinel = {
     services.nginx = {
       upstreams.open-webui = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.open-webui.port}" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.open-webui.port}" = { };
         extraConfig = ''
           zone open-webui 64k;
           keepalive 2;
@@ -79,7 +81,7 @@ in {
         useACMEWildcardHost = true;
         oauth2 = {
           enable = true;
-          allowedGroups = ["access_openwebui"];
+          allowedGroups = [ "access_openwebui" ];
           X-Email = "\${upstream_http_x_auth_request_preferred_username}@${globals.domains.personal}";
         };
         extraConfig = ''

@@ -33,9 +33,16 @@
   nixpkgs.hostPlatform = "x86_64-linux";
   nixpkgs.config.cudaSupport = true;
   boot.mode = "efi";
-  boot.kernelModules = ["nvidia_uvm"]; # FIXME: For some reason this doesn't load automatically for me, causing CUDA_ERROR_UNKNOWN (999) issues when trying to cuInit
-  boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod"];
-  boot.binfmt.emulatedSystems = ["aarch64-linux"];
+  boot.kernelModules = [ "nvidia_uvm" ]; # FIXME: For some reason this doesn't load automatically for me, causing CUDA_ERROR_UNKNOWN (999) issues when trying to cuInit
+  boot.initrd.availableKernelModules = [
+    "xhci_pci"
+    "ahci"
+    "nvme"
+    "usbhid"
+    "usb_storage"
+    "sd_mod"
+  ];
+  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 }
 // lib.optionalAttrs (!minimal) {
   # TODO goodbye once -sk keys.

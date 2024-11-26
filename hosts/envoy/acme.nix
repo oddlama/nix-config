@@ -1,6 +1,8 @@
-{config, ...}: let
+{ config, ... }:
+let
   inherit (config.repo.secrets.local) acme;
-in {
+in
+{
   age.secrets.acme-cloudflare-dns-token = {
     rekeyFile = ./secrets/acme-cloudflare-dns-token.age;
     mode = "440";
@@ -22,7 +24,10 @@ in {
       };
       dnsProvider = "cloudflare";
       dnsPropagationCheck = true;
-      reloadServices = ["nginx" "stalwart-mail"];
+      reloadServices = [
+        "nginx"
+        "stalwart-mail"
+      ];
     };
     inherit (acme) certs wildcardDomains;
   };

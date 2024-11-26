@@ -2,9 +2,10 @@
   lib,
   pkgs,
   ...
-}: {
+}:
+{
   # Needed in path for zsh-histdb
-  home.packages = [pkgs.sqlite-interactive];
+  home.packages = [ pkgs.sqlite-interactive ];
 
   programs.zsh = {
     enable = true;

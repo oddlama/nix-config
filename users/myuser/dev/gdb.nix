@@ -1,4 +1,5 @@
-{pkgs, ...}: let
+{ pkgs, ... }:
+let
   # pwndbg wraps a gdb binary for us, but we want debuginfod in there too.
   # Also make it the default gdb.
   pwndbgWithDebuginfod =
@@ -6,15 +7,18 @@
       gdb = pkgs.gdb.override {
         enableDebuginfod = true;
       };
-    })
-    .overrideAttrs (_finalAttrs: previousAttrs: {
-      installPhase =
-        previousAttrs.installPhase
-        + ''
-          ln -s $out/bin/pwndbg $out/bin/gdb
-        '';
-    });
-in {
+    }).overrideAttrs
+      (
+        _finalAttrs: previousAttrs: {
+          installPhase =
+            previousAttrs.installPhase
+            + ''
+              ln -s $out/bin/pwndbg $out/bin/gdb
+            '';
+        }
+      );
+in
+{
   home.packages = [
     pwndbgWithDebuginfod
     pkgs.hotspot

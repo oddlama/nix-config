@@ -3,7 +3,8 @@
   pkgs,
   nixosConfig,
   ...
-}: let
+}:
+let
   save-replay = pkgs.writeShellApplication {
     name = "gpu-screen-recorder-save-replay";
     runtimeInputs = [
@@ -34,7 +35,7 @@
 
   on-stop-service = pkgs.writeShellApplication {
     name = "gpu-screen-recorder-stop-service";
-    runtimeInputs = [pkgs.libnotify];
+    runtimeInputs = [ pkgs.libnotify ];
     text = ''
       if [[ "$SERVICE_RESULT" == "success" ]]; then
         notify-send '🎥 GPU Screen Recorder' '🔴 Replay service stopped!' \
@@ -85,7 +86,8 @@
         -o "$GSR_OUTPUTDIR"
     '';
   };
-in {
+in
+{
   lib.gpu-screen-recorder = {
     inherit save-replay;
   };

@@ -3,10 +3,12 @@
   globals,
   lib,
   ...
-}: let
+}:
+let
   iotCidrv4 = "10.90.0.0/24";
   iotCidrv6 = "fd00:90::/64";
-in {
+in
+{
   networking.hostId = config.repo.secrets.local.networking.hostId;
 
   globals.monitoring.ping.zackbiene = {
@@ -19,7 +21,9 @@ in {
 
   boot.initrd.systemd.network = {
     enable = true;
-    networks = {inherit (config.systemd.network.networks) "10-lan1";};
+    networks = {
+      inherit (config.systemd.network.networks) "10-lan1";
+    };
   };
 
   systemd.network.networks = {
@@ -49,36 +53,39 @@ in {
       };
       # Announce a static prefix
       ipv6Prefixes = [
-        {Prefix = iotCidrv6;}
+        { Prefix = iotCidrv6; }
       ];
       linkConfig.RequiredForOnline = "no";
     };
   };
 
   networking.nftables.firewall = {
-    snippets.nnf-icmp.ipv6Types = ["mld-listener-query" "nd-router-solicit"];
+    snippets.nnf-icmp.ipv6Types = [
+      "mld-listener-query"
+      "nd-router-solicit"
+    ];
 
     zones = {
-      untrusted.interfaces = ["lan1"];
-      lan-interface.interfaces = ["lan1"];
+      untrusted.interfaces = [ "lan1" ];
+      lan-interface.interfaces = [ "lan1" ];
       lan = {
         parent = "lan-interface";
-        ipv4Addresses = [globals.net.home-lan.cidrv4];
-        ipv6Addresses = [globals.net.home-lan.cidrv6];
+        ipv4Addresses = [ globals.net.home-lan.cidrv4 ];
+        ipv6Addresses = [ globals.net.home-lan.cidrv6 ];
       };
-      iot.interfaces = ["wlan1"];
+      iot.interfaces = [ "wlan1" ];
     };
 
     rules = {
       masquerade-iot = {
-        from = ["lan"];
-        to = ["iot"];
+        from = [ "lan" ];
+        to = [ "iot" ];
         masquerade = true;
       };
 
       outbound = {
-        from = ["lan"];
-        to = ["iot"];
+        from = [ "lan" ];
+        to = [ "iot" ];
         late = true; # Only accept after any rejects have been processed
         verdict = "accept";
       };

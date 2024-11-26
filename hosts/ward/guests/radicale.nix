@@ -2,12 +2,14 @@
   config,
   globals,
   ...
-}: let
+}:
+let
   radicaleDomain = "radicale.${globals.domains.personal}";
-in {
+in
+{
   wireguard.proxy-sentinel = {
     client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [8000];
+    firewallRuleForNode.sentinel.allowedTCPPorts = [ 8000 ];
   };
 
   globals.services.radicale.domain = radicaleDomain;
@@ -20,7 +22,7 @@ in {
   nodes.sentinel = {
     services.nginx = {
       upstreams.radicale = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:8000" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:8000" = { };
         extraConfig = ''
           zone radicale 64k;
           keepalive 2;
@@ -61,7 +63,10 @@ in {
     enable = true;
     settings = {
       server = {
-        hosts = ["0.0.0.0:8000" "[::]:8000"];
+        hosts = [
+          "0.0.0.0:8000"
+          "[::]:8000"
+        ];
       };
       auth = {
         type = "htpasswd";
@@ -95,6 +100,6 @@ in {
 
   backups.storageBoxes.dusk = {
     subuser = "radicale";
-    paths = ["/var/lib/radicale"];
+    paths = [ "/var/lib/radicale" ];
   };
 }

@@ -3,9 +3,11 @@
   lib,
   nixosConfig,
   ...
-}: let
+}:
+let
   inherit (lib) optionals;
-in {
+in
+{
   home.persistence."/state".files = optionals config.programs.ssh.enable [
     ".ssh/known_hosts"
   ];

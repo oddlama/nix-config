@@ -5,10 +5,12 @@
   nodes,
   pkgs,
   ...
-}: let
+}:
+let
   homeDomain = "home.${globals.domains.me}";
   fritzboxDomain = "fritzbox.${globals.domains.me}";
-in {
+in
+{
   wireguard.proxy-home.firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [
     config.services.home-assistant.config.http.server_port
   ];
@@ -39,10 +41,10 @@ in {
     ];
     config = {
       http = {
-        server_host = ["0.0.0.0"];
+        server_host = [ "0.0.0.0" ];
         server_port = 8123;
         use_x_forwarded_for = true;
-        trusted_proxies = [nodes.ward-web-proxy.config.wireguard.proxy-home.ipv4];
+        trusted_proxies = [ nodes.ward-web-proxy.config.wireguard.proxy-home.ipv4 ];
       };
 
       homeassistant = {
@@ -61,26 +63,26 @@ in {
 
       #### only selected components from default_config ####
 
-      assist_pipeline = {};
-      backup = {};
-      bluetooth = {};
-      config = {};
+      assist_pipeline = { };
+      backup = { };
+      bluetooth = { };
+      config = { };
       #cloud = {};
       #conversation = {};
-      dhcp = {};
-      energy = {};
-      history = {};
-      homeassistant_alerts = {};
-      logbook = {};
+      dhcp = { };
+      energy = { };
+      history = { };
+      homeassistant_alerts = { };
+      logbook = { };
       #media_source = {};
-      mobile_app = {};
-      my = {};
-      ssdp = {};
-      stream = {};
-      sun = {};
+      mobile_app = { };
+      my = { };
+      ssdp = { };
+      stream = { };
+      sun = { };
       #usb = {};
-      webhook = {};
-      zeroconf = {};
+      webhook = { };
+      zeroconf = { };
 
       ### Components not from default_config
 
@@ -100,8 +102,8 @@ in {
         bucket = "home_assistant";
       };
     };
-    extraPackages = python3Packages:
-      with python3Packages; [
+    extraPackages =
+      python3Packages: with python3Packages; [
         psycopg2
         gtts
       ];
@@ -122,7 +124,9 @@ in {
       # We don't use -i because it would require chown with is a @privileged syscall
       INFLUXDB_TOKEN="$(cat ${config.age.secrets.hass-influxdb-token.path})" \
         ${lib.getExe pkgs.yq-go} '.influxdb_token = strenv(INFLUXDB_TOKEN)' \
-        ${config.age.secrets."home-assistant-secrets.yaml".path} > ${config.services.home-assistant.configDir}/secrets.yaml
+        ${
+          config.age.secrets."home-assistant-secrets.yaml".path
+        } > ${config.services.home-assistant.configDir}/secrets.yaml
 
       touch -a ${config.services.home-assistant.configDir}/{automations,scenes,scripts,manual}.yaml
     '';
@@ -143,19 +147,20 @@ in {
     };
 
     services.influxdb2.provision.organizations.home.auths."home-assistant (${config.node.name})" = {
-      readBuckets = ["home_assistant"];
-      writeBuckets = ["home_assistant"];
+      readBuckets = [ "home_assistant" ];
+      writeBuckets = [ "home_assistant" ];
       tokenFile = nodes.sire-influxdb.config.age.secrets."hass-influxdb-token-${config.node.name}".path;
     };
   };
 
   # Connect to fritzbox via https proxy (to ensure valid cert)
-  networking.hosts.${globals.net.home-lan.hosts.ward-web-proxy.ipv4} = [fritzboxDomain];
+  networking.hosts.${globals.net.home-lan.hosts.ward-web-proxy.ipv4} = [ fritzboxDomain ];
 
   nodes.ward-web-proxy = {
     services.nginx = {
       upstreams."home-assistant" = {
-        servers."${config.wireguard.proxy-home.ipv4}:${toString config.services.home-assistant.config.http.server_port}" = {};
+        servers."${config.wireguard.proxy-home.ipv4}:${toString config.services.home-assistant.config.http.server_port}" =
+          { };
         extraConfig = ''
           zone home-assistant 64k;
           keepalive 2;

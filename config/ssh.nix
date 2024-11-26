@@ -3,7 +3,8 @@
   lib,
   pkgs,
   ...
-}: {
+}:
+{
   config = lib.mkMerge [
     {
       services.openssh = {
@@ -12,7 +13,7 @@
         # because we rely on ssh key generation for agenix. So we need
         # the service to start eagerly
         startWhenNeeded = lib.mkForce false;
-        authorizedKeysFiles = lib.mkForce ["/etc/ssh/authorized_keys.d/%u"];
+        authorizedKeysFiles = lib.mkForce [ "/etc/ssh/authorized_keys.d/%u" ];
         sftpServerExecutable = "internal-sftp";
         settings = {
           PasswordAuthentication = false;
@@ -35,7 +36,7 @@
       boot.initrd.network.ssh = {
         enable = true;
         port = 4;
-        hostKeys = [config.age.secrets.initrd_host_ed25519_key.path];
+        hostKeys = [ config.age.secrets.initrd_host_ed25519_key.path ];
       };
 
       # Make sure that there is always a valid initrd hostkey available that can be installed into
@@ -49,9 +50,12 @@
           [[ -e ${config.age.secrets.initrd_host_ed25519_key.path} ]] \
             || ${pkgs.openssh}/bin/ssh-keygen -t ed25519 -N "" -f ${config.age.secrets.initrd_host_ed25519_key.path}
         '';
-        deps = ["agenixInstall" "users"];
+        deps = [
+          "agenixInstall"
+          "users"
+        ];
       };
-      system.activationScripts.agenixChown.deps = ["agenixEnsureInitrdHostkey"];
+      system.activationScripts.agenixChown.deps = [ "agenixEnsureInitrdHostkey" ];
     })
   ];
 }

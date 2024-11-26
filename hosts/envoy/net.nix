@@ -3,12 +3,14 @@
   globals,
   lib,
   ...
-}: let
+}:
+let
   icfg = config.repo.secrets.local.networking.interfaces.wan;
-in {
+in
+{
   networking.hostId = config.repo.secrets.local.networking.hostId;
   networking.domain = globals.mail.primary;
-  networking.hosts."127.0.0.1" = ["mail.${globals.mail.primary}"];
+  networking.hosts."127.0.0.1" = [ "mail.${globals.mail.primary}" ];
 
   globals.monitoring.ping.envoy = {
     hostv4 = lib.net.cidr.ip icfg.hostCidrv4;
@@ -18,7 +20,9 @@ in {
 
   boot.initrd.systemd.network = {
     enable = true;
-    networks = {inherit (config.systemd.network.networks) "10-wan";};
+    networks = {
+      inherit (config.systemd.network.networks) "10-wan";
+    };
   };
 
   systemd.network.networks = {
@@ -27,9 +31,9 @@ in {
         icfg.hostCidrv4
         icfg.hostCidrv6
       ];
-      gateway = ["fe80::1"];
+      gateway = [ "fe80::1" ];
       routes = [
-        {Destination = "172.31.1.1";}
+        { Destination = "172.31.1.1"; }
         {
           Gateway = "172.31.1.1";
           GatewayOnLink = true;
@@ -41,7 +45,7 @@ in {
     };
   };
 
-  networking.nftables.firewall.zones.untrusted.interfaces = ["wan"];
+  networking.nftables.firewall.zones.untrusted.interfaces = [ "wan" ];
 
   # Allow accessing influx
   wireguard.proxy-sentinel.client.via = "sentinel";

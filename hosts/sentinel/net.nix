@@ -3,9 +3,11 @@
   globals,
   lib,
   ...
-}: let
+}:
+let
   icfg = config.repo.secrets.local.networking.interfaces.wan;
-in {
+in
+{
   networking.hostId = config.repo.secrets.local.networking.hostId;
   networking.domain = globals.domains.me;
 
@@ -20,7 +22,9 @@ in {
 
   boot.initrd.systemd.network = {
     enable = true;
-    networks = {inherit (config.systemd.network.networks) "10-wan";};
+    networks = {
+      inherit (config.systemd.network.networks) "10-wan";
+    };
   };
 
   systemd.network.networks = {
@@ -29,9 +33,9 @@ in {
         icfg.hostCidrv4
         icfg.hostCidrv6
       ];
-      gateway = ["fe80::1"];
+      gateway = [ "fe80::1" ];
       routes = [
-        {Destination = "172.31.1.1";}
+        { Destination = "172.31.1.1"; }
         {
           Gateway = "172.31.1.1";
           GatewayOnLink = true;
@@ -43,16 +47,19 @@ in {
     };
   };
 
-  networking.nftables.firewall.zones.untrusted.interfaces = ["wan"];
+  networking.nftables.firewall.zones.untrusted.interfaces = [ "wan" ];
   networking.nftables.chains.forward.dnat = {
-    after = ["conntrack"];
-    rules = ["ct status dnat accept"];
+    after = [ "conntrack" ];
+    rules = [ "ct status dnat accept" ];
   };
 
   wireguard.proxy-sentinel.server = {
     host = config.networking.fqdn;
     port = 51443;
-    reservedAddresses = ["10.43.0.0/24" "fd00:43::/120"];
+    reservedAddresses = [
+      "10.43.0.0/24"
+      "fd00:43::/120"
+    ];
     openFirewall = true;
   };
 }

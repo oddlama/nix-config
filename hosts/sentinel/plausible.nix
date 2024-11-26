@@ -3,9 +3,11 @@
   lib,
   globals,
   ...
-}: let
+}:
+let
   plausibleDomain = "analytics.${globals.domains.me}";
-in {
+in
+{
   age.secrets.plausible-secret = {
     generator.script = args: "${args.pkgs.openssl}/bin/openssl rand -base64 64";
     mode = "440";
@@ -61,7 +63,7 @@ in {
 
   services.nginx = {
     upstreams.plausible = {
-      servers."127.0.0.1:${toString config.services.plausible.server.port}" = {};
+      servers."127.0.0.1:${toString config.services.plausible.server.port}" = { };
       extraConfig = ''
         zone plausible 64k;
         keepalive 2;
@@ -75,7 +77,7 @@ in {
       forceSSL = true;
       useACMEWildcardHost = true;
       oauth2.enable = true;
-      oauth2.allowedGroups = ["access_analytics"];
+      oauth2.allowedGroups = [ "access_analytics" ];
       locations."/".proxyPass = "http://plausible";
       locations."= /js/script.js" = {
         proxyPass = "http://plausible";
@@ -111,7 +113,7 @@ in {
     };
   };
 
-  users.groups.plausible = {};
+  users.groups.plausible = { };
   users.users.plausible = {
     group = "plausible";
     isSystemUser = true;

@@ -1,4 +1,5 @@
-{config, ...}: {
+{ config, ... }:
+{
   age.secrets.mosquitto-pw-zigbee2mqtt = {
     rekeyFile = ./secrets/mosquitto-pw-zigbee2mqtt.age;
     mode = "440";
@@ -17,15 +18,15 @@
     persistence = true;
     listeners = [
       {
-        acl = ["pattern readwrite #"];
+        acl = [ "pattern readwrite #" ];
         users = {
           zigbee2mqtt = {
             passwordFile = config.age.secrets.mosquitto-pw-zigbee2mqtt.path;
-            acl = ["readwrite #"];
+            acl = [ "readwrite #" ];
           };
           home_assistant = {
             passwordFile = config.age.secrets.mosquitto-pw-home_assistant.path;
-            acl = ["readwrite #"];
+            acl = [ "readwrite #" ];
           };
         };
         settings.allow_anonymous = false;

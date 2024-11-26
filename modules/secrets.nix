@@ -3,9 +3,9 @@
   inputs,
   lib,
   ...
-}: let
-  inherit
-    (lib)
+}:
+let
+  inherit (lib)
     assertMsg
     literalExpression
     mapAttrs
@@ -16,29 +16,31 @@
   # If the given expression is a bare set, it will be wrapped in a function,
   # so that the imported file can always be applied to the inputs, similar to
   # how modules can be functions or sets.
-  constSet = x:
-    if builtins.isAttrs x
-    then (_: x)
-    else x;
+  constSet = x: if builtins.isAttrs x then (_: x) else x;
 
   # Try to access the extra builtin we loaded via nix-plugins.
   # Throw an error if that doesn't exist.
-  rageImportEncrypted = assert assertMsg (builtins ? extraBuiltins.rageImportEncrypted) "The extra builtin 'rageImportEncrypted' is not available, so repo.secrets cannot be decrypted. Did you forget to add nix-plugins and point it to `./nix/extra-builtins.nix` ?";
+  rageImportEncrypted =
+    assert assertMsg (builtins ? extraBuiltins.rageImportEncrypted)
+      "The extra builtin 'rageImportEncrypted' is not available, so repo.secrets cannot be decrypted. Did you forget to add nix-plugins and point it to `./nix/extra-builtins.nix` ?";
     builtins.extraBuiltins.rageImportEncrypted;
 
   # This "imports" an encrypted .nix.age file by evaluating the decrypted content.
-  importEncrypted = path:
+  importEncrypted =
+    path:
     constSet (
-      if builtins.pathExists path
-      then rageImportEncrypted inputs.self.secretsConfig.masterIdentities path
-      else {}
+      if builtins.pathExists path then
+        rageImportEncrypted inputs.self.secretsConfig.masterIdentities path
+      else
+        { }
     );
 
   cfg = config.repo;
-in {
+in
+{
   options.repo = {
     secretFiles = mkOption {
-      default = {};
+      default = { };
       type = types.attrsOf types.path;
       example = literalExpression "{ local = ./secrets.nix.age; }";
       description = ''

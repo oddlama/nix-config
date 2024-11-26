@@ -3,7 +3,8 @@
   globals,
   pkgs,
   ...
-}: let
+}:
+let
   kanidmDomain = "auth.${globals.domains.me}";
   kanidmPort = 8300;
 
@@ -12,10 +13,11 @@
     mode = "440";
     group = "kanidm";
   };
-in {
+in
+{
   wireguard.proxy-sentinel = {
     client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [kanidmPort];
+    firewallRuleForNode.sentinel.allowedTCPPorts = [ kanidmPort ];
   };
 
   age.secrets."kanidm-self-signed.crt" = {
@@ -50,7 +52,7 @@ in {
   nodes.sentinel = {
     services.nginx = {
       upstreams.kanidm = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString kanidmPort}" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString kanidmPort}" = { };
         extraConfig = ''
           zone kanidm 64k;
           keepalive 2;
@@ -112,7 +114,7 @@ in {
       inherit (globals.kanidm) persons;
 
       # Immich
-      groups."immich.access" = {};
+      groups."immich.access" = { };
       systems.oauth2.immich = {
         displayName = "Immich";
         originUrl = "https://${globals.services.immich.domain}/";
@@ -123,11 +125,15 @@ in {
         allowInsecureClientDisablePkce = true;
         # XXX: RS256 is used instead of ES256 so additionally we need legacy crypto
         enableLegacyCrypto = true;
-        scopeMaps."immich.access" = ["openid" "email" "profile"];
+        scopeMaps."immich.access" = [
+          "openid"
+          "email"
+          "profile"
+        ];
       };
 
       # Netbird
-      groups."netbird.access" = {};
+      groups."netbird.access" = { };
       systems.oauth2.netbird = {
         public = true;
         displayName = "Netbird";
@@ -136,78 +142,97 @@ in {
         preferShortUsername = true;
         enableLocalhostRedirects = true;
         enableLegacyCrypto = true;
-        scopeMaps."netbird.access" = ["openid" "email" "profile"];
+        scopeMaps."netbird.access" = [
+          "openid"
+          "email"
+          "profile"
+        ];
       };
 
       # Paperless
-      groups."paperless.access" = {};
+      groups."paperless.access" = { };
       systems.oauth2.paperless = {
         displayName = "Paperless";
         originUrl = "https://${globals.services.paperless.domain}/";
         originLanding = "https://${globals.services.paperless.domain}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-paperless.path;
         preferShortUsername = true;
-        scopeMaps."paperless.access" = ["openid" "email" "profile"];
+        scopeMaps."paperless.access" = [
+          "openid"
+          "email"
+          "profile"
+        ];
       };
 
       # Grafana
-      groups."grafana.access" = {};
-      groups."grafana.editors" = {};
-      groups."grafana.admins" = {};
-      groups."grafana.server-admins" = {};
+      groups."grafana.access" = { };
+      groups."grafana.editors" = { };
+      groups."grafana.admins" = { };
+      groups."grafana.server-admins" = { };
       systems.oauth2.grafana = {
         displayName = "Grafana";
         originUrl = "https://${globals.services.grafana.domain}/";
         originLanding = "https://${globals.services.grafana.domain}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-grafana.path;
         preferShortUsername = true;
-        scopeMaps."grafana.access" = ["openid" "email" "profile"];
+        scopeMaps."grafana.access" = [
+          "openid"
+          "email"
+          "profile"
+        ];
         claimMaps.groups = {
           joinType = "array";
           valuesByGroup = {
-            "grafana.editors" = ["editor"];
-            "grafana.admins" = ["admin"];
-            "grafana.server-admins" = ["server_admin"];
+            "grafana.editors" = [ "editor" ];
+            "grafana.admins" = [ "admin" ];
+            "grafana.server-admins" = [ "server_admin" ];
           };
         };
       };
 
       # Forgejo
-      groups."forgejo.access" = {};
-      groups."forgejo.admins" = {};
+      groups."forgejo.access" = { };
+      groups."forgejo.admins" = { };
       systems.oauth2.forgejo = {
         displayName = "Forgejo";
         originUrl = "https://${globals.services.forgejo.domain}/";
         originLanding = "https://${globals.services.forgejo.domain}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-forgejo.path;
-        scopeMaps."forgejo.access" = ["openid" "email" "profile"];
+        scopeMaps."forgejo.access" = [
+          "openid"
+          "email"
+          "profile"
+        ];
         # XXX: PKCE is currently not supported by gitea/forgejo,
         # see https://github.com/go-gitea/gitea/issues/21376.
         allowInsecureClientDisablePkce = true;
         preferShortUsername = true;
         claimMaps.groups = {
           joinType = "array";
-          valuesByGroup."forgejo.admins" = ["admin"];
+          valuesByGroup."forgejo.admins" = [ "admin" ];
         };
       };
 
       # Web Sentinel
-      groups."web-sentinel.access" = {};
-      groups."web-sentinel.adguardhome" = {};
-      groups."web-sentinel.openwebui" = {};
-      groups."web-sentinel.analytics" = {};
+      groups."web-sentinel.access" = { };
+      groups."web-sentinel.adguardhome" = { };
+      groups."web-sentinel.openwebui" = { };
+      groups."web-sentinel.analytics" = { };
       systems.oauth2.web-sentinel = {
         displayName = "Web Sentinel";
         originUrl = "https://oauth2.${globals.domains.me}/";
         originLanding = "https://oauth2.${globals.domains.me}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-web-sentinel.path;
         preferShortUsername = true;
-        scopeMaps."web-sentinel.access" = ["openid" "email"];
+        scopeMaps."web-sentinel.access" = [
+          "openid"
+          "email"
+        ];
         claimMaps.groups = {
           joinType = "array";
-          valuesByGroup."web-sentinel.adguardhome" = ["access_adguardhome"];
-          valuesByGroup."web-sentinel.openwebui" = ["access_openwebui"];
-          valuesByGroup."web-sentinel.analytics" = ["access_analytics"];
+          valuesByGroup."web-sentinel.adguardhome" = [ "access_adguardhome" ];
+          valuesByGroup."web-sentinel.openwebui" = [ "access_openwebui" ];
+          valuesByGroup."web-sentinel.analytics" = [ "access_analytics" ];
         };
       };
     };

@@ -5,9 +5,9 @@
   nodes,
   globals,
   ...
-}: let
-  inherit
-    (lib)
+}:
+let
+  inherit (lib)
     mkEnableOption
     mkIf
     mkOption
@@ -15,7 +15,8 @@
     ;
 
   cfg = config.meta.promtail;
-in {
+in
+{
   options.meta.promtail = {
     enable = mkEnableOption "promtail to push logs to a loki instance.";
     # TODO: FIXME: this should not be named proxy. get domain from globals and name this secretAggregatorNode or smth.
@@ -114,15 +115,15 @@ in {
             ];
             relabel_configs = [
               {
-                source_labels = ["__journal__hostname"];
+                source_labels = [ "__journal__hostname" ];
                 target_label = "host";
               }
               {
-                source_labels = ["__journal_priority"];
+                source_labels = [ "__journal_priority" ];
                 target_label = "priority";
               }
               {
-                source_labels = ["__journal_priority_keyword"];
+                source_labels = [ "__journal_priority_keyword" ];
                 target_label = "level";
               }
               #{
@@ -130,15 +131,15 @@ in {
               #  target_label = "unit";
               #}
               {
-                source_labels = ["__journal__systemd_user_unit"];
+                source_labels = [ "__journal__systemd_user_unit" ];
                 target_label = "user_unit";
               }
               {
-                source_labels = ["__journal__boot_id"];
+                source_labels = [ "__journal__boot_id" ];
                 target_label = "boot_id";
               }
               {
-                source_labels = ["__journal__comm"];
+                source_labels = [ "__journal__comm" ];
                 target_label = "command";
               }
             ];

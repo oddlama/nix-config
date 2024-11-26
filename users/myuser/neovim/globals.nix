@@ -22,8 +22,13 @@
 
     number = true; # Show line numbers
     cursorline = true; # Enable cursorline, colorscheme only shows this in number column
-    wildmode = ["list" "full"]; # Only complete the longest common prefix and list all results
-    fillchars = {stlnc = "─";}; # Show separators in inactive window statuslines
+    wildmode = [
+      "list"
+      "full"
+    ]; # Only complete the longest common prefix and list all results
+    fillchars = {
+      stlnc = "─";
+    }; # Show separators in inactive window statuslines
 
     # FIXME: disabled because this really fucks everything up in the terminal.
     title = false; # Sets the window title

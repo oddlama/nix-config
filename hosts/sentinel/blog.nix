@@ -1,4 +1,5 @@
-{globals, ...}: {
+{ globals, ... }:
+{
   environment.persistence."/persist".directories = [
     {
       directory = "/var/lib/blog";

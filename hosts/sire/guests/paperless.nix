@@ -5,23 +5,25 @@
   nodes,
   pkgs,
   ...
-}: let
+}:
+let
   sentinelCfg = nodes.sentinel.config;
   wardWebProxyCfg = nodes.ward-web-proxy.config;
   paperlessDomain = "paperless.${globals.domains.me}";
   paperlessBackupDir = "/var/cache/paperless-backup";
-in {
+in
+{
   microvm.mem = 1024 * 9;
   microvm.vcpu = 8;
 
   wireguard.proxy-sentinel = {
     client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.paperless.port];
+    firewallRuleForNode.sentinel.allowedTCPPorts = [ config.services.paperless.port ];
   };
 
   wireguard.proxy-home = {
     client.via = "ward";
-    firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [config.services.paperless.port];
+    firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [ config.services.paperless.port ];
   };
 
   globals.services.paperless.domain = paperlessDomain;
@@ -34,7 +36,7 @@ in {
   nodes.sentinel = {
     services.nginx = {
       upstreams.paperless = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.paperless.port}" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.paperless.port}" = { };
         extraConfig = ''
           zone paperless 64k;
           keepalive 2;
@@ -62,7 +64,7 @@ in {
   nodes.ward-web-proxy = {
     services.nginx = {
       upstreams.paperless = {
-        servers."${config.wireguard.proxy-home.ipv4}:${toString config.services.paperless.port}" = {};
+        servers."${config.wireguard.proxy-home.ipv4}:${toString config.services.paperless.port}" = { };
         extraConfig = ''
           zone paperless 64k;
           keepalive 2;
@@ -191,20 +193,22 @@ in {
     )
   '';
 
-  systemd.services.paperless-backup = let
-    cfg = config.systemd.services.paperless-consumer;
-  in {
-    description = "Paperless documents backup";
-    serviceConfig = lib.recursiveUpdate cfg.serviceConfig {
-      ExecStart = "${config.services.paperless.package}/bin/paperless-ngx document_exporter -na -nt -f -d ${paperlessBackupDir}";
-      ReadWritePaths = cfg.serviceConfig.ReadWritePaths ++ [paperlessBackupDir];
-      Restart = "no";
-      Type = "oneshot";
+  systemd.services.paperless-backup =
+    let
+      cfg = config.systemd.services.paperless-consumer;
+    in
+    {
+      description = "Paperless documents backup";
+      serviceConfig = lib.recursiveUpdate cfg.serviceConfig {
+        ExecStart = "${config.services.paperless.package}/bin/paperless-ngx document_exporter -na -nt -f -d ${paperlessBackupDir}";
+        ReadWritePaths = cfg.serviceConfig.ReadWritePaths ++ [ paperlessBackupDir ];
+        Restart = "no";
+        Type = "oneshot";
+      };
+      inherit (cfg) environment;
+      requiredBy = [ "restic-backups-storage-box-dusk.service" ];
+      before = [ "restic-backups-storage-box-dusk.service" ];
     };
-    inherit (cfg) environment;
-    requiredBy = ["restic-backups-storage-box-dusk.service"];
-    before = ["restic-backups-storage-box-dusk.service"];
-  };
 
   # Needed so we don't run out of tmpfs space for large backups.
   # Technically this could be cleared each boot but whatever.
@@ -219,6 +223,6 @@ in {
 
   backups.storageBoxes.dusk = {
     subuser = "paperless";
-    paths = [paperlessBackupDir];
+    paths = [ paperlessBackupDir ];
   };
 }

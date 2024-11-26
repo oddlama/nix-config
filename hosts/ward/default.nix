@@ -6,7 +6,8 @@
   minimal,
   nodes,
   ...
-}: {
+}:
+{
   imports = [
     inputs.nixos-hardware.nixosModules.common-cpu-intel
     inputs.nixos-hardware.nixosModules.common-pc-ssd
@@ -26,7 +27,16 @@
 
   nixpkgs.hostPlatform = "x86_64-linux";
   boot.mode = "efi";
-  boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" "r8169"];
+  boot.initrd.availableKernelModules = [
+    "xhci_pci"
+    "ahci"
+    "nvme"
+    "usbhid"
+    "usb_storage"
+    "sd_mod"
+    "sdhci_pci"
+    "r8169"
+  ];
 
   meta.promtail = {
     enable = true;
@@ -34,7 +44,9 @@
   };
 
   # Connect safely via wireguard to skip authentication
-  networking.hosts.${nodes.ward-web-proxy.config.wireguard.proxy-home.ipv4} = [globals.services.influxdb.domain];
+  networking.hosts.${nodes.ward-web-proxy.config.wireguard.proxy-home.ipv4} = [
+    globals.services.influxdb.domain
+  ];
   meta.telegraf = {
     enable = true;
     influxdb2 = {
@@ -48,34 +60,33 @@
   # TODO track my github stats
   # services.telegraf.extraConfig.inputs.github = {};
 
-  guests = let
-    mkGuest = guestName: {
-      autostart = true;
-      zfs."/state" = {
-        pool = "rpool";
-        dataset = "local/guests/${guestName}";
+  guests =
+    let
+      mkGuest = guestName: {
+        autostart = true;
+        zfs."/state" = {
+          pool = "rpool";
+          dataset = "local/guests/${guestName}";
+        };
+        zfs."/persist" = {
+          pool = "rpool";
+          dataset = "safe/guests/${guestName}";
+        };
+        modules = [
+          ../../config
+          ./guests/common.nix
+          ./guests/${guestName}.nix
+          {
+            node.secretsDir = ./secrets/${guestName};
+            networking.nftables.firewall = {
+              zones.untrusted.interfaces = [ config.guests.${guestName}.networking.mainLinkName ];
+            };
+          }
+        ];
       };
-      zfs."/persist" = {
-        pool = "rpool";
-        dataset = "safe/guests/${guestName}";
-      };
-      modules = [
-        ../../config
-        ./guests/common.nix
-        ./guests/${guestName}.nix
-        {
-          node.secretsDir = ./secrets/${guestName};
-          networking.nftables.firewall = {
-            zones.untrusted.interfaces = [config.guests.${guestName}.networking.mainLinkName];
-          };
-        }
-      ];
-    };
 
-    mkMicrovm = guestName: {
-      ${guestName} =
-        mkGuest guestName
-        // {
+      mkMicrovm = guestName: {
+        ${guestName} = mkGuest guestName // {
           backend = "microvm";
           microvm = {
             system = "x86_64-linux";
@@ -88,13 +99,11 @@
             inherit inputs minimal;
           };
         };
-    };
+      };
 
-    # deadnix: skip
-    mkContainer = guestName: {
-      ${guestName} =
-        mkGuest guestName
-        // {
+      # deadnix: skip
+      mkContainer = guestName: {
+        ${guestName} = mkGuest guestName // {
           backend = "container";
           container.macvlan = "lan";
           extraSpecialArgs = {
@@ -103,10 +112,10 @@
             inherit inputs minimal;
           };
         };
-    };
-  in
+      };
+    in
     lib.mkIf (!minimal) (
-      {}
+      { }
       // mkMicrovm "adguardhome"
       // mkMicrovm "forgejo"
       // mkMicrovm "home-gateway"

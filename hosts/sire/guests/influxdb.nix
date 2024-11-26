@@ -5,20 +5,22 @@
   nodes,
   pkgs,
   ...
-}: let
+}:
+let
   sentinelCfg = nodes.sentinel.config;
   wardCfg = nodes.ward.config;
   influxdbDomain = "influxdb.${globals.domains.me}";
   influxdbPort = 8086;
-in {
+in
+{
   wireguard.proxy-sentinel = {
     client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [influxdbPort];
+    firewallRuleForNode.sentinel.allowedTCPPorts = [ influxdbPort ];
   };
 
   wireguard.proxy-home = {
     client.via = "ward";
-    firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [influxdbPort];
+    firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [ influxdbPort ];
   };
 
   age.secrets.github-access-token = {
@@ -28,7 +30,9 @@ in {
   };
 
   meta.telegraf.secrets."@GITHUB_ACCESS_TOKEN@" = config.age.secrets.github-access-token.path;
-  services.telegraf.extraConfig.outputs.influxdb_v2.urls = lib.mkForce ["http://localhost:${toString influxdbPort}"];
+  services.telegraf.extraConfig.outputs.influxdb_v2.urls = lib.mkForce [
+    "http://localhost:${toString influxdbPort}"
+  ];
 
   services.telegraf.extraConfig.inputs = {
     github = {
@@ -51,7 +55,7 @@ in {
   nodes.sentinel = {
     services.nginx = {
       upstreams.influxdb = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString influxdbPort}" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString influxdbPort}" = { };
         extraConfig = ''
           zone influxdb 64k;
           keepalive 2;
@@ -61,35 +65,39 @@ in {
           expectedBodyRegex = "InfluxDB";
         };
       };
-      virtualHosts.${influxdbDomain} = let
-        accessRules = ''
-          ${lib.concatMapStrings (ip: "allow ${ip};\n") sentinelCfg.wireguard.proxy-sentinel.server.reservedAddresses}
-          deny all;
-        '';
-      in {
-        forceSSL = true;
-        useACMEWildcardHost = true;
-        locations."/" = {
-          proxyPass = "http://influxdb";
-          proxyWebsockets = true;
-          extraConfig = accessRules;
-        };
-        locations."/api/v2/write" = {
-          proxyPass = "http://influxdb/api/v2/write";
-          proxyWebsockets = true;
-          extraConfig = ''
-            ${accessRules}
-            access_log off;
+      virtualHosts.${influxdbDomain} =
+        let
+          accessRules = ''
+            ${lib.concatMapStrings (
+              ip: "allow ${ip};\n"
+            ) sentinelCfg.wireguard.proxy-sentinel.server.reservedAddresses}
+            deny all;
           '';
+        in
+        {
+          forceSSL = true;
+          useACMEWildcardHost = true;
+          locations."/" = {
+            proxyPass = "http://influxdb";
+            proxyWebsockets = true;
+            extraConfig = accessRules;
+          };
+          locations."/api/v2/write" = {
+            proxyPass = "http://influxdb/api/v2/write";
+            proxyWebsockets = true;
+            extraConfig = ''
+              ${accessRules}
+              access_log off;
+            '';
+          };
         };
-      };
     };
   };
 
   nodes.ward-web-proxy = {
     services.nginx = {
       upstreams.influxdb = {
-        servers."${config.wireguard.proxy-home.ipv4}:${toString influxdbPort}" = {};
+        servers."${config.wireguard.proxy-home.ipv4}:${toString influxdbPort}" = { };
         extraConfig = ''
           zone influxdb 64k;
           keepalive 2;
@@ -99,28 +107,30 @@ in {
           expectedBodyRegex = "InfluxDB";
         };
       };
-      virtualHosts.${influxdbDomain} = let
-        accessRules = ''
-          ${lib.concatMapStrings (ip: "allow ${ip};\n") wardCfg.wireguard.proxy-home.server.reservedAddresses}
-          deny all;
-        '';
-      in {
-        forceSSL = true;
-        useACMEWildcardHost = true;
-        locations."/" = {
-          proxyPass = "http://influxdb";
-          proxyWebsockets = true;
-          extraConfig = accessRules;
-        };
-        locations."/api/v2/write" = {
-          proxyPass = "http://influxdb/api/v2/write";
-          proxyWebsockets = true;
-          extraConfig = ''
-            ${accessRules}
-            access_log off;
+      virtualHosts.${influxdbDomain} =
+        let
+          accessRules = ''
+            ${lib.concatMapStrings (ip: "allow ${ip};\n") wardCfg.wireguard.proxy-home.server.reservedAddresses}
+            deny all;
           '';
+        in
+        {
+          forceSSL = true;
+          useACMEWildcardHost = true;
+          locations."/" = {
+            proxyPass = "http://influxdb";
+            proxyWebsockets = true;
+            extraConfig = accessRules;
+          };
+          locations."/api/v2/write" = {
+            proxyPass = "http://influxdb/api/v2/write";
+            proxyWebsockets = true;
+            extraConfig = ''
+              ${accessRules}
+              access_log off;
+            '';
+          };
         };
-      };
     };
   };
 
@@ -166,12 +176,12 @@ in {
         passwordFile = config.age.secrets.influxdb-admin-password.path;
         tokenFile = config.age.secrets.influxdb-admin-token.path;
       };
-      organizations.machines.buckets.telegraf = {};
-      organizations.home.buckets.home_assistant = {};
+      organizations.machines.buckets.telegraf = { };
+      organizations.home.buckets.home_assistant = { };
     };
   };
 
-  environment.systemPackages = [pkgs.influxdb2-cli];
+  environment.systemPackages = [ pkgs.influxdb2-cli ];
 
   systemd.services.grafana.serviceConfig.RestartSec = "60"; # Retry every minute
 }

@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   home.persistence."/state".directories = [
     ".config/awakened-poe-trade"
   ];

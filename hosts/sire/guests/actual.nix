@@ -3,12 +3,14 @@
   globals,
   nodes,
   ...
-}: let
+}:
+let
   actualDomain = "finance.${globals.domains.me}";
-in {
+in
+{
   wireguard.proxy-sentinel = {
     client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [config.services.actual.settings.port];
+    firewallRuleForNode.sentinel.allowedTCPPorts = [ config.services.actual.settings.port ];
   };
 
   environment.persistence."/persist".directories = [
@@ -22,7 +24,7 @@ in {
 
   services.actual = {
     enable = true;
-    settings.trustedProxies = [nodes.sentinel.config.wireguard.proxy-sentinel.ipv4];
+    settings.trustedProxies = [ nodes.sentinel.config.wireguard.proxy-sentinel.ipv4 ];
   };
 
   globals.services.actual.domain = actualDomain;
@@ -35,7 +37,8 @@ in {
   nodes.sentinel = {
     services.nginx = {
       upstreams.actual = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.actual.settings.port}" = {};
+        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.actual.settings.port}" =
+          { };
         extraConfig = ''
           zone actual 64k;
           keepalive 2;

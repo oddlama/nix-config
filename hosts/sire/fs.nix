@@ -2,9 +2,11 @@
   config,
   lib,
   ...
-}: let
+}:
+let
   inherit (config.repo.secrets.local) disks;
-in {
+in
+{
   disko.devices = {
     disk =
       {
@@ -33,11 +35,9 @@ in {
     zpool = {
       rpool = lib.disko.zfs.mkZpool {
         mode = "mirror";
-        datasets =
-          lib.disko.zfs.impermanenceZfsDatasets
-          // {
-            "safe/guests" = lib.disko.zfs.unmountable;
-          };
+        datasets = lib.disko.zfs.impermanenceZfsDatasets // {
+          "safe/guests" = lib.disko.zfs.unmountable;
+        };
       };
       storage = lib.disko.zfs.mkZpool {
         mode = "raidz";
@@ -48,7 +48,7 @@ in {
     };
   };
 
-  boot.initrd.systemd.services."zfs-import-storage".after = ["cryptsetup.target"];
+  boot.initrd.systemd.services."zfs-import-storage".after = [ "cryptsetup.target" ];
 
   services.zrepl = {
     enable = true;

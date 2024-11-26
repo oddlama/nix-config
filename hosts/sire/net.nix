@@ -3,7 +3,8 @@
   globals,
   lib,
   ...
-}: {
+}:
+{
   networking.hostId = config.repo.secrets.local.networking.hostId;
 
   globals.monitoring.ping.sire = {
@@ -15,8 +16,8 @@
   boot.initrd.systemd.network = {
     enable = true;
     networks."10-lan" = {
-      address = [globals.net.home-lan.hosts.sire.cidrv4];
-      gateway = [globals.net.home-lan.hosts.ward.ipv4];
+      address = [ globals.net.home-lan.hosts.sire.cidrv4 ];
+      gateway = [ globals.net.home-lan.hosts.ward.ipv4 ];
       matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.lan.mac;
       networkConfig = {
         IPv6PrivacyExtensions = "yes";
@@ -53,8 +54,8 @@
       '';
     };
     "20-lan-self" = {
-      address = [globals.net.home-lan.hosts.sire.cidrv4];
-      gateway = [globals.net.home-lan.hosts.ward.ipv4];
+      address = [ globals.net.home-lan.hosts.sire.cidrv4 ];
+      gateway = [ globals.net.home-lan.hosts.ward.ipv4 ];
       matchConfig.Name = "lan-self";
       networkConfig = {
         IPv6PrivacyExtensions = "yes";
@@ -71,7 +72,7 @@
   };
 
   networking.nftables.firewall = {
-    zones.untrusted.interfaces = ["lan-self"];
+    zones.untrusted.interfaces = [ "lan-self" ];
   };
 
   # Allow accessing influx

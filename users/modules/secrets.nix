@@ -3,9 +3,11 @@
   lib,
   nixosConfig,
   ...
-}: let
+}:
+let
   inherit (lib) mkOption types;
-in {
+in
+{
   options.userSecretsName = mkOption {
     default = "user-${config._module.args.name}";
     type = types.str;

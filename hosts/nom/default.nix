@@ -2,7 +2,8 @@
   inputs,
   pkgs,
   ...
-}: {
+}:
+{
   imports = [
     inputs.nixos-hardware.nixosModules.common-cpu-intel
     inputs.nixos-hardware.nixosModules.common-pc-laptop
@@ -29,11 +30,18 @@
 
   nixpkgs.hostPlatform = "x86_64-linux";
   boot.mode = "efi";
-  boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod"];
+  boot.initrd.availableKernelModules = [
+    "xhci_pci"
+    "ahci"
+    "nvme"
+    "usbhid"
+    "usb_storage"
+    "sd_mod"
+  ];
 
   console = {
     font = "ter-v28n";
-    packages = [pkgs.terminus_font];
+    packages = [ pkgs.terminus_font ];
   };
 
   # FIXME: fuck optional modules and make this more adjustable via settings

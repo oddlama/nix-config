@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   # XXX: Do NOT enable "Use discrete GPU" when running on nvidia by default.
   # Otherwise the xorg server will crash big time (no logs). After some gdb
   # debugging the culprit seems to be the x11 nvidia driver (nvidia_drv.so),

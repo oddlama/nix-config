@@ -6,7 +6,7 @@
     desktopManager.xterm.enable = false;
     autoRepeatDelay = 235;
     autoRepeatInterval = 60;
-    videoDrivers = ["modesetting"];
+    videoDrivers = [ "modesetting" ];
     xkb.layout = "de";
     xkb.variant = "nodeadkeys";
   };

@@ -1,11 +1,12 @@
-{globals, ...}: {
+{ globals, ... }:
+{
   # Forwarding required to masquerade netbird network
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
 
   wireguard.proxy-home.client.via = "ward";
 
   networking.nftables.chains.forward.from-netbird = {
-    after = ["conntrack"];
+    after = [ "conntrack" ];
     rules = [
       "iifname wt-home oifname lan accept"
     ];

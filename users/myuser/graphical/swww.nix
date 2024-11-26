@@ -2,7 +2,8 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   swww-update-wallpaper = pkgs.writeShellApplication {
     name = "swww-update-wallpaper";
     runtimeInputs = [
@@ -20,15 +21,16 @@
         --transition-duration 1.5
     '';
   };
-in {
+in
+{
   systemd.user = {
     services = {
       swww = {
-        Install.WantedBy = ["graphical-session.target"];
+        Install.WantedBy = [ "graphical-session.target" ];
         Unit = {
           Description = "Wayland wallpaper daemon";
-          PartOf = ["graphical-session.target"];
-          After = ["graphical-session.target"];
+          PartOf = [ "graphical-session.target" ];
+          After = [ "graphical-session.target" ];
         };
         Service = {
           ExecStart = "${pkgs.swww}/bin/swww-daemon";
@@ -36,7 +38,7 @@ in {
         };
       };
       swww-update-wallpaper = {
-        Install.WantedBy = ["default.target"];
+        Install.WantedBy = [ "default.target" ];
         Unit.Description = "Update the wallpaper";
         Service = {
           Type = "oneshot";
@@ -47,7 +49,7 @@ in {
       };
     };
     timers.swww-update-wallpaper = {
-      Install.WantedBy = ["timers.target"];
+      Install.WantedBy = [ "timers.target" ];
       Unit.Description = "Periodically switch to a new wallpaper";
       Timer.OnCalendar = "*:0/5"; # Every 5 minutes
     };

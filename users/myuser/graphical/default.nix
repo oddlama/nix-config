@@ -3,7 +3,8 @@
   nixosConfig,
   pkgs,
   ...
-}: {
+}:
+{
   imports =
     [
       ./discord.nix

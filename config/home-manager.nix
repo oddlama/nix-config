@@ -3,7 +3,8 @@
   config,
   minimal,
   ...
-}: {
+}:
+{
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
@@ -37,5 +38,5 @@
 
   # But still link all completions from all packages so they
   # can be found by zsh
-  environment.pathsToLink = ["/share/zsh"];
+  environment.pathsToLink = [ "/share/zsh" ];
 }

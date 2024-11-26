@@ -2,7 +2,8 @@
   lib,
   pkgs,
   ...
-}: {
+}:
+{
   programs.waybar = {
     enable = true;
     systemd.enable = true;
@@ -121,7 +122,17 @@
       battery = {
         interval = 2;
         format = "{icon}  {capacity}%";
-        format-icons = ["" "" "" "" "" "" "" "" ""];
+        format-icons = [
+          ""
+          ""
+          ""
+          ""
+          ""
+          ""
+          ""
+          ""
+          ""
+        ];
         states = {
           warning = 25;
           critical = 15;
@@ -154,7 +165,10 @@
       wireplumber = {
         format = "<tt>{icon} {volume}%</tt>";
         format-muted = "<tt> {volume}%</tt>";
-        format-icons = ["" ""];
+        format-icons = [
+          ""
+          ""
+        ];
         on-click = "${pkgs.hyprland}/bin/hyprctl dispatch exec \"[float;pin;move 80% 50%;size 20% 50%;noborder]\" ${lib.getExe pkgs.pwvucontrol}";
         on-click-middle = "${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 100%";
         on-click-right = "${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
@@ -247,7 +261,7 @@
   };
 
   systemd.user.services.waybar = {
-    Unit.After = ["graphical-session.target"];
-    Service.Slice = ["app-graphical.slice"];
+    Unit.After = [ "graphical-session.target" ];
+    Service.Slice = [ "app-graphical.slice" ];
   };
 }

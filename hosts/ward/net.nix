@@ -3,7 +3,8 @@
   globals,
   lib,
   ...
-}: {
+}:
+{
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
   networking.hostId = config.repo.secrets.local.networking.hostId;
 
@@ -17,8 +18,8 @@
     enable = true;
     networks = {
       "10-wan" = {
-        address = [globals.net.home-wan.hosts.ward.cidrv4];
-        gateway = [globals.net.home-wan.hosts.fritzbox.ipv4];
+        address = [ globals.net.home-wan.hosts.ward.cidrv4 ];
+        gateway = [ globals.net.home-wan.hosts.fritzbox.ipv4 ];
         matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.wan.mac;
         networkConfig.IPv6PrivacyExtensions = "yes";
         linkConfig.RequiredForOnline = "routable";
@@ -70,8 +71,8 @@
       #dhcpV4Config.UseDNS = false;
       #dhcpV6Config.UseDNS = false;
       #ipv6AcceptRAConfig.UseDNS = false;
-      address = [globals.net.home-wan.hosts.ward.cidrv4];
-      gateway = [globals.net.home-wan.hosts.fritzbox.ipv4];
+      address = [ globals.net.home-wan.hosts.ward.cidrv4 ];
+      gateway = [ globals.net.home-wan.hosts.fritzbox.ipv4 ];
       matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.wan.mac;
       networkConfig.IPv6PrivacyExtensions = "yes";
       dhcpV6Config.PrefixDelegationHint = "::/64";
@@ -99,7 +100,7 @@
       dhcpPrefixDelegationConfig.Token = "::ff";
       # Announce a static prefix
       ipv6Prefixes = [
-        {Prefix = globals.net.home-lan.cidrv6;}
+        { Prefix = globals.net.home-lan.cidrv6; }
       ];
       # Delegate prefix
       dhcpPrefixDelegationConfig = {
@@ -123,39 +124,45 @@
   };
 
   networking.nftables.firewall = {
-    snippets.nnf-icmp.ipv6Types = ["mld-listener-query" "nd-router-solicit"];
+    snippets.nnf-icmp.ipv6Types = [
+      "mld-listener-query"
+      "nd-router-solicit"
+    ];
 
     zones = {
-      untrusted.interfaces = ["wan"];
-      lan.interfaces = ["lan-self"];
-      proxy-home.interfaces = ["proxy-home"];
+      untrusted.interfaces = [ "wan" ];
+      lan.interfaces = [ "lan-self" ];
+      proxy-home.interfaces = [ "proxy-home" ];
     };
 
     rules = {
       masquerade = {
-        from = ["lan"];
-        to = ["untrusted"];
+        from = [ "lan" ];
+        to = [ "untrusted" ];
         masquerade = true;
       };
 
       outbound = {
-        from = ["lan"];
-        to = ["lan" "untrusted"];
+        from = [ "lan" ];
+        to = [
+          "lan"
+          "untrusted"
+        ];
         late = true; # Only accept after any rejects have been processed
         verdict = "accept";
       };
 
       lan-to-local = {
-        from = ["lan"];
-        to = ["local"];
+        from = [ "lan" ];
+        to = [ "local" ];
 
-        allowedUDPPorts = [config.wireguard.proxy-home.server.port];
+        allowedUDPPorts = [ config.wireguard.proxy-home.server.port ];
       };
 
       # Forward traffic between participants
       forward-proxy-home-vpn-traffic = {
-        from = ["proxy-home"];
-        to = ["proxy-home"];
+        from = [ "proxy-home" ];
+        to = [ "proxy-home" ];
         verdict = "accept";
       };
 

@@ -3,9 +3,9 @@
   globals,
   lib,
   ...
-}: let
-  inherit
-    (lib)
+}:
+let
+  inherit (lib)
     attrValues
     flip
     mkIf
@@ -13,46 +13,51 @@
     mkOption
     types
     ;
-in {
+in
+{
   options.backups.storageBoxes = mkOption {
     description = "Backups to Hetzner Storage Boxes using restic";
-    default = {};
-    type = types.attrsOf (types.submodule (submod: {
-      options = {
-        name = mkOption {
-          description = "The name of the storage box to backup to. The box must be defined in the globals. Defaults to the attribute name.";
-          default = submod.config._module.args.name;
-          type = types.str;
-        };
+    default = { };
+    type = types.attrsOf (
+      types.submodule (submod: {
+        options = {
+          name = mkOption {
+            description = "The name of the storage box to backup to. The box must be defined in the globals. Defaults to the attribute name.";
+            default = submod.config._module.args.name;
+            type = types.str;
+          };
 
-        subuser = mkOption {
-          description = "The name of the storage box subuser as defined in the globals, mapping this user to a subuser id.";
-          type = types.str;
-        };
+          subuser = mkOption {
+            description = "The name of the storage box subuser as defined in the globals, mapping this user to a subuser id.";
+            type = types.str;
+          };
 
-        paths = mkOption {
-          description = "The paths to backup.";
-          type = types.listOf types.path;
+          paths = mkOption {
+            description = "The paths to backup.";
+            type = types.listOf types.path;
+          };
         };
-      };
-    }));
+      })
+    );
   };
 
-  config = mkIf (config.backups.storageBoxes != {}) {
+  config = mkIf (config.backups.storageBoxes != { }) {
     age.secrets.restic-encryption-password.generator.script = "alnum";
     age.secrets.restic-ssh-privkey.generator.script = "ssh-ed25519";
 
-    services.restic.backups = mkMerge (flip map (attrValues config.backups.storageBoxes)
-      (boxCfg: {
+    services.restic.backups = mkMerge (
+      flip map (attrValues config.backups.storageBoxes) (boxCfg: {
         "storage-box-${boxCfg.name}" = {
-          hetznerStorageBox = let
-            box = globals.hetzner.storageboxes.${boxCfg.name};
-          in {
-            enable = true;
-            inherit (box) mainUser;
-            inherit (box.users.${boxCfg.subuser}) subUid path;
-            sshAgeSecret = "restic-ssh-privkey";
-          };
+          hetznerStorageBox =
+            let
+              box = globals.hetzner.storageboxes.${boxCfg.name};
+            in
+            {
+              enable = true;
+              inherit (box) mainUser;
+              inherit (box.users.${boxCfg.subuser}) subUid path;
+              sshAgeSecret = "restic-ssh-privkey";
+            };
 
           # A) We need to backup stuff from other users, so run as root.
           # B) We also need to be root because the ssh key will only
@@ -76,6 +81,7 @@ in {
           #   "--keep-yearly 75"
           # ];
         };
-      }));
+      })
+    );
   };
 }

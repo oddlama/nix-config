@@ -4,12 +4,14 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   primaryDomain = globals.mail.primary;
   stalwartDomain = "mail.${primaryDomain}";
   dataDir = "/var/lib/stalwart-mail";
   mailBackupDir = "/var/cache/mail-backup";
-in {
+in
+{
   environment.persistence."/persist".directories = [
     {
       directory = dataDir;
@@ -25,13 +27,13 @@ in {
   };
 
   age.secrets.stalwart-admin-hash = {
-    generator.dependencies = [config.age.secrets.stalwart-admin-pw];
+    generator.dependencies = [ config.age.secrets.stalwart-admin-pw ];
     generator.script = "argon2id";
     mode = "440";
     group = "stalwart-mail";
   };
 
-  users.groups.acme.members = ["stalwart-mail"];
+  users.groups.acme.members = [ "stalwart-mail" ];
 
   networking.firewall.allowedTCPPorts = [
     25 # smtp
@@ -51,23 +53,24 @@ in {
 
   services.stalwart-mail = {
     enable = true;
-    settings = let
-      case = field: check: value: data: {
-        "if" = field;
-        ${check} = value;
-        "then" = data;
-      };
-      ifthen = field: data: {
-        "if" = field;
-        "then" = data;
-      };
-      otherwise = value: {"else" = value;};
-      is-smtp = case "listener" "eq" "smtp";
-      is-authenticated = data: {
-        "if" = "!is_empty(authenticated_as)";
-        "then" = data;
-      };
-    in
+    settings =
+      let
+        case = field: check: value: data: {
+          "if" = field;
+          ${check} = value;
+          "then" = data;
+        };
+        ifthen = field: data: {
+          "if" = field;
+          "then" = data;
+        };
+        otherwise = value: { "else" = value; };
+        is-smtp = case "listener" "eq" "smtp";
+        is-authenticated = data: {
+          "if" = "!is_empty(authenticated_as)";
+          "then" = data;
+        };
+      in
       lib.mkForce {
         config.local-keys = [
           "store.*"
@@ -111,49 +114,190 @@ in {
         store.idmail = {
           type = "sqlite";
           path = "${config.services.idmail.dataDir}/idmail.db";
-          query = let
-            # Remove comments from SQL and make it single-line
-            toSingleLineSql = sql:
-              lib.concatStringsSep " " (
-                lib.forEach (lib.flatten (lib.split "\n" sql)) (
-                  line: lib.optionalString (builtins.match "^[[:space:]]*--.*" line == null) line
+          query =
+            let
+              # Remove comments from SQL and make it single-line
+              toSingleLineSql =
+                sql:
+                lib.concatStringsSep " " (
+                  lib.forEach (lib.flatten (lib.split "\n" sql)) (
+                    line: lib.optionalString (builtins.match "^[[:space:]]*--.*" line == null) line
+                  )
+                );
+            in
+            {
+              # "SELECT name, type, secret, description, quota FROM accounts WHERE name = ?1 AND active = true";
+              name = toSingleLineSql ''
+                SELECT
+                    m.address AS name,
+                    'individual' AS type,
+                    m.password_hash AS secret,
+                    m.address AS description,
+                    0 AS quota
+                  FROM mailboxes AS m
+                  JOIN domains AS d ON m.domain = d.domain
+                  JOIN users AS u ON m.owner = u.username
+                  WHERE m.address = ?1
+                    AND m.active = true
+                    AND d.active = true
+                    AND u.active = true
+              '';
+              # "SELECT member_of FROM group_members WHERE name = ?1";
+              members = "";
+              # "SELECT name FROM emails WHERE address = ?1";
+              recipients = toSingleLineSql ''
+                -- It is important that we return only one value here, but in theory three UNIONed
+                -- queries are guaranteed to be distinct. This is because a mailbox address
+                -- and alias address can never be the same, their cross-table uniqueness is guaranteed on insert.
+                -- The catch-all union can also only return something if @domain.tld is given as a parameter,
+                -- which is invalid for aliases and mailboxes.
+                --
+                -- Nonetheless, it may be beneficial to allow an alias to override an existing mailbox,
+                -- so we can have send-only mailboxes which have their incoming mail redirected somewhere else.
+                -- Therefore, we make sure to order the query by (aliases -> mailboxes -> catch all) and only return the
+                -- highest priority one.
+                SELECT name FROM (
+                  -- Select the target of a matching alias (if any)
+                  -- but make sure that all related parts are active.
+                  SELECT a.target AS name, 1 AS rowOrder
+                    FROM aliases AS a
+                    JOIN domains AS d ON a.domain = d.domain
+                    JOIN (
+                      -- To check whether the owner is active we need to make a subquery
+                      -- because the owner could be a user or mailbox
+                      SELECT username
+                        FROM users
+                        WHERE active = true
+                      UNION
+                      SELECT m.address AS username
+                        FROM mailboxes AS m
+                        JOIN users AS u ON m.owner = u.username
+                        WHERE m.active = true
+                          AND u.active = true
+                    ) AS u ON a.owner = u.username
+                    WHERE a.address = ?1
+                      AND a.active = true
+                      AND d.active = true
+                  -- Select the primary mailbox address if it matches and
+                  -- all related parts are active.
+                  UNION
+                  SELECT m.address AS name, 2 AS rowOrder
+                    FROM mailboxes AS m
+                    JOIN domains AS d ON m.domain = d.domain
+                    JOIN users AS u ON m.owner = u.username
+                    WHERE m.address = ?1
+                      AND m.active = true
+                      AND d.active = true
+                      AND u.active = true
+                  -- Finally, select any catch_all address that would catch this.
+                  -- Again make sure everything is active.
+                  UNION
+                  SELECT d.catch_all AS name, 3 AS rowOrder
+                    FROM domains AS d
+                    JOIN mailboxes AS m ON d.catch_all = m.address
+                    JOIN users AS u ON m.owner = u.username
+                    WHERE ?1 = ('@' || d.domain)
+                      AND d.active = true
+                      AND m.active = true
+                      AND u.active = true
+                  ORDER BY rowOrder, name ASC
+                  LIMIT 1
                 )
-              );
-          in {
-            # "SELECT name, type, secret, description, quota FROM accounts WHERE name = ?1 AND active = true";
-            name = toSingleLineSql ''
-              SELECT
-                  m.address AS name,
-                  'individual' AS type,
-                  m.password_hash AS secret,
-                  m.address AS description,
-                  0 AS quota
-                FROM mailboxes AS m
-                JOIN domains AS d ON m.domain = d.domain
-                JOIN users AS u ON m.owner = u.username
-                WHERE m.address = ?1
-                  AND m.active = true
-                  AND d.active = true
-                  AND u.active = true
-            '';
-            # "SELECT member_of FROM group_members WHERE name = ?1";
-            members = "";
-            # "SELECT name FROM emails WHERE address = ?1";
-            recipients = toSingleLineSql ''
-              -- It is important that we return only one value here, but in theory three UNIONed
-              -- queries are guaranteed to be distinct. This is because a mailbox address
-              -- and alias address can never be the same, their cross-table uniqueness is guaranteed on insert.
-              -- The catch-all union can also only return something if @domain.tld is given as a parameter,
-              -- which is invalid for aliases and mailboxes.
-              --
-              -- Nonetheless, it may be beneficial to allow an alias to override an existing mailbox,
-              -- so we can have send-only mailboxes which have their incoming mail redirected somewhere else.
-              -- Therefore, we make sure to order the query by (aliases -> mailboxes -> catch all) and only return the
-              -- highest priority one.
-              SELECT name FROM (
-                -- Select the target of a matching alias (if any)
-                -- but make sure that all related parts are active.
-                SELECT a.target AS name, 1 AS rowOrder
+              '';
+              # "SELECT address FROM emails WHERE name = ?1 AND type != 'list' ORDER BY type DESC, address ASC";
+              emails = toSingleLineSql ''
+                -- Return first the primary address, then any aliases.
+                SELECT address FROM (
+                  -- Select primary address, if active
+                  SELECT m.address AS address, 1 AS rowOrder
+                    FROM mailboxes AS m
+                    JOIN domains AS d ON m.domain = d.domain
+                    JOIN users AS u ON m.owner = u.username
+                    WHERE m.address = ?1
+                      AND m.active = true
+                      AND d.active = true
+                      AND u.active = true
+                  -- Select any active aliases
+                  UNION
+                  SELECT a.address AS address, 2 AS rowOrder
+                    FROM aliases AS a
+                    JOIN domains AS d ON a.domain = d.domain
+                    JOIN (
+                      -- To check whether the owner is active we need to make a subquery
+                      -- because the owner could be a user or mailbox
+                      SELECT username
+                        FROM users
+                        WHERE active = true
+                      UNION
+                      SELECT m.address AS username
+                        FROM mailboxes AS m
+                        JOIN users AS u ON m.owner = u.username
+                        WHERE m.active = true
+                          AND u.active = true
+                    ) AS u ON a.owner = u.username
+                    WHERE a.target = ?1
+                      AND a.active = true
+                      AND d.active = true
+                  -- Select the catch-all marker, if we are the target.
+                  UNION
+                  -- Order 2 is correct, it counts as an alias
+                  SELECT ('@' || d.domain) AS address, 2 AS rowOrder
+                    FROM domains AS d
+                    JOIN mailboxes AS m ON d.catch_all = m.address
+                    JOIN users AS u ON m.owner = u.username
+                    WHERE d.catch_all = ?1
+                      AND d.active = true
+                      AND m.active = true
+                      AND u.active = true
+                  ORDER BY rowOrder, address ASC
+                )
+              '';
+              # "SELECT address FROM emails WHERE address LIKE '%' || ?1 || '%' AND type = 'primary' ORDER BY address LIMIT 5";
+              verify = toSingleLineSql ''
+                SELECT m.address AS address
+                  FROM mailboxes AS m
+                  JOIN domains AS d ON m.domain = d.domain
+                  JOIN users AS u ON m.owner = u.username
+                  WHERE m.address LIKE '%' || ?1 || '%'
+                    AND m.active = true
+                    AND d.active = true
+                    AND u.active = true
+                UNION
+                SELECT a.address AS address
+                  FROM aliases AS a
+                  JOIN domains AS d ON a.domain = d.domain
+                  JOIN (
+                    -- To check whether the owner is active we need to make a subquery
+                    -- because the owner could be a user or mailbox
+                    SELECT username
+                      FROM users
+                      WHERE active = true
+                    UNION
+                    SELECT m.address AS username
+                      FROM mailboxes AS m
+                      JOIN users AS u ON m.owner = u.username
+                      WHERE m.active = true
+                        AND u.active = true
+                  ) AS u ON a.owner = u.username
+                  WHERE a.address LIKE '%' || ?1 || '%'
+                    AND a.active = true
+                    AND d.active = true
+                ORDER BY address
+                LIMIT 5
+              '';
+              # "SELECT p.address FROM emails AS p JOIN emails AS l ON p.name = l.name WHERE p.type = 'primary' AND l.address = ?1 AND l.type = 'list' ORDER BY p.address LIMIT 50";
+              # XXX: We don't actually expand, but return the same address if it exists since we don't support mailing lists
+              expand = toSingleLineSql ''
+                SELECT m.address AS address
+                  FROM mailboxes AS m
+                  JOIN domains AS d ON m.domain = d.domain
+                  JOIN users AS u ON m.owner = u.username
+                  WHERE m.address = ?1
+                    AND m.active = true
+                    AND d.active = true
+                    AND u.active = true
+                UNION
+                SELECT a.address AS address
                   FROM aliases AS a
                   JOIN domains AS d ON a.domain = d.domain
                   JOIN (
@@ -172,154 +316,16 @@ in {
                   WHERE a.address = ?1
                     AND a.active = true
                     AND d.active = true
-                -- Select the primary mailbox address if it matches and
-                -- all related parts are active.
-                UNION
-                SELECT m.address AS name, 2 AS rowOrder
-                  FROM mailboxes AS m
-                  JOIN domains AS d ON m.domain = d.domain
-                  JOIN users AS u ON m.owner = u.username
-                  WHERE m.address = ?1
-                    AND m.active = true
-                    AND d.active = true
-                    AND u.active = true
-                -- Finally, select any catch_all address that would catch this.
-                -- Again make sure everything is active.
-                UNION
-                SELECT d.catch_all AS name, 3 AS rowOrder
-                  FROM domains AS d
-                  JOIN mailboxes AS m ON d.catch_all = m.address
-                  JOIN users AS u ON m.owner = u.username
-                  WHERE ?1 = ('@' || d.domain)
-                    AND d.active = true
-                    AND m.active = true
-                    AND u.active = true
-                ORDER BY rowOrder, name ASC
-                LIMIT 1
-              )
-            '';
-            # "SELECT address FROM emails WHERE name = ?1 AND type != 'list' ORDER BY type DESC, address ASC";
-            emails = toSingleLineSql ''
-              -- Return first the primary address, then any aliases.
-              SELECT address FROM (
-                -- Select primary address, if active
-                SELECT m.address AS address, 1 AS rowOrder
-                  FROM mailboxes AS m
-                  JOIN domains AS d ON m.domain = d.domain
-                  JOIN users AS u ON m.owner = u.username
-                  WHERE m.address = ?1
-                    AND m.active = true
-                    AND d.active = true
-                    AND u.active = true
-                -- Select any active aliases
-                UNION
-                SELECT a.address AS address, 2 AS rowOrder
-                  FROM aliases AS a
-                  JOIN domains AS d ON a.domain = d.domain
-                  JOIN (
-                    -- To check whether the owner is active we need to make a subquery
-                    -- because the owner could be a user or mailbox
-                    SELECT username
-                      FROM users
-                      WHERE active = true
-                    UNION
-                    SELECT m.address AS username
-                      FROM mailboxes AS m
-                      JOIN users AS u ON m.owner = u.username
-                      WHERE m.active = true
-                        AND u.active = true
-                  ) AS u ON a.owner = u.username
-                  WHERE a.target = ?1
-                    AND a.active = true
-                    AND d.active = true
-                -- Select the catch-all marker, if we are the target.
-                UNION
-                -- Order 2 is correct, it counts as an alias
-                SELECT ('@' || d.domain) AS address, 2 AS rowOrder
-                  FROM domains AS d
-                  JOIN mailboxes AS m ON d.catch_all = m.address
-                  JOIN users AS u ON m.owner = u.username
-                  WHERE d.catch_all = ?1
-                    AND d.active = true
-                    AND m.active = true
-                    AND u.active = true
-                ORDER BY rowOrder, address ASC
-              )
-            '';
-            # "SELECT address FROM emails WHERE address LIKE '%' || ?1 || '%' AND type = 'primary' ORDER BY address LIMIT 5";
-            verify = toSingleLineSql ''
-              SELECT m.address AS address
-                FROM mailboxes AS m
-                JOIN domains AS d ON m.domain = d.domain
-                JOIN users AS u ON m.owner = u.username
-                WHERE m.address LIKE '%' || ?1 || '%'
-                  AND m.active = true
-                  AND d.active = true
-                  AND u.active = true
-              UNION
-              SELECT a.address AS address
-                FROM aliases AS a
-                JOIN domains AS d ON a.domain = d.domain
-                JOIN (
-                  -- To check whether the owner is active we need to make a subquery
-                  -- because the owner could be a user or mailbox
-                  SELECT username
-                    FROM users
-                    WHERE active = true
-                  UNION
-                  SELECT m.address AS username
-                    FROM mailboxes AS m
-                    JOIN users AS u ON m.owner = u.username
-                    WHERE m.active = true
-                      AND u.active = true
-                ) AS u ON a.owner = u.username
-                WHERE a.address LIKE '%' || ?1 || '%'
-                  AND a.active = true
-                  AND d.active = true
-              ORDER BY address
-              LIMIT 5
-            '';
-            # "SELECT p.address FROM emails AS p JOIN emails AS l ON p.name = l.name WHERE p.type = 'primary' AND l.address = ?1 AND l.type = 'list' ORDER BY p.address LIMIT 50";
-            # XXX: We don't actually expand, but return the same address if it exists since we don't support mailing lists
-            expand = toSingleLineSql ''
-              SELECT m.address AS address
-                FROM mailboxes AS m
-                JOIN domains AS d ON m.domain = d.domain
-                JOIN users AS u ON m.owner = u.username
-                WHERE m.address = ?1
-                  AND m.active = true
-                  AND d.active = true
-                  AND u.active = true
-              UNION
-              SELECT a.address AS address
-                FROM aliases AS a
-                JOIN domains AS d ON a.domain = d.domain
-                JOIN (
-                  -- To check whether the owner is active we need to make a subquery
-                  -- because the owner could be a user or mailbox
-                  SELECT username
-                    FROM users
-                    WHERE active = true
-                  UNION
-                  SELECT m.address AS username
-                    FROM mailboxes AS m
-                    JOIN users AS u ON m.owner = u.username
-                    WHERE m.active = true
-                      AND u.active = true
-                ) AS u ON a.owner = u.username
-                WHERE a.address = ?1
-                  AND a.active = true
-                  AND d.active = true
-              ORDER BY address
-              LIMIT 50
-            '';
-            # "SELECT 1 FROM emails WHERE address LIKE '%@' || ?1 LIMIT 1";
-            domains = toSingleLineSql ''
-              SELECT domain
-                FROM domains
-                WHERE domain = ?1
-            '';
-          };
+                ORDER BY address
+                LIMIT 50
+              '';
+              # "SELECT 1 FROM emails WHERE address LIKE '%@' || ?1 LIMIT 1";
+              domains = toSingleLineSql ''
+                SELECT domain
+                  FROM domains
+                  WHERE domain = ?1
+              '';
+            };
         };
 
         storage = {
@@ -428,7 +434,13 @@ in {
               private-key = "%{file:/var/lib/stalwart-mail/dkim/ed25519-${domain}.key}%";
               inherit domain;
               selector = "ed_default";
-              headers = ["From" "To" "Date" "Subject" "Message-ID"];
+              headers = [
+                "From"
+                "To"
+                "Date"
+                "Subject"
+                "Message-ID"
+              ];
               algorithm = "ed25519-sha256";
               canonicalization = "relaxed/relaxed";
               set-body-length = false;
@@ -438,7 +450,13 @@ in {
               private-key = "%{file:/var/lib/stalwart-mail/dkim/rsa-${domain}.key}%";
               inherit domain;
               selector = "rsa_default";
-              headers = ["From" "To" "Date" "Subject" "Message-ID"];
+              headers = [
+                "From"
+                "To"
+                "Date"
+                "Subject"
+                "Message-ID"
+              ];
               algorithm = "rsa-sha256";
               canonicalization = "relaxed/relaxed";
               set-body-length = false;
@@ -496,7 +514,7 @@ in {
 
   services.nginx = {
     upstreams.stalwart = {
-      servers."127.0.0.1:8080" = {};
+      servers."127.0.0.1:8080" = { };
       extraConfig = ''
         zone stalwart 64k;
         keepalive 2;
@@ -516,52 +534,60 @@ in {
           };
         };
       }
-      // lib.genAttrs ["autoconfig.${primaryDomain}" "autodiscover.${primaryDomain}" "mta-sts.${primaryDomain}"] (_: {
-        forceSSL = true;
-        useACMEWildcardHost = true;
-        locations."/".proxyPass = "http://stalwart";
-      });
+      // lib.genAttrs
+        [
+          "autoconfig.${primaryDomain}"
+          "autodiscover.${primaryDomain}"
+          "mta-sts.${primaryDomain}"
+        ]
+        (_: {
+          forceSSL = true;
+          useACMEWildcardHost = true;
+          locations."/".proxyPass = "http://stalwart";
+        });
   };
 
-  systemd.services.stalwart-mail = let
-    cfg = config.services.stalwart-mail;
-    configFormat = pkgs.formats.toml {};
-    configFile = configFormat.generate "stalwart-mail.toml" cfg.settings;
-  in {
-    preStart = lib.mkAfter (
-      ''
-        cat ${configFile} > /run/stalwart-mail/config.toml
-        cat ${config.age.secrets.stalwart-admin-hash.path} \
-          | tr -d '\n' > /run/stalwart-mail/admin-hash
+  systemd.services.stalwart-mail =
+    let
+      cfg = config.services.stalwart-mail;
+      configFormat = pkgs.formats.toml { };
+      configFile = configFormat.generate "stalwart-mail.toml" cfg.settings;
+    in
+    {
+      preStart = lib.mkAfter (
+        ''
+          cat ${configFile} > /run/stalwart-mail/config.toml
+          cat ${config.age.secrets.stalwart-admin-hash.path} \
+            | tr -d '\n' > /run/stalwart-mail/admin-hash
 
-        mkdir -p /var/lib/stalwart-mail/dkim
-      ''
-      # Generate DKIM keys if necessary
-      + lib.concatLines (
-        lib.forEach (builtins.attrNames globals.mail.domains) (domain: ''
-          if [[ ! -e /var/lib/stalwart-mail/dkim/rsa-${domain}.key ]]; then
-            echo "Generating DKIM key for ${domain} (rsa)"
-            ${lib.getExe pkgs.openssl} genrsa -traditional -out /var/lib/stalwart-mail/dkim/rsa-${domain}.key 2048
-          fi
-          if [[ ! -e /var/lib/stalwart-mail/dkim/ed25519-${domain}.key ]]; then
-            echo "Generating DKIM key for ${domain} (ed25519)"
-            ${lib.getExe pkgs.openssl} genpkey -algorithm ed25519 -out /var/lib/stalwart-mail/dkim/ed25519-${domain}.key
-          fi
-        '')
-      )
-    );
+          mkdir -p /var/lib/stalwart-mail/dkim
+        ''
+        # Generate DKIM keys if necessary
+        + lib.concatLines (
+          lib.forEach (builtins.attrNames globals.mail.domains) (domain: ''
+            if [[ ! -e /var/lib/stalwart-mail/dkim/rsa-${domain}.key ]]; then
+              echo "Generating DKIM key for ${domain} (rsa)"
+              ${lib.getExe pkgs.openssl} genrsa -traditional -out /var/lib/stalwart-mail/dkim/rsa-${domain}.key 2048
+            fi
+            if [[ ! -e /var/lib/stalwart-mail/dkim/ed25519-${domain}.key ]]; then
+              echo "Generating DKIM key for ${domain} (ed25519)"
+              ${lib.getExe pkgs.openssl} genpkey -algorithm ed25519 -out /var/lib/stalwart-mail/dkim/ed25519-${domain}.key
+            fi
+          '')
+        )
+      );
 
-    serviceConfig = {
-      RuntimeDirectory = "stalwart-mail";
-      ReadWritePaths = [config.services.idmail.dataDir];
-      ExecStart = lib.mkForce [
-        ""
-        "${cfg.package}/bin/stalwart-mail --config=/run/stalwart-mail/config.toml"
-      ];
-      RestartSec = "60"; # Retry every minute
-      CacheDirectory = lib.trace "remove stalwart cache soon, it's upstream" "stalwart-mail";
+      serviceConfig = {
+        RuntimeDirectory = "stalwart-mail";
+        ReadWritePaths = [ config.services.idmail.dataDir ];
+        ExecStart = lib.mkForce [
+          ""
+          "${cfg.package}/bin/stalwart-mail --config=/run/stalwart-mail/config.toml"
+        ];
+        RestartSec = "60"; # Retry every minute
+        CacheDirectory = lib.trace "remove stalwart cache soon, it's upstream" "stalwart-mail";
+      };
     };
-  };
 
   systemd.services.backup-mail = {
     description = "Mail backup";
@@ -575,15 +601,17 @@ in {
       Type = "oneshot";
       User = "stalwart-mail";
       Group = "stalwart-mail";
-      ExecStart = lib.getExe (pkgs.writeShellApplication {
-        name = "backup-mail";
-        runtimeInputs = [pkgs.sqlite];
-        text = ''
-          sqlite3 "$STALWART_DATA/database.sqlite3" ".backup '$BACKUP_DIR/database.sqlite3'"
-          sqlite3 "$IDMAIL_DATA/database.sqlite3" ".backup '$BACKUP_DIR/idmail.db'"
-          cp -r "$STALWART_DATA/dkim" "$BACKUP_DIR/"
-        '';
-      });
+      ExecStart = lib.getExe (
+        pkgs.writeShellApplication {
+          name = "backup-mail";
+          runtimeInputs = [ pkgs.sqlite ];
+          text = ''
+            sqlite3 "$STALWART_DATA/database.sqlite3" ".backup '$BACKUP_DIR/database.sqlite3'"
+            sqlite3 "$IDMAIL_DATA/database.sqlite3" ".backup '$BACKUP_DIR/idmail.db'"
+            cp -r "$STALWART_DATA/dkim" "$BACKUP_DIR/"
+          '';
+        }
+      );
       ReadWritePaths = [
         dataDir
         config.services.idmail.dataDir
@@ -591,8 +619,8 @@ in {
       ];
       Restart = "no";
     };
-    requiredBy = ["restic-backups-storage-box-dusk.service"];
-    before = ["restic-backups-storage-box-dusk.service"];
+    requiredBy = [ "restic-backups-storage-box-dusk.service" ];
+    before = [ "restic-backups-storage-box-dusk.service" ];
   };
 
   # Needed so we don't run out of tmpfs space for large backups.
@@ -608,6 +636,6 @@ in {
 
   backups.storageBoxes.dusk = {
     subuser = "stalwart";
-    paths = [mailBackupDir];
+    paths = [ mailBackupDir ];
   };
 }

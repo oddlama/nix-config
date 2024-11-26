@@ -3,7 +3,8 @@
   nixosConfig,
   pkgs,
   ...
-}: {
+}:
+{
   xresources.properties = {
     "Xft.hinting" = true;
     "Xft.antialias" = true;
@@ -13,29 +14,31 @@
     "Xft.rgba" = "rgb";
   };
 
-  gtk = let
-    gtk34extraConfig = {
-      gtk-application-prefer-dark-theme = 1;
-      gtk-cursor-theme-size = 32;
-      gtk-enable-animations = true;
-      gtk-xft-antialias = 1;
-      gtk-xft-dpi = 160; # XXX: delete for wayland?
-      gtk-xft-hinting = 1;
-      gtk-xft-hintstyle = "hintfull";
-      gtk-xft-rgba = "rgb";
-    };
-  in {
-    enable = true;
+  gtk =
+    let
+      gtk34extraConfig = {
+        gtk-application-prefer-dark-theme = 1;
+        gtk-cursor-theme-size = 32;
+        gtk-enable-animations = true;
+        gtk-xft-antialias = 1;
+        gtk-xft-dpi = 160; # XXX: delete for wayland?
+        gtk-xft-hinting = 1;
+        gtk-xft-hintstyle = "hintfull";
+        gtk-xft-rgba = "rgb";
+      };
+    in
+    {
+      enable = true;
 
-    iconTheme = {
-      name = "WhiteSur-dark";
-      package = pkgs.whitesur-icon-theme;
-    };
+      iconTheme = {
+        name = "WhiteSur-dark";
+        package = pkgs.whitesur-icon-theme;
+      };
 
-    gtk2.extraConfig = "gtk-application-prefer-dark-theme = true";
-    gtk3.extraConfig = gtk34extraConfig;
-    gtk4.extraConfig = gtk34extraConfig;
-  };
+      gtk2.extraConfig = "gtk-application-prefer-dark-theme = true";
+      gtk3.extraConfig = gtk34extraConfig;
+      gtk4.extraConfig = gtk34extraConfig;
+    };
 
   home.sessionVariables.GTK_THEME = config.gtk.theme.name;
 

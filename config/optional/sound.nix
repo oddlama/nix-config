@@ -32,5 +32,8 @@ lib.optionalAttrs (!minimal) {
     ];
   };
 
-  environment.systemPackages = with pkgs; [pulseaudio pulsemixer];
+  environment.systemPackages = with pkgs; [
+    pulseaudio
+    pulsemixer
+  ];
 }

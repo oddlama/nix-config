@@ -87,6 +87,7 @@
       ".config/gpu-screen-recorder"
       ".config/obsidian"
       ".config/spotify"
+      ".factorio" # XDG spec? nah, apprently overrated.
     ];
   };
 

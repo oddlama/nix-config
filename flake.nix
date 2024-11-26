@@ -95,6 +95,11 @@
       inputs.home-manager.follows = "home-manager";
     };
 
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     whisper-overlay = {
       url = "github:oddlama/whisper-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -106,8 +111,9 @@
     };
   };
 
-  outputs = inputs:
-    inputs.flake-parts.lib.mkFlake {inherit inputs;} {
+  outputs =
+    inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
         ./nix/agenix-rekey.nix
         ./nix/devshell.nix

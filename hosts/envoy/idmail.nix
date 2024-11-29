@@ -11,7 +11,7 @@ let
 
   mkRandomSecret = {
     generator.script = "alnum";
-    mode = "000";
+    intermediary = true;
   };
 
   mkArgon2id = secret: {
@@ -65,13 +65,10 @@ in
           inherit (domainCfg) public;
         }
       );
-      mailboxes = lib.flip lib.mapAttrs' globals.mail.domains (
-        _domain: _domainCfg:
-        lib.nameValuePair "catch-all@${primaryDomain}" {
-          password_hash = "%{file:${config.age.secrets.idmail-mailbox-hash_catch-all.path}}%";
-          owner = "admin";
-        }
-      );
+      mailboxes."catch-all@${primaryDomain}" = {
+        password_hash = "%{file:${config.age.secrets.idmail-mailbox-hash_catch-all.path}}%";
+        owner = "admin";
+      };
       # XXX: create mailboxes for git@ vaultwarden@ and simultaneously alias them to the catch all for a send only mail.
     };
   };

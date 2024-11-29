@@ -23,7 +23,7 @@ in
 
   age.secrets.stalwart-admin-pw = {
     generator.script = "alnum";
-    mode = "000";
+    intermediary = true;
   };
 
   age.secrets.stalwart-admin-hash = {
@@ -585,7 +585,6 @@ in
           "${cfg.package}/bin/stalwart-mail --config=/run/stalwart-mail/config.toml"
         ];
         RestartSec = "60"; # Retry every minute
-        CacheDirectory = lib.trace "remove stalwart cache soon, it's upstream" "stalwart-mail";
       };
     };
 

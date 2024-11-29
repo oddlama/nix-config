@@ -117,7 +117,7 @@ in
       groups."immich.access" = { };
       systems.oauth2.immich = {
         displayName = "Immich";
-        originUrl = "https://${globals.services.immich.domain}/";
+        originUrl = "https://${globals.services.immich.domain}/auth/login";
         originLanding = "https://${globals.services.immich.domain}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-immich.path;
         preferShortUsername = true;
@@ -153,7 +153,7 @@ in
       groups."paperless.access" = { };
       systems.oauth2.paperless = {
         displayName = "Paperless";
-        originUrl = "https://${globals.services.paperless.domain}/";
+        originUrl = "https://${globals.services.paperless.domain}/accounts/oidc/kanidm/login/callback/";
         originLanding = "https://${globals.services.paperless.domain}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-paperless.path;
         preferShortUsername = true;
@@ -171,7 +171,7 @@ in
       groups."grafana.server-admins" = { };
       systems.oauth2.grafana = {
         displayName = "Grafana";
-        originUrl = "https://${globals.services.grafana.domain}/";
+        originUrl = "https://${globals.services.grafana.domain}/login/generic_oauth";
         originLanding = "https://${globals.services.grafana.domain}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-grafana.path;
         preferShortUsername = true;
@@ -195,7 +195,7 @@ in
       groups."forgejo.admins" = { };
       systems.oauth2.forgejo = {
         displayName = "Forgejo";
-        originUrl = "https://${globals.services.forgejo.domain}/";
+        originUrl = "https://${globals.services.forgejo.domain}/user/oauth2/kanidm/callback";
         originLanding = "https://${globals.services.forgejo.domain}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-forgejo.path;
         scopeMaps."forgejo.access" = [
@@ -220,7 +220,7 @@ in
       groups."web-sentinel.analytics" = { };
       systems.oauth2.web-sentinel = {
         displayName = "Web Sentinel";
-        originUrl = "https://oauth2.${globals.domains.me}/";
+        originUrl = "https://oauth2.${globals.domains.me}/oauth2/callback";
         originLanding = "https://oauth2.${globals.domains.me}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-web-sentinel.path;
         preferShortUsername = true;

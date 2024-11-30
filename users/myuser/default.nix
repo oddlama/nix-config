@@ -20,6 +20,7 @@ lib.optionalAttrs (!minimal) {
       "wheel"
       "input"
       "video"
+      "plugdev"
     ];
     isNormalUser = true;
     autoSubUidGidRange = false;

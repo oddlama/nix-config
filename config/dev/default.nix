@@ -31,5 +31,11 @@ lib.optionalAttrs (!minimal) {
   services.nixseparatedebuginfod.enable = true;
 
   # For embedded development
-  services.udev.packages = [ pkgs.stlink ];
+  users.groups.plugdev = { };
+  services.udev.packages = [
+    (pkgs.runCommandLocal "probe-rs-udev-rules" { } ''
+      mkdir -p $out/lib/udev/rules.d
+      cp ${./69-probe-rs.rules} $out/lib/udev/rules.d/
+    '')
+  ];
 }

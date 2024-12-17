@@ -4,6 +4,12 @@
   lib,
   ...
 }:
+let
+  vlans.personal = 10;
+  vlans.devices = 20;
+  vlans.iot = 30;
+  vlans.guest = 40;
+in
 {
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
   networking.hostId = config.repo.secrets.local.networking.hostId;
@@ -42,86 +48,106 @@
 
   # Create a MACVTAP for ourselves too, so that we can communicate with
   # our guests on the same interface.
-  systemd.network.netdevs."10-lan-self" = {
-    netdevConfig = {
-      Name = "lan-self";
-      Kind = "macvlan";
-    };
-    extraConfig = ''
-      [MACVLAN]
-      Mode=bridge
-    '';
-  };
+  systemd.network.netdevs =
+    {
+      "10-lan-self" = {
+        netdevConfig = {
+          Name = "lan-self";
+          Kind = "macvlan";
+        };
+        extraConfig = ''
+          [MACVLAN]
+          Mode=bridge
+        '';
+      };
+    }
+    // lib.flip lib.mapAttrs' vlans (
+      vlanName: vlanId:
+      lib.nameValuePair "40-vlan-${vlanName}" {
+        netdevConfig = {
+          Kind = "vlan";
+          Name = "vlan-${vlanName}";
+        };
+        vlanConfig.Id = vlanId;
+      }
+    );
 
-  systemd.network.networks = {
-    "10-lan" = {
-      matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.lan.mac;
-      # This interface should only be used from attached macvtaps.
-      # So don't acquire a link local address and only wait for
-      # this interface to gain a carrier.
-      networkConfig.LinkLocalAddressing = "no";
-      linkConfig.RequiredForOnline = "carrier";
-      extraConfig = ''
-        [Network]
-        MACVLAN=lan-self
-      '';
-    };
-    "10-wan" = {
-      #DHCP = "yes";
-      #dhcpV4Config.UseDNS = false;
-      #dhcpV6Config.UseDNS = false;
-      #ipv6AcceptRAConfig.UseDNS = false;
-      address = [ globals.net.home-wan.hosts.ward.cidrv4 ];
-      gateway = [ globals.net.home-wan.hosts.fritzbox.ipv4 ];
-      matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.wan.mac;
-      networkConfig.IPv6PrivacyExtensions = "yes";
-      dhcpV6Config.PrefixDelegationHint = "::/64";
-      # FIXME: This should not be needed, but for some reason part of networkd
-      # isn't seeing the RAs and not triggering DHCPv6. Even though some other
-      # part of networkd is properly seeing them and logging accordingly.
-      dhcpV6Config.WithoutRA = "solicit";
-      linkConfig.RequiredForOnline = "routable";
-    };
-    "20-lan-self" = {
-      address = [
-        globals.net.home-lan.hosts.ward.cidrv4
-        globals.net.home-lan.hosts.ward.cidrv6
-      ];
-      matchConfig.Name = "lan-self";
-      networkConfig = {
-        IPv4Forwarding = "yes";
-        IPv6PrivacyExtensions = "yes";
-        IPv6SendRA = true;
-        IPv6AcceptRA = false;
-        DHCPPrefixDelegation = true;
-        MulticastDNS = true;
+  systemd.network.networks =
+    {
+      "10-lan" = {
+        matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.lan.mac;
+        # This interface should only be used from attached macvtaps.
+        # So don't acquire a link local address and only wait for
+        # this interface to gain a carrier.
+        networkConfig.LinkLocalAddressing = "no";
+        linkConfig.RequiredForOnline = "carrier";
+        extraConfig = ''
+          [Network]
+          MACVLAN=lan-self
+        '';
       };
-      dhcpPrefixDelegationConfig.UplinkInterface = "wan";
-      dhcpPrefixDelegationConfig.Token = "::ff";
-      # Announce a static prefix
-      ipv6Prefixes = [
-        { Prefix = globals.net.home-lan.cidrv6; }
-      ];
-      # Delegate prefix
-      dhcpPrefixDelegationConfig = {
-        SubnetId = "22";
+      "10-wan" = {
+        #DHCP = "yes";
+        #dhcpV4Config.UseDNS = false;
+        #dhcpV6Config.UseDNS = false;
+        #ipv6AcceptRAConfig.UseDNS = false;
+        address = [ globals.net.home-wan.hosts.ward.cidrv4 ];
+        gateway = [ globals.net.home-wan.hosts.fritzbox.ipv4 ];
+        matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.wan.mac;
+        networkConfig.IPv6PrivacyExtensions = "yes";
+        dhcpV6Config.PrefixDelegationHint = "::/64";
+        # FIXME: This should not be needed, but for some reason part of networkd
+        # isn't seeing the RAs and not triggering DHCPv6. Even though some other
+        # part of networkd is properly seeing them and logging accordingly.
+        dhcpV6Config.WithoutRA = "solicit";
+        linkConfig.RequiredForOnline = "routable";
       };
-      # Provide a DNS resolver
-      # ipv6SendRAConfig = {
-      #   Managed = true;
-      #   EmitDNS = true;
-      # FIXME: this is not the true ipv6 of adguardhome   DNS = globals.net.home-lan.hosts.ward-adguardhome.ipv6;
-      # FIXME: todo assign static additional to reservation in kea
-      # };
-      linkConfig.RequiredForOnline = "routable";
-    };
-    # Remaining macvtap interfaces should not be touched.
-    "90-macvtap-ignore" = {
-      matchConfig.Kind = "macvtap";
-      linkConfig.ActivationPolicy = "manual";
-      linkConfig.Unmanaged = "yes";
-    };
-  };
+      "20-lan-self" = {
+        address = [
+          globals.net.home-lan.hosts.ward.cidrv4
+          globals.net.home-lan.hosts.ward.cidrv6
+        ];
+        matchConfig.Name = "lan-self";
+        networkConfig = {
+          IPv4Forwarding = "yes";
+          IPv6PrivacyExtensions = "yes";
+          IPv6SendRA = true;
+          IPv6AcceptRA = false;
+          DHCPPrefixDelegation = true;
+          MulticastDNS = true;
+        };
+        dhcpPrefixDelegationConfig.UplinkInterface = "wan";
+        dhcpPrefixDelegationConfig.Token = "::ff";
+        # Announce a static prefix
+        ipv6Prefixes = [
+          { Prefix = globals.net.home-lan.cidrv6; }
+        ];
+        # Delegate prefix
+        dhcpPrefixDelegationConfig = {
+          SubnetId = "22";
+        };
+        # Provide a DNS resolver
+        # ipv6SendRAConfig = {
+        #   Managed = true;
+        #   EmitDNS = true;
+        # FIXME: this is not the true ipv6 of adguardhome   DNS = globals.net.home-lan.hosts.ward-adguardhome.ipv6;
+        # FIXME: todo assign static additional to reservation in kea
+        # };
+        linkConfig.RequiredForOnline = "routable";
+      };
+      # Remaining macvtap interfaces should not be touched.
+      "90-macvtap-ignore" = {
+        matchConfig.Kind = "macvtap";
+        linkConfig.ActivationPolicy = "manual";
+        linkConfig.Unmanaged = "yes";
+      };
+    }
+    // lib.flip lib.mapAttrs' vlans (
+      vlanName: _:
+      lib.nameValuePair "40-vlan-${vlanName}" {
+        matchConfig.Name = "vlan-${vlanName}";
+      }
+    );
 
   networking.nftables.firewall = {
     snippets.nnf-icmp.ipv6Types = [

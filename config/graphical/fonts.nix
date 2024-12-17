@@ -27,13 +27,13 @@
       </fontconfig>
     '';
 
-    packages = with pkgs; [
-      (pkgs.nerdfonts.override { fonts = [ "NerdFontsSymbolsOnly" ]; })
-      noto-fonts
-      noto-fonts-cjk-sans
-      noto-fonts-cjk-serif
-      noto-fonts-emoji
-      noto-fonts-extra
+    packages = [
+      pkgs.nerd-fonts.symbols-only
+      pkgs.noto-fonts
+      pkgs.noto-fonts-cjk-sans
+      pkgs.noto-fonts-cjk-serif
+      pkgs.noto-fonts-emoji
+      pkgs.noto-fonts-extra
     ];
   };
 

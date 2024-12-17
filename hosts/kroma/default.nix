@@ -28,6 +28,7 @@
 
     ./fs.nix
     ./net.nix
+    ./unifi.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
@@ -121,10 +122,4 @@
     dockerCompat = true;
     defaultNetwork.settings.dns_enabled = true;
   };
-
-  users.deterministicIds.unifi = {
-    uid = 968;
-    gid = 968;
-  };
-  services.unifi.enable = true;
 }

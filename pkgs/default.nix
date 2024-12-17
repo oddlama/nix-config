@@ -3,7 +3,6 @@ _inputs: [
   (_final: prev: {
     deploy = prev.callPackage ./deploy.nix { };
     git-fuzzy = prev.callPackage ./git-fuzzy { };
-    awakened-poe-trade = prev.callPackage ./awakened-poe-trade.nix { };
     segoe-ui-ttf = prev.callPackage ./segoe-ui-ttf.nix { };
     zsh-histdb-skim = prev.callPackage ./zsh-skim-histdb.nix { };
     actual-server = prev.callPackage ./actual-server.nix { };

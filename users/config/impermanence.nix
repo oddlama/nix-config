@@ -25,6 +25,9 @@ in
     ]
     ++ optionals nixosConfig.services.pipewire.enable [
       ".local/state/wireplumber"
+    ]
+    ++ optionals nixosConfig.programs.steam.enable [
+      ".local/share/Steam"
     ];
 
   home.persistence."/persist".directories =
@@ -32,7 +35,7 @@ in
       ".local/share/nix" # Repl history
     ]
     ++ optionals nixosConfig.programs.steam.enable [
-      ".local/share/Steam"
+      ".local/share/Steam/userdata"
       ".steam"
     ];
 }

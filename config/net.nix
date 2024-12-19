@@ -5,6 +5,7 @@
 }:
 {
   systemd.network.enable = true;
+  systemd.network.wait-online.enable = false;
 
   networking = {
     useDHCP = lib.mkForce false;

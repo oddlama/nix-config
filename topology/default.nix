@@ -57,8 +57,8 @@ in
         "eth7"
       ]
     ];
-    connections.eth1 = mkConnection "ward" "lan-self";
-    connections.eth2 = mkConnection "sire" "lan-self";
+    connections.eth1 = mkConnection "ward" "lan";
+    connections.eth2 = mkConnection "sire" "lan";
     connections.eth7 = mkConnection "zackbiene" "lan1";
   };
 

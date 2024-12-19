@@ -2,7 +2,6 @@
   lib,
   globals,
   utils,
-  nodes,
   ...
 }:
 let
@@ -30,58 +29,42 @@ in
       renew-timer = 3600;
       interfaces-config = {
         # XXX: BUG: why does this bind other macvtaps?
-        interfaces = [ "lan-self" ];
+        interfaces = map (name: "me-${name}") (builtins.attrNames globals.net.home-lan.vlans);
         service-sockets-max-retries = -1;
       };
-      option-data = [
-        {
-          name = "domain-name-servers";
-          data = globals.net.home-lan.hosts.ward-adguardhome.ipv4;
-        }
-      ];
-      subnet4 = [
-        {
-          id = 1;
-          interface = "lan-self";
-          subnet = globals.net.home-lan.cidrv4;
-          pools = [
-            {
-              pool = "${net.cidr.host 20 globals.net.home-lan.cidrv4} - ${
-                net.cidr.host (-6) globals.net.home-lan.cidrv4
-              }";
-            }
-          ];
-          option-data = [
-            {
-              name = "routers";
-              data = globals.net.home-lan.hosts.ward.ipv4; # FIXME: how to advertise v6 address also?
-            }
-          ];
-          # FIXME: map this over globals.guests or smth. marker tag for finding: ipv4 192.168.1.1
-          reservations = [
-            {
-              hw-address = nodes.ward-adguardhome.config.lib.microvm.mac;
-              ip-address = globals.net.home-lan.hosts.ward-adguardhome.ipv4;
-            }
-            {
-              hw-address = nodes.ward-web-proxy.config.lib.microvm.mac;
-              ip-address = globals.net.home-lan.hosts.ward-web-proxy.ipv4;
-            }
-            {
-              hw-address = nodes.sire-samba.config.lib.microvm.mac;
-              ip-address = globals.net.home-lan.hosts.sire-samba.ipv4;
-            }
-            {
-              hw-address = globals.macs.wallbox;
-              ip-address = globals.net.home-lan.hosts.wallbox.ipv4;
-            }
-            {
-              hw-address = globals.macs.home-assistant;
-              ip-address = globals.net.home-lan.hosts.home-assistant-temp.ipv4;
-            }
-          ];
-        }
-      ];
+      subnet4 = lib.mapAttrsToList globals.net.home-lan.vlans (
+        vlanName: vlanCfg: [
+          {
+            inherit (vlanCfg) id;
+            interface = "me-${vlanName}";
+            subnet = vlanCfg.cidrv4;
+            pools = [
+              {
+                pool = "${net.cidr.host 20 vlanCfg.cidrv4} - ${net.cidr.host (-6) vlanCfg.cidrv4}";
+              }
+            ];
+            option-data = [
+              {
+                name = "routers";
+                data = vlanCfg.hosts.ward.ipv4; # FIXME: how to advertise v6 address also?
+              }
+              {
+                name = "domain-name-servers";
+                data = vlanCfg.hosts.ward-adguardhome.ipv4;
+              }
+            ];
+            reservations = lib.concatLists (
+              lib.forEach (builtins.attrValues vlanCfg.hosts) (
+                hostCfg:
+                lib.optional (hostCfg.mac != null) {
+                  hw-address = hostCfg.mac;
+                  ip-address = hostCfg.ipv4;
+                }
+              )
+            );
+          }
+        ]
+      );
     };
   };
 

@@ -28,15 +28,63 @@ in
       };
 
       home-lan = {
-        cidrv4 = "192.168.1.0/24";
-        cidrv6 = "fd10::/64";
-        hosts.ward.id = 1;
-        hosts.sire.id = 2;
-        hosts.ward-adguardhome.id = 3;
-        hosts.ward-web-proxy.id = 4;
-        hosts.sire-samba.id = 10;
-        hosts.wallbox.id = 40;
-        hosts.home-assistant-temp.id = 85;
+        vlans = {
+          personal = {
+            id = 10;
+            cidrv4 = "192.168.10.0/24";
+            cidrv6 = "fd10::/64";
+            hosts.ward.id = 1;
+            hosts.ward-adguardhome.id = 3;
+          };
+          services = {
+            id = 20;
+            cidrv4 = "192.168.20.0/24";
+            cidrv6 = "fd20::/64";
+            hosts.ward.id = 1;
+            hosts.sire.id = 2;
+            hosts.ward-adguardhome = {
+              id = 3;
+              inherit (nodes.ward-adguardhome.config.lib.microvm.interfaces.vlan-services) mac;
+            };
+            hosts.ward-web-proxy = {
+              id = 4;
+              inherit (nodes.ward-web-proxy.config.lib.microvm.interfaces.vlan-services) mac;
+            };
+            hosts.sire-samba = {
+              id = 10;
+              inherit (nodes.sire-samba.config.lib.microvm.interfaces.vlan-services) mac;
+            };
+          };
+          devices = {
+            id = 30;
+            cidrv4 = "192.168.30.0/24";
+            cidrv6 = "fd30::/64";
+            hosts.ward.id = 1;
+            hosts.ward-adguardhome.id = 3;
+            hosts.wallbox = {
+              id = 40;
+              mac = globals.macs.wallbox;
+            };
+            hosts.home-assistant-temp = {
+              id = 85;
+              mac = globals.macs.home-assistant;
+            };
+          };
+          iot = {
+            id = 40;
+            cidrv4 = "192.168.40.0/24";
+            cidrv6 = "fd40::/64";
+            hosts.ward.id = 1;
+            hosts.ward-adguardhome.id = 3;
+          };
+          guests = {
+            id = 50;
+            cidrv4 = "192.168.50.0/24";
+            cidrv6 = "fd50::/64";
+            hosts.ward.id = 1;
+            hosts.ward-adguardhome.id = 3;
+          };
+        };
       };
 
       proxy-home = {

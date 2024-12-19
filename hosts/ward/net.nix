@@ -4,12 +4,6 @@
   lib,
   ...
 }:
-let
-  vlans.personal = 10;
-  vlans.devices = 20;
-  vlans.iot = 30;
-  vlans.guest = 40;
-in
 {
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
   networking.hostId = config.repo.secrets.local.networking.hostId;
@@ -17,11 +11,19 @@ in
   globals.monitoring.ping.ward = {
     hostv4 = lib.net.cidr.ip globals.net.home-lan.hosts.ward.cidrv4;
     hostv6 = lib.net.cidr.ip globals.net.home-lan.hosts.ward.cidrv6;
-    network = "home-lan";
+    network = "home-lan.vlans.devices";
   };
 
+  boot.initrd.availableKernelModules = [ "8021q" ];
   boot.initrd.systemd.network = {
     enable = true;
+    netdevs."30-vlan-home" = {
+      netdevConfig = {
+        Kind = "vlan";
+        Name = "vlan-home";
+      };
+      vlanConfig.Id = globals.net.home-lan.vlans.home.id;
+    };
     networks = {
       "10-wan" = {
         address = [ globals.net.home-wan.hosts.ward.cidrv4 ];
@@ -30,12 +32,21 @@ in
         networkConfig.IPv6PrivacyExtensions = "yes";
         linkConfig.RequiredForOnline = "routable";
       };
-      "20-lan" = {
+      "10-lan" = {
+        matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.lan.mac;
+        # This interface should only be used from attached vlans.
+        # So don't acquire a link local address and only wait for
+        # this interface to gain a carrier.
+        networkConfig.LinkLocalAddressing = "no";
+        linkConfig.RequiredForOnline = "carrier";
+        vlan = [ "vlan-home" ];
+      };
+      "30-vlan-home" = {
         address = [
           globals.net.home-lan.hosts.ward.cidrv4
           globals.net.home-lan.hosts.ward.cidrv6
         ];
-        matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.lan.mac;
+        matchConfig.Name = "vlan-home";
         networkConfig = {
           IPv4Forwarding = "yes";
           IPv6PrivacyExtensions = "yes";
@@ -48,11 +59,18 @@ in
 
   # Create a MACVTAP for ourselves too, so that we can communicate with
   # our guests on the same interface.
-  systemd.network.netdevs =
-    {
-      "10-lan-self" = {
+  systemd.network.netdevs = lib.flip lib.concatMapAttrs globals.net.home-lan.vlans (
+    vlanName: vlanCfg: {
+      "30-vlan-${vlanName}" = {
         netdevConfig = {
-          Name = "lan-self";
+          Kind = "vlan";
+          Name = "vlan-${vlanName}";
+        };
+        vlanConfig.Id = vlanCfg.id;
+      };
+      "40-me-${vlanName}" = {
+        netdevConfig = {
+          Name = "me-${vlanName}";
           Kind = "macvlan";
         };
         extraConfig = ''
@@ -61,30 +79,18 @@ in
         '';
       };
     }
-    // lib.flip lib.mapAttrs' vlans (
-      vlanName: vlanId:
-      lib.nameValuePair "40-vlan-${vlanName}" {
-        netdevConfig = {
-          Kind = "vlan";
-          Name = "vlan-${vlanName}";
-        };
-        vlanConfig.Id = vlanId;
-      }
-    );
+  );
 
   systemd.network.networks =
     {
       "10-lan" = {
         matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.lan.mac;
-        # This interface should only be used from attached macvtaps.
+        # This interface should only be used from attached vlans.
         # So don't acquire a link local address and only wait for
         # this interface to gain a carrier.
         networkConfig.LinkLocalAddressing = "no";
         linkConfig.RequiredForOnline = "carrier";
-        extraConfig = ''
-          [Network]
-          MACVLAN=lan-self
-        '';
+        vlan = map (name: "vlan-${name}") (builtins.attrNames globals.net.home-lan.vlans);
       };
       "10-wan" = {
         #DHCP = "yes";
@@ -95,44 +101,11 @@ in
         gateway = [ globals.net.home-wan.hosts.fritzbox.ipv4 ];
         matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.wan.mac;
         networkConfig.IPv6PrivacyExtensions = "yes";
-        dhcpV6Config.PrefixDelegationHint = "::/64";
+        # dhcpV6Config.PrefixDelegationHint = "::/64";
         # FIXME: This should not be needed, but for some reason part of networkd
         # isn't seeing the RAs and not triggering DHCPv6. Even though some other
         # part of networkd is properly seeing them and logging accordingly.
         dhcpV6Config.WithoutRA = "solicit";
-        linkConfig.RequiredForOnline = "routable";
-      };
-      "20-lan-self" = {
-        address = [
-          globals.net.home-lan.hosts.ward.cidrv4
-          globals.net.home-lan.hosts.ward.cidrv6
-        ];
-        matchConfig.Name = "lan-self";
-        networkConfig = {
-          IPv4Forwarding = "yes";
-          IPv6PrivacyExtensions = "yes";
-          IPv6SendRA = true;
-          IPv6AcceptRA = false;
-          DHCPPrefixDelegation = true;
-          MulticastDNS = true;
-        };
-        dhcpPrefixDelegationConfig.UplinkInterface = "wan";
-        dhcpPrefixDelegationConfig.Token = "::ff";
-        # Announce a static prefix
-        ipv6Prefixes = [
-          { Prefix = globals.net.home-lan.cidrv6; }
-        ];
-        # Delegate prefix
-        dhcpPrefixDelegationConfig = {
-          SubnetId = "22";
-        };
-        # Provide a DNS resolver
-        # ipv6SendRAConfig = {
-        #   Managed = true;
-        #   EmitDNS = true;
-        # FIXME: this is not the true ipv6 of adguardhome   DNS = globals.net.home-lan.hosts.ward-adguardhome.ipv6;
-        # FIXME: todo assign static additional to reservation in kea
-        # };
         linkConfig.RequiredForOnline = "routable";
       };
       # Remaining macvtap interfaces should not be touched.
@@ -142,10 +115,53 @@ in
         linkConfig.Unmanaged = "yes";
       };
     }
-    // lib.flip lib.mapAttrs' vlans (
-      vlanName: _:
-      lib.nameValuePair "40-vlan-${vlanName}" {
-        matchConfig.Name = "vlan-${vlanName}";
+    // lib.flip lib.concatMapAttrs globals.net.home-lan.vlans (
+      vlanName: vlanCfg: {
+        "30-vlan-${vlanName}" = {
+          matchConfig.Name = "vlan-${vlanName}";
+          # This interface should only be used from attached macvlans.
+          # So don't acquire a link local address and only wait for
+          # this interface to gain a carrier.
+          networkConfig.LinkLocalAddressing = "no";
+          linkConfig.RequiredForOnline = "carrier";
+          extraConfig = ''
+            [Network]
+            MACVLAN=me-${vlanName}
+          '';
+        };
+        "40-me-${vlanName}" = {
+          address = [
+            vlanCfg.hosts.ward.cidrv4
+            vlanCfg.hosts.ward.cidrv6
+          ];
+          matchConfig.Name = "me-${vlanName}";
+          networkConfig = {
+            IPv4Forwarding = "yes";
+            IPv6PrivacyExtensions = "yes";
+            IPv6SendRA = true;
+            IPv6AcceptRA = false;
+            # DHCPPrefixDelegation = true;
+            MulticastDNS = true;
+          };
+          # dhcpPrefixDelegationConfig.UplinkInterface = "wan";
+          # dhcpPrefixDelegationConfig.Token = "::ff";
+          # Announce a static prefix
+          ipv6Prefixes = [
+            { Prefix = vlanCfg.cidrv6; }
+          ];
+          # Delegate prefix
+          # dhcpPrefixDelegationConfig = {
+          #   SubnetId = vlanCfg.id;
+          # };
+          # Provide a DNS resolver
+          # ipv6SendRAConfig = {
+          #   Managed = true;
+          #   EmitDNS = true;
+          # FIXME: this is not the true ipv6 of adguardhome   DNS = globals.net.home-lan.hosts.ward-adguardhome.ipv6;
+          # FIXME: todo assign static additional to reservation in kea
+          # };
+          linkConfig.RequiredForOnline = "routable";
+        };
       }
     );
 
@@ -155,31 +171,35 @@ in
       "nd-router-solicit"
     ];
 
-    zones = {
-      untrusted.interfaces = [ "wan" ];
-      lan.interfaces = [ "lan-self" ];
-      proxy-home.interfaces = [ "proxy-home" ];
-    };
+    zones =
+      {
+        untrusted.interfaces = [ "wan" ];
+        proxy-home.interfaces = [ "proxy-home" ];
+      }
+      // lib.flip lib.concatMapAttrs globals.net.home-lan.vlans (
+        vlanName: _: {
+          "me-${vlanName}".interfaces = [ "me-${vlanName}" ];
+        }
+      );
 
     rules = {
-      masquerade = {
-        from = [ "lan" ];
-        to = [ "untrusted" ];
-        masquerade = true;
-      };
-
-      outbound = {
-        from = [ "lan" ];
+      masquerade-internet = {
+        from = [
+          "vlan-home"
+          "vlan-services"
+          "vlan-devices"
+          "vlan-guests"
+        ];
         to = [
-          "lan"
           "untrusted"
         ];
+        masquerade = true;
         late = true; # Only accept after any rejects have been processed
         verdict = "accept";
       };
 
-      lan-to-local = {
-        from = [ "lan" ];
+      services-to-local = {
+        from = [ "vlan-services" ];
         to = [ "local" ];
 
         allowedUDPPorts = [ config.wireguard.proxy-home.server.port ];
@@ -191,19 +211,6 @@ in
         to = [ "proxy-home" ];
         verdict = "accept";
       };
-
-      #masquerade-vpn = {
-      #  from = ["wg-home"];
-      #  to = ["lan"];
-      #  masquerade = true;
-      #};
-
-      #outbound-vpn = {
-      #  from = ["wg-home"];
-      #  to = ["lan"];
-      #  late = true; # Only accept after any rejects have been processed
-      #  verdict = "accept";
-      #};
     };
   };
 

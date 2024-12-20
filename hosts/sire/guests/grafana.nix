@@ -65,12 +65,13 @@ in
       group = "influxdb2";
     };
 
-    services.influxdb2.provision.organizations.machines.auths."grafana machines:telegraf (${config.node.name})" = {
-      readBuckets = [ "telegraf" ];
-      writeBuckets = [ "telegraf" ];
-      tokenFile =
-        nodes.sire-influxdb.config.age.secrets."grafana-influxdb-token-machines-${config.node.name}".path;
-    };
+    services.influxdb2.provision.organizations.machines.auths."grafana machines:telegraf (${config.node.name})" =
+      {
+        readBuckets = [ "telegraf" ];
+        writeBuckets = [ "telegraf" ];
+        tokenFile =
+          nodes.sire-influxdb.config.age.secrets."grafana-influxdb-token-machines-${config.node.name}".path;
+      };
 
     age.secrets."grafana-influxdb-token-home-${config.node.name}" = {
       inherit (config.age.secrets.grafana-influxdb-token-home) rekeyFile;
@@ -78,12 +79,13 @@ in
       group = "influxdb2";
     };
 
-    services.influxdb2.provision.organizations.home.auths."grafana home:home_assistant (${config.node.name})" = {
-      readBuckets = [ "home_assistant" ];
-      writeBuckets = [ "home_assistant" ];
-      tokenFile =
-        nodes.sire-influxdb.config.age.secrets."grafana-influxdb-token-home-${config.node.name}".path;
-    };
+    services.influxdb2.provision.organizations.home.auths."grafana home:home_assistant (${config.node.name})" =
+      {
+        readBuckets = [ "home_assistant" ];
+        writeBuckets = [ "home_assistant" ];
+        tokenFile =
+          nodes.sire-influxdb.config.age.secrets."grafana-influxdb-token-home-${config.node.name}".path;
+      };
   };
 
   globals.services.grafana.domain = grafanaDomain;
@@ -144,8 +146,8 @@ in
           proxyWebsockets = true;
         };
         extraConfig = ''
-          allow ${globals.net.home-lan.cidrv4};
-          allow ${globals.net.home-lan.cidrv6};
+          allow ${globals.net.home-lan.vlans.services.cidrv4};
+          allow ${globals.net.home-lan.vlans.services.cidrv6};
           deny all;
         '';
       };

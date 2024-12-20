@@ -14,7 +14,7 @@ in
   globals.monitoring.ping.zackbiene = {
     hostv4 = "zackbiene.local";
     hostv6 = "zackbiene.local";
-    network = "home-lan";
+    network = "home-lan.vlans.services";
   };
 
   wireguard.proxy-home.client.via = "ward";
@@ -70,8 +70,8 @@ in
       lan-interface.interfaces = [ "lan1" ];
       lan = {
         parent = "lan-interface";
-        ipv4Addresses = [ globals.net.home-lan.cidrv4 ];
-        ipv6Addresses = [ globals.net.home-lan.cidrv6 ];
+        ipv4Addresses = [ globals.net.home-lan.vlans.services.cidrv4 ];
+        ipv6Addresses = [ globals.net.home-lan.vlans.services.cidrv6 ];
       };
       iot.interfaces = [ "wlan1" ];
     };

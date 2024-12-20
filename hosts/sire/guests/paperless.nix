@@ -79,8 +79,8 @@ in
         useACMEWildcardHost = true;
         extraConfig = ''
           client_max_body_size 512M;
-          allow ${globals.net.home-lan.cidrv4};
-          allow ${globals.net.home-lan.cidrv6};
+          allow ${globals.net.home-lan.vlans.services.cidrv4};
+          allow ${globals.net.home-lan.vlans.services.cidrv6};
           deny all;
         '';
         locations."/" = {

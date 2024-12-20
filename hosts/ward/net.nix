@@ -9,9 +9,9 @@
   networking.hostId = config.repo.secrets.local.networking.hostId;
 
   globals.monitoring.ping.ward = {
-    hostv4 = lib.net.cidr.ip globals.net.home-lan.hosts.ward.cidrv4;
-    hostv6 = lib.net.cidr.ip globals.net.home-lan.hosts.ward.cidrv6;
-    network = "home-lan.vlans.devices";
+    hostv4 = lib.net.cidr.ip globals.net.home-lan.vlans.services.hosts.ward.cidrv4;
+    hostv6 = lib.net.cidr.ip globals.net.home-lan.vlans.services.hosts.ward.cidrv6;
+    network = "home-lan.vlans.services";
   };
 
   boot.initrd.availableKernelModules = [ "8021q" ];
@@ -43,8 +43,8 @@
       };
       "30-vlan-home" = {
         address = [
-          globals.net.home-lan.hosts.ward.cidrv4
-          globals.net.home-lan.hosts.ward.cidrv6
+          globals.net.home-lan.vlans.home.hosts.ward.cidrv4
+          globals.net.home-lan.vlans.home.hosts.ward.cidrv6
         ];
         matchConfig.Name = "vlan-home";
         networkConfig = {
@@ -157,7 +157,7 @@
           # ipv6SendRAConfig = {
           #   Managed = true;
           #   EmitDNS = true;
-          # FIXME: this is not the true ipv6 of adguardhome   DNS = globals.net.home-lan.hosts.ward-adguardhome.ipv6;
+          # FIXME: this is not the true ipv6 of adguardhome   DNS = globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv6;
           # FIXME: todo assign static additional to reservation in kea
           # };
           linkConfig.RequiredForOnline = "routable";
@@ -178,15 +178,15 @@
       }
       // lib.flip lib.concatMapAttrs globals.net.home-lan.vlans (
         vlanName: _: {
-          "me-${vlanName}".interfaces = [ "me-${vlanName}" ];
+          "vlan-${vlanName}".interfaces = [ "me-${vlanName}" ];
         }
       );
 
     rules = {
       masquerade-internet = {
         from = [
-          "vlan-home"
           "vlan-services"
+          "vlan-home"
           "vlan-devices"
           "vlan-guests"
         ];
@@ -222,7 +222,7 @@
   #};
 
   wireguard.proxy-home.server = {
-    host = globals.net.home-lan.hosts.ward.ipv4;
+    host = globals.net.home-lan.vlans.services.hosts.ward.ipv4;
     port = 51444;
     reservedAddresses = [
       globals.net.proxy-home.cidrv4

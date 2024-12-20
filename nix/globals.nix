@@ -14,6 +14,7 @@
             specialArgs = {
               inherit (inputs.self.pkgs.x86_64-linux) lib;
               inherit inputs;
+              inherit (config) nodes;
             };
             modules = [
               ../modules/globals.nix

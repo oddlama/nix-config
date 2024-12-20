@@ -16,9 +16,9 @@ in
 
   globals.services.adguardhome.domain = adguardhomeDomain;
   globals.monitoring.dns.adguardhome = {
-    server = globals.net.home-lan.hosts.ward-adguardhome.ipv4;
+    server = globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv4;
     domain = ".";
-    network = "home-lan";
+    network = "home-lan.vlans.services";
   };
 
   nodes.sentinel = {
@@ -99,7 +99,7 @@ in
           map
             (domain: {
               inherit domain;
-              answer = globals.net.home-lan.hosts.ward-web-proxy.ipv4;
+              answer = globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv4;
             })
             [
               # FIXME: dont hardcode, filter global service domains by internal state

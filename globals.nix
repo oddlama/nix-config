@@ -2,6 +2,7 @@
   inputs,
   config,
   lib,
+  nodes,
   ...
 }:
 let
@@ -29,15 +30,8 @@ in
 
       home-lan = {
         vlans = {
-          personal = {
-            id = 10;
-            cidrv4 = "192.168.10.0/24";
-            cidrv6 = "fd10::/64";
-            hosts.ward.id = 1;
-            hosts.ward-adguardhome.id = 3;
-          };
           services = {
-            id = 20;
+            id = 5;
             cidrv4 = "192.168.20.0/24";
             cidrv6 = "fd20::/64";
             hosts.ward.id = 1;
@@ -52,11 +46,18 @@ in
             };
             hosts.sire-samba = {
               id = 10;
-              inherit (nodes.sire-samba.config.lib.microvm.interfaces.vlan-services) mac;
+              inherit (nodes.sire-samba.config.lib.microvm.interfaces.lan) mac;
             };
           };
+          home = {
+            id = 10;
+            cidrv4 = "192.168.10.0/24";
+            cidrv6 = "fd10::/64";
+            hosts.ward.id = 1;
+            hosts.ward-adguardhome.id = 3;
+          };
           devices = {
-            id = 30;
+            id = 20;
             cidrv4 = "192.168.30.0/24";
             cidrv6 = "fd30::/64";
             hosts.ward.id = 1;
@@ -71,14 +72,14 @@ in
             };
           };
           iot = {
-            id = 40;
+            id = 30;
             cidrv4 = "192.168.40.0/24";
             cidrv6 = "fd40::/64";
             hosts.ward.id = 1;
             hosts.ward-adguardhome.id = 3;
           };
           guests = {
-            id = 50;
+            id = 40;
             cidrv4 = "192.168.50.0/24";
             cidrv6 = "fd50::/64";
             hosts.ward.id = 1;

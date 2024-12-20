@@ -8,16 +8,16 @@
   networking.hostId = config.repo.secrets.local.networking.hostId;
 
   globals.monitoring.ping.sire = {
-    hostv4 = lib.net.cidr.ip globals.net.home-lan.hosts.sire.cidrv4;
-    hostv6 = lib.net.cidr.ip globals.net.home-lan.hosts.sire.cidrv6;
-    network = "home-lan";
+    hostv4 = lib.net.cidr.ip globals.net.home-lan.vlans.services.hosts.sire.cidrv4;
+    hostv6 = lib.net.cidr.ip globals.net.home-lan.vlans.services.hosts.sire.cidrv6;
+    network = "home-lan.vlans.services";
   };
 
   boot.initrd.systemd.network = {
     enable = true;
     networks."10-lan" = {
-      address = [ globals.net.home-lan.hosts.sire.cidrv4 ];
-      gateway = [ globals.net.home-lan.hosts.ward.ipv4 ];
+      address = [ globals.net.home-lan.vlans.services.hosts.sire.cidrv4 ];
+      gateway = [ globals.net.home-lan.vlans.services.hosts.ward.ipv4 ];
       matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.lan.mac;
       networkConfig = {
         IPv6PrivacyExtensions = "yes";
@@ -54,8 +54,8 @@
       '';
     };
     "20-lan-self" = {
-      address = [ globals.net.home-lan.hosts.sire.cidrv4 ];
-      gateway = [ globals.net.home-lan.hosts.ward.ipv4 ];
+      address = [ globals.net.home-lan.vlans.services.hosts.sire.cidrv4 ];
+      gateway = [ globals.net.home-lan.vlans.services.hosts.ward.ipv4 ];
       matchConfig.Name = "lan-self";
       networkConfig = {
         IPv6PrivacyExtensions = "yes";

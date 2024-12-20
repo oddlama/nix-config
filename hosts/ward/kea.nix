@@ -5,7 +5,11 @@
   ...
 }:
 let
-  inherit (lib) net;
+  inherit (lib)
+    flip
+    mapAttrsToList
+    net
+    ;
 in
 {
   environment.persistence."/persist".directories = [
@@ -32,7 +36,7 @@ in
         interfaces = map (name: "me-${name}") (builtins.attrNames globals.net.home-lan.vlans);
         service-sockets-max-retries = -1;
       };
-      subnet4 = lib.mapAttrsToList globals.net.home-lan.vlans (
+      subnet4 = flip mapAttrsToList globals.net.home-lan.vlans (
         vlanName: vlanCfg: [
           {
             inherit (vlanCfg) id;

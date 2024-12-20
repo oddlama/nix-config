@@ -154,7 +154,9 @@ in
   };
 
   # Connect to fritzbox via https proxy (to ensure valid cert)
-  networking.hosts.${globals.net.home-lan.hosts.ward-web-proxy.ipv4} = [ fritzboxDomain ];
+  networking.hosts.${globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv4} = [
+    fritzboxDomain
+  ];
 
   nodes.ward-web-proxy = {
     services.nginx = {
@@ -174,8 +176,8 @@ in
           proxyWebsockets = true;
         };
         extraConfig = ''
-          allow ${globals.net.home-lan.cidrv4};
-          allow ${globals.net.home-lan.cidrv6};
+          allow ${globals.net.home-lan.vlans.services.cidrv4};
+          allow ${globals.net.home-lan.vlans.services.cidrv6};
           deny all;
         '';
       };

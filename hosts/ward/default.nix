@@ -79,7 +79,9 @@
           {
             node.secretsDir = ./secrets/${guestName};
             networking.nftables.firewall = {
-              zones.untrusted.interfaces = [ config.guests.${guestName}.networking.mainLinkName ];
+              zones.untrusted.interfaces = lib.mkIf (
+                lib.length config.guests.${guestName}.networking.links == 1
+              ) config.guests.${guestName}.networking.links;
             };
           }
         ];
@@ -90,8 +92,8 @@
           backend = "microvm";
           microvm = {
             system = "x86_64-linux";
-            macvtap = "lan";
             baseMac = config.repo.secrets.local.networking.interfaces.lan.mac;
+            interfaces.vlan-services = { };
           };
           extraSpecialArgs = {
             inherit (inputs.self) nodes globals;

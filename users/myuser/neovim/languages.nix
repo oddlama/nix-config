@@ -28,9 +28,9 @@
       };
 
       # Cargo.toml dependency completion
-      crates-nvim = {
+      crates = {
         enable = true;
-        extraOptions = {
+        settings = {
           completion.cmp.enabled = true;
         };
       };

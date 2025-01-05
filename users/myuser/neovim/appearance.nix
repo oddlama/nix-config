@@ -53,7 +53,7 @@
     # Status updates for LSP progress in right bottom corner.
     fidget.enable = true;
     # Show colors
-    nvim-colorizer.enable = true;
+    colorizer.enable = true;
 
     # Breadcrumbs
     # TODO navic.enable = true; or dropbar?

@@ -193,18 +193,16 @@ in
           "4, monitor:DP-2"
           "5, monitor:DP-2"
           "6, monitor:DP-2"
-          "7, monitor:DP-3, default: true"
+          "7, monitor:DP-3"
           "8, monitor:DP-3"
           "9, monitor:DP-3"
         ];
       })
       (mkIf (nixosConfig.node.name == "nom") {
-        monitor =
-          [
-          ];
-        workspace =
-          [
-          ];
+        monitor = [
+        ];
+        workspace = [
+        ];
       })
     ];
 

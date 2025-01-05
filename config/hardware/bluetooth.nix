@@ -19,7 +19,7 @@
     };
   };
 
-  hardware.pulseaudio = {
+  services.pulseaudio = {
     package = pkgs.pulseaudio.override { bluetoothSupport = true; };
     extraConfig = ''
       load-module module-bluetooth-discover

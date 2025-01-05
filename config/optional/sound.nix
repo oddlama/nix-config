@@ -14,7 +14,7 @@ lib.optionalAttrs (!minimal) {
   # > cat /proc/asound/card*/pcm*p/sub*/hw_params
   # Compare resamplers on: https://src.infinitewave.ca/
 
-  hardware.pulseaudio.enable = lib.mkForce false;
+  services.pulseaudio.enable = lib.mkForce false;
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;

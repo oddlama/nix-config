@@ -23,7 +23,7 @@
 
   systemd.network.networks = {
     "10-lan" = {
-      address = [ "192.168.1.6/24" ];
+      address = [ "192.168.1.17/24" ];
       gateway = [ globals.net.home-lan.vlans.services.hosts.ward.ipv4 ];
       matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.lan.mac;
       networkConfig = {

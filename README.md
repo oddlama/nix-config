@@ -15,7 +15,8 @@ including my homelab, external servers and my development machines.
 🖥️ | Desktop | kroma | PC (AMD Ryzen 9 5900X) | Main workstation and development machine, also for some occasional gaming
 🖥️ | Server | ward | ODROID H3 | Energy efficient SBC for my home firewall and some lightweight services using containers and microvms.
 🖥️ | Server | sire | Threadripper 1950X | Home media server and data storage. Runs all services as microvms.
-🥔 | Server | zackbiene | ODROID N2+ | ARM SBC for home automation, isolating the sketchy stuff from my main network
+🖥️ | Server | sausebiene | Intel N100 | Home automation and IoT network isolation
+🥔 | Server | zackbiene | ODROID N2+ | Decomissioned. Old home assistant board
 ☁️  | VPS | sentinel | Hetzner Cloud server | Proxies and protects my local services
 ☁️  | VPS | envoy | Hetzner Cloud server | Mailserver
 
@@ -23,15 +24,7 @@ including my homelab, external servers and my development machines.
 
 An overview over what you will find in this repository. I usually put a lot of
 effort into all my configurations and try to go over every option in detail.
-These lists summarize the major parts.
-
-I've also included a (subjective) indicator of customization (💎) so you can more
-easily find the configs that are very polished or different from the basic setup
-that most people would have. The configurations are sorted into three categories:
-
-- **dotfiles**: Lists all the stuff I use on my desktop/development machines. All of this is very customized.
-- **services**: Lists all my services, both homelab and external.
-- **other**: Lists anything else, like general machine config, organizational and miscellaneous stuff.
+I've included the major components in the lists below.
 
 #### Dotfiles
 
@@ -47,27 +40,31 @@ that most people would have. The configurations are sorted into three categories
 📷 Screenshots | Custom based on grimblast | [Link](./pkgs/scripts) | Custom scripts utilizing grimblast for [QR code detection](./pkgs/scripts/screenshot-area-scan-qr.nix) and [OCR / satty editing](./pkgs/scripts/screenshot-area.nix)
 🗨️ Notifications | SwayNotificationCenter | [Link](./users/myuser/graphical/swaync.nix) | Notification center with customized color scheme
 🎮 Gaming | Steam & Bottles | [Link](./users/myuser/graphical/games) | Setup for gaming
+📫 Mail | Thunderbird | [Link](./users/myuser/graphical/thunderbird.nix) | Your regular thunderbird setup
 
 #### Services
 
-| ~~~~~~~~~~~~ | 💎 | Service | Source | Description
----|---|---|---|---
-🐙 Git | – | Forgejo | [Link](./hosts/ward/guests/forgejo.nix) | Forgejo with SSO
-🔑 SSO | 💎 | Kanidm | [Link](./hosts/ward/guests/kanidm.nix) | Identity provider for Single Sign On on my hosted services. 💎 With custom-made secret provisioning.
-🔴 DNS Adblock | – | AdGuard Home | [Link](./hosts/ward/guests/adguardhome.nix) | DNS level adblocker
-🔐 Passwords | – | Vaultwarden | [Link](./hosts/ward/guests/vaultwarden.nix) | Self-hosted password manager
-📷 Photos | – | Immich | [Link](./hosts/sire/guests/immich.nix) | Self-hosted photo and video backup solution
-🗂️ Documents | 💎 | Paperless | [Link](./hosts/sire/guests/paperless.nix) | Document management system. 💎 with per-user Samba share integration (consume & archive)
-🗓️ CalDAV/CardDAV | – | Radicale | [Link](./hosts/ward/guests/radicale.nix) | Contacts, Calender and Tasks synchronization
-📁 NAS | 💎 | Samba | [Link](./hosts/sire/guests/samba.nix) | Network attached storage. 💎 Cross-integration with paperless
-🧱 Minecraft | 💎 | PaperMC | [Link](./hosts/sire/guests/minecraft.nix) | Minecraft game server. 💎 Autostart on connect, systemd service with background console, automatic backups
-🛡️ VPN | - | Netbird | [Link](./hosts/ward/guests/netbird.nix) | Internal network gateway and wireguard VPN server with dynamic peer configuration and SSO authentication.
-📧 Mailserver | 💎 | Stalwart | [Link](./hosts/envoy/stalwart-mail.nix) | Modern mail server setup with custom self-service alias management including Bitwarden integration
-📈 Dashboard | – | Grafana | [Link](./hosts/sire/guests/grafana.nix) | Logs and metrics dashboard and alerting
-📔 Logs DB | – | Loki | [Link](./hosts/sire/guests/loki.nix) | Central log aggregation service
-📔 Logs | – | Promtail | [Link](./modules/promtail.nix) | Log shipping agent
-📚 TSDB | – | Influxdb2 | [Link](./hosts/sire/guests/influxdb.nix) | Time series database for storing host metrics
-⏱️  Metrics | – | Telegraf | [Link](./modules/telegraf.nix) | Per-host collection of metrics
+| ~~~~~~~~~~~~ | Service | Source | Description
+---|---|---|---
+💸 Budgeting | Actual Budget | [Link](./hosts/sire/guests/actual.nix) | Budgeting application to track income and expenses
+🛡️ Adblock | AdGuard Home | [Link](./hosts/ward/guests/adguardhome.nix) | DNS level adblocker
+🔒 SSO | Kanidm | [Link](./hosts/ward/guests/kanidm.nix) | Identity provider for Single-Sign-On on my hosted services, with provisioning.
+🐙 Git | Forgejo | [Link](./hosts/ward/guests/forgejo.nix) | Forgejo with SSO
+🔑 Passwords | Vaultwarden | [Link](./hosts/ward/guests/vaultwarden.nix) | Self-hosted password manager
+📷 Photos | Immich | [Link](./hosts/sire/guests/immich.nix) | Self-hosted photo and video backup solution
+📄 Documents | Paperless | [Link](./hosts/sire/guests/paperless.nix) | Document management system. With per-user Samba share integration (consume & archive)
+🗓️ CalDAV/CardDAV | Radicale | [Link](./hosts/ward/guests/radicale.nix) | Contacts, Calender and Tasks synchronization
+📁 NAS | Samba | [Link](./hosts/sire/guests/samba.nix) | Network attached storage. Cross-integration with paperless
+🌐 VPN | Netbird | [Link](./hosts/ward/guests/netbird.nix) | Internal network gateway and wireguard VPN server with dynamic peer configuration and SSO authentication.
+🏠 Home Automation | Home Assistant | [Link](./hosts/zackbiene/home-assistant.nix) | Automation with Home Assistant and many related services
+📧 Mailserver | Stalwart | [Link](./hosts/envoy/stalwart-mail.nix) | Modern mail server setup with custom self-service alias management including Bitwarden integration
+🧱 Minecraft | PaperMC | [Link](./hosts/sire/guests/minecraft.nix) | Minecraft game server. Autostart on connect, systemd service with background console, automatic backups
+🐒 Local LLM | Ollama & open-webui | [Link](./hosts/sire/guests/ai.nix) | Local LLM and AI Chat
+📊 Dashboard | Grafana | [Link](./hosts/sire/guests/grafana.nix) | Logs and metrics dashboard and alerting
+📔 Logs DB | Loki | [Link](./hosts/sire/guests/loki.nix) | Central log aggregation service
+📔 Logs Agent | Promtail | [Link](./modules/promtail.nix) | Log shipping agent
+📚 TSDB | Influxdb2 | [Link](./hosts/sire/guests/influxdb.nix) | Time series database for storing host metrics
+⏱️  Metrics | Telegraf | [Link](./modules/telegraf.nix) | Per-host collection of metrics
 
 <!--
 - home assistant & subcomponents
@@ -80,9 +77,9 @@ that most people would have. The configurations are sorted into three categories
 
 (WIP)
 
-| ~~~~~~~~~~~~ | 💎 | Source | Description
----|---|---|---
-🗑️ Impermanence | – | [Link](./config/impermanence.nix) | Only persist what is necessary. ZFS rollback on boot. Most configuration is will be next to the respective service / program configuration.
+| ~~~~~~~~~~~~ | Source | Description
+---|---|---
+🗑️ Impermanence | [Link](./config/impermanence.nix) | Only persist what is necessary. ZFS rollback on boot. Most configuration is will be next to the respective service / program configuration.
 
 - reverse proxy with wireguard tunnel
 - restic

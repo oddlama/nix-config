@@ -2,12 +2,15 @@
   globals,
   inputs,
   nodes,
+  pkgs,
+  lib,
   ...
 }:
 {
   imports = [
     inputs.nixos-hardware.nixosModules.common-cpu-intel
     inputs.nixos-hardware.nixosModules.common-pc-ssd
+    inputs.lanzaboote.nixosModules.lanzaboote
 
     ../../config
     ../../config/hardware/intel.nix
@@ -22,6 +25,27 @@
 
   nixpkgs.hostPlatform = "x86_64-linux";
   boot.mode = "efi";
+  boot.loader.systemd-boot.enable = lib.mkForce false;
+  boot.lanzaboote = {
+    enable = true;
+    pkiBundle = "/var/lib/sbctl";
+  };
+  boot.initrd.availableKernelModules = [
+    "r8169"
+    "tpm_crb"
+  ];
+  security.tpm2 = {
+    enable = true;
+    pkcs11.enable = true;
+  };
+
+  environment.systemPackages = [ pkgs.sbctl ];
+  environment.persistence."/persist".directories = [
+    {
+      directory = "/var/lib/sbctl";
+      mode = "0700";
+    }
+  ];
 
   meta.promtail = {
     enable = true;

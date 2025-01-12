@@ -40,7 +40,8 @@
       plausible = uidGid 971;
       actual = uidGid 970;
       flatpak = uidGid 969;
-      plugdev.gid = 967;
       unifi = uidGid 968;
+      plugdev.gid = 967;
+      tss = uidGid 966;
     };
 }

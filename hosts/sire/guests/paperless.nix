@@ -150,6 +150,8 @@ in
       # Ghostscript is entirely bug-free.
       PAPERLESS_OCR_USER_ARGS = builtins.toJSON {
         continue_on_soft_render_error = true;
+        # The original will always be kept, so just invalidate it. Otherwise the import will fail.
+        invalidate_digital_signatures = true;
       };
 
       # virtiofsd doesn't send inotify events (not sure if generally, or because we

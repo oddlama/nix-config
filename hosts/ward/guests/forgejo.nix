@@ -115,6 +115,7 @@ in
 
   services.forgejo = {
     enable = true;
+    package = pkgs.forgejo;
     # TODO db backups
     # dump.enable = true;
     user = "git";

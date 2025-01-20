@@ -109,7 +109,7 @@
           microvm = {
             system = "x86_64-linux";
             baseMac = config.repo.secrets.local.networking.interfaces.lan.mac;
-            interfaces.lan = { };
+            interfaces.vlan-services = { };
           };
           extraSpecialArgs = {
             inherit (inputs.self) nodes globals;

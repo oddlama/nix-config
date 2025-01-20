@@ -2,7 +2,6 @@
   config,
   globals,
   lib,
-  pkgs,
   ...
 }:
 let
@@ -68,6 +67,7 @@ in
     port = 3000;
     settings = {
       dns = {
+        bind_hosts = [ globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv4 ];
         # allowed_clients = [
         # ];
         #trusted_proxies = [];
@@ -131,12 +131,5 @@ in
     };
   };
 
-  systemd.services.adguardhome = {
-    preStart = lib.mkAfter ''
-      INTERFACE_ADDR=$(${pkgs.iproute2}/bin/ip -family inet -brief addr show lan | grep -o "[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+") \
-        ${lib.getExe pkgs.yq-go} -i '.dns.bind_hosts = [strenv(INTERFACE_ADDR)]' \
-        "$STATE_DIRECTORY/AdGuardHome.yaml"
-    '';
-    serviceConfig.RestartSec = lib.mkForce "60"; # Retry every minute
-  };
+  systemd.services.adguardhome.serviceConfig.RestartSec = lib.mkForce "60"; # Retry every minute
 }

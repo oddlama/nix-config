@@ -28,12 +28,12 @@
       "10-wan" = {
         address = [ globals.net.home-wan.hosts.ward.cidrv4 ];
         gateway = [ globals.net.home-wan.hosts.fritzbox.ipv4 ];
-        matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.wan.mac;
+        matchConfig.Name = "wan";
         networkConfig.IPv6PrivacyExtensions = "yes";
         linkConfig.RequiredForOnline = "routable";
       };
       "10-lan" = {
-        matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.lan.mac;
+        matchConfig.Name = "lan";
         # This interface should only be used from attached vlans.
         # So don't acquire a link local address and only wait for
         # this interface to gain a carrier.
@@ -57,10 +57,9 @@
     };
   };
 
-  # Create a MACVTAP for ourselves too, so that we can communicate with
-  # our guests on the same interface.
   systemd.network.netdevs = lib.flip lib.concatMapAttrs globals.net.home-lan.vlans (
     vlanName: vlanCfg: {
+      # Add an interface for each VLAN
       "30-vlan-${vlanName}" = {
         netdevConfig = {
           Kind = "vlan";
@@ -68,6 +67,8 @@
         };
         vlanConfig.Id = vlanCfg.id;
       };
+      # Create a MACVTAP for ourselves too, so that we can communicate with
+      # our guests on the same interface.
       "40-me-${vlanName}" = {
         netdevConfig = {
           Name = "me-${vlanName}";
@@ -84,7 +85,7 @@
   systemd.network.networks =
     {
       "10-lan" = {
-        matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.lan.mac;
+        matchConfig.Name = "lan";
         # This interface should only be used from attached vlans.
         # So don't acquire a link local address and only wait for
         # this interface to gain a carrier.
@@ -99,7 +100,7 @@
         #ipv6AcceptRAConfig.UseDNS = false;
         address = [ globals.net.home-wan.hosts.ward.cidrv4 ];
         gateway = [ globals.net.home-wan.hosts.fritzbox.ipv4 ];
-        matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.wan.mac;
+        matchConfig.Name = "wan";
         networkConfig.IPv6PrivacyExtensions = "yes";
         # dhcpV6Config.PrefixDelegationHint = "::/64";
         # FIXME: This should not be needed, but for some reason part of networkd
@@ -123,11 +124,8 @@
           # So don't acquire a link local address and only wait for
           # this interface to gain a carrier.
           networkConfig.LinkLocalAddressing = "no";
+          networkConfig.MACVLAN = "me-${vlanName}";
           linkConfig.RequiredForOnline = "carrier";
-          extraConfig = ''
-            [Network]
-            MACVLAN=me-${vlanName}
-          '';
         };
         "40-me-${vlanName}" = {
           address = [
@@ -175,6 +173,12 @@
       {
         untrusted.interfaces = [ "wan" ];
         proxy-home.interfaces = [ "proxy-home" ];
+        adguardhome.ipv4Addresses = [
+          globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv4
+        ];
+        adguardhome.ipv6Addresses = [
+          globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv6
+        ];
       }
       // lib.flip lib.concatMapAttrs globals.net.home-lan.vlans (
         vlanName: _: {
@@ -198,10 +202,21 @@
         verdict = "accept";
       };
 
+      # Allow access to the AdGuardHome DNS server from any VLAN that has internet access
+      access-adguardhome-dns = {
+        from = [
+          "vlan-services"
+          "vlan-home"
+          "vlan-devices"
+          "vlan-guests"
+        ];
+        to = [ "adguardhome" ];
+        verdict = "accept";
+      };
+
       services-to-local = {
         from = [ "vlan-services" ];
         to = [ "local" ];
-
         allowedUDPPorts = [ config.wireguard.proxy-home.server.port ];
       };
 

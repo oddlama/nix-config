@@ -32,7 +32,6 @@
   };
   boot.initrd.availableKernelModules = [
     "r8169"
-    "tpm_crb"
   ];
   security.tpm2 = {
     enable = true;

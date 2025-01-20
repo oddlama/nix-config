@@ -62,10 +62,15 @@ in
             cidrv6 = "fd20::/64";
             hosts.ward.id = 1;
             hosts.sire.id = 2;
+            hosts.scanner-ads-4300n = {
+              id = 23;
+              mac = globals.macs.scanner-ads-4300n;
+            };
             hosts.wallbox = {
               id = 40;
               mac = globals.macs.wallbox;
             };
+            # TODO remove once new home-assistant machine is up
             hosts.home-assistant-temp = {
               id = 85;
               mac = globals.macs.home-assistant;

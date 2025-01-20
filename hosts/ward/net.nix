@@ -173,11 +173,15 @@
       {
         untrusted.interfaces = [ "wan" ];
         proxy-home.interfaces = [ "proxy-home" ];
-        adguardhome.ipv4Addresses = [
-          globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv4
+        adguardhome.ipv4Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv4 ];
+        adguardhome.ipv6Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv6 ];
+        samba.ipv4Addresses = [ globals.net.home-lan.vlans.services.hosts.sire-samba.ipv4 ];
+        samba.ipv6Addresses = [ globals.net.home-lan.vlans.services.hosts.sire-samba.ipv6 ];
+        scanner-ads-4300n.ipv4Addresses = [
+          globals.net.home-lan.vlans.devices.hosts.scanner-ads-4300n.ipv4
         ];
-        adguardhome.ipv6Addresses = [
-          globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv6
+        scanner-ads-4300n.ipv6Addresses = [
+          globals.net.home-lan.vlans.devices.hosts.scanner-ads-4300n.ipv6
         ];
       }
       // lib.flip lib.concatMapAttrs globals.net.home-lan.vlans (
@@ -194,9 +198,7 @@
           "vlan-devices"
           "vlan-guests"
         ];
-        to = [
-          "untrusted"
-        ];
+        to = [ "untrusted" ];
         masquerade = true;
         late = true; # Only accept after any rejects have been processed
         verdict = "accept";
@@ -214,11 +216,16 @@
         verdict = "accept";
       };
 
+      # Allow the scanner to access samba via SFTP
+      access-samba-sftp = {
+        from = [ "scanner-ads-4300n" ];
+        to = [ "samba" ];
+        allowedTCPPorts = [ 22 ];
+      };
+
       # Allow devices in the home VLAN to talk to any of the services or home devices.
       access-services = {
-        from = [
-          "vlan-home"
-        ];
+        from = [ "vlan-home" ];
         to = [
           "vlan-services"
           "vlan-devices"

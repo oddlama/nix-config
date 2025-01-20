@@ -249,8 +249,8 @@ in
           proxy_read_timeout 600s;
           proxy_send_timeout 600s;
           send_timeout       600s;
-          allow ${globals.net.home-lan.vlans.services.cidrv4};
-          allow ${globals.net.home-lan.vlans.services.cidrv6};
+          allow ${globals.net.home-lan.vlans.home.cidrv4};
+          allow ${globals.net.home-lan.vlans.home.cidrv6};
           deny all;
         '';
       };

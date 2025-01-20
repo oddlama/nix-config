@@ -214,13 +214,27 @@
         verdict = "accept";
       };
 
+      # Allow devices in the home VLAN to talk to any of the services or home devices.
+      access-services = {
+        from = [
+          "vlan-home"
+        ];
+        to = [
+          "vlan-services"
+          "vlan-devices"
+        ];
+        late = true;
+        verdict = "accept";
+      };
+
+      # Allow the services VLAN to talk to our wireguard server
       services-to-local = {
         from = [ "vlan-services" ];
         to = [ "local" ];
         allowedUDPPorts = [ config.wireguard.proxy-home.server.port ];
       };
 
-      # Forward traffic between participants
+      # Forward traffic between wireguard participants
       forward-proxy-home-vpn-traffic = {
         from = [ "proxy-home" ];
         to = [ "proxy-home" ];

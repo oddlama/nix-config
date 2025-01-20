@@ -179,8 +179,10 @@ in
             # Deny access to all hosts by default.
             "hosts deny" = "0.0.0.0/0";
             # Allow access to local network and TODO: wireguard
-            "hosts allow" =
-              "${globals.net.home-lan.vlans.services.cidrv4} ${globals.net.home-lan.vlans.services.cidrv6}";
+            "hosts allow" = lib.concatStringsSep " " [
+              globals.net.home-lan.vlans.home.cidrv4
+              globals.net.home-lan.vlans.home.cidrv6
+            ];
             # Don't advertise inaccessible shares to users
             "access based share enum" = "yes";
 

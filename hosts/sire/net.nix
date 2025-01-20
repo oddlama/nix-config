@@ -16,6 +16,7 @@ in
     network = "home-lan.vlans.services";
   };
 
+  boot.initrd.availableKernelModules = [ "8021q" ];
   boot.initrd.systemd.network = {
     enable = true;
     netdevs."30-vlan-home" = {

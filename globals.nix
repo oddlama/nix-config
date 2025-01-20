@@ -46,7 +46,7 @@ in
             };
             hosts.sire-samba = {
               id = 10;
-              inherit (nodes.sire-samba.config.lib.microvm.interfaces.lan) mac;
+              inherit (nodes.sire-samba.config.lib.microvm.interfaces.vlan-services) mac;
             };
           };
           home = {

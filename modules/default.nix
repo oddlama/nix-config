@@ -8,6 +8,7 @@
     ./backups.nix
     ./deterministic-ids.nix
     ./distributed-config.nix
+    ./firezone-server.nix
     ./globals.nix
     ./meta.nix
     ./netbird-client.nix

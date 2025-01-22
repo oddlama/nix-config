@@ -122,4 +122,9 @@
     dockerCompat = true;
     defaultNetwork.settings.dns_enabled = true;
   };
+
+  services.firezone.server.domain.enable = true;
+  services.firezone.server.domain.enableLocalDB = true;
+  services.firezone.server.web.enable = true;
+  services.firezone.server.api.enable = true;
 }

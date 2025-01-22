@@ -1,0 +1,68 @@
+diff --git a/apps/domain/lib/domain/config/definitions.ex b/apps/domain/lib/domain/config/definitions.ex
+index 8cd2e8d0f..f27d67c69 100644
+--- a/apps/domain/lib/domain/config/definitions.ex
++++ b/apps/domain/lib/domain/config/definitions.ex
+@@ -61,6 +61,7 @@ defmodule Domain.Config.Definitions do
+       {"Database",
+        [
+          :database_host,
++         :database_socket_dir,
+          :database_port,
+          :database_name,
+          :database_user,
+@@ -255,6 +256,11 @@ defmodule Domain.Config.Definitions do
+   """
+   defconfig(:database_host, :string, default: "postgres")
+ 
++  @doc """
++  PostgreSQL socket directory (takes precedence over hostname).
++  """
++  defconfig(:database_socket_dir, :string, default: nil)
++
+   @doc """
+   PostgreSQL port.
+   """
+diff --git a/apps/domain/lib/domain/telemetry.ex b/apps/domain/lib/domain/telemetry.ex
+index af430358d..a544e706e 100644
+--- a/apps/domain/lib/domain/telemetry.ex
++++ b/apps/domain/lib/domain/telemetry.ex
+@@ -13,7 +13,7 @@ defmodule Domain.Telemetry do
+ 
+     children = [
+       # We start a /healthz endpoint that is used for liveness probes
+-      {Bandit, plug: Telemetry.HealthzPlug, scheme: :http, port: 4000},
++      {Bandit, plug: Telemetry.HealthzPlug, scheme: :http, port: System.get_env("HEALTHZ_PORT") |> String.to_integer()},
+ 
+       # Telemetry poller will execute the given period measurements
+       # every 10_000ms. Learn more here: https://hexdocs.pm/telemetry_metrics
+diff --git a/config/runtime.exs b/config/runtime.exs
+index 15037e0a3..948f62cc8 100644
+--- a/config/runtime.exs
++++ b/config/runtime.exs
+@@ -8,15 +8,17 @@ if config_env() == :prod do
+   ###############################
+ 
+   config :domain, Domain.Repo,
+-    database: compile_config!(:database_name),
+-    username: compile_config!(:database_user),
+-    hostname: compile_config!(:database_host),
+-    port: compile_config!(:database_port),
+-    password: compile_config!(:database_password),
+-    pool_size: compile_config!(:database_pool_size),
+-    ssl: compile_config!(:database_ssl_enabled),
+-    ssl_opts: compile_config!(:database_ssl_opts),
+-    parameters: compile_config!(:database_parameters)
++  [
++    {:database, compile_config!(:database_name)},
++    {:username, compile_config!(:database_user)},
++    {:port, compile_config!(:database_port)},
++    {:pool_size, compile_config!(:database_pool_size)},
++    {:ssl, compile_config!(:database_ssl_enabled)},
++    {:ssl_opts, compile_config!(:database_ssl_opts)},
++    {:parameters, compile_config!(:database_parameters)}
++  ]
++  ++ (if System.get_env("DATABASE_PASSWORD"), do: [{:password, compile_config!(:database_password)}], else: [])
++  ++ (if System.get_env("DATABASE_SOCKET_DIR"), do: [{:socket_dir, compile_config!(:database_socket_dir)}], else: [{:hostname, compile_config!(:database_host)}])
+ 
+   config :domain, Domain.Tokens,
+     key_base: compile_config!(:tokens_key_base),

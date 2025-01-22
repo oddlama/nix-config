@@ -19,6 +19,9 @@ _inputs: [
     #    (_pythonFinal: pythonPrev: {
     #    })
     #  ];
+    firezone-server-domain = prev.callPackage ./firezone-server-domain/package.nix { };
+    firezone-server-web = prev.callPackage ./firezone-server-web/package.nix { };
+    firezone-server-api = prev.callPackage ./firezone-server-api/package.nix { };
 
     formats = prev.formats // {
       ron = import ./ron.nix { inherit (prev) lib pkgs; };

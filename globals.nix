@@ -66,6 +66,10 @@ in
               id = 23;
               mac = globals.macs.scanner-ads-4300n;
             };
+            hosts.epsondc44f7 = {
+              id = 30;
+              mac = globals.macs.epsondc44f7;
+            };
             hosts.wallbox = {
               id = 40;
               mac = globals.macs.wallbox;

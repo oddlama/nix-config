@@ -102,6 +102,7 @@
         gateway = [ globals.net.home-wan.hosts.fritzbox.ipv4 ];
         matchConfig.Name = "wan";
         networkConfig.IPv6PrivacyExtensions = "yes";
+        networkConfig.MulticastDNS = true;
         # dhcpV6Config.PrefixDelegationHint = "::/64";
         # FIXME: This should not be needed, but for some reason part of networkd
         # isn't seeing the RAs and not triggering DHCPv6. Even though some other
@@ -229,6 +230,7 @@
         to = [
           "vlan-services"
           "vlan-devices"
+          "vlan-iot"
         ];
         late = true;
         verdict = "accept";

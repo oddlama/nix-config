@@ -117,7 +117,10 @@ in
       groups."immich.access" = { };
       systems.oauth2.immich = {
         displayName = "Immich";
-        originUrl = "https://${globals.services.immich.domain}/auth/login";
+        originUrl = [
+          "https://${globals.services.immich.domain}/auth/login"
+          "https://${globals.services.immich.domain}/api/oauth/mobile-redirect"
+        ];
         originLanding = "https://${globals.services.immich.domain}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-immich.path;
         preferShortUsername = true;

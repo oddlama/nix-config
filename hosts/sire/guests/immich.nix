@@ -23,7 +23,6 @@ let
         crf = 23;
         gopSize = 0;
         maxBitrate = "0";
-        npl = 0;
         preset = "ultrafast";
         refs = 0;
         targetAudioCodec = "aac";
@@ -178,7 +177,7 @@ in
     rules = [
       "iifname proxy-sentinel ip saddr ${sentinelCfg.wireguard.proxy-sentinel.ipv4} tcp dport 2283 accept"
       "iifname proxy-home ip saddr ${wardWebProxyCfg.wireguard.proxy-home.ipv4} tcp dport 2283 accept"
-      "iifname podman1 oifname lan accept"
+      "iifname podman1 oifname vlan-services accept"
     ];
   };
 

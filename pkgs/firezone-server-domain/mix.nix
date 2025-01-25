@@ -775,6 +775,19 @@ let
         ];
       };
 
+      mail = buildMix rec {
+        name = "mail";
+        version = "0.3.1";
+
+        src = fetchHex {
+          pkg = "mail";
+          version = "${version}";
+          sha256 = "1db701e89865c1d5fa296b2b57b1cd587587cca8d8a1a22892b35ef5a8e352a6";
+        };
+
+        beamDeps = [ ];
+      };
+
       metrics = buildRebar3 rec {
         name = "metrics";
         version = "1.0.1";
@@ -844,6 +857,19 @@ let
           jason
           yaml_elixir
         ];
+      };
+
+      mua = buildMix rec {
+        name = "mua";
+        version = "0.2.4";
+
+        src = fetchHex {
+          pkg = "mua";
+          version = "${version}";
+          sha256 = "e7e4dacd5ad65f13e3542772e74a159c00bd2d5579e729e9bb72d2c73a266fb7";
+        };
+
+        beamDeps = [ castore ];
       };
 
       multipart = buildMix rec {
@@ -1476,7 +1502,9 @@ let
           gen_smtp
           hackney
           jason
+          mail
           mime
+          mua
           multipart
           plug
           plug_cowboy

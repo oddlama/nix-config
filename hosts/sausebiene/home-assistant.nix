@@ -8,7 +8,7 @@
 }:
 let
   homeassistantDomain = "home.${globals.domains.personal}";
-  fritzboxDomain = "fritzbox.${globals.domains.me}";
+  fritzboxDomain = "fritzbox.${globals.domains.personal}";
 in
 {
   wireguard.proxy-home.firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [
@@ -80,7 +80,8 @@ in
         currency = "EUR";
         time_zone = "Europe/Berlin";
         unit_system = "metric";
-        #external_url = "https://";
+        external_url = "https://${homeassistantDomain}";
+        internal_url = "https://${homeassistantDomain}";
         packages.manual = "!include manual.yaml";
       };
 
@@ -162,6 +163,10 @@ in
   # Connect to fritzbox via https proxy (to ensure valid cert)
   networking.hosts.${globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv4} = [
     fritzboxDomain
+  ];
+
+  networking.hosts.${nodes.ward-adguardhome.config.wireguard.proxy-home.ipv4} = [
+    "adguardhome.internal"
   ];
 
   nodes.ward-web-proxy = {

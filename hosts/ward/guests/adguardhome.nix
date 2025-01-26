@@ -13,6 +13,12 @@ in
     firewallRuleForNode.sentinel.allowedTCPPorts = [ config.services.adguardhome.port ];
   };
 
+  # Allow home-assistant to access it directly
+  wireguard.proxy-home = {
+    client.via = "ward";
+    firewallRuleForNode.sausebiene.allowedTCPPorts = [ config.services.adguardhome.port ];
+  };
+
   globals.services.adguardhome.domain = adguardhomeDomain;
   globals.monitoring.dns.adguardhome = {
     server = globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv4;

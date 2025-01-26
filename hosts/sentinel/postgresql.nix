@@ -4,7 +4,7 @@
     enable = true;
     package = pkgs.postgresql_16_jit;
 
-    # Doesn't work with plausible, since it wants to connect as the postgres
+    # Doesn't work with plausible, since it wants to connect as the postgres user
     # for some (probably unecessary) reason.
     #
     # authentication = lib.mkForce ''

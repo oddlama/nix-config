@@ -7,7 +7,7 @@
   ...
 }:
 let
-  homeDomain = "home.${globals.domains.me}";
+  homeassistantDomain = "home.${globals.domains.personal}";
   fritzboxDomain = "fritzbox.${globals.domains.me}";
 in
 {
@@ -24,11 +24,17 @@ in
     }
   ];
 
-  topology.self.services.home-assistant.info = "https://${homeDomain}";
+  globals.services.home-assistant.domain = homeassistantDomain;
+  # globals.monitoring.http.homeassistant = {
+  #   url = "https://${homeasisstantDomain}";
+  #   expectedBodyRegex = "homeassistant";
+  #   network = "internet";
+  # };
+
+  topology.self.services.home-assistant.info = "https://${homeassistantDomain}";
   services.home-assistant = {
     enable = true;
     extraComponents = [
-      "default_config"
       "radio_browser"
       "met"
       "esphome"
@@ -38,8 +44,27 @@ in
       "matter"
       #"zha"
       "mqtt"
+      "ollama"
     ];
+
+    customLovelaceModules =
+      let
+        mods = pkgs.home-assistant-custom-lovelace-modules;
+      in
+      [
+        mods.bubble-card
+        mods.weather-card
+        mods.mini-graph-card
+        mods.card-mod
+        mods.mushroom
+        mods.multiple-entity-row
+        mods.button-card
+        mods.weather-chart-card
+        mods.hourly-weather
+      ];
+
     config = {
+      default_config = { };
       http = {
         server_host = [ "0.0.0.0" ];
         server_port = 8123;
@@ -56,56 +81,37 @@ in
         time_zone = "Europe/Berlin";
         unit_system = "metric";
         #external_url = "https://";
-        packages = {
-          manual = "!include manual.yaml";
-        };
+        packages.manual = "!include manual.yaml";
       };
 
-      #### only selected components from default_config ####
-
-      assist_pipeline = { };
-      backup = { };
-      bluetooth = { };
-      config = { };
-      #cloud = {};
-      #conversation = {};
-      dhcp = { };
-      energy = { };
-      history = { };
-      homeassistant_alerts = { };
-      logbook = { };
-      #media_source = {};
-      mobile_app = { };
-      my = { };
-      ssdp = { };
-      stream = { };
-      sun = { };
-      #usb = {};
-      webhook = { };
-      zeroconf = { };
-
-      ### Components not from default_config
+      lovelace.mode = "yaml";
 
       frontend = {
-        #themes = "!include_dir_merge_named themes";
+        themes = "!include_dir_merge_named themes";
       };
+      "automation ui" = "!include automations.yaml";
 
-      influxdb = {
-        api_version = 2;
-        host = globals.services.influxdb.domain;
-        port = "443";
-        max_retries = 10;
-        ssl = true;
-        verify_ssl = true;
-        token = "!secret influxdb_token";
-        organization = "home";
-        bucket = "home_assistant";
-      };
+      # influxdb = {
+      #   api_version = 2;
+      #   host = globals.services.influxdb.domain;
+      #   port = "443";
+      #   max_retries = 10;
+      #   ssl = true;
+      #   verify_ssl = true;
+      #   token = "!secret influxdb_token";
+      #   organization = "home";
+      #   bucket = "home_assistant";
+      # };
+
     };
     extraPackages =
       python3Packages: with python3Packages; [
         psycopg2
         gtts
+        fritzconnection
+        adguardhome
+        zlib-ng
+        pymodbus
       ];
   };
 
@@ -138,20 +144,20 @@ in
     group = "hass";
   };
 
-  nodes.sire-influxdb = {
-    # Mirror the original secret on the influx host
-    age.secrets."hass-influxdb-token-${config.node.name}" = {
-      inherit (config.age.secrets.hass-influxdb-token) rekeyFile;
-      mode = "440";
-      group = "influxdb2";
-    };
-
-    services.influxdb2.provision.organizations.home.auths."home-assistant (${config.node.name})" = {
-      readBuckets = [ "home_assistant" ];
-      writeBuckets = [ "home_assistant" ];
-      tokenFile = nodes.sire-influxdb.config.age.secrets."hass-influxdb-token-${config.node.name}".path;
-    };
-  };
+  # nodes.sire-influxdb = {
+  #   # Mirror the original secret on the influx host
+  #   age.secrets."hass-influxdb-token-${config.node.name}" = {
+  #     inherit (config.age.secrets.hass-influxdb-token) rekeyFile;
+  #     mode = "440";
+  #     group = "influxdb2";
+  #   };
+  #
+  #   services.influxdb2.provision.organizations.home.auths."home-assistant (${config.node.name})" = {
+  #     readBuckets = [ "home_assistant" ];
+  #     writeBuckets = [ "home_assistant" ];
+  #     tokenFile = nodes.sire-influxdb.config.age.secrets."hass-influxdb-token-${config.node.name}".path;
+  #   };
+  # };
 
   # Connect to fritzbox via https proxy (to ensure valid cert)
   networking.hosts.${globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv4} = [
@@ -168,7 +174,7 @@ in
           keepalive 2;
         '';
       };
-      virtualHosts.${homeDomain} = {
+      virtualHosts.${homeassistantDomain} = {
         forceSSL = true;
         useACMEWildcardHost = true;
         locations."/" = {

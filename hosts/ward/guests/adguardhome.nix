@@ -108,8 +108,9 @@ in
               globals.services.influxdb.domain
               globals.services.loki.domain
               globals.services.paperless.domain
-              "home.${globals.domains.me}"
-              "fritzbox.${globals.domains.me}"
+              globals.services.esphome.domain
+              globals.services.home-assistant.domain
+              "fritzbox.${globals.domains.personal}"
             ];
       filters = [
         {

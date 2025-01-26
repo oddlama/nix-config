@@ -19,6 +19,10 @@
 
     ./fs.nix
     ./net.nix
+
+    ./esphome.nix
+    ./home-assistant.nix
+    ./mosquitto.nix
   ];
 
   topology.self.hardware.info = "Intel N100, 16GB RAM";

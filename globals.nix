@@ -44,6 +44,7 @@ in
               id = 4;
               inherit (nodes.ward-web-proxy.config.lib.microvm.interfaces.vlan-services) mac;
             };
+            hosts.sausebiene.id = 5;
             hosts.sire-samba = {
               id = 10;
               inherit (nodes.sire-samba.config.lib.microvm.interfaces.vlan-services) mac;
@@ -55,6 +56,7 @@ in
             cidrv6 = "fd10::/64";
             hosts.ward.id = 1;
             hosts.sire.id = 2;
+            hosts.sausebiene.id = 5;
           };
           devices = {
             id = 20;
@@ -62,6 +64,7 @@ in
             cidrv6 = "fd20::/64";
             hosts.ward.id = 1;
             hosts.sire.id = 2;
+            hosts.sausebiene.id = 5;
             hosts.scanner-ads-4300n = {
               id = 23;
               mac = globals.macs.scanner-ads-4300n;
@@ -85,6 +88,7 @@ in
             cidrv4 = "192.168.30.0/24";
             cidrv6 = "fd30::/64";
             hosts.ward.id = 1;
+            hosts.sausebiene.id = 5;
           };
           guests = {
             id = 50;

@@ -1,42 +1,110 @@
 {
   config,
+  globals,
+  lib,
   ...
 }:
+let
+  localVlans = lib.genAttrs [ "services" "home" "devices" "iot" ] (
+    x: globals.net.home-lan.vlans.${x}
+  );
+in
 {
   networking.hostId = config.repo.secrets.local.networking.hostId;
 
-  # FIXME: aaaaaaaaa
-  # globals.monitoring.ping.sausebiene = {
-  #   hostv4 = lib.net.cidr.ip globals.net.home-lan.vlans.services.hosts.sausebiene.cidrv4;
-  #   hostv6 = lib.net.cidr.ip globals.net.home-lan.vlans.services.hosts.sausebiene.cidrv6;
-  #   network = "home-lan.vlans.services";
-  # };
+  globals.monitoring.ping.sausebiene = {
+    hostv4 = lib.net.cidr.ip globals.net.home-lan.vlans.services.hosts.sausebiene.cidrv4;
+    hostv6 = lib.net.cidr.ip globals.net.home-lan.vlans.services.hosts.sausebiene.cidrv6;
+    network = "home-lan.vlans.services";
+  };
 
   boot.initrd.availableKernelModules = [ "8021q" ];
   boot.initrd.systemd.network = {
     enable = true;
+    netdevs."30-vlan-services" = {
+      netdevConfig = {
+        Kind = "vlan";
+        Name = "vlan-services";
+      };
+      vlanConfig.Id = globals.net.home-lan.vlans.services.id;
+    };
     networks = {
-      inherit (config.systemd.network.networks) "10-lan";
+      "10-lan" = {
+        matchConfig.Name = "lan";
+        networkConfig.LinkLocalAddressing = "no";
+        linkConfig.RequiredForOnline = "carrier";
+        vlan = [ "vlan-services" ];
+      };
+      "30-vlan-services" = {
+        address = [
+          globals.net.home-lan.vlans.services.hosts.sausebiene.cidrv4
+          globals.net.home-lan.vlans.services.hosts.sausebiene.cidrv6
+        ];
+        gateway = [ globals.net.home-lan.vlans.services.hosts.ward.ipv4 ];
+        matchConfig.Name = "vlan-services";
+        networkConfig = {
+          IPv6PrivacyExtensions = "yes";
+          MulticastDNS = true;
+        };
+        linkConfig.RequiredForOnline = "routable";
+      };
     };
   };
 
-  systemd.network.networks = {
-    "10-lan" = {
-      address = [ "192.168.1.17/24" ];
-      gateway = [ "192.168.1.1" ];
-      matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.lan.mac;
-      networkConfig = {
-        IPv6PrivacyExtensions = "yes";
-        MulticastDNS = true;
+  systemd.network.netdevs = lib.flip lib.concatMapAttrs localVlans (
+    vlanName: vlanCfg: {
+      # Add an interface for each VLAN
+      "30-vlan-${vlanName}" = {
+        netdevConfig = {
+          Kind = "vlan";
+          Name = "vlan-${vlanName}";
+        };
+        vlanConfig.Id = vlanCfg.id;
       };
-      linkConfig.RequiredForOnline = "routable";
-    };
-  };
+    }
+  );
+
+  systemd.network.networks =
+    {
+      "10-lan" = {
+        matchConfig.Name = "lan";
+        # This interface should only be used from attached vlans.
+        # So don't acquire a link local address and only wait for
+        # this interface to gain a carrier.
+        networkConfig.LinkLocalAddressing = "no";
+        linkConfig.RequiredForOnline = "carrier";
+        vlan = map (name: "vlan-${name}") (builtins.attrNames localVlans);
+      };
+    }
+    // lib.flip lib.concatMapAttrs localVlans (
+      vlanName: vlanCfg: {
+        "30-vlan-${vlanName}" = {
+          address = [
+            vlanCfg.hosts.sausebiene.cidrv4
+            vlanCfg.hosts.sausebiene.cidrv6
+          ];
+          gateway = [ vlanCfg.hosts.ward.ipv4 ];
+          matchConfig.Name = "vlan-${vlanName}";
+          networkConfig = {
+            IPv6PrivacyExtensions = "yes";
+            MulticastDNS = true;
+          };
+          linkConfig.RequiredForOnline = "routable";
+        };
+      }
+    );
 
   networking.nftables.firewall = {
-    zones.untrusted.interfaces = [ "lan" ];
+    zones =
+      {
+        untrusted.interfaces = [ "vlan-services" ];
+      }
+      // lib.flip lib.concatMapAttrs localVlans (
+        vlanName: _: {
+          "vlan-${vlanName}".interfaces = [ "vlan-${vlanName}" ];
+        }
+      );
   };
 
-  # Allow accessing influx
-  wireguard.proxy-sentinel.client.via = "sentinel";
+  wireguard.proxy-home.client.via = "ward";
 }

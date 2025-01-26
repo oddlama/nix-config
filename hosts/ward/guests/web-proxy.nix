@@ -5,7 +5,7 @@
 }:
 let
   inherit (config.repo.secrets.local) acme;
-  fritzboxDomain = "fritzbox.${globals.domains.me}";
+  fritzboxDomain = "fritzbox.${globals.domains.personal}";
 in
 {
   microvm.mem = 1024 * 4; # Need more /tmp space so nginx can store intermediary files

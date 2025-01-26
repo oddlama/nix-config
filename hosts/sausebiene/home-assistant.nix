@@ -35,16 +35,30 @@ in
   services.home-assistant = {
     enable = true;
     extraComponents = [
-      "radio_browser"
-      "met"
       "esphome"
       "fritzbox"
-      "soundtouch"
-      "spotify"
       "matter"
-      #"zha"
+      "met"
       "mqtt"
       "ollama"
+      "radio_browser"
+      "soundtouch" # Bose SoundTouch
+      "spotify"
+      "webostv" # LG WebOS TV
+      #"zha"
+    ];
+
+    customComponents = with pkgs.home-assistant-custom-components; [
+      (pkgs.home-assistant.python.pkgs.callPackage ./hass-components/ha-bambulab.nix { })
+      (philips_airpurifier_coap.overrideAttrs (_: rec {
+        version = "0.34.0";
+        src = pkgs.fetchFromGitHub {
+          owner = "kongo09";
+          repo = "philips-airpurifier-coap";
+          rev = "v${version}";
+          hash = "sha256-jQXQdcgW8IDmjaHjmeyXHcNTXYmknNDw7Flegy6wj2A=";
+        };
+      }))
     ];
 
     customLovelaceModules =
@@ -103,8 +117,8 @@ in
       #   organization = "home";
       #   bucket = "home_assistant";
       # };
-
     };
+
     extraPackages =
       python3Packages: with python3Packages; [
         psycopg2
@@ -114,6 +128,7 @@ in
         zlib-ng
         pymodbus
         pyipp
+        pyatv
       ];
   };
 

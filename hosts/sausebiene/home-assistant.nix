@@ -113,6 +113,7 @@ in
         adguardhome
         zlib-ng
         pymodbus
+        pyipp
       ];
   };
 

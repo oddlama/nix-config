@@ -27,16 +27,4 @@
       }
     ];
   };
-
-  networking.nftables.firewall.rules = {
-    # Allow devices and iot VLANs to access the MQTT server
-    access-mqtt = {
-      from = [
-        "vlan-devices"
-        "vlan-iot"
-      ];
-      to = [ "local" ];
-      allowedTCPPorts = [ 1883 ];
-    };
-  };
 }

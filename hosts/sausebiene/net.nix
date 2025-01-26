@@ -104,6 +104,44 @@ in
           "vlan-${vlanName}".interfaces = [ "vlan-${vlanName}" ];
         }
       );
+
+    rules = {
+      # Allow devices to be discovered through various protocols
+      discovery-protocols = {
+        from = [
+          "vlan-home"
+          "vlan-devices"
+          "vlan-iot"
+        ];
+        to = [ "local" ];
+        allowedUDPPorts = [
+          1900 # Simple Service Discovery Protocol, UPnP
+        ];
+        allowedTCPPorts = [
+          40000 # UPnP HTTP
+        ];
+        # HomeKit etc. may use random high-numbered ports.
+        # There's probably a better way to handle this
+        allowedUDPPortRanges = [
+          {
+            from = 30000;
+            to = 65535;
+          }
+        ];
+      };
+
+      # Allow devices to access some local services
+      access-services = {
+        from = [
+          "vlan-devices"
+          "vlan-iot"
+        ];
+        to = [ "local" ];
+        allowedTCPPorts = [
+          1883 # MQTT
+        ];
+      };
+    };
   };
 
   wireguard.proxy-home.client.via = "ward";

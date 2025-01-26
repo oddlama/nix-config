@@ -77,11 +77,6 @@ in
               id = 40;
               mac = globals.macs.wallbox;
             };
-            # TODO remove once new home-assistant machine is up
-            hosts.home-assistant-temp = {
-              id = 85;
-              mac = globals.macs.home-assistant;
-            };
           };
           iot = {
             id = 30;
@@ -89,6 +84,10 @@ in
             cidrv6 = "fd30::/64";
             hosts.ward.id = 1;
             hosts.sausebiene.id = 5;
+            hosts.bambulab-p1s = {
+              id = 22;
+              mac = globals.macs.bambulab-p1s;
+            };
           };
           guests = {
             id = 50;

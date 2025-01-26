@@ -15,6 +15,7 @@
           iifname lo accept
           meta l4proto ipv6-icmp accept
           meta l4proto icmp accept
+          ip protocol igmp accept
           tcp dport ${toString (lib.head config.services.openssh.ports)} accept
         }
         chain forward {
@@ -35,26 +36,6 @@
         nnf-drop.enable = true;
         nnf-loopback.enable = true;
         nnf-ssh.enable = true;
-        nnf-icmp = {
-          enable = true;
-          ipv6Types = [
-            "echo-request"
-            "destination-unreachable"
-            "packet-too-big"
-            "time-exceeded"
-            "parameter-problem"
-            "nd-router-advert"
-            "nd-neighbor-solicit"
-            "nd-neighbor-advert"
-          ];
-          ipv4Types = [
-            "echo-request"
-            "destination-unreachable"
-            "router-advertisement"
-            "time-exceeded"
-            "parameter-problem"
-          ];
-        };
       };
 
       rules.untrusted-to-local = {
@@ -67,6 +48,20 @@
           allowedUDPPorts
           allowedUDPPortRanges
           ;
+      };
+
+      rules.icmp-and-igmp = {
+        after = [
+          "ct"
+          "ssh"
+        ];
+        from = "all";
+        to = [ "local" ];
+        extraLines = [
+          "meta l4proto ipv6-icmp accept"
+          "meta l4proto icmp accept"
+          "ip protocol igmp accept"
+        ];
       };
     };
   };

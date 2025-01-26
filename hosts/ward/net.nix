@@ -165,11 +165,6 @@
     );
 
   networking.nftables.firewall = {
-    snippets.nnf-icmp.ipv6Types = [
-      "mld-listener-query"
-      "nd-router-solicit"
-    ];
-
     zones =
       {
         untrusted.interfaces = [ "wan" ];

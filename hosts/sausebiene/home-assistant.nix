@@ -44,8 +44,10 @@ in
       "radio_browser"
       "soundtouch" # Bose SoundTouch
       "spotify"
+      "wake_word"
       "webostv" # LG WebOS TV
-      #"zha"
+      "whisper"
+      "wyoming"
     ];
 
     customComponents = with pkgs.home-assistant-custom-components; [

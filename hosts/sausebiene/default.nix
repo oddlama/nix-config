@@ -23,6 +23,7 @@
     ./esphome.nix
     ./home-assistant.nix
     ./mosquitto.nix
+    ./wyoming.nix
   ];
 
   topology.self.hardware.info = "Intel N100, 16GB RAM";
@@ -49,6 +50,11 @@
       mode = "0700";
     }
   ];
+
+  systemd.tmpfiles.settings."01-var-lib-private"."/var/lib/private".d = {
+    user = "root";
+    mode = "0700";
+  };
 
   meta.promtail = {
     enable = true;

@@ -63,21 +63,19 @@ in
       }))
     ];
 
-    customLovelaceModules =
-      let
-        mods = pkgs.home-assistant-custom-lovelace-modules;
-      in
-      [
-        mods.bubble-card
-        mods.weather-card
-        mods.mini-graph-card
-        mods.card-mod
-        mods.mushroom
-        mods.multiple-entity-row
-        mods.button-card
-        mods.weather-chart-card
-        mods.hourly-weather
-      ];
+    customLovelaceModules = with pkgs.home-assistant-custom-lovelace-modules; [
+      (pkgs.callPackage ./hass-lovelace/clock-weather-card/package.nix { })
+      bubble-card
+      button-card
+      card-mod
+      hourly-weather
+      lg-webos-remote-control
+      mini-graph-card
+      multiple-entity-row
+      mushroom
+      weather-card
+      weather-chart-card
+    ];
 
     config = {
       default_config = { };

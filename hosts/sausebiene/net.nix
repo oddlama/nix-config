@@ -5,9 +5,7 @@
   ...
 }:
 let
-  localVlans = lib.genAttrs [ "services" "home" "devices" "iot" ] (
-    x: globals.net.home-lan.vlans.${x}
-  );
+  localVlans = lib.genAttrs [ "services" "devices" "iot" ] (x: globals.net.home-lan.vlans.${x});
 in
 {
   networking.hostId = config.repo.secrets.local.networking.hostId;
@@ -109,7 +107,6 @@ in
       # Allow devices to be discovered through various protocols
       discovery-protocols = {
         from = [
-          "vlan-home"
           "vlan-devices"
           "vlan-iot"
         ];

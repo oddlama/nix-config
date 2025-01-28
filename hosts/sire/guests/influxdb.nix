@@ -146,12 +146,6 @@ in
     group = "influxdb2";
   };
 
-  age.secrets.influxdb-user-telegraf-token = {
-    generator.script = "alnum";
-    mode = "440";
-    group = "influxdb2";
-  };
-
   environment.persistence."/persist".directories = [
     {
       directory = "/var/lib/influxdb2";
@@ -160,6 +154,8 @@ in
       mode = "0700";
     }
   ];
+
+  environment.systemPackages = [ pkgs.influxdb2-cli ];
 
   topology.self.services.influxdb2.info = "https://${influxdbDomain}";
   services.influxdb2 = {
@@ -177,11 +173,8 @@ in
         tokenFile = config.age.secrets.influxdb-admin-token.path;
       };
       organizations.machines.buckets.telegraf = { };
-      organizations.home.buckets.home_assistant = { };
     };
   };
 
-  environment.systemPackages = [ pkgs.influxdb2-cli ];
-
-  systemd.services.grafana.serviceConfig.RestartSec = "60"; # Retry every minute
+  systemd.services.influxdb2.serviceConfig.RestartSec = "60"; # Retry every minute
 }

@@ -34,7 +34,4 @@
       uri = "tcp://0.0.0.0:10200";
     };
   };
-
-  # needs access to /proc/cpuinfo
-  # systemd.services."wyoming-faster-whisper-en".serviceConfig.ProcSubset = lib.mkForce "all";
 }

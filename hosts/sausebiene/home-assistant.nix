@@ -11,6 +11,8 @@ let
   fritzboxDomain = "fritzbox.${globals.domains.personal}";
 in
 {
+  imports = [ ./hass-modbus/mennekes-amtron-xtra.nix ];
+
   wireguard.proxy-home.firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [
     config.services.home-assistant.config.http.server_port
   ];
@@ -105,17 +107,17 @@ in
       };
       "automation ui" = "!include automations.yaml";
 
-      # influxdb = {
-      #   api_version = 2;
-      #   host = globals.services.influxdb.domain;
-      #   port = "443";
-      #   max_retries = 10;
-      #   ssl = true;
-      #   verify_ssl = true;
-      #   token = "!secret influxdb_token";
-      #   organization = "home";
-      #   bucket = "home_assistant";
-      # };
+      influxdb = {
+        api_version = 2;
+        host = "localhost";
+        port = "8086";
+        max_retries = 10;
+        ssl = false;
+        verify_ssl = false;
+        token = "!secret influxdb_token";
+        organization = "home";
+        bucket = "hass";
+      };
     };
 
     extraPackages =
@@ -154,27 +156,6 @@ in
       touch -a ${config.services.home-assistant.configDir}/{automations,scenes,scripts,manual}.yaml
     '';
   };
-
-  age.secrets.hass-influxdb-token = {
-    generator.script = "alnum";
-    mode = "440";
-    group = "hass";
-  };
-
-  # nodes.sire-influxdb = {
-  #   # Mirror the original secret on the influx host
-  #   age.secrets."hass-influxdb-token-${config.node.name}" = {
-  #     inherit (config.age.secrets.hass-influxdb-token) rekeyFile;
-  #     mode = "440";
-  #     group = "influxdb2";
-  #   };
-  #
-  #   services.influxdb2.provision.organizations.home.auths."home-assistant (${config.node.name})" = {
-  #     readBuckets = [ "home_assistant" ];
-  #     writeBuckets = [ "home_assistant" ];
-  #     tokenFile = nodes.sire-influxdb.config.age.secrets."hass-influxdb-token-${config.node.name}".path;
-  #   };
-  # };
 
   # Connect to fritzbox via https proxy (to ensure valid cert)
   networking.hosts.${globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv4} = [

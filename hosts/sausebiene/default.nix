@@ -22,6 +22,7 @@
 
     ./esphome.nix
     ./home-assistant.nix
+    ./influxdb.nix
     ./mosquitto.nix
     ./wyoming.nix
   ];

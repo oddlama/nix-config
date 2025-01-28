@@ -61,10 +61,17 @@ in
           hash = "sha256-jQXQdcgW8IDmjaHjmeyXHcNTXYmknNDw7Flegy6wj2A=";
         };
       }))
+      dwd
+      waste_collection_schedule
     ];
 
     customLovelaceModules = with pkgs.home-assistant-custom-lovelace-modules; [
-      (pkgs.callPackage ./hass-lovelace/clock-weather-card/package.nix { })
+      (builtins.trace "soon upstreamed" (
+        pkgs.callPackage ./hass-lovelace/clock-weather-card/package.nix { }
+      ))
+      (pkgs.callPackage ./hass-lovelace/config-template-card/package.nix { })
+      (pkgs.callPackage ./hass-lovelace/hui-element/package.nix { })
+      apexcharts-card
       bubble-card
       button-card
       card-mod
@@ -121,14 +128,15 @@ in
 
     extraPackages =
       python3Packages: with python3Packages; [
-        psycopg2
-        gtts
-        fritzconnection
         adguardhome
-        zlib-ng
-        pymodbus
-        pyipp
+        dwdwfsapi
+        fritzconnection
+        gtts
+        psycopg2
         pyatv
+        pyipp
+        pymodbus
+        zlib-ng
       ];
   };
 

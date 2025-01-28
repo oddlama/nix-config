@@ -14,12 +14,6 @@ in
     group = "plausible";
   };
 
-  age.secrets.plausible-admin-pw = {
-    generator.script = "alnum";
-    mode = "440";
-    group = "plausible";
-  };
-
   environment.persistence."/persist".directories = [
     {
       directory = "/var/lib/clickhouse";
@@ -51,13 +45,6 @@ in
       baseUrl = "https://${plausibleDomain}";
       disableRegistration = true;
       secretKeybaseFile = config.age.secrets.plausible-secret.path;
-    };
-
-    adminUser = {
-      activate = true;
-      name = "admin";
-      email = "plausible@${globals.domains.me}";
-      passwordFile = config.age.secrets.plausible-admin-pw.path;
     };
   };
 

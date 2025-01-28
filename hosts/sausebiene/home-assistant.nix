@@ -48,19 +48,11 @@ in
       "webostv" # LG WebOS TV
       "whisper"
       "wyoming"
+      "zha"
     ];
 
     customComponents = with pkgs.home-assistant-custom-components; [
       (pkgs.home-assistant.python.pkgs.callPackage ./hass-components/ha-bambulab.nix { })
-      (philips_airpurifier_coap.overrideAttrs (_: rec {
-        version = "0.34.0";
-        src = pkgs.fetchFromGitHub {
-          owner = "kongo09";
-          repo = "philips-airpurifier-coap";
-          rev = "v${version}";
-          hash = "sha256-jQXQdcgW8IDmjaHjmeyXHcNTXYmknNDw7Flegy6wj2A=";
-        };
-      }))
       dwd
       waste_collection_schedule
     ];

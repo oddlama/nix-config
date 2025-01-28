@@ -84,10 +84,6 @@ in
             cidrv6 = "fd30::/64";
             hosts.ward.id = 1;
             hosts.sausebiene.id = 5;
-            hosts.philips-ac2889 = {
-              id = 21;
-              mac = globals.macs.scanner-ads-4300n;
-            };
             hosts.bambulab-p1s = {
               id = 22;
               mac = globals.macs.bambulab-p1s;

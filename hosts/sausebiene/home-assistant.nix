@@ -125,6 +125,7 @@ in
         adguardhome
         dwdwfsapi
         fritzconnection
+        getmac
         gtts
         psycopg2
         pyatv
@@ -140,6 +141,9 @@ in
   };
 
   systemd.services.home-assistant = {
+    serviceConfig.LoadCredential = [
+      "hass-influxdb-token:${config.age.secrets.hass-influxdb-token.path}"
+    ];
     preStart = lib.mkBefore ''
       if [[ -e ${config.services.home-assistant.configDir}/secrets.yaml ]]; then
         rm ${config.services.home-assistant.configDir}/secrets.yaml
@@ -147,7 +151,7 @@ in
 
       # Update influxdb token
       # We don't use -i because it would require chown with is a @privileged syscall
-      INFLUXDB_TOKEN="$(cat ${config.age.secrets.hass-influxdb-token.path})" \
+      INFLUXDB_TOKEN="$(cat "$CREDENTIALS_DIRECTORY/hass-influxdb-token")" \
         ${lib.getExe pkgs.yq-go} '.influxdb_token = strenv(INFLUXDB_TOKEN)' \
         ${
           config.age.secrets."home-assistant-secrets.yaml".path

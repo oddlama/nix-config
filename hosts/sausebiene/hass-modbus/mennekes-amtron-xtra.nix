@@ -9,26 +9,25 @@
       {
         delay = 1;
         host = globals.net.home-lan.vlans.devices.hosts.wallbox.ipv4;
-        name = "Amtron Xtra 22 C2";
+        name = "amtron_xtra_22_c2";
         port = 502;
-        retries = 1;
-        retry_on_empty = true;
+        timeout = 10;
+        message_wait_milliseconds = 100;
+        type = "tcp";
         sensors = [
           {
             address = 768;
             count = 38;
             data_type = "custom";
             input_type = "input";
-            lazy_error_count = 1;
             name = "Amtron Registers";
             precision = 0;
-            scan_interval = 120;
+            scan_interval = 30;
             slave = 255;
             structure = ">2h15H22B10H";
           }
           {
             address = 1024;
-            count = 1;
             data_type = "uint16";
             device_class = "current";
             input_type = "holding";
@@ -39,7 +38,6 @@
           }
           {
             address = 1025;
-            count = 1;
             data_type = "uint16";
             input_type = "holding";
             name = "Amtron Change Charge State";
@@ -47,8 +45,6 @@
             unique_id = "amtron_change_charge_state";
           }
         ];
-        timeout = 10;
-        type = "tcp";
       }
     ];
     template = [
@@ -229,9 +225,9 @@
               {% set ns = namespace(name = ''') -%}
               {% set input = states('sensor.amtron_registers').split(',')[17:40] -%}
               {% for i in range(0,11) -%}
-                {% set ns.name = ns.name ~ \"%c\"%input[i*2+1]|int ~ \"%c\"%input[i*2]|int -%}
+                {% set ns.name = ns.name ~ "%c"%input[i*2+1]|int ~ "%c"%input[i*2]|int -%}
               {% endfor %}
-              {{ ns.name.replace('\\x00',''') }}
+              {{ ns.name.replace('\x00',''') }}
             '';
             unique_id = "amtron_wallbox_name";
           }

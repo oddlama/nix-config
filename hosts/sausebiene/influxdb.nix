@@ -19,7 +19,7 @@
   age.secrets.hass-influxdb-token = {
     generator.script = "alnum";
     mode = "440";
-    group = "hass";
+    group = "influxdb2";
   };
 
   environment.persistence."/persist".directories = [

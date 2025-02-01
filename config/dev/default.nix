@@ -28,7 +28,8 @@ lib.optionalAttrs (!minimal) {
     }
   ];
 
-  services.nixseparatedebuginfod.enable = true;
+  # NOTE: disabled temporarily. Spams my journal and uses a lot of CPU in the background at all times.
+  # services.nixseparatedebuginfod.enable = true;
 
   # For embedded development
   users.groups.plugdev = { };

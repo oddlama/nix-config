@@ -23,9 +23,9 @@
       # Wayland
       ./gpu-screen-recorder.nix
       ./hyprland.nix
-      ./rofi.nix
+      ./fuzzel.nix
+      ./sway.nix
       ./swaync.nix
-      ./swww.nix
       ./waybar.nix
       ./whisper-overlay.nix
     ]

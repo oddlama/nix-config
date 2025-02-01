@@ -14,14 +14,14 @@
       height = 28;
 
       modules-left = [
-        "hyprland/workspaces"
+        "sway/workspaces"
         "tray"
-        "hyprland/submap"
+        "sway/mode"
         "privacy"
         #"custom/whisper_overlay"
       ];
       modules-center = [
-        "hyprland/window"
+        "sway/window"
       ];
       modules-right = [
         "custom/scan_qr"

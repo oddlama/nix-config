@@ -145,7 +145,7 @@ in
 
         assigns = {
           "1" = [
-            { class = "^firefox$"; }
+            { app_id = "firefox"; }
           ];
           "5" = [
             { class = "^bottles$"; }

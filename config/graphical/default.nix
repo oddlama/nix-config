@@ -44,20 +44,20 @@ in
     services.dbus.packages = [ pkgs.gcr ];
 
     xdg.portal = {
-      wlr.enable = true;
       enable = true;
       xdgOpenUsePortal = true;
       config.common = {
         default = [
-          "wlr"
           "gtk"
+          "hyprland"
         ];
         "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
-        "org.freedesktop.impl.portal.ScreenCast" = [ "xdg-desktop-portal-wlr" ];
-        "org.freedesktop.impl.portal.Screenshot" = [ "xdg-desktop-portal-wlr" ];
+        "org.freedesktop.impl.portal.ScreenCast" = [ "hyprland" ];
+        "org.freedesktop.impl.portal.Screenshot" = [ "hyprland" ];
         "org.freedesktop.portal.FileChooser" = [ "xdg-desktop-portal-gtk" ];
       };
       extraPortals = [
+        pkgs.xdg-desktop-portal-hyprland
         pkgs.xdg-desktop-portal-gtk
       ];
     };

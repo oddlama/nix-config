@@ -18,8 +18,6 @@ let
     mkMerge
     optionals
     ;
-
-  rofi-drun = "rofi -show drun -theme ~/.config/rofi/launchers/type-1/style-10.rasi";
 in
 {
   home.packages = with pkgs; [
@@ -53,10 +51,10 @@ in
             "SUPER + CTRL + SHIFT,q,exec,uwsm stop"
 
             # Applications
-            "SUPER,code:49,exec,${rofi-drun}" # SUPER+^
-            ",Menu,exec,${rofi-drun}"
+            "SUPER,code:49,exec,fuzzel" # SUPER+^
+            ",Menu,exec,fuzzel"
             "SUPER,t,exec,kitty"
-            "SUPER,b,exec,firefox"
+            "SUPER,b,exec,uwsm app firefox"
             "SUPER,c,exec,${getExe pkgs.scripts.clone-term}"
 
             # Shortcuts & Actions

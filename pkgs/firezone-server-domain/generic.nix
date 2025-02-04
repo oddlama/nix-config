@@ -3,6 +3,7 @@
 }:
 {
   lib,
+  nixosTests,
   fetchFromGitHub,
   beamPackages,
   pnpm_9,
@@ -41,9 +42,6 @@ beamPackages.mixRelease rec {
     cat >> config/runtime.exs <<EOF
     config :tzdata, :data_dir, System.get_env("TZDATA_DIR")
     EOF
-
-    # TODO replace https://firezone.statuspage.io with custom link,
-    # unfortunately simple replace only works at compile time
   '';
 
   postBuild = ''
@@ -115,8 +113,12 @@ beamPackages.mixRelease rec {
       };
   };
 
+  passthru.tests = {
+    inherit (nixosTests) firezone;
+  };
+
   meta = {
-    description = "Backend server and Admin UI for the Firezone zero-trust access platform";
+    description = "Backend server for the Firezone zero-trust access platform";
     homepage = "https://github.com/firezone/firezone";
     license = lib.licenses.asl20;
     maintainers = with lib.maintainers; [

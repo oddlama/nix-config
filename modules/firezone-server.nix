@@ -9,7 +9,12 @@ let
     attrNames
     boolToString
     concatLines
+    concatLists
+    concatMapAttrs
+    concatStringsSep
     filterAttrs
+    filterAttrsRecursive
+    flip
     forEach
     getExe
     isBool
@@ -20,11 +25,26 @@ let
     mkIf
     mkMerge
     mkOption
+    mkPackageOption
+    optionalAttrs
+    recursiveUpdate
     subtractLists
+    toUpper
     types
     ;
 
   cfg = config.services.firezone.server;
+  jsonFormat = pkgs.formats.json { };
+  availableAuthAdapters = [
+    "email"
+    "openid_connect"
+    "userpass"
+    "token"
+    "google_workspace"
+    "microsoft_entra"
+    "okta"
+    "jumpcloud"
+  ];
 
   # All non-secret environment variables or the given component
   collectEnvironment =
@@ -75,40 +95,60 @@ let
       '')
     );
 
+  provisionStateJson =
+    let
+      # Convert clientSecretFile options into the real counterpart
+      augmentedAccounts = flip mapAttrs cfg.provision.accounts (
+        accountName: account:
+        account
+        // {
+          auth = flip mapAttrs account.auth (
+            authName: auth:
+            recursiveUpdate auth (
+              optionalAttrs (auth.adapter_config.clientSecretFile != null) {
+                adapter_config.client_secret = "{env:AUTH_CLIENT_SECRET_${toUpper accountName}_${toUpper authName}}";
+              }
+            )
+          );
+        }
+      );
+    in
+    jsonFormat.generate "provision-state.json" {
+      # Do not include any clientSecretFile attributes in the resulting json
+      accounts = filterAttrsRecursive (k: _: k != "clientSecretFile") augmentedAccounts;
+    };
+
   commonServiceConfig = {
-    # AmbientCapablities = "CAP_NET_ADMIN";
-    # CapabilityBoundingSet = "CAP_CHOWN CAP_NET_ADMIN";
-    # DeviceAllow = "/dev/net/tun";
-    # LockPersonality = "true";
-    # LogsDirectory = "dev.firezone.client";
-    # LogsDirectoryMode = "755";
-    # MemoryDenyWriteExecute = "true";
-    # NoNewPrivileges = "true";
-    # PrivateMounts = "true";
-    # PrivateTmp = "true";
-    # PrivateUsers = "false";
-    # ProcSubset = "pid";
-    # ProtectClock = "true";
-    # ProtectControlGroups = "true";
-    # ProtectHome = "true";
-    # ProtectHostname = "true";
-    # ProtectKernelLogs = "true";
-    # ProtectKernelModules = "true";
-    # ProtectKernelTunables = "true";
-    # ProtectProc = "invisible";
-    # ProtectSystem = "strict";
-    # RestrictAddressFamilies = [
-    #   "AF_INET"
-    #   "AF_INET6"
-    #   "AF_NETLINK"
-    #   "AF_UNIX"
-    # ];
-    # RestrictNamespaces = "true";
-    # RestrictRealtime = "true";
-    # RestrictSUIDSGID = "true";
-    # SystemCallArchitectures = "native";
-    # SystemCallFilter = "@aio @basic-io @file-system @io-event @ipc @network-io @signal @system-service";
-    # UMask = "077";
+    AmbientCapablities = [ ];
+    CapabilityBoundingSet = [ ];
+    LockPersonality = "true";
+    MemoryDenyWriteExecute = "true";
+    NoNewPrivileges = "true";
+    PrivateMounts = "true";
+    PrivateTmp = "true";
+    PrivateUsers = "false";
+    ProcSubset = "pid";
+    ProtectClock = "true";
+    ProtectControlGroups = "true";
+    ProtectHome = "true";
+    ProtectHostname = "true";
+    ProtectKernelLogs = "true";
+    ProtectKernelModules = "true";
+    ProtectKernelTunables = "true";
+    ProtectProc = "invisible";
+    ProtectSystem = "strict";
+    RestrictAddressFamilies = [
+      "AF_INET"
+      "AF_INET6"
+      "AF_NETLINK"
+      "AF_UNIX"
+    ];
+    RestrictNamespaces = "true";
+    RestrictRealtime = "true";
+    RestrictSUIDSGID = "true";
+    SystemCallArchitectures = "native";
+    SystemCallFilter = "@system-service";
+    UMask = "077";
 
     DynamicUser = true;
     User = "firezone";
@@ -117,6 +157,7 @@ let
     StateDirectory = "firezone";
     WorkingDirectory = "/var/lib/firezone";
 
+    Type = "exec";
     LoadCredential = mapAttrsToList (secretName: secretFile: "${secretName}:${secretFile}") (
       filterAttrs (_: v: v != null) cfg.settingsSecret
     );
@@ -124,10 +165,9 @@ let
 
   componentOptions = component: {
     enable = mkEnableOption "the Firezone ${component} server";
-    # TODO: single package plus web and api passthrough.
-    # package = mkPackageOption pkgs "firezone-server" { };
+    package = mkPackageOption pkgs "firezone-server-${component}" { };
 
-    settings = lib.mkOption {
+    settings = mkOption {
       description = ''
         Environment variables for this component of the Firezone server. For a
         list of available variables, please refer to the [upstream definitions](https://github.com/firezone/firezone/blob/main/elixir/apps/domain/lib/domain/config/definitions.ex).
@@ -140,7 +180,7 @@ let
         overwritten by this option.
       '';
       default = { };
-      type = lib.types.submodule {
+      type = types.submodule {
         freeformType = types.attrsOf (
           types.oneOf [
             types.bool
@@ -214,7 +254,7 @@ in
         option for more information regarding the actual variables and how
         filtering rules are applied for each component.
       '';
-      type = lib.types.submodule {
+      type = types.submodule {
         freeformType = types.attrsOf types.path;
         options = {
           RELEASE_COOKIE = mkOption {
@@ -325,7 +365,7 @@ in
       };
     };
 
-    settings = lib.mkOption {
+    settings = mkOption {
       description = ''
         Environment variables for the Firezone server. For a list of available
         variables, please refer to the [upstream definitions](https://github.com/firezone/firezone/blob/main/elixir/apps/domain/lib/domain/config/definitions.ex).
@@ -336,7 +376,7 @@ in
         override specific variables passed to that component.
       '';
       default = { };
-      type = lib.types.submodule {
+      type = types.submodule {
         freeformType = types.attrsOf (
           types.oneOf [
             types.bool
@@ -347,6 +387,63 @@ in
             types.package
           ]
         );
+      };
+    };
+
+    smtp = {
+      configureManually = mkOption {
+        type = types.bool;
+        default = false;
+        description = ''
+          Outbound email configuration is mandatory for Firezone and supports
+          many different delivery adapters. Yet, most users will only need an
+          SMTP relay to send emails, so this configuration enforced by default.
+
+          If you want to utilize an alternative way to send emails (e.g. via a
+          supportd API-based service), enable this option and define
+          `OUTBOUND_EMAIL_FROM`, `OUTBOUND_EMAIL_ADAPTER` and
+          `OUTBOUND_EMAIL_ADAPTER_OPTS` manually via
+          {option}`services.firezone.server.settings` and/or
+          {option}`services.firezone.server.settingsSecret`.
+
+          The Firezone documentation holds [a list of supported Swoosh adapters](https://github.com/firezone/firezone/blob/main/website/src/app/docs/reference/env-vars/readme.mdx#outbound-emails).
+        '';
+      };
+
+      from = mkOption {
+        type = types.str;
+        example = "firezone@example.com";
+        description = "Outbound SMTP FROM address";
+      };
+
+      host = mkOption {
+        type = types.str;
+        example = "mail.example.com";
+        description = "Outbound SMTP host";
+      };
+
+      port = mkOption {
+        type = types.port;
+        example = 465;
+        description = "Outbound SMTP port";
+      };
+
+      implicitTls = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Whether to use implicit TLS instead of STARTTLS (usually port 465)";
+      };
+
+      username = mkOption {
+        type = types.str;
+        example = "firezone@example.com";
+        description = "Username to authenticate against the SMTP relay";
+      };
+
+      passwordFile = mkOption {
+        type = types.path;
+        example = "/run/secrets/smtp-password";
+        description = "File containing the password for the given username. Beware that a file in the nix store will be world readable.";
       };
     };
 
@@ -411,9 +508,160 @@ in
         description = "A list of trusted proxies";
       };
     };
+
+    provision = {
+      enable = mkEnableOption "provisioning of the Firezone domain server";
+      accounts = mkOption {
+        type = types.attrsOf (
+          types.submodule {
+            freeformType = jsonFormat.type;
+            options = {
+              name = mkOption {
+                type = types.str;
+                description = "The account name";
+                example = "My Organization";
+              };
+
+              features =
+                let
+                  mkFeatureOption =
+                    name: default:
+                    mkOption {
+                      type = types.bool;
+                      inherit default;
+                      description = "Whether to enable the `${name}` feature for this account.";
+                    };
+                in
+                {
+                  flow_activities = mkFeatureOption "flow_activities" true;
+                  policy_conditions = mkFeatureOption "policy_conditions" true;
+                  multi_site_resources = mkFeatureOption "multi_site_resources" true;
+                  traffic_filters = mkFeatureOption "traffic_filters" true;
+                  self_hosted_relays = mkFeatureOption "self_hosted_relays" true;
+                  idp_sync = mkFeatureOption "idp_sync" true;
+                  rest_api = mkFeatureOption "rest_api" true;
+                  internet_resource = mkFeatureOption "internet_resource" true;
+                };
+
+              actors = mkOption {
+                type = types.attrsOf (
+                  types.submodule {
+                    freeformType = jsonFormat.type;
+                    options = {
+                      type = mkOption {
+                        type = types.enum [
+                          "account_admin_user"
+                          "account_user"
+                          "service_account"
+                          "api_client"
+                        ];
+                        description = "The account type";
+                      };
+
+                      email = mkOption {
+                        type = types.str;
+                        description = "The email address used to authenticate as this account";
+                      };
+                    };
+                  }
+                );
+                default = { };
+                example = {
+                  admin = {
+                    type = "account_admin_user";
+                    email = "admin@myorg.example.com";
+                  };
+                };
+                description = "All actors (users) to provision.";
+              };
+
+              auth = mkOption {
+                type = types.attrsOf (
+                  types.submodule {
+                    freeformType = jsonFormat.type;
+                    options = {
+                      adapter = mkOption {
+                        type = types.enum availableAuthAdapters;
+                        description = "The auth adapter type";
+                      };
+
+                      adapter_config.clientSecretFile = mkOption {
+                        type = types.nullOr types.path;
+                        default = null;
+                        description = ''
+                          A file containing a the client secret for an openid_connect adapter.
+                          You only need to set this if this is an openid_connect provider.
+                        '';
+                      };
+                    };
+                  }
+                );
+                default = { };
+                example = {
+                  myoidcprovider = {
+                    adapter = "openid_connect";
+                    adapter_config = {
+                      client_id = "clientid";
+                      clientSecretFile = "/run/secrets/oidc-client-secret";
+                      response_type = "code";
+                      scope = "openid email name";
+                      discorvery_document_uri = "https://auth.example.com/.well-known/openid-configuration";
+                    };
+                  };
+                };
+                description = "All authentication providers to provision.";
+              };
+            };
+          }
+        );
+        default = { };
+        example = {
+          main = {
+            name = "My Account / Organization";
+            metadata.stripe.billing_email = "org@myorg.example.com";
+            features.rest_api = false;
+          };
+        };
+        description = ''
+          All accounts to provision. The key specified here will become the
+          account slug. By using `"{file:/path/to/file}"` as a string value
+          anywhere in these settings, the provisioning script will replace that
+          value with the content of the given file at runtime.
+
+          Please refer to the [Firezone source code](https://github.com/firezone/firezone/blob/main/elixir/apps/domain/lib/domain/accounts/account.ex)
+          for all available properties.
+        '';
+      };
+    };
   };
 
   config = mkMerge [
+    {
+      assertions =
+        [
+          {
+            assertion = cfg.provision.enable -> cfg.domain.enable;
+            message = "Provisioning must be done on a machine running the firezone domain server";
+          }
+        ]
+        ++ concatLists (
+          flip mapAttrsToList cfg.provision.accounts (
+            accountName: accountCfg:
+            [
+              {
+                assertion = (builtins.match "^[[:lower:]_-]+$" accountName) != null;
+                message = "An account name must contain only lowercase characters and underscores, as it will be used as the URL slug for this account.";
+              }
+            ]
+            ++ flip mapAttrsToList accountCfg.auth (
+              authName: _: {
+                assertion = (builtins.match "^[[:alnum:]_-]+$" authName) != null;
+                message = "An authentication provider name must contain only letters, numbers, underscores or dashes.";
+              }
+            )
+          )
+        );
+    }
     # Enable all components if the main server is enabled
     (mkIf cfg.enable {
       services.firezone.server.domain.enable = true;
@@ -447,14 +695,14 @@ in
         virtualHosts.${cfg.nginx.webDomain} = {
           forceSSL = mkDefault true;
           locations."/" = {
-            proxyPass = "http://${cfg.dashboardAddress}";
+            proxyPass = "http://${cfg.web.address}:${toString cfg.web.port}";
             proxyWebsockets = true;
           };
         };
         virtualHosts.${cfg.nginx.apiDomain} = {
           forceSSL = mkDefault true;
           locations."/" = {
-            proxyPass = "http://${cfg.dashboardAddress}";
+            proxyPass = "http://${cfg.api.address}:${toString cfg.api.port}";
             proxyWebsockets = true;
           };
         };
@@ -464,7 +712,7 @@ in
     {
       services.firezone.server = {
         settings = {
-          LOG_LEVEL = mkDefault "debug";
+          LOG_LEVEL = mkDefault "info";
           RELEASE_HOSTNAME = mkDefault "localhost.localdomain";
 
           ERLANG_CLUSTER_ADAPTER = mkDefault "Elixir.Cluster.Strategy.Epmd";
@@ -483,7 +731,7 @@ in
           # sufficient for small to medium deployments
           DATABASE_POOL_SIZE = "16";
 
-          AUTH_PROVIDER_ADAPTERS = mkDefault "email,openid_connect,userpass,token";
+          AUTH_PROVIDER_ADAPTERS = mkDefault (concatStringsSep "," availableAuthAdapters);
 
           FEATURE_FLOW_ACTIVITIES_ENABLED = mkDefault true;
           FEATURE_POLICY_CONDITIONS_ENABLED = mkDefault true;
@@ -499,11 +747,13 @@ in
         domain.settings = {
           ERLANG_DISTRIBUTION_PORT = mkDefault 9000;
           HEALTHZ_PORT = mkDefault 4000;
+          BACKGROUND_JOBS_ENABLED = mkDefault true;
         };
 
         web.settings = {
           ERLANG_DISTRIBUTION_PORT = mkDefault 9001;
           HEALTHZ_PORT = mkDefault 4001;
+          BACKGROUND_JOBS_ENABLED = mkDefault false;
 
           PHOENIX_LISTEN_ADDRESS = mkDefault cfg.web.address;
           PHOENIX_EXTERNAL_TRUSTED_PROXIES = mkDefault (builtins.toJSON cfg.web.trustedProxies);
@@ -517,6 +767,7 @@ in
         api.settings = {
           ERLANG_DISTRIBUTION_PORT = mkDefault 9002;
           HEALTHZ_PORT = mkDefault 4002;
+          BACKGROUND_JOBS_ENABLED = mkDefault false;
 
           PHOENIX_LISTEN_ADDRESS = mkDefault cfg.api.address;
           PHOENIX_EXTERNAL_TRUSTED_PROXIES = mkDefault (builtins.toJSON cfg.api.trustedProxies);
@@ -528,9 +779,49 @@ in
         };
       };
     }
+    (mkIf (!cfg.smtp.configureManually) {
+      services.firezone.server.settings = {
+        OUTBOUND_EMAIL_ADAPTER = "Elixir.Swoosh.Adapters.Mua";
+        OUTBOUND_EMAIL_ADAPTER_OPTS = builtins.toJSON { };
+        OUTBOUND_EMAIL_FROM = cfg.smtp.from;
+        OUTBOUND_EMAIL_SMTP_HOST = cfg.smtp.host;
+        OUTBOUND_EMAIL_SMTP_PORT = toString cfg.smtp.port;
+        OUTBOUND_EMAIL_SMTP_PROTOCOL = if cfg.smtp.implicitTls then "ssl" else "tcp";
+        OUTBOUND_EMAIL_SMTP_USERNAME = cfg.smtp.username;
+      };
+      services.firezone.server.settingsSecret = {
+        OUTBOUND_EMAIL_SMTP_PASSWORD = cfg.smtp.passwordFile;
+      };
+    })
+    (mkIf cfg.provision.enable {
+      # Load client secrets from authentication providers
+      services.firezone.server.settingsSecret = flip concatMapAttrs cfg.provision.accounts (
+        accountName: accountCfg:
+        flip concatMapAttrs accountCfg.auth (
+          authName: authCfg:
+          optionalAttrs (authCfg.adapter_config.clientSecretFile != null) {
+            "AUTH_CLIENT_SECRET_${toUpper accountName}_${toUpper authName}" =
+              authCfg.adapter_config.clientSecretFile;
+          }
+        )
+      );
+    })
+    (mkIf (cfg.openClusterFirewall && cfg.domain.enable) {
+      networking.firewall.allowedTCPPorts = [
+        cfg.domain.settings.ERLANG_DISTRIBUTION_PORT
+      ];
+    })
+    (mkIf (cfg.openClusterFirewall && cfg.web.enable) {
+      networking.firewall.allowedTCPPorts = [
+        cfg.web.settings.ERLANG_DISTRIBUTION_PORT
+      ];
+    })
+    (mkIf (cfg.openClusterFirewall && cfg.api.enable) {
+      networking.firewall.allowedTCPPorts = [
+        cfg.api.settings.ERLANG_DISTRIBUTION_PORT
+      ];
+    })
     (mkIf (cfg.domain.enable || cfg.web.enable || cfg.api.enable) {
-      # FIXME: mkIf openClusterFirewall {};
-
       systemd.slices.system-firezone = {
         description = "Firezone Slice";
       };
@@ -556,13 +847,8 @@ in
           ${loadSecretEnvironment "domain"}
 
           echo "Running migrations"
-          ${getExe pkgs.firezone-server-domain} eval Domain.Release.migrate
-
-          echo "Provisioning"
-        ''; # FIXME: ^----- aaaaaaaaaaaaaaaaaa
-        #FIXME: aaaaaaaaaaaaaaaaaa
-        #FIXME: aaaaaaaaaaaaaaaaaa
-        #FIXME: aaaaaaaaaaaaaaaaaa
+          ${getExe cfg.domain.package} eval Domain.Release.migrate
+        '';
 
         # We use the domain environment to be able to run migrations
         environment = collectEnvironment "domain";
@@ -581,7 +867,26 @@ in
 
         script = ''
           ${loadSecretEnvironment "domain"}
-          exec ${getExe pkgs.firezone-server-domain} start;
+          exec ${getExe cfg.domain.package} start;
+        '';
+
+        postStart = mkIf cfg.provision.enable ''
+          ${loadSecretEnvironment "domain"}
+
+          # Wait for the firezone server to come online
+          count=0
+          while ! ${getExe cfg.domain.package} pid >/dev/null
+          do
+            sleep 1
+            if [[ "$count" -eq 30 ]]; then
+              echo "Tried for at least 30 seconds, giving up..."
+              exit 1
+            fi
+            count=$((count++))
+          done
+
+          ln -sTf ${provisionStateJson} provision-state.json
+          ${getExe cfg.domain.package} rpc 'Code.eval_file("${./provision.exs}")'
         '';
 
         environment = collectEnvironment "domain";
@@ -597,7 +902,7 @@ in
 
         script = ''
           ${loadSecretEnvironment "web"}
-          exec ${getExe pkgs.firezone-server-web} start;
+          exec ${getExe cfg.web.package} start;
         '';
 
         environment = collectEnvironment "web";
@@ -613,7 +918,7 @@ in
 
         script = ''
           ${loadSecretEnvironment "api"}
-          exec ${getExe pkgs.firezone-server-api} start;
+          exec ${getExe cfg.api.package} start;
         '';
 
         environment = collectEnvironment "api";

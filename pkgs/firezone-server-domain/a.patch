@@ -60,7 +60,7 @@ index c4e06bc58..89533fb81 100644
  
 -        {:error, :send_email, _reason, _effects_so_far} ->
 +        {:error, :send_email, reason, _effects_so_far} ->
-+          Logger.info("aaaaaaaaaaaaaaaaaa", reason: inspect(reason))
++          Logger.info("failed to send email", reason: inspect(reason))
            changeset =
              Ecto.Changeset.add_error(
                changeset,
@@ -103,12 +103,12 @@ index 15037e0a3..475c4ddfb 100644
 -           from_email: compile_config!(:outbound_email_from)
 +            adapter: compile_config!(:outbound_email_adapter),
 +            from_email: compile_config!(:outbound_email_from),
-+            protocol: :ssl,
-+            relay: System.get_env("OUTBOUND_EMAIL_RELAY"),
-+            port: 465,
++            protocol: String.to_atom(System.get_env("OUTBOUND_EMAIL_SMTP_PROTOCOL")),
++            relay: System.get_env("OUTBOUND_EMAIL_SMTP_HOST"),
++            port: String.to_integer(System.get_env("OUTBOUND_EMAIL_SMTP_PORT")),
 +            auth: [
-+              username: System.get_env("OUTBOUND_EMAIL_USERNAME"),
-+              password: System.get_env("OUTBOUND_EMAIL_PASSWORD")
++              username: System.get_env("OUTBOUND_EMAIL_SMTP_USERNAME"),
++              password: System.get_env("OUTBOUND_EMAIL_SMTP_PASSWORD")
 +            ]
           ] ++ compile_config!(:outbound_email_adapter_opts)
  

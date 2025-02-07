@@ -85,14 +85,15 @@ let
       );
     in
     concatLines (
-      forEach relevantSecrets (secret: ''
-        export ${secret}=$(< ${
+      forEach relevantSecrets (
+        secret:
+        ''export ${secret}=$(< ${
           if cfg.settingsSecret.${secret} == null then
             "secrets/${secret}"
           else
             "\"$CREDENTIALS_DIRECTORY/${secret}\""
-        })
-      '')
+        })''
+      )
     );
 
   provisionStateJson =
@@ -121,20 +122,20 @@ let
   commonServiceConfig = {
     AmbientCapablities = [ ];
     CapabilityBoundingSet = [ ];
-    LockPersonality = "true";
-    MemoryDenyWriteExecute = "true";
-    NoNewPrivileges = "true";
-    PrivateMounts = "true";
-    PrivateTmp = "true";
-    PrivateUsers = "false";
+    LockPersonality = true;
+    MemoryDenyWriteExecute = true;
+    NoNewPrivileges = true;
+    PrivateMounts = true;
+    PrivateTmp = true;
+    PrivateUsers = false;
     ProcSubset = "pid";
-    ProtectClock = "true";
-    ProtectControlGroups = "true";
-    ProtectHome = "true";
-    ProtectHostname = "true";
-    ProtectKernelLogs = "true";
-    ProtectKernelModules = "true";
-    ProtectKernelTunables = "true";
+    ProtectClock = true;
+    ProtectControlGroups = true;
+    ProtectHome = true;
+    ProtectHostname = true;
+    ProtectKernelLogs = true;
+    ProtectKernelModules = true;
+    ProtectKernelTunables = true;
     ProtectProc = "invisible";
     ProtectSystem = "strict";
     RestrictAddressFamilies = [
@@ -143,9 +144,9 @@ let
       "AF_NETLINK"
       "AF_UNIX"
     ];
-    RestrictNamespaces = "true";
-    RestrictRealtime = "true";
-    RestrictSUIDSGID = "true";
+    RestrictNamespaces = true;
+    RestrictRealtime = true;
+    RestrictSUIDSGID = true;
     SystemCallArchitectures = "native";
     SystemCallFilter = "@system-service";
     UMask = "077";
@@ -157,10 +158,12 @@ let
     StateDirectory = "firezone";
     WorkingDirectory = "/var/lib/firezone";
 
-    Type = "exec";
     LoadCredential = mapAttrsToList (secretName: secretFile: "${secretName}:${secretFile}") (
       filterAttrs (_: v: v != null) cfg.settingsSecret
     );
+    Type = "exec";
+    Restart = "on-failure";
+    RestartSec = 10;
   };
 
   componentOptions = component: {
@@ -199,20 +202,7 @@ in
   options.services.firezone.server = {
     enable = mkEnableOption "all Firezone components";
     enableLocalDB = mkEnableOption "a local postgresql database for Firezone";
-
-    nginx = {
-      enable = mkEnableOption "nginx virtualhost definition";
-      apiDomain = mkOption {
-        type = types.str;
-        example = "api.firezone.example.com";
-        description = "The virtual host domain under which the api should be exposed";
-      };
-      webDomain = mkOption {
-        type = types.str;
-        example = "firezone.example.com";
-        description = "The virtual host domain under which the web interface should be exposed";
-      };
-    };
+    nginx.enable = mkEnableOption "nginx virtualhost definition";
 
     openClusterFirewall = mkOption {
       type = types.bool;
@@ -482,7 +472,7 @@ in
     api = componentOptions "api" // {
       externalUrl = mkOption {
         type = types.strMatching "^https://.+/$";
-        example = "https://api.firezone.example.com/";
+        example = "https://firezone.example.com/api/";
         description = ''
           The external URL under which you will serve the api. You need to
           setup a reverse proxy for TLS termination, either with
@@ -690,23 +680,45 @@ in
     })
     # Create a local nginx reverse proxy
     (mkIf cfg.nginx.enable {
-      services.nginx = {
-        enable = true;
-        virtualHosts.${cfg.nginx.webDomain} = {
-          forceSSL = mkDefault true;
-          locations."/" = {
-            proxyPass = "http://${cfg.web.address}:${toString cfg.web.port}";
-            proxyWebsockets = true;
-          };
-        };
-        virtualHosts.${cfg.nginx.apiDomain} = {
-          forceSSL = mkDefault true;
-          locations."/" = {
-            proxyPass = "http://${cfg.api.address}:${toString cfg.api.port}";
-            proxyWebsockets = true;
-          };
-        };
-      };
+      services.nginx = mkMerge [
+        {
+          enable = true;
+        }
+        (
+          let
+            urlComponents = builtins.elemAt (builtins.split "https://([^/]*)(/?.*)" cfg.web.externalUrl) 1;
+            domain = builtins.elemAt urlComponents 0;
+            location = builtins.elemAt urlComponents 1;
+          in
+          {
+            virtualHosts.${domain} = {
+              forceSSL = mkDefault true;
+              locations.${location} = {
+                # The trailing slash is important to strip the location prefix from the request
+                proxyPass = "http://${cfg.web.address}:${toString cfg.web.port}/";
+                proxyWebsockets = true;
+              };
+            };
+          }
+        )
+        (
+          let
+            urlComponents = builtins.elemAt (builtins.split "https://([^/]*)(/?.*)" cfg.api.externalUrl) 1;
+            domain = builtins.elemAt urlComponents 0;
+            location = builtins.elemAt urlComponents 1;
+          in
+          {
+            virtualHosts.${domain} = {
+              forceSSL = mkDefault true;
+              locations.${location} = {
+                # The trailing slash is important to strip the location prefix from the request
+                proxyPass = "http://${cfg.api.address}:${toString cfg.api.port}/";
+                proxyWebsockets = true;
+              };
+            };
+          }
+        )
+      ];
     })
     # Specify sensible defaults
     {
@@ -832,7 +844,7 @@ in
       };
 
       systemd.services.firezone-initialize = {
-        description = "Firezone initialization";
+        description = "Backend initialization service for the Firezone zero-trust access platform";
 
         after = mkIf cfg.enableLocalDB [ "postgresql.service" ];
         requires = mkIf cfg.enableLocalDB [ "postgresql.service" ];
@@ -859,7 +871,7 @@ in
       };
 
       systemd.services.firezone-server-domain = mkIf cfg.domain.enable {
-        description = "Firezone domain server";
+        description = "Backend domain server for the Firezone zero-trust access platform";
         after = [ "firezone-initialize.service" ];
         bindsTo = [ "firezone-initialize.service" ];
         wantedBy = [ "firezone.target" ];
@@ -870,12 +882,13 @@ in
           exec ${getExe cfg.domain.package} start;
         '';
 
+        path = [ pkgs.curl ];
         postStart = mkIf cfg.provision.enable ''
           ${loadSecretEnvironment "domain"}
 
           # Wait for the firezone server to come online
           count=0
-          while ! ${getExe cfg.domain.package} pid >/dev/null
+          while [[ "$(curl -s "http://localhost:${toString cfg.domain.settings.HEALTHZ_PORT}" 2>/dev/null || echo)" != '{"status":"ok"}' ]]
           do
             sleep 1
             if [[ "$count" -eq 30 ]]; then
@@ -885,6 +898,7 @@ in
             count=$((count++))
           done
 
+          sleep 1 # Wait for server to fully come up. Not ideal to use sleep, but at least it works.
           ln -sTf ${provisionStateJson} provision-state.json
           ${getExe cfg.domain.package} rpc 'Code.eval_file("${./provision.exs}")'
         '';
@@ -894,7 +908,7 @@ in
       };
 
       systemd.services.firezone-server-web = mkIf cfg.web.enable {
-        description = "Firezone web server";
+        description = "Backend web server for the Firezone zero-trust access platform";
         after = [ "firezone-initialize.service" ];
         bindsTo = [ "firezone-initialize.service" ];
         wantedBy = [ "firezone.target" ];
@@ -910,7 +924,7 @@ in
       };
 
       systemd.services.firezone-server-api = mkIf cfg.api.enable {
-        description = "Firezone api server";
+        description = "Backend api server for the Firezone zero-trust access platform";
         after = [ "firezone-initialize.service" ];
         bindsTo = [ "firezone-initialize.service" ];
         wantedBy = [ "firezone.target" ];

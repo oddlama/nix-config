@@ -24,7 +24,11 @@ beamPackages.mixRelease rec {
       hash = "sha256-yccplADHRJQQiKrmHcJ5rvouswHrbx4K6ysnIAoZJR0=";
     }
   }/elixir";
-  patches = [ ./a.patch ];
+  patches = [
+    ./0000-add-healthz-port.patch
+    ./0001-postgres-socket.patch
+    ./0002-add-mua.patch
+  ];
 
   pnpmDeps = pnpm_9.fetchDeps {
     inherit pname version;

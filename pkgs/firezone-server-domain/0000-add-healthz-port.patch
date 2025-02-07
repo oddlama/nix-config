@@ -1,0 +1,60 @@
+diff --git a/apps/domain/lib/domain/config/definitions.ex b/apps/domain/lib/domain/config/definitions.ex
+index 8cd2e8d0f..de55c8e8f 100644
+--- a/apps/domain/lib/domain/config/definitions.ex
++++ b/apps/domain/lib/domain/config/definitions.ex
+@@ -120,6 +120,7 @@ defmodule Domain.Config.Definitions do
+        ]},
+       {"Instrumentation",
+        [
++         :healthz_port,
+          :instrumentation_client_logs_enabled,
+          :instrumentation_client_logs_bucket,
+          :telemetry_metrics_reporter,
+@@ -474,6 +475,19 @@ defmodule Domain.Config.Definitions do
+   ## Telemetry
+   ##############################################
+ 
++  @doc """
++  The port for the internal healthz endpoint.
++  """
++  defconfig(:healthz_port, :integer,
++    default: 4000,
++    changeset: fn changeset, key ->
++      Ecto.Changeset.validate_number(changeset, key,
++        greater_than: 0,
++        less_than_or_equal_to: 65_535
++      )
++    end
++  )
++
+   @doc """
+   Enable or disable the Firezone telemetry collection.
+ 
+diff --git a/apps/domain/lib/domain/telemetry.ex b/apps/domain/lib/domain/telemetry.ex
+index af430358d..d154282b4 100644
+--- a/apps/domain/lib/domain/telemetry.ex
++++ b/apps/domain/lib/domain/telemetry.ex
+@@ -13,7 +13,7 @@ defmodule Domain.Telemetry do
+ 
+     children = [
+       # We start a /healthz endpoint that is used for liveness probes
+-      {Bandit, plug: Telemetry.HealthzPlug, scheme: :http, port: 4000},
++      {Bandit, plug: Telemetry.HealthzPlug, scheme: :http, port: Keyword.get(config, :healthz_port)},
+ 
+       # Telemetry poller will execute the given period measurements
+       # every 10_000ms. Learn more here: https://hexdocs.pm/telemetry_metrics
+diff --git a/config/runtime.exs b/config/runtime.exs
+index 7817942fa..c6dfe9c31 100644
+--- a/config/runtime.exs
++++ b/config/runtime.exs
+@@ -211,7 +211,9 @@ if config_env() == :prod do
+       otlp_endpoint: System.get_env("OTLP_ENDPOINT")
+   end
+ 
+-  config :domain, Domain.Telemetry, metrics_reporter: compile_config!(:telemetry_metrics_reporter)
++  config :domain, Domain.Telemetry,
++    healthz_port: compile_config!(:healthz_port),
++    metrics_reporter: compile_config!(:telemetry_metrics_reporter)
+ 
+   if telemetry_metrics_reporter = compile_config!(:telemetry_metrics_reporter) do
+     config :domain, telemetry_metrics_reporter, compile_config!(:telemetry_metrics_reporter_opts)

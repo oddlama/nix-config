@@ -36,7 +36,7 @@ lib.optionalAttrs (!minimal) {
   services.udev.packages = [
     (pkgs.runCommandLocal "probe-rs-udev-rules" { } ''
       mkdir -p $out/lib/udev/rules.d
-      cp ${./69-probe-rs.rules} $out/lib/udev/rules.d/
+      cp ${./69-probe-rs.rules} $out/lib/udev/rules.d/69-probe-rs.rules
     '')
   ];
 }

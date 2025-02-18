@@ -100,27 +100,12 @@
           };
         };
       };
-
-      # deadnix: skip
-      mkContainer = guestName: {
-        ${guestName} = mkGuest guestName // {
-          backend = "container";
-          container.macvlan = "lan";
-          extraSpecialArgs = {
-            inherit (inputs.self) nodes globals;
-            inherit (inputs.self.pkgs.x86_64-linux) lib;
-            inherit inputs minimal;
-          };
-        };
-      };
     in
     lib.mkIf (!minimal) (
       { }
       // mkMicrovm "adguardhome"
       // mkMicrovm "forgejo"
-      // mkMicrovm "home-gateway"
       // mkMicrovm "kanidm"
-      // mkMicrovm "netbird"
       // mkMicrovm "radicale"
       // mkMicrovm "vaultwarden"
       // mkMicrovm "web-proxy"

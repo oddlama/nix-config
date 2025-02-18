@@ -35,7 +35,7 @@
       maddy = uidGid 976;
       minecraft = uidGid 975;
       stalwart-mail = uidGid 974;
-      netbird-home = uidGid 973;
+      # 973
       gamemode = uidGid 972;
       plausible = uidGid 971;
       actual = uidGid 970;

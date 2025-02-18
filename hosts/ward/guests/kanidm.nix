@@ -135,17 +135,16 @@ in
         ];
       };
 
-      # Netbird
-      groups."netbird.access" = { };
-      systems.oauth2.netbird = {
+      # Firezone
+      groups."firezone.access" = { };
+      systems.oauth2.firezone = {
         public = true;
-        displayName = "Netbird";
-        originUrl = "https://${globals.services.netbird.domain}/";
-        originLanding = "https://${globals.services.netbird.domain}/";
+        displayName = "Firezone VPN";
+        # FIXME: change
+        originUrl = "https://dummy.example.org/";
+        originLanding = "https://dummy.example.org/";
         preferShortUsername = true;
-        enableLocalhostRedirects = true;
-        enableLegacyCrypto = true;
-        scopeMaps."netbird.access" = [
+        scopeMaps."firezone.access" = [
           "openid"
           "email"
           "profile"

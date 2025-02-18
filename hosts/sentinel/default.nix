@@ -11,7 +11,6 @@
 
     ./acme.nix
     ./blog.nix
-    ./coturn.nix
     ./fs.nix
     ./net.nix
     ./oauth2.nix

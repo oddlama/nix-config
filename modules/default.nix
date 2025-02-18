@@ -1,8 +1,4 @@
 {
-  disabledModules = [
-    "services/networking/netbird.nix"
-  ];
-
   imports = [
     ./acme-wildcard.nix
     ./backups.nix
@@ -10,7 +6,6 @@
     ./distributed-config.nix
     ./globals.nix
     ./meta.nix
-    ./netbird-client.nix
     ./nginx-upstream-monitoring.nix
     ./oauth2-proxy.nix
     ./promtail.nix

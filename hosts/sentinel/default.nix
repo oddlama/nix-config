@@ -26,6 +26,9 @@
     80
     443
   ];
+  wireguard.proxy-sentinel.firewallRuleForAll.allowedUDPPorts = [
+    443
+  ];
 
   users.groups.acme.members = [ "nginx" ];
   services.nginx.enable = true;

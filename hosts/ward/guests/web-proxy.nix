@@ -16,6 +16,9 @@ in
       80
       443
     ];
+    firewallRuleForAll.allowedUDPPorts = [
+      443
+    ];
   };
 
   # This node shall monitor the infrastructure

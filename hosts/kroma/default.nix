@@ -1,5 +1,4 @@
 {
-  globals,
   inputs,
   lib,
   minimal,
@@ -89,28 +88,6 @@
   #  };
   #};
 
-  # FIXME: the ui is not directly accessible via environment.systemPackages
-  # FIXME: to control it as a user (and to allow SSO) we need to be in the netbird-home group
-  services.netbird.ui.enable = true;
-  services.netbird.clients.home = {
-    port = 51820;
-    name = "netbird-home";
-    interface = "wt-home";
-    autoStart = false;
-    openFirewall = true;
-    config.ServerSSHAllowed = false;
-    environment = rec {
-      NB_MANAGEMENT_URL = "https://${globals.services.netbird.domain}";
-      NB_ADMIN_URL = NB_MANAGEMENT_URL;
-    };
-  };
-  environment.persistence."/persist".directories = [
-    {
-      directory = "/var/lib/netbird-home";
-      mode = "0700";
-    }
-  ];
-
   programs.nix-ld.enable = true;
   topology.self.icon = "devices.desktop";
 
@@ -122,9 +99,4 @@
     dockerCompat = true;
     defaultNetwork.settings.dns_enabled = true;
   };
-
-  services.firezone.server.domain.enable = true;
-  services.firezone.server.domain.enableLocalDB = true;
-  services.firezone.server.web.enable = true;
-  services.firezone.server.api.enable = true;
 }

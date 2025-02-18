@@ -43,6 +43,5 @@
       unifi = uidGid 968;
       plugdev.gid = 967;
       tss = uidGid 966;
-      firezone-client = uidGid 965;
     };
 }

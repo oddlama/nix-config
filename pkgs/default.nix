@@ -19,13 +19,6 @@ _inputs: [
     #    (_pythonFinal: pythonPrev: {
     #    })
     #  ];
-    firezone-server-domain = prev.callPackage ./firezone-server-domain/package.nix { };
-    firezone-server-web = prev.callPackage ./firezone-server-web/package.nix { };
-    firezone-server-api = prev.callPackage ./firezone-server-api/package.nix { };
-    firezone-gateway = prev.callPackage ./firezone-gateway/package.nix { };
-    firezone-relay = prev.callPackage ./firezone-relay/package.nix { };
-    firezone-gui-client = prev.callPackage ./firezone-gui-client/package.nix { };
-    firezone-headless-client = prev.callPackage ./firezone-headless-client/package.nix { };
 
     mdns-repeater = prev.callPackage ./mdns-repeater.nix { };
 

@@ -33,6 +33,11 @@ in
   #   network = "internet";
   # };
 
+  services.matter-server = {
+    enable = true;
+    logLevel = "debug";
+  };
+
   topology.self.services.home-assistant.info = "https://${homeassistantDomain}";
   services.home-assistant = {
     enable = true;
@@ -226,6 +231,8 @@ in
         extraConfig = ''
           allow ${globals.net.home-lan.vlans.home.cidrv4};
           allow ${globals.net.home-lan.vlans.home.cidrv6};
+          allow ${globals.net.home-lan.vlans.devices.cidrv4};
+          allow ${globals.net.home-lan.vlans.devices.cidrv6};
           deny all;
         '';
       };

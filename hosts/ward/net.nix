@@ -171,6 +171,8 @@
         proxy-home.interfaces = [ "proxy-home" ];
         adguardhome.ipv4Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv4 ];
         adguardhome.ipv6Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv6 ];
+        web-proxy.ipv4Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv4 ];
+        web-proxy.ipv6Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv6 ];
         samba.ipv4Addresses = [ globals.net.home-lan.vlans.services.hosts.sire-samba.ipv4 ];
         samba.ipv6Addresses = [ globals.net.home-lan.vlans.services.hosts.sire-samba.ipv6 ];
         scanner-ads-4300n.ipv4Addresses = [
@@ -209,6 +211,20 @@
           "vlan-guests"
         ];
         to = [ "adguardhome" ];
+        verdict = "accept";
+      };
+
+      # Allow access to the web proxy from the devices VLAN
+      access-web-proxy = {
+        from = [
+          "vlan-devices"
+        ];
+        to = [ "web-proxy" ];
+        allowedTCPPorts = [
+          80
+          443
+        ];
+        allowedUDPPorts = [ 443 ];
         verdict = "accept";
       };
 

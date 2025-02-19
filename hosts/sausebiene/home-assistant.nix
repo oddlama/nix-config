@@ -233,6 +233,8 @@ in
           allow ${globals.net.home-lan.vlans.home.cidrv6};
           allow ${globals.net.home-lan.vlans.devices.cidrv4};
           allow ${globals.net.home-lan.vlans.devices.cidrv6};
+          allow ${globals.net.home-lan.vlans.services.hosts.sausebiene.ipv4};
+          allow ${globals.net.home-lan.vlans.services.hosts.sausebiene.ipv6};
           deny all;
         '';
       };

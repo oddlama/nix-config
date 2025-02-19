@@ -74,6 +74,7 @@ in
       extraConfig = ''
         proxy_ssl_verify off;
         allow ${globals.net.home-lan.vlans.services.hosts.sausebiene.ipv4};
+        allow ${globals.net.home-lan.vlans.services.hosts.sausebiene.ipv6};
         allow ${globals.net.home-lan.vlans.home.cidrv4};
         allow ${globals.net.home-lan.vlans.home.cidrv6};
         deny all;

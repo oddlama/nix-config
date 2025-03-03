@@ -92,6 +92,8 @@ in
         trusted_proxies = [ nodes.ward-web-proxy.config.wireguard.proxy-home.ipv4 ];
       };
 
+      zha.zigpy_config.source_routing = true;
+
       homeassistant = {
         name = "!secret ha_name";
         latitude = "!secret ha_latitude";
@@ -111,6 +113,7 @@ in
         themes = "!include_dir_merge_named themes";
       };
       "automation ui" = "!include automations.yaml";
+      "scene" = "!include scenes.yaml";
 
       influxdb = {
         api_version = 2;

@@ -11,5 +11,6 @@
     ./promtail.nix
     ./secrets.nix
     ./telegraf.nix
+    ../fz/modules
   ];
 }

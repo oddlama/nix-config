@@ -1,13 +1,4 @@
 {
-  disabledModules = [
-    "services/home-automation/wyoming/faster-whisper.nix"
-    "services/home-automation/wyoming/piper.nix"
-  ];
-  imports = [
-    (builtins.trace "remove after next flake update" ./wfw.nix)
-    (builtins.trace "remove after next flake update" ./pip.nix)
-  ];
-
   environment.persistence."/persist".directories = [
     {
       directory = "/var/lib/private/wyoming";

@@ -65,15 +65,13 @@ in
     ];
 
     customLovelaceModules = with pkgs.home-assistant-custom-lovelace-modules; [
-      (builtins.trace "soon upstreamed" (
-        pkgs.callPackage ./hass-lovelace/clock-weather-card/package.nix { }
-      ))
       (pkgs.callPackage ./hass-lovelace/config-template-card/package.nix { })
       (pkgs.callPackage ./hass-lovelace/hui-element/package.nix { })
       apexcharts-card
       bubble-card
       button-card
       card-mod
+      clock-weather-card
       hourly-weather
       lg-webos-remote-control
       mini-graph-card

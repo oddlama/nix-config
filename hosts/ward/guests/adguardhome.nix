@@ -110,6 +110,7 @@ in
             [
               # FIXME: dont hardcode, filter global service domains by internal state
               # FIXME: new entry here? make new firezone entry too.
+              # FIXME: new entry here? make new firezone gateway on ward entry too.
               globals.services.grafana.domain
               globals.services.immich.domain
               globals.services.influxdb.domain

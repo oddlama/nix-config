@@ -7,6 +7,21 @@
   nodes,
   ...
 }:
+let
+  # FIXME: dont hardcode, filter global service domains by internal state
+  # FIXME: new entry here? make new adguardhome entry too.
+  # FIXME: new entry here? make new firezone entry too.
+  homeDomains = [
+    globals.services.grafana.domain
+    globals.services.immich.domain
+    globals.services.influxdb.domain
+    globals.services.loki.domain
+    globals.services.paperless.domain
+    globals.services.esphome.domain
+    globals.services.home-assistant.domain
+    "fritzbox.${globals.domains.personal}"
+  ];
+in
 {
   imports = [
     inputs.nixos-hardware.nixosModules.common-cpu-intel
@@ -63,6 +78,9 @@
     rekeyFile = config.node.secretsDir + "/firezone-gateway-token.age";
   };
 
+  networking.hosts.${globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv6} = homeDomains;
+  networking.hosts.${globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv4} = homeDomains;
+  systemd.services.firezone-gateway.environment.HEALTH_CHECK_ADDR = "127.0.0.1:17999";
   services.firezone.gateway = {
     enable = true;
     name = "ward";

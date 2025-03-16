@@ -7,6 +7,9 @@
 }:
 let
   firezoneDomain = "firezone.${globals.domains.me}";
+  # FIXME: dont hardcode, filter global service domains by internal state
+  # FIXME: new entry here? make new adguardhome entry too.
+  # FIXME: new entry here? make new firezone gateway on ward entry too.
   homeDomains = [
     globals.services.grafana.domain
     globals.services.immich.domain
@@ -91,8 +94,6 @@ in
             };
           };
 
-        # FIXME: dont hardcode, filter global service domains by internal state
-        # FIXME: new entry here? make new adguardhome entry too.
         resources =
           lib.genAttrs homeDomains (domain: {
             type = "dns";
@@ -151,6 +152,8 @@ in
     publicIpv6 = lib.net.cidr.ip config.repo.secrets.local.networking.interfaces.wan.hostCidrv6;
     openFirewall = true;
   };
+
+  systemd.services.firezone-relay.environment.HEALTH_CHECK_ADDR = "127.0.0.1:17999";
 
   services.nginx = {
     upstreams.firezone = {

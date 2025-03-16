@@ -51,6 +51,9 @@ in
         extraConfig = ''
           allow ${globals.net.home-lan.vlans.home.cidrv4};
           allow ${globals.net.home-lan.vlans.home.cidrv6};
+          # Firezone traffic
+          allow ${globals.net.home-lan.vlans.services.hosts.ward.ipv4};
+          allow ${globals.net.home-lan.vlans.services.hosts.ward.ipv6};
           deny all;
         '';
       };

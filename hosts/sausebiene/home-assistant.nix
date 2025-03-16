@@ -234,8 +234,12 @@ in
           allow ${globals.net.home-lan.vlans.home.cidrv6};
           allow ${globals.net.home-lan.vlans.devices.cidrv4};
           allow ${globals.net.home-lan.vlans.devices.cidrv6};
+          # Self-traffic (needed for media in Voice PE)
           allow ${globals.net.home-lan.vlans.services.hosts.sausebiene.ipv4};
           allow ${globals.net.home-lan.vlans.services.hosts.sausebiene.ipv6};
+          # Firezone traffic
+          allow ${globals.net.home-lan.vlans.services.hosts.ward.ipv4};
+          allow ${globals.net.home-lan.vlans.services.hosts.ward.ipv6};
           deny all;
         '';
       };

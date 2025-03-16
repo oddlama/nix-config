@@ -169,6 +169,7 @@
       {
         untrusted.interfaces = [ "wan" ];
         proxy-home.interfaces = [ "proxy-home" ];
+        firezone.interfaces = [ "tun-firezone" ];
         adguardhome.ipv4Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv4 ];
         adguardhome.ipv6Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv6 ];
         web-proxy.ipv4Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv4 ];
@@ -258,6 +259,28 @@
       forward-proxy-home-vpn-traffic = {
         from = [ "proxy-home" ];
         to = [ "proxy-home" ];
+        verdict = "accept";
+      };
+
+      # masquerade firezone traffic
+      masquerade-firezone = {
+        from = [ "firezone" ];
+        to = [ "vlan-services" ];
+        masquerade = true;
+        late = true; # Only accept after any rejects have been processed
+        verdict = "accept";
+      };
+
+      # forward firezone traffic
+      forward-incoming-firezone-traffic = {
+        from = [ "firezone" ];
+        to = [ "vlan-services" ];
+        verdict = "accept";
+      };
+
+      forward-outgoing-firezone-traffic = {
+        from = [ "vlan-services" ];
+        to = [ "firezone" ];
         verdict = "accept";
       };
     };

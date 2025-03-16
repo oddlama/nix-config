@@ -15,10 +15,8 @@ in
 
   environment.persistence."/persist".directories = [
     {
-      directory = "/var/lib/actual";
+      directory = "/var/lib/private/actual";
       mode = "0700";
-      user = "actual";
-      group = "actual";
     }
   ];
 

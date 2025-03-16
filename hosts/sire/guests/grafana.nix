@@ -72,20 +72,6 @@ in
         tokenFile =
           nodes.sire-influxdb.config.age.secrets."grafana-influxdb-token-machines-${config.node.name}".path;
       };
-
-    age.secrets."grafana-influxdb-token-home-${config.node.name}" = {
-      inherit (config.age.secrets.grafana-influxdb-token-home) rekeyFile;
-      mode = "440";
-      group = "influxdb2";
-    };
-
-    services.influxdb2.provision.organizations.home.auths."grafana home:home_assistant (${config.node.name})" =
-      {
-        readBuckets = [ "home_assistant" ];
-        writeBuckets = [ "home_assistant" ];
-        tokenFile =
-          nodes.sire-influxdb.config.age.secrets."grafana-influxdb-token-home-${config.node.name}".path;
-      };
   };
 
   globals.services.grafana.domain = grafanaDomain;

@@ -21,7 +21,7 @@ let
     version = "1.0.0";
 
     src = ./i3-per-workspace-layout;
-    cargoHash = "sha256-9/k5IaMmLtbRP9hzcvi0+v6NJSihR+bcXzQB9oisfkk=";
+    cargoHash = "sha256-TSVN2BAfP3w1UdlEacPPWdWG6TmUdEHPtSgDZ7XqtE8=";
 
     meta = with lib; {
       description = "A helper utility to allow assigning a layout to each workspace in i3";
@@ -41,7 +41,7 @@ let
       rev = "8c2a80fd111dcb9ce7e956b867c0d0180b13b649";
       hash = "sha256-Rv4dTycB19c2JyQ0y5WpDpX15D2RhjKq2lPOyuK2Ki8=";
     };
-    cargoHash = "sha256-mwPLroz7oE7NNdc/H/sH9mnXj3KyT75U55UE7tMyZMw=";
+    cargoHash = "sha256-jSve8wMRP4p2eDVkLR1i4jjQ5pa2jKVheOeElY2HirM=";
 
     meta = with lib; {
       description = "Better focus navigation for sway and i3";
@@ -68,10 +68,14 @@ in
 
       keybindings =
         {
-          "XF86AudioRaiseVolume" = "exec --no-startup-id ${getExe pkgs.scripts.volume} set-volume @DEFAULT_AUDIO_SINK@ 5%+";
-          "XF86AudioLowerVolume" = "exec --no-startup-id ${getExe pkgs.scripts.volume} set-volume @DEFAULT_AUDIO_SINK@ 5%-";
-          "XF86AudioMute" = "exec --no-startup-id ${getExe pkgs.scripts.volume} set-mute @DEFAULT_AUDIO_SINK@ toggle";
-          "XF86AudioMicMute" = "exec --no-startup-id ${getExe pkgs.scripts.volume} set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
+          "XF86AudioRaiseVolume" =
+            "exec --no-startup-id ${getExe pkgs.scripts.volume} set-volume @DEFAULT_AUDIO_SINK@ 5%+";
+          "XF86AudioLowerVolume" =
+            "exec --no-startup-id ${getExe pkgs.scripts.volume} set-volume @DEFAULT_AUDIO_SINK@ 5%-";
+          "XF86AudioMute" =
+            "exec --no-startup-id ${getExe pkgs.scripts.volume} set-mute @DEFAULT_AUDIO_SINK@ toggle";
+          "XF86AudioMicMute" =
+            "exec --no-startup-id ${getExe pkgs.scripts.volume} set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
           "XF86AudioPlay" = "exec --no-startup-id ${getExe pkgs.playerctl} play-pause";
           "XF86AudioNext" = "exec --no-startup-id ${getExe pkgs.playerctl} next";
           "XF86AudioPrev" = "exec --no-startup-id ${getExe pkgs.playerctl} previous";
@@ -92,7 +96,8 @@ in
           "F11" = "exec --no-startup-id ${getExe pkgs.scripts.screenshot-area-scan-qr}";
           # Exlicitly without --no-startup-id to show the spinner
           "F12" = "exec ${getExe pkgs.scripts.screenshot-screen}";
-          "Print" = "exec --no-startup-id env QT_AUTO_SCREEN_SCALE_FACTOR=0 QT_SCREEN_SCALE_FACTORS='' ${getExe pkgs.flameshot} gui";
+          "Print" =
+            "exec --no-startup-id env QT_AUTO_SCREEN_SCALE_FACTOR=0 QT_SCREEN_SCALE_FACTORS='' ${getExe pkgs.flameshot} gui";
 
           "Shift+r" = "reload";
           "q" = "kill";
@@ -118,7 +123,8 @@ in
           "Return" = "fullscreen toggle";
           "a" = "focus parent";
 
-          "Shift+Ctrl+q" = "exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'";
+          "Shift+Ctrl+q" =
+            "exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'";
           "r" = "mode resize";
 
           "1" = "workspace number 1";
@@ -262,8 +268,10 @@ in
               };
             };
             fingerprint = {
-              ${monitorMain} = "00ffffffffffff001e6d9a5b078e0a000b1f0104b53c2278f919c1ae5044af260e5054210800d1c061404540314001010101010101014dd000a0f0703e803020350058542100001a000000fd0c3090505086010a202020202020000000fc003237474e3935300a2020202020000000ff003131314e5447594c423731390a02e602032d7123090707830100004410040301e2006ae305c000e60605017360216d1a0000020b309000047321602900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f47012790300030128d8060284ff0e9f002f801f006f08910002000400404f0104ff0e9f002f801f006f086200020004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006d90";
-              ${monitorLeft} = "00ffffffffffff001e6d095b39790700081a0104b53c22789f3035a7554ea3260f50542108007140818081c0a9c0d1c08100010101014dd000a0f0703e803020650c58542100001a286800a0f0703e800890650c58542100001a000000fd00283d878738010a202020202020000000fc004c4720556c7472612048440a2001850203117144900403012309070783010000023a801871382d40582c450058542100001e565e00a0a0a029503020350058542100001a0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c8";
+              ${monitorMain} =
+                "00ffffffffffff001e6d9a5b078e0a000b1f0104b53c2278f919c1ae5044af260e5054210800d1c061404540314001010101010101014dd000a0f0703e803020350058542100001a000000fd0c3090505086010a202020202020000000fc003237474e3935300a2020202020000000ff003131314e5447594c423731390a02e602032d7123090707830100004410040301e2006ae305c000e60605017360216d1a0000020b309000047321602900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f47012790300030128d8060284ff0e9f002f801f006f08910002000400404f0104ff0e9f002f801f006f086200020004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006d90";
+              ${monitorLeft} =
+                "00ffffffffffff001e6d095b39790700081a0104b53c22789f3035a7554ea3260f50542108007140818081c0a9c0d1c08100010101014dd000a0f0703e803020650c58542100001a286800a0f0703e800890650c58542100001a000000fd00283d878738010a202020202020000000fc004c4720556c7472612048440a2001850203117144900403012309070783010000023a801871382d40582c450058542100001e565e00a0a0a029503020350058542100001a0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c8";
             };
           };
         };

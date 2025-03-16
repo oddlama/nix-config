@@ -628,7 +628,7 @@ defmodule Provision do
               if only_updated_attrs == %{} do
                 {:ok, existing}
               else
-                resource = case existing |> Resources.update_or_replace_resource(resource_attrs, temp_admin_subject) do
+                resource = case existing |> Resources.update_resource(resource_attrs, temp_admin_subject) do
                   {:replaced, _old, new} ->
                     UuidMapping.update_entities(slug, "resources", %{external_id => new.id})
                     new
@@ -668,7 +668,7 @@ defmodule Provision do
               if only_updated_attrs == %{} do
                 {:ok, existing}
               else
-                policy = case existing |> Policies.update_or_replace_policy(policy_attrs, temp_admin_subject) do
+                policy = case existing |> Policies.update_policy(policy_attrs, temp_admin_subject) do
                   {:replaced, _old, new} ->
                     UuidMapping.update_entities(slug, "policies", %{external_id => new.id})
                     new

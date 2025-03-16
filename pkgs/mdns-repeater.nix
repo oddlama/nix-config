@@ -14,7 +14,7 @@ rustPlatform.buildRustPackage {
     hash = "sha256-cIrHSzdzFqfArE2bqWPm+CULuQU/KajkRN+i0b+seD0=";
   };
 
-  cargoHash = "sha256-00Vh2AVECtqvkmLZmyDCR43tUqKdN4j1B8GnnRiWAmU=";
+  cargoHash = "sha256-ZKY1UVxeMSQaPZecBCIleZSFMRAPP6Vv0uRcnSNUOY0=";
 
   meta = {
     description = "mDNS packet relayer";

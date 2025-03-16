@@ -2,6 +2,7 @@
   config,
   globals,
   lib,
+  nodes,
   ...
 }:
 let
@@ -25,10 +26,11 @@ let
   };
 in
 {
-  age.secrets.firezone-smtp-password = {
-    generator.script = "alnum";
-    mode = "440";
-    group = "firezone";
+  age.secrets.firezone-smtp-password.generator.script = "alnum";
+
+  # Mirror the original oauth2 secret
+  age.secrets.firezone-oauth2-client-secret = {
+    inherit (nodes.ward-kanidm.config.age.secrets.kanidm-oauth2-firezone) rekeyFile;
   };
 
   environment.persistence."/persist".directories = [
@@ -53,7 +55,7 @@ in
       inherit (config.repo.secrets.local.firezone.mail) from host username;
       port = 465;
       implicitTls = true;
-      passwordFile = config.age.secrets.firezone-smtp-password.file;
+      passwordFile = config.age.secrets.firezone-smtp-password.path;
     };
 
     provision = {
@@ -67,6 +69,22 @@ in
           name = "Admin";
           email = "admin@${globals.domains.me}";
         };
+
+        auth.oidc =
+          let
+            client_id = "firezone";
+          in
+          {
+            name = "Kanidm";
+            adapter = "openid_connect";
+            adapter_config = {
+              scope = "openid email profile";
+              response_type = "code";
+              inherit client_id;
+              discovery_document_uri = "https://${globals.services.kanidm.domain}/oauth2/openid/${client_id}/.well-known/openid-configuration";
+              clientSecretFile = config.age.secrets.firezone-oauth2-client-secret.path;
+            };
+          };
 
         # FIXME: dont hardcode, filter global service domains by internal state
         # FIXME: new entry here? make new adguardhome entry too.
@@ -110,10 +128,11 @@ in
           { }
           // allow "everyone" "home.vlan-services.v4"
           // allow "everyone" "home.vlan-services.v6"
-          // lib.genAttrs homeDomains (domain: allow "everyone" domain);
+          // lib.mergeAttrsList (map (domain: allow "everyone" domain) homeDomains);
       };
     };
 
+    domain.settings.ERLANG_DISTRIBUTION_PORT = 9003;
     api.externalUrl = "https://${firezoneDomain}/api/";
     web.externalUrl = "https://${firezoneDomain}/";
   };

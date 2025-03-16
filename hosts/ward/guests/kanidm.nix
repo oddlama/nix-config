@@ -38,6 +38,7 @@ in
   age.secrets.kanidm-oauth2-forgejo = mkRandomSecret;
   age.secrets.kanidm-oauth2-grafana = mkRandomSecret;
   age.secrets.kanidm-oauth2-immich = mkRandomSecret;
+  age.secrets.kanidm-oauth2-firezone = mkRandomSecret;
   age.secrets.kanidm-oauth2-paperless = mkRandomSecret;
   age.secrets.kanidm-oauth2-web-sentinel = mkRandomSecret;
 
@@ -138,11 +139,14 @@ in
       # Firezone
       groups."firezone.access" = { };
       systems.oauth2.firezone = {
-        public = true;
         displayName = "Firezone VPN";
-        # FIXME: change
-        originUrl = "https://dummy.example.org/";
-        originLanding = "https://dummy.example.org/";
+        # NOTE: state: both uuids are runtime values
+        originUrl = [
+          "https://${globals.services.firezone.domain}/50e16678-6e95-49e2-b59e-d70d0e658843/sign_in/providers/fc8afaa3-ce60-4073-9cae-81dec9453a2d/handle_callback"
+          "https://${globals.services.firezone.domain}/50e16678-6e95-49e2-b59e-d70d0e658843/settings/identity_providers/openid_connect/fc8afaa3-ce60-4073-9cae-81dec9453a2d/handle_callback"
+        ];
+        originLanding = "https://${globals.services.firezone.domain}/";
+        basicSecretFile = config.age.secrets.kanidm-oauth2-firezone.path;
         preferShortUsername = true;
         scopeMaps."firezone.access" = [
           "openid"

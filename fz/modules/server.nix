@@ -535,6 +535,13 @@ in
                 example = "My Organization";
               };
 
+              id = mkOption {
+                type = types.nullOr types.str;
+                description = "The uuid to assign to this account. A random uuid will be assigned when this is null.";
+                default = null;
+                example = "cbb88fd0-13e1-4ae4-9b6e-214a5a4666e8";
+              };
+
               features =
                 let
                   mkFeatureOption =
@@ -632,7 +639,7 @@ in
                       clientSecretFile = "/run/secrets/oidc-client-secret";
                       response_type = "code";
                       scope = "openid email name";
-                      discorvery_document_uri = "https://auth.example.com/.well-known/openid-configuration";
+                      discovery_document_uri = "https://auth.example.com/.well-known/openid-configuration";
                     };
                   };
                 };
@@ -1014,6 +1021,9 @@ in
           FEATURE_TRAFFIC_FILTERS_ENABLED = mkDefault true;
 
           FEATURE_SIGN_UP_ENABLED = mkDefault (!cfg.provision.enable);
+
+          WEB_EXTERNAL_URL = mkDefault cfg.web.externalUrl;
+          API_EXTERNAL_URL = mkDefault cfg.api.externalUrl;
         };
 
         domain.settings = {
@@ -1032,8 +1042,6 @@ in
           PHOENIX_HTTP_WEB_PORT = mkDefault cfg.web.port;
           PHOENIX_HTTP_API_PORT = mkDefault cfg.api.port;
           PHOENIX_SECURE_COOKIES = mkDefault true; # enforce HTTPS on cookies
-          WEB_EXTERNAL_URL = mkDefault cfg.web.externalUrl;
-          API_EXTERNAL_URL = mkDefault cfg.api.externalUrl;
         };
 
         api.settings = {
@@ -1046,8 +1054,6 @@ in
           PHOENIX_HTTP_WEB_PORT = mkDefault cfg.web.port;
           PHOENIX_HTTP_API_PORT = mkDefault cfg.api.port;
           PHOENIX_SECURE_COOKIES = mkDefault true; # enforce HTTPS on cookies
-          WEB_EXTERNAL_URL = mkDefault cfg.web.externalUrl;
-          API_EXTERNAL_URL = mkDefault cfg.api.externalUrl;
         };
       };
     }

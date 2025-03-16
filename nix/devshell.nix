@@ -86,8 +86,5 @@
           }
         ];
       };
-
-      # `nix fmt`
-      formatter = pkgs.alejandra;
     };
 }

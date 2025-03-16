@@ -28,6 +28,11 @@ in
 {
   age.secrets.firezone-smtp-password.generator.script = "alnum";
 
+  # NOTE: state: this token is from a manually created service account
+  age.secrets.firezone-relay-token = {
+    rekeyFile = config.node.secretsDir + "/firezone-relay-token.age";
+  };
+
   # Mirror the original oauth2 secret
   age.secrets.firezone-oauth2-client-secret = {
     inherit (nodes.ward-kanidm.config.age.secrets.kanidm-oauth2-firezone) rekeyFile;
@@ -135,6 +140,16 @@ in
     domain.settings.ERLANG_DISTRIBUTION_PORT = 9003;
     api.externalUrl = "https://${firezoneDomain}/api/";
     web.externalUrl = "https://${firezoneDomain}/";
+  };
+
+  services.firezone.relay = {
+    enable = true;
+    name = "sentinel";
+    apiUrl = "wss://${firezoneDomain}/api/";
+    tokenFile = config.age.secrets.firezone-relay-token.path;
+    publicIpv4 = lib.net.cidr.ip config.repo.secrets.local.networking.interfaces.wan.hostCidrv4;
+    publicIpv6 = lib.net.cidr.ip config.repo.secrets.local.networking.interfaces.wan.hostCidrv6;
+    openFirewall = true;
   };
 
   services.nginx = {

@@ -58,6 +58,18 @@
     };
   };
 
+  # NOTE: state: this token is from a manually created service account
+  age.secrets.firezone-gateway-token = {
+    rekeyFile = config.node.secretsDir + "/firezone-gateway-token.age";
+  };
+
+  services.firezone.gateway = {
+    enable = true;
+    name = "ward";
+    apiUrl = "wss://${globals.services.firezone.domain}/api/";
+    tokenFile = config.age.secrets.firezone-gateway-token.path;
+  };
+
   guests =
     let
       mkGuest = guestName: {

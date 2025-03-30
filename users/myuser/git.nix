@@ -46,6 +46,7 @@
       mergetool.prompt = true;
       commit.gpgsign = true;
       pull.rebase = true;
+      rebase.autostash = true;
       push.autoSetupRemote = true;
     };
     aliases = {

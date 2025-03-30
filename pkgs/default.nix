@@ -7,11 +7,10 @@ _inputs: [
     zsh-histdb-skim = prev.callPackage ./zsh-skim-histdb.nix { };
     neovim-clean = prev.neovim-unwrapped.overrideAttrs (old: {
       nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ prev.makeWrapper ];
-      postInstall =
-        (old.postInstall or "")
-        + ''
-          wrapProgram $out/bin/nvim --add-flags "--clean"
-        '';
+      postInstall = ''
+        ${old.postInstall or ""}
+        wrapProgram $out/bin/nvim --add-flags "--clean"
+      '';
     });
     #pythonPackagesExtensions =
     #  prev.pythonPackagesExtensions

@@ -21,7 +21,7 @@ let
     version = "1.0.0";
 
     src = ./i3-per-workspace-layout;
-    cargoHash = "sha256-TSVN2BAfP3w1UdlEacPPWdWG6TmUdEHPtSgDZ7XqtE8=";
+    cargoHash = "sha256-Sr++AnE/b7vj7dhoQhHW+riwkAOhueGusW0RtHciDK0=";
 
     meta = with lib; {
       description = "A helper utility to allow assigning a layout to each workspace in i3";
@@ -41,7 +41,7 @@ let
       rev = "8c2a80fd111dcb9ce7e956b867c0d0180b13b649";
       hash = "sha256-Rv4dTycB19c2JyQ0y5WpDpX15D2RhjKq2lPOyuK2Ki8=";
     };
-    cargoHash = "sha256-jSve8wMRP4p2eDVkLR1i4jjQ5pa2jKVheOeElY2HirM=";
+    cargoHash = "sha256-n/Ytn8t67f4FuZWqd4kQtQRewnDRfko7LO3OFb0Omaw=";
 
     meta = with lib; {
       description = "Better focus navigation for sway and i3";

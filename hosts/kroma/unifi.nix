@@ -1,4 +1,4 @@
-{ lib, ... }:
+# { lib, ... }:
 {
   environment.persistence."/persist".directories = [
     {
@@ -9,7 +9,8 @@
     }
   ];
 
-  services.unifi.enable = true;
+  # services.unifi.enable = true;
+
   # Don't autostart.
-  systemd.services.unifi.wantedBy = lib.mkForce [ ];
+  # systemd.services.unifi.wantedBy = lib.mkForce [ ];
 }

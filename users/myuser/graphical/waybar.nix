@@ -61,13 +61,13 @@
         format = "";
         on-click = "${lib.getExe pkgs.hyprpicker} --autocopy";
       };
-
-      "custom/cycle_wallpaper" = {
-        format = " ";
-        tooltip = true;
-        tooltip-format = "Change wallpaper";
-        on-click = "systemctl --user start swww-update-wallpaper";
-      };
+      #
+      # "custom/cycle_wallpaper" = {
+      #   format = " ";
+      #   tooltip = true;
+      #   tooltip-format = "Change wallpaper";
+      #   on-click = "systemctl --user start swww-update-wallpaper";
+      # };
 
       "custom/notification" = {
         tooltip = false;

@@ -15,7 +15,7 @@ rustPlatform.buildRustPackage rec {
     hash = "sha256-lJ2kpIXPHE8qP0EBnLuyvatWMtepBobNAC09e7itGas=";
   };
 
-  cargoHash = "sha256-yvgyqm8WM7Oddxsbl/lfHQOmsEEiMTK6itbqea5+Ibg=";
+  cargoHash = "sha256-dqTYJkKnvjzkV124XZHzDV58rjLhNz+Nc3Jj5gSaJas=";
 
   patchPhase = ''
     substituteInPlace zsh-histdb-skim-vendored.zsh \

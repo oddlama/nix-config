@@ -171,7 +171,7 @@ in
           "Google".metaData.hidden = true;
 
           "Kagi" = {
-            iconUpdateURL = "https://kagi.com/favicon.ico";
+            icon = "https://kagi.com/favicon.ico";
             updateInterval = 24 * 60 * 60 * 1000;
             definedAliases = [ "@k" ];
             urls = [
@@ -188,7 +188,7 @@ in
           };
 
           "YouTube" = {
-            iconUpdateURL = "https://youtube.com/favicon.ico";
+            icon = "https://youtube.com/favicon.ico";
             updateInterval = 24 * 60 * 60 * 1000;
             definedAliases = [ "@yt" ];
             urls = [
@@ -245,7 +245,7 @@ in
           };
 
           "GitHub" = {
-            iconUpdateURL = "https://github.com/favicon.ico";
+            icon = "https://github.com/favicon.ico";
             updateInterval = 24 * 60 * 60 * 1000;
             definedAliases = [ "@gh" ];
 
@@ -280,7 +280,7 @@ in
           };
 
           "HackerNews" = {
-            iconUpdateURL = "https://hn.algolia.com/favicon.ico";
+            icon = "https://hn.algolia.com/favicon.ico";
             updateInterval = 24 * 60 * 60 * 1000;
             definedAliases = [ "@hn" ];
 

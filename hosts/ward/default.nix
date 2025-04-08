@@ -13,6 +13,7 @@ let
   # FIXME: new entry here? make new firezone entry too.
   homeDomains = [
     globals.services.grafana.domain
+    globals.services.actual.domain
     globals.services.immich.domain
     globals.services.influxdb.domain
     globals.services.loki.domain

@@ -27,6 +27,7 @@ in
   };
 
   globals.services.paperless.domain = paperlessDomain;
+  # FIXME: also monitor from internal network
   globals.monitoring.http.paperless = {
     url = "https://${paperlessDomain}";
     expectedBodyRegex = "Paperless-ngx";

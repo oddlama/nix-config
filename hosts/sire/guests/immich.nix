@@ -107,7 +107,7 @@ let
 
   processedConfigFile = "/run/agenix/immich.config.json";
 
-  version = "v1.121.0";
+  version = "v1.131.3";
   environment = {
     DB_DATABASE_NAME = "immich";
     DB_HOSTNAME = ipImmichPostgres;

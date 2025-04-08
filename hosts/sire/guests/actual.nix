@@ -8,12 +8,12 @@
 }:
 let
   actualDomain = "finance.${globals.domains.me}";
-  client_id = "actual";
+  # client_id = "actual";
 in
 {
-  wireguard.proxy-sentinel = {
-    client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [ config.services.actual.settings.port ];
+  wireguard.proxy-home = {
+    client.via = "ward";
+    firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [ config.services.actual.settings.port ];
   };
 
   # Mirror the original oauth2 secret
@@ -30,7 +30,7 @@ in
 
   services.actual = {
     enable = true;
-    settings.trustedProxies = [ nodes.sentinel.config.wireguard.proxy-sentinel.ipv4 ];
+    settings.trustedProxies = [ nodes.ward-web-proxy.config.wireguard.proxy-home.ipv4 ];
   };
 
   # NOTE: state: to enable openid, we need to call their enable-openid script once
@@ -46,27 +46,30 @@ in
     serviceConfig.LoadCredential = [
       "oauth2-client-secret:${config.age.secrets.actual-oauth2-client-secret.path}"
     ];
-    environment = {
-      ACTUAL_OPENID_ENFORCE = "true";
-      ACTUAL_TOKEN_EXPIRATION = "openid-provider";
-
-      ACTUAL_OPENID_DISCOVERY_URL = "https://${globals.services.kanidm.domain}/oauth2/openid/${client_id}/.well-known/openid-configuration";
-      ACTUAL_OPENID_CLIENT_ID = client_id;
-      ACTUAL_OPENID_SERVER_HOSTNAME = "https://${actualDomain}";
-    };
+    # NOTE: openid is disabled for now. too experimental, many rough edges.
+    # only admins can use sync, every admin can open anyones finances. not good enough yet.
+    # environment = {
+    #   ACTUAL_OPENID_ENFORCE = "true";
+    #   ACTUAL_TOKEN_EXPIRATION = "openid-provider";
+    #
+    #   ACTUAL_OPENID_DISCOVERY_URL = "https://${globals.services.kanidm.domain}/oauth2/openid/${client_id}/.well-known/openid-configuration";
+    #   ACTUAL_OPENID_CLIENT_ID = client_id;
+    #   ACTUAL_OPENID_SERVER_HOSTNAME = "https://${actualDomain}";
+    # };
   };
 
   globals.services.actual.domain = actualDomain;
-  globals.monitoring.http.actual = {
-    url = "https://${actualDomain}/";
-    expectedBodyRegex = "Actual";
-    network = "internet";
-  };
+  # FIXME: monitor from internal network
+  # globals.monitoring.http.actual = {
+  #   url = "https://${actualDomain}/";
+  #   expectedBodyRegex = "Actual";
+  #   network = "local-${config.node.name}";
+  # };
 
-  nodes.sentinel = {
+  nodes.ward-web-proxy = {
     services.nginx = {
       upstreams.actual = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.actual.settings.port}" =
+        servers."${config.wireguard.proxy-home.ipv4}:${toString config.services.actual.settings.port}" =
           { };
         extraConfig = ''
           zone actual 64k;
@@ -80,11 +83,6 @@ in
       virtualHosts.${actualDomain} = {
         forceSSL = true;
         useACMEWildcardHost = true;
-        # oauth2 = {
-        #   enable = true;
-        #   allowedGroups = ["access_openwebui"];
-        #   X-Email = "\${upstream_http_x_auth_request_preferred_username}@${globals.domains.personal}";
-        # };
         extraConfig = ''
           client_max_body_size 256M;
         '';

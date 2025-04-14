@@ -1,5 +1,12 @@
 { config, ... }:
 {
+  age.secrets.mosquitto-pw-zigbee2mqtt = {
+    mode = "440";
+    owner = "zigbee2mqtt";
+    group = "mosquitto";
+    generator.script = "alnum";
+  };
+
   age.secrets.mosquitto-pw-home-assistant = {
     mode = "440";
     owner = "hass";
@@ -14,10 +21,10 @@
       {
         acl = [ "pattern readwrite #" ];
         users = {
-          # zigbee2mqtt = {
-          #   passwordFile = config.age.secrets.mosquitto-pw-zigbee2mqtt.path;
-          #   acl = [ "readwrite #" ];
-          # };
+          zigbee2mqtt = {
+            passwordFile = config.age.secrets.mosquitto-pw-zigbee2mqtt.path;
+            acl = [ "readwrite #" ];
+          };
           home_assistant = {
             passwordFile = config.age.secrets.mosquitto-pw-home-assistant.path;
             acl = [ "readwrite #" ];

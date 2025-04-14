@@ -25,6 +25,7 @@
     ./influxdb.nix
     ./mosquitto.nix
     ./wyoming.nix
+    ./zigbee2mqtt.nix
   ];
 
   topology.self.hardware.info = "Intel N100, 16GB RAM";

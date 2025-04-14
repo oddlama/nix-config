@@ -20,7 +20,6 @@ let
     globals.services.paperless.domain
     globals.services.esphome.domain
     globals.services.home-assistant.domain
-    globals.services.zigbee2mqtt.domain
     "fritzbox.${globals.domains.personal}"
   ];
 in

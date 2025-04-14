@@ -39,7 +39,7 @@
       gamemode = uidGid 972;
       plausible = uidGid 971;
       actual = uidGid 970;
-      flatpak = uidGid 969;
+      # flatpak = uidGid 969;
       unifi = uidGid 968;
       plugdev.gid = 967;
       tss = uidGid 966;

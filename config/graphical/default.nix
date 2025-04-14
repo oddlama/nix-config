@@ -43,24 +43,11 @@ in
     # Required for gnome3 pinentry
     services.dbus.packages = [ pkgs.gcr ];
 
-    xdg.portal = {
-      enable = true;
-      xdgOpenUsePortal = true;
-      config.common = {
-        default = [
-          "gtk"
-          "hyprland"
-        ];
-        "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
-        "org.freedesktop.impl.portal.ScreenCast" = [ "hyprland" ];
-        "org.freedesktop.impl.portal.Screenshot" = [ "hyprland" ];
-        "org.freedesktop.portal.FileChooser" = [ "xdg-desktop-portal-gtk" ];
-      };
-      extraPortals = [
-        pkgs.xdg-desktop-portal-hyprland
-        pkgs.xdg-desktop-portal-gtk
-      ];
-    };
+    # We actually use the home-manager module to add the actual portal config,
+    # but need this so relevant implementations are found
+    environment.pathsToLink = [
+      "/share/xdg-desktop-portal"
+    ];
 
     services.displayManager.enable = true;
     programs.uwsm = {

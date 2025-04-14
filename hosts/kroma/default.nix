@@ -91,7 +91,6 @@
   programs.nix-ld.enable = true;
   topology.self.icon = "devices.desktop";
 
-  services.flatpak.enable = true;
   hardware.nvidia-container-toolkit.enable = true;
   virtualisation.containers.enable = true;
   virtualisation.podman = {

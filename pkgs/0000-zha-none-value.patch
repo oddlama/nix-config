@@ -1,0 +1,74 @@
+From 4d9b897f73ccb24c32c48584667fd71b8eb433e9 Mon Sep 17 00:00:00 2001
+From: puddly <32534428+puddly@users.noreply.github.com>
+Date: Tue, 8 Apr 2025 20:01:07 -0400
+Subject: [PATCH] Ignore "non-value" values for sensors
+
+---
+ zha/application/platforms/sensor/__init__.py | 26 ++++++++++++++------
+ 1 file changed, 18 insertions(+), 8 deletions(-)
+
+diff --git a/zha/application/platforms/sensor/__init__.py b/zha/application/platforms/sensor/__init__.py
+index 73cc7fe1..e9d7ad30 100644
+--- a/zha/application/platforms/sensor/__init__.py
++++ b/zha/application/platforms/sensor/__init__.py
+@@ -17,6 +17,7 @@
+ from zigpy import types
+ from zigpy.quirks.v2 import ZCLEnumMetadata, ZCLSensorMetadata
+ from zigpy.state import Counter, State
++from zigpy.zcl import foundation
+ from zigpy.zcl.clusters.closures import WindowCovering
+ from zigpy.zcl.clusters.general import Basic
+ 
+@@ -297,10 +298,25 @@ def handle_cluster_handler_attribute_updated(
+         ):
+             self.maybe_emit_state_changed_event()
+ 
++    def _is_non_value(self, value: int) -> bool:
++        # Ignore "non-value" values
++        try:
++            attr_def = self._cluster_handler.cluster.find_attribute(
++                self._attribute_name
++            )
++        except ValueError:
++            return False
++
++        data_type = foundation.DataType.from_type_id(attr_def.zcl_type)
++        return value == data_type.non_value
++
+     def formatter(
+         self, value: int | enum.IntEnum
+     ) -> datetime | int | float | str | None:
+         """Numeric pass-through formatter."""
++        if self._is_non_value(value):
++            return None
++
+         if self._decimals > 0:
+             return round(
+                 float(value * self._multiplier) / self._divisor, self._decimals
+@@ -885,10 +901,10 @@ class Illuminance(Sensor):
+ 
+     def formatter(self, value: int) -> int | None:
+         """Convert illumination data."""
++        if self._is_non_value(value):
++            return None
+         if value == 0:
+             return 0
+-        if value == 0xFFFF:
+-            return None
+         return round(pow(10, ((value - 1) / 10000)))
+ 
+ 
+@@ -1244,12 +1260,6 @@ class Flow(Sensor):
+     _attr_native_unit_of_measurement = UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR
+     _attr_primary_weight = 1
+ 
+-    def formatter(self, value: int) -> datetime | int | float | str | None:
+-        """Handle unknown value state."""
+-        if value == 0xFFFF:
+-            return None
+-        return super().formatter(value)
+-
+ 
+ @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_TEMPERATURE)
+ class Temperature(Sensor):
+

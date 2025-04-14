@@ -12,12 +12,13 @@ _inputs: [
         wrapProgram $out/bin/nvim --add-flags "--clean"
       '';
     });
-    #pythonPackagesExtensions =
-    #  prev.pythonPackagesExtensions
-    #  ++ [
-    #    (_pythonFinal: pythonPrev: {
-    #    })
-    #  ];
+    pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+      (_pythonFinal: pythonPrev: {
+        zha = pythonPrev.zha.overrideAttrs {
+          patches = [ ./0000-zha-none-value.patch ];
+        };
+      })
+    ];
 
     mdns-repeater = prev.callPackage ./mdns-repeater.nix { };
 

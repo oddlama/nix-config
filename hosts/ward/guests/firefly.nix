@@ -11,7 +11,7 @@ in
 {
   wireguard.proxy-home = {
     client.via = "ward";
-    firewallRuleForNode.sausebiene.allowedTCPPorts = [ config.services.firefly.port ];
+    firewallRuleForNode.sausebiene.allowedTCPPorts = [ 80 ];
   };
 
   globals.services.firefly.domain = fireflyDomain;
@@ -55,8 +55,7 @@ in
   nodes.ward-web-proxy = {
     services.nginx = {
       upstreams.firefly = {
-        servers."${config.wireguard.proxy-home.ipv4}:${toString config.services.firefly.settings.server.http_port}" =
-          { };
+        servers."${config.wireguard.proxy-home.ipv4}:80" = { };
         extraConfig = ''
           zone firefly 64k;
           keepalive 2;

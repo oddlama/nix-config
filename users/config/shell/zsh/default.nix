@@ -18,16 +18,18 @@
       save = 1000500;
       size = 1000000;
     };
-    initExtra = lib.readFile ./zshrc;
-    initExtraFirst = ''
-      HISTDB_FILE=''${XDG_DATA_HOME-$HOME/.local/share}/zsh/history.db
+    initContent = lib.mkMerge [
+      (lib.mkBefore ''
+        HISTDB_FILE=''${XDG_DATA_HOME-$HOME/.local/share}/zsh/history.db
 
-      # Do this early so fast-syntax-highlighting can wrap and override this
-      if autoload history-search-end; then
-        zle -N history-beginning-search-backward-end history-search-end
-        zle -N history-beginning-search-forward-end  history-search-end
-      fi
-    '';
+        # Do this early so fast-syntax-highlighting can wrap and override this
+        if autoload history-search-end; then
+          zle -N history-beginning-search-backward-end history-search-end
+          zle -N history-beginning-search-forward-end  history-search-end
+        fi
+      '')
+      (lib.readFile ./zshrc)
+    ];
     plugins = [
       {
         # Must be before plugins that wrap widgets, such as zsh-autosuggestions or fast-syntax-highlighting

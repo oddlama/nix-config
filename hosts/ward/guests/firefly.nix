@@ -17,7 +17,7 @@ in
   globals.services.firefly.domain = fireflyDomain;
   globals.monitoring.http.firefly = {
     url = "https://${fireflyDomain}";
-    expectedBodyRegex = "Firefly-III";
+    expectedBodyRegex = "Firefly III";
     network = "home-lan.vlans.services";
   };
 
@@ -48,9 +48,6 @@ in
       TRUSTED_PROXIES = wardWebProxyCfg.wireguard.proxy-home.ipv4;
       SITE_OWNER = "admin@${globals.domains.me}";
       APP_KEY_FILE = config.age.secrets.firefly-app-key.path;
-      AUTHENTICATION_GUARD = "remote_user_guard";
-      AUTHENTICATION_GUARD_HEADER = "X-User";
-      AUTHENTICATION_GUARD_EMAIL = "X-Email";
     };
   };
 

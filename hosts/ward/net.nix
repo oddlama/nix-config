@@ -140,7 +140,7 @@
             IPv6SendRA = true;
             IPv6AcceptRA = false;
             # DHCPPrefixDelegation = true;
-            MulticastDNS = true;
+            MulticastDNS = vlanName == "services";
           };
           # dhcpPrefixDelegationConfig.UplinkInterface = "wan";
           # dhcpPrefixDelegationConfig.Token = "::ff";

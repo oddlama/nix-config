@@ -85,7 +85,7 @@ in
           matchConfig.Name = "vlan-${vlanName}";
           networkConfig = {
             IPv6PrivacyExtensions = "yes";
-            MulticastDNS = true;
+            MulticastDNS = vlanName == "services";
           };
           linkConfig.RequiredForOnline = "routable";
         };

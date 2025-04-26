@@ -18,6 +18,11 @@
     group = "oauth2-proxy";
   };
 
+  # FIXME: switch to loadcredential + start wrapper.
+  # TODO: define nixos option to do this for us, it's recurring. like systemd.services.a.secretEnv = {
+  #   ABC = ./path.to.secret.file; # or runtime path.
+  # };
+
   # Mirror the original oauth2 secret, but prepend OAUTH2_PROXY_CLIENT_SECRET=
   # so it can be used as an EnvironmentFile
   age.secrets.oauth2-client-secret = {

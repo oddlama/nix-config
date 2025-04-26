@@ -35,7 +35,6 @@ in
   age.secrets.kanidm-admin-password = mkRandomSecret;
   age.secrets.kanidm-idm-admin-password = mkRandomSecret;
 
-  age.secrets.kanidm-oauth2-actual = mkRandomSecret;
   age.secrets.kanidm-oauth2-forgejo = mkRandomSecret;
   age.secrets.kanidm-oauth2-grafana = mkRandomSecret;
   age.secrets.kanidm-oauth2-immich = mkRandomSecret;
@@ -131,23 +130,6 @@ in
         # XXX: RS256 is used instead of ES256 so additionally we need legacy crypto
         enableLegacyCrypto = true;
         scopeMaps."immich.access" = [
-          "openid"
-          "email"
-          "profile"
-        ];
-      };
-
-      # Actual
-      groups."actual.access" = { };
-      systems.oauth2.actual = {
-        displayName = "Actual Budget";
-        originUrl = "https://${globals.services.actual.domain}/openid/callback";
-        originLanding = "https://${globals.services.actual.domain}/";
-        basicSecretFile = config.age.secrets.kanidm-oauth2-actual.path;
-        preferShortUsername = true;
-        # XXX: RS256 is used instead of ES256 so additionally we need legacy crypto
-        enableLegacyCrypto = true;
-        scopeMaps."actual.access" = [
           "openid"
           "email"
           "profile"

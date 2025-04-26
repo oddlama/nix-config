@@ -112,7 +112,7 @@ in
               # FIXME: new entry here? make new firezone entry too.
               # FIXME: new entry here? make new firezone gateway on ward entry too.
               globals.services.grafana.domain
-              globals.services.actual.domain
+              globals.services.firefly.domain
               globals.services.immich.domain
               globals.services.influxdb.domain
               globals.services.loki.domain

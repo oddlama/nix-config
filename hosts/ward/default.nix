@@ -13,7 +13,7 @@ let
   # FIXME: new entry here? make new firezone entry too.
   homeDomains = [
     globals.services.grafana.domain
-    globals.services.actual.domain
+    globals.services.firefly.domain
     globals.services.immich.domain
     globals.services.influxdb.domain
     globals.services.loki.domain
@@ -135,6 +135,7 @@ in
     lib.mkIf (!minimal) (
       { }
       // mkMicrovm "adguardhome"
+      // mkMicrovm "firefly"
       // mkMicrovm "forgejo"
       // mkMicrovm "kanidm"
       // mkMicrovm "radicale"

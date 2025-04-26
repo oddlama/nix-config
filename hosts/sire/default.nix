@@ -134,7 +134,6 @@
     in
     lib.mkIf (!minimal) (
       { }
-      // mkMicrovm "actual" { }
       // mkMicrovm "samba" {
         enableStorageDataset = true;
         enableBunkerDataset = true;

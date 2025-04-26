@@ -11,7 +11,7 @@ in
 {
   wireguard.proxy-home = {
     client.via = "ward";
-    firewallRuleForNode.sausebiene.allowedTCPPorts = [ 80 ];
+    firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [ 80 ];
   };
 
   globals.services.firefly.domain = fireflyDomain;
@@ -41,6 +41,8 @@ in
     enableNginx = true;
     virtualHost = globals.services.firefly.domain;
     settings = {
+      AUDIT_LOG_LEVEL = "emergency"; # disable audit logs
+      LOG_CHANNEL = "stdout";
       APP_URL = "https://${globals.services.firefly.domain}";
       TZ = "Europe/Berlin";
       TRUSTED_PROXIES = wardWebProxyCfg.wireguard.proxy-home.ipv4;

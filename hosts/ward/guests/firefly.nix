@@ -51,6 +51,7 @@ in
     }
   ];
 
+  i18n.supportedLocales = [ "all" ];
   services.firefly-iii = {
     enable = true;
     enableNginx = true;

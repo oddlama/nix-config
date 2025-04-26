@@ -19,6 +19,7 @@ _inputs: [
     # ];
 
     mdns-repeater = prev.callPackage ./mdns-repeater.nix { };
+    firefly-pico = prev.callPackage ./firefly-pico.nix { };
 
     formats = prev.formats // {
       ron = import ./ron.nix { inherit (prev) lib pkgs; };

@@ -81,7 +81,7 @@ in
             vlanCfg.hosts.sausebiene.cidrv4
             vlanCfg.hosts.sausebiene.cidrv6
           ];
-          gateway = [ vlanCfg.hosts.ward.ipv4 ];
+          gateway = lib.optionals (vlanName == "services") [ vlanCfg.hosts.ward.ipv4 ];
           matchConfig.Name = "vlan-${vlanName}";
           networkConfig = {
             IPv6PrivacyExtensions = "yes";

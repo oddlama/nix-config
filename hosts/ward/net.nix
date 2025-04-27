@@ -6,6 +6,7 @@
 }:
 {
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
+  boot.kernel.sysctl."net.ipv6.conf.all.forwarding" = 1;
   networking.hostId = config.repo.secrets.local.networking.hostId;
 
   globals.monitoring.ping.ward = {
@@ -164,124 +165,169 @@
       }
     );
 
-  networking.nftables.firewall = {
-    zones =
-      {
-        untrusted.interfaces = [ "wan" ];
-        proxy-home.interfaces = [ "proxy-home" ];
-        firezone.interfaces = [ "tun-firezone" ];
-        adguardhome.ipv4Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv4 ];
-        adguardhome.ipv6Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv6 ];
-        web-proxy.ipv4Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv4 ];
-        web-proxy.ipv6Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv6 ];
-        samba.ipv4Addresses = [ globals.net.home-lan.vlans.services.hosts.sire-samba.ipv4 ];
-        samba.ipv6Addresses = [ globals.net.home-lan.vlans.services.hosts.sire-samba.ipv6 ];
-        scanner-ads-4300n.ipv4Addresses = [
-          globals.net.home-lan.vlans.devices.hosts.scanner-ads-4300n.ipv4
-        ];
-        scanner-ads-4300n.ipv6Addresses = [
-          globals.net.home-lan.vlans.devices.hosts.scanner-ads-4300n.ipv6
-        ];
-      }
-      // lib.flip lib.concatMapAttrs globals.net.home-lan.vlans (
-        vlanName: _: {
-          "vlan-${vlanName}".interfaces = [ "me-${vlanName}" ];
+  networking.nftables = {
+    firewall = {
+      zones =
+        {
+          untrusted.interfaces = [ "wan" ];
+          proxy-home.interfaces = [ "proxy-home" ];
+          firezone.interfaces = [ "tun-firezone" ];
+          adguardhome.ipv4Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv4 ];
+          adguardhome.ipv6Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv6 ];
+          web-proxy.ipv4Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv4 ];
+          web-proxy.ipv6Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv6 ];
+          samba.ipv4Addresses = [ globals.net.home-lan.vlans.services.hosts.sire-samba.ipv4 ];
+          samba.ipv6Addresses = [ globals.net.home-lan.vlans.services.hosts.sire-samba.ipv6 ];
+          scanner-ads-4300n.ipv4Addresses = [
+            globals.net.home-lan.vlans.devices.hosts.scanner-ads-4300n.ipv4
+          ];
+          scanner-ads-4300n.ipv6Addresses = [
+            globals.net.home-lan.vlans.devices.hosts.scanner-ads-4300n.ipv6
+          ];
         }
-      );
+        // lib.flip lib.concatMapAttrs globals.net.home-lan.vlans (
+          vlanName: _: {
+            "vlan-${vlanName}".interfaces = [ "me-${vlanName}" ];
+          }
+        );
 
-    rules = {
-      masquerade-internet = {
-        from = [
-          "vlan-services"
-          "vlan-home"
-          "vlan-devices"
-          "vlan-guests"
-        ];
-        to = [ "untrusted" ];
-        masquerade = true;
-        late = true; # Only accept after any rejects have been processed
-        verdict = "accept";
+      rules = {
+        masquerade-internet = {
+          from = [
+            "vlan-services"
+            "vlan-home"
+            "vlan-devices"
+            "vlan-guests"
+          ];
+          to = [ "untrusted" ];
+          # masquerade = true; NOTE: custom rule below for ip4 + ip6
+          late = true; # Only accept after any rejects have been processed
+          verdict = "accept";
+        };
+
+        # masquerade firezone traffic
+        masquerade-firezone = {
+          from = [ "firezone" ];
+          to = [ "vlan-services" ];
+          # masquerade = true; NOTE: custom rule below for ip4 + ip6
+          late = true; # Only accept after any rejects have been processed
+          verdict = "accept";
+        };
+
+        # Allow access to the AdGuardHome DNS server from any VLAN that has internet access
+        access-adguardhome-dns = {
+          from = [
+            "vlan-services"
+            "vlan-home"
+            "vlan-devices"
+            "vlan-guests"
+          ];
+          to = [ "adguardhome" ];
+          verdict = "accept";
+        };
+
+        # Allow access to the web proxy from the devices VLAN
+        access-web-proxy = {
+          from = [
+            "vlan-devices"
+          ];
+          to = [ "web-proxy" ];
+          allowedTCPPorts = [
+            80
+            443
+          ];
+          allowedUDPPorts = [ 443 ];
+          verdict = "accept";
+        };
+
+        # Allow the scanner to access samba via SFTP
+        access-samba-sftp = {
+          from = [ "scanner-ads-4300n" ];
+          to = [ "samba" ];
+          allowedTCPPorts = [ 22 ];
+        };
+
+        # Allow devices in the home VLAN to talk to any of the services or home devices.
+        access-services = {
+          from = [ "vlan-home" ];
+          to = [
+            "vlan-services"
+            "vlan-devices"
+            "vlan-iot"
+          ];
+          late = true;
+          verdict = "accept";
+        };
+
+        # Allow the services VLAN to talk to our wireguard server
+        services-to-local = {
+          from = [ "vlan-services" ];
+          to = [ "local" ];
+          allowedUDPPorts = [ config.wireguard.proxy-home.server.port ];
+        };
+
+        # Forward traffic between wireguard participants
+        forward-proxy-home-vpn-traffic = {
+          from = [ "proxy-home" ];
+          to = [ "proxy-home" ];
+          verdict = "accept";
+        };
+
+        # forward firezone traffic
+        forward-incoming-firezone-traffic = {
+          from = [ "firezone" ];
+          to = [ "vlan-services" ];
+          verdict = "accept";
+        };
+
+        forward-outgoing-firezone-traffic = {
+          from = [ "vlan-services" ];
+          to = [ "firezone" ];
+          verdict = "accept";
+        };
       };
+    };
 
-      # Allow access to the AdGuardHome DNS server from any VLAN that has internet access
-      access-adguardhome-dns = {
-        from = [
-          "vlan-services"
-          "vlan-home"
-          "vlan-devices"
-          "vlan-guests"
-        ];
-        to = [ "adguardhome" ];
-        verdict = "accept";
-      };
-
-      # Allow access to the web proxy from the devices VLAN
-      access-web-proxy = {
-        from = [
-          "vlan-devices"
-        ];
-        to = [ "web-proxy" ];
-        allowedTCPPorts = [
-          80
-          443
-        ];
-        allowedUDPPorts = [ 443 ];
-        verdict = "accept";
-      };
-
-      # Allow the scanner to access samba via SFTP
-      access-samba-sftp = {
-        from = [ "scanner-ads-4300n" ];
-        to = [ "samba" ];
-        allowedTCPPorts = [ 22 ];
-      };
-
-      # Allow devices in the home VLAN to talk to any of the services or home devices.
-      access-services = {
-        from = [ "vlan-home" ];
-        to = [
-          "vlan-services"
-          "vlan-devices"
-          "vlan-iot"
-        ];
-        late = true;
-        verdict = "accept";
-      };
-
-      # Allow the services VLAN to talk to our wireguard server
-      services-to-local = {
-        from = [ "vlan-services" ];
-        to = [ "local" ];
-        allowedUDPPorts = [ config.wireguard.proxy-home.server.port ];
-      };
-
-      # Forward traffic between wireguard participants
-      forward-proxy-home-vpn-traffic = {
-        from = [ "proxy-home" ];
-        to = [ "proxy-home" ];
-        verdict = "accept";
-      };
-
-      # masquerade firezone traffic
+    chains.postrouting = {
       masquerade-firezone = {
-        from = [ "firezone" ];
-        to = [ "vlan-services" ];
-        masquerade = true;
-        late = true; # Only accept after any rejects have been processed
-        verdict = "accept";
+        after = [ "hook" ];
+        late = true;
+        rules =
+          lib.forEach
+            [
+              "firezone"
+            ]
+            (
+              zone:
+              lib.concatStringsSep " " [
+                "meta protocol { ip, ip6 }"
+                (lib.head config.networking.nftables.firewall.zones.${zone}.ingressExpression)
+                (lib.head config.networking.nftables.firewall.zones.vlan-services.egressExpression)
+                "masquerade random"
+              ]
+            );
       };
 
-      # forward firezone traffic
-      forward-incoming-firezone-traffic = {
-        from = [ "firezone" ];
-        to = [ "vlan-services" ];
-        verdict = "accept";
-      };
-
-      forward-outgoing-firezone-traffic = {
-        from = [ "vlan-services" ];
-        to = [ "firezone" ];
-        verdict = "accept";
+      masquerade-internet = {
+        after = [ "hook" ];
+        late = true;
+        rules =
+          lib.forEach
+            [
+              "vlan-services"
+              "vlan-home"
+              "vlan-devices"
+              "vlan-guests"
+            ]
+            (
+              zone:
+              lib.concatStringsSep " " [
+                "meta protocol { ip, ip6 }"
+                (lib.head config.networking.nftables.firewall.zones.${zone}.ingressExpression)
+                (lib.head config.networking.nftables.firewall.zones.untrusted.egressExpression)
+                "masquerade random"
+              ]
+            );
       };
     };
   };

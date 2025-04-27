@@ -69,7 +69,7 @@ in
         let
           accessRules = ''
             ${lib.concatMapStrings (
-              ip: "allow ${ip};\n"
+              cidr: "allow ${cidr};\n"
             ) sentinelCfg.wireguard.proxy-sentinel.server.reservedAddresses}
             deny all;
           '';

@@ -6,6 +6,7 @@
 }:
 let
   fireflyDomain = "firefly.${globals.domains.me}";
+  fireflyPicoDomain = "firefly-pico.${globals.domains.me}";
   wardWebProxyCfg = nodes.ward-web-proxy.config;
 in
 {
@@ -15,13 +16,14 @@ in
   };
 
   globals.services.firefly.domain = fireflyDomain;
+  globals.services.firefly-pico.domain = fireflyPicoDomain;
   globals.monitoring.http.firefly = {
     url = "https://${fireflyDomain}";
     expectedBodyRegex = "Firefly III";
     network = "home-lan.vlans.services";
   };
   globals.monitoring.http.firefly-pico = {
-    url = "https://${fireflyDomain}/pico";
+    url = "https://${fireflyPicoDomain}";
     expectedBodyRegex = "Pico";
     network = "home-lan.vlans.services";
   };
@@ -51,6 +53,11 @@ in
     }
   ];
 
+  networking.hosts.${wardWebProxyCfg.wireguard.proxy-home.ipv4} = [
+    globals.services.firefly.domain
+    globals.services.firefly-pico.domain
+  ];
+
   i18n.supportedLocales = [ "all" ];
   services.firefly-iii = {
     enable = true;
@@ -70,10 +77,10 @@ in
   services.firefly-pico = {
     enable = true;
     enableNginx = true;
-    virtualHost = "pico.internal";
+    virtualHost = globals.services.firefly-pico.domain;
     settings = {
       LOG_CHANNEL = "syslog";
-      APP_URL = "https://${globals.services.firefly.domain}/pico";
+      APP_URL = "https://${globals.services.firefly-pico.domain}";
       TZ = "Europe/Berlin";
       FIREFLY_URL = config.services.firefly-iii.settings.APP_URL;
       TRUSTED_PROXIES = wardWebProxyCfg.wireguard.proxy-home.ipv4;
@@ -121,22 +128,31 @@ in
           proxyPass = "http://firefly";
           proxyWebsockets = true;
         };
-        locations."= /pico".return = "302 /pico/";
-        locations."/pico/" = {
-          proxyPass = "http://firefly/"; # Trailing slash matters! (remove location suffix)
+        extraConfig = ''
+          # allow self-access
+          allow ${config.wireguard.proxy-home.ipv4};
+          allow ${config.wireguard.proxy-home.ipv6};
+          # allow home traffic
+          allow ${globals.net.home-lan.vlans.home.cidrv4};
+          allow ${globals.net.home-lan.vlans.home.cidrv6};
+          # Firezone traffic
+          allow ${globals.net.home-lan.vlans.services.hosts.ward.ipv4};
+          allow ${globals.net.home-lan.vlans.services.hosts.ward.ipv6};
+          deny all;
+        '';
+      };
+      virtualHosts.${fireflyPicoDomain} = {
+        forceSSL = true;
+        useACMEWildcardHost = true;
+        locations."/" = {
+          proxyPass = "http://firefly";
           proxyWebsockets = true;
-
-          recommendedProxySettings = false; # We need to change Host without duplicating the header.
-          extraConfig = ''
-            proxy_set_header Host pico.internal;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-            proxy_set_header X-Forwarded-Host $host;
-            proxy_set_header X-Forwarded-Server pico.internal;
-          '';
         };
         extraConfig = ''
+          # allow self-access
+          allow ${config.wireguard.proxy-home.ipv4};
+          allow ${config.wireguard.proxy-home.ipv6};
+          # allow home traffic
           allow ${globals.net.home-lan.vlans.home.cidrv4};
           allow ${globals.net.home-lan.vlans.home.cidrv6};
           # Firezone traffic

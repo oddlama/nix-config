@@ -372,6 +372,7 @@ in
         [
           "${cfg.dataDir}/storage"
           "${cfg.dataDir}/storage/app"
+          "${cfg.dataDir}/storage/database"
           "${cfg.dataDir}/storage/framework"
           "${cfg.dataDir}/storage/framework/cache"
           "${cfg.dataDir}/storage/framework/sessions"

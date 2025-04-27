@@ -11,6 +11,7 @@
     llmnr = "false";
     extraConfig = ''
       Domains=~.
+      MulticastDNS=false
     '';
   };
 }

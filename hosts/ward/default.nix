@@ -15,6 +15,7 @@ let
     globals.services.grafana.domain
     globals.services.firefly.domain
     globals.services.firefly-pico.domain
+    globals.services.firefly-data-importer.domain
     globals.services.immich.domain
     globals.services.influxdb.domain
     globals.services.loki.domain

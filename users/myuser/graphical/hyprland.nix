@@ -163,7 +163,7 @@ in
       }
       (mkIf (nixosConfig.node.name == "kroma") {
         monitor = [
-          "DP-2, preferred, 0x0, 1"
+          "DP-2, 3840x2160@120, 0x0, 1"
           "DP-3, preferred, -3840x0, 1"
           # Thank you NVIDIA for this generous, free-of-charge, extra monitor that
           # doesn't exist and crashes yoru session sometimes when moving a window to it.

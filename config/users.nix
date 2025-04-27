@@ -45,5 +45,6 @@
       tss = uidGid 966;
       firefly-iii = uidGid 965;
       firefly-pico = uidGid 964;
+      avahi = uidGid 963;
     };
 }

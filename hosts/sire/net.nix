@@ -40,10 +40,7 @@ in
         ];
         gateway = [ globals.net.home-lan.vlans.home.hosts.ward.ipv4 ];
         matchConfig.Name = "vlan-home";
-        networkConfig = {
-          IPv6PrivacyExtensions = "yes";
-          MulticastDNS = true;
-        };
+        networkConfig.IPv6PrivacyExtensions = "yes";
         linkConfig.RequiredForOnline = "routable";
       };
     };
@@ -110,10 +107,7 @@ in
           ];
           gateway = lib.optionals (vlanName == "services") [ vlanCfg.hosts.ward.ipv4 ];
           matchConfig.Name = "me-${vlanName}";
-          networkConfig = {
-            IPv6PrivacyExtensions = "yes";
-            MulticastDNS = vlanName == "services";
-          };
+          networkConfig.IPv6PrivacyExtensions = "yes";
           linkConfig.RequiredForOnline = "routable";
         };
       }

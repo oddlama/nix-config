@@ -14,6 +14,9 @@
     network = "home-lan.vlans.services";
   };
 
+  # Reflect mDNS packets between our networks
+  services.avahi.reflector = true;
+
   boot.initrd.availableKernelModules = [ "8021q" ];
   boot.initrd.systemd.network = {
     enable = true;
@@ -50,7 +53,6 @@
         networkConfig = {
           IPv4Forwarding = "yes";
           IPv6PrivacyExtensions = "yes";
-          MulticastDNS = true;
         };
         linkConfig.RequiredForOnline = "routable";
       };
@@ -102,7 +104,6 @@
         gateway = [ globals.net.home-wan.hosts.fritzbox.ipv4 ];
         matchConfig.Name = "wan";
         networkConfig.IPv6PrivacyExtensions = "yes";
-        networkConfig.MulticastDNS = true;
         # dhcpV6Config.PrefixDelegationHint = "::/64";
         # FIXME: This should not be needed, but for some reason part of networkd
         # isn't seeing the RAs and not triggering DHCPv6. Even though some other
@@ -140,7 +141,6 @@
             IPv6SendRA = true;
             IPv6AcceptRA = false;
             # DHCPPrefixDelegation = true;
-            MulticastDNS = vlanName == "services";
           };
           # dhcpPrefixDelegationConfig.UplinkInterface = "wan";
           # dhcpPrefixDelegationConfig.Token = "::ff";

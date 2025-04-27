@@ -16,20 +16,14 @@
     "10-lan1" = {
       DHCP = "yes";
       matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.lan1.mac;
-      networkConfig = {
-        IPv6PrivacyExtensions = "yes";
-        MulticastDNS = true;
-      };
+      networkConfig.IPv6PrivacyExtensions = true;
       dhcpV4Config.RouteMetric = 10;
       dhcpV6Config.RouteMetric = 10;
     };
     "10-wlan1" = {
       DHCP = "yes";
       matchConfig.MACAddress = config.repo.secrets.local.networking.interfaces.wlan1.mac;
-      networkConfig = {
-        IPv6PrivacyExtensions = "yes";
-        MulticastDNS = true;
-      };
+      networkConfig.IPv6PrivacyExtensions = true;
       dhcpV4Config.RouteMetric = 40;
       dhcpV6Config.RouteMetric = 40;
     };

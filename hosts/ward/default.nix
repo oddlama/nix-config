@@ -36,7 +36,6 @@ in
     ./fs.nix
     ./net.nix
     ./kea.nix
-    ./mdns-repeater.nix
   ];
 
   topology.self.hardware.image = ../../topology/images/odroid-h3.png;

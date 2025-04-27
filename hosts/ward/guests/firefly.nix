@@ -37,7 +37,7 @@ in
     generator.script = _: ''
       echo "base64:$(head -c 32 /dev/urandom | base64)"
     '';
-    owner = "firefly-iii";
+    owner = "firefly-pico";
   };
 
   environment.persistence."/persist".directories = [
@@ -82,6 +82,25 @@ in
     };
   };
 
+  services.nginx.commonHttpConfig = ''
+    log_format json_combined escape=json '{'
+      '"time": $msec,'
+      '"remote_addr":"$remote_addr",'
+      '"status":$status,'
+      '"method":"$request_method",'
+      '"host":"$host",'
+      '"uri":"$request_uri",'
+      '"request_size":$request_length,'
+      '"response_size":$body_bytes_sent,'
+      '"response_time":$request_time,'
+      '"referrer":"$http_referer",'
+      '"user_agent":"$http_user_agent"'
+    '}';
+    error_log syslog:server=unix:/dev/log,nohostname;
+    access_log syslog:server=unix:/dev/log,nohostname json_combined;
+    ssl_ecdh_curve secp384r1;
+  '';
+
   nodes.ward-web-proxy = {
     services.nginx = {
       upstreams.firefly = {
@@ -102,11 +121,19 @@ in
           proxyPass = "http://firefly";
           proxyWebsockets = true;
         };
-        locations."/pico" = {
+        locations."= /pico".return = "302 /pico/";
+        locations."/pico/" = {
           proxyPass = "http://firefly/"; # Trailing slash matters! (remove location suffix)
           proxyWebsockets = true;
+
+          recommendedProxySettings = false; # We need to change Host without duplicating the header.
           extraConfig = ''
             proxy_set_header Host pico.internal;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header X-Forwarded-Host $host;
+            proxy_set_header X-Forwarded-Server pico.internal;
           '';
         };
         extraConfig = ''

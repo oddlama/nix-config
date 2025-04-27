@@ -230,9 +230,9 @@ in
               else if cfg.settings.DB_CONNECTION == "mysql" then
                 "firefly-pico"
               else
-                cfg.dataDir + "storage/database/database.sqlite";
+                cfg.dataDir + "/storage/database/database.sqlite";
             defaultText = ''
-              `cfg.dataDir + "storage/database/database.sqlite` if DB_CONNECTION is "sqlite", `firefly-pico` if "mysql" or "pgsql"
+              `cfg.dataDir + "/storage/database/database.sqlite` if DB_CONNECTION is "sqlite", `firefly-pico` if "mysql" or "pgsql"
             '';
             description = ''
               The absolute path or name of your firefly-pico database.
@@ -372,7 +372,6 @@ in
         [
           "${cfg.dataDir}/storage"
           "${cfg.dataDir}/storage/app"
-          "${cfg.dataDir}/storage/database"
           "${cfg.dataDir}/storage/framework"
           "${cfg.dataDir}/storage/framework/cache"
           "${cfg.dataDir}/storage/framework/sessions"

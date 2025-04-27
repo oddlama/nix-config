@@ -7,6 +7,13 @@
     generator.script = "alnum";
   };
 
+  age.secrets.mosquitto-pw-garage-door = {
+    mode = "440";
+    owner = "hass";
+    group = "mosquitto";
+    generator.script = "alnum";
+  };
+
   services.mosquitto = {
     enable = true;
     persistence = true;
@@ -20,6 +27,10 @@
           # };
           home_assistant = {
             passwordFile = config.age.secrets.mosquitto-pw-home-assistant.path;
+            acl = [ "readwrite #" ];
+          };
+          garage_door_sensor = {
+            passwordFile = config.age.secrets.mosquitto-pw-garage-door.path;
             acl = [ "readwrite #" ];
           };
         };

@@ -7,7 +7,6 @@
 let
   fireflyDomain = "firefly.${globals.domains.me}";
   fireflyPicoDomain = "firefly-pico.${globals.domains.me}";
-  fireflyDataImporterDomain = "firefly-data-importer.${globals.domains.me}";
   wardWebProxyCfg = nodes.ward-web-proxy.config;
 in
 {
@@ -18,7 +17,6 @@ in
 
   globals.services.firefly.domain = fireflyDomain;
   globals.services.firefly-pico.domain = fireflyPicoDomain;
-  globals.services.firefly-data-importer.domain = fireflyDataImporterDomain;
   globals.monitoring.http.firefly = {
     url = "https://${fireflyDomain}";
     expectedBodyRegex = "Firefly III";
@@ -44,13 +42,6 @@ in
     owner = "firefly-pico";
   };
 
-  age.secrets.firefly-data-importer-app-key = {
-    generator.script = _: ''
-      echo "base64:$(head -c 32 /dev/urandom | base64)"
-    '';
-    owner = "firefly-data-importer";
-  };
-
   environment.persistence."/persist".directories = [
     {
       directory = "/var/lib/firefly-iii";
@@ -59,10 +50,6 @@ in
     {
       directory = "/var/lib/firefly-pico";
       user = "firefly-pico";
-    }
-    {
-      directory = "/var/lib/firefly-iii-data-importer";
-      user = "firefly-iii-data-importer";
     }
   ];
 
@@ -99,23 +86,6 @@ in
       TRUSTED_PROXIES = wardWebProxyCfg.wireguard.proxy-home.ipv4;
       SITE_OWNER = "admin@${globals.domains.me}";
       APP_KEY_FILE = config.age.secrets.firefly-pico-app-key.path;
-    };
-  };
-
-  services.firefly-iii-data-importer = {
-    enable = true;
-    enableNginx = true;
-    virtualHost = globals.services.firefly-data-importer.domain;
-    settings = {
-      LOG_CHANNEL = "syslog";
-      APP_ENV = "local";
-      APP_URL = "https://${globals.services.firefly-data-importer.domain}";
-      TZ = "Europe/Berlin";
-      FIREFLY_III_URL = config.services.firefly-iii.settings.APP_URL;
-      VANITY_URL = config.services.firefly-iii.settings.APP_URL;
-      TRUSTED_PROXIES = wardWebProxyCfg.wireguard.proxy-home.ipv4;
-      EXPECT_SECURE_URL = "true";
-      APP_KEY_FILE = config.age.secrets.firefly-data-importer-app-key.path;
     };
   };
 

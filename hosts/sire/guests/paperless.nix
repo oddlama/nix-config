@@ -169,7 +169,7 @@ in
       PAPERLESS_CONSUMER_ENABLE_ASN_BARCODE = true;
       PAPERLESS_CONSUMER_BARCODE_SCANNER = "ZXING";
       PAPERLESS_CONSUMER_RECURSIVE = true;
-      PAPERLESS_FILENAME_FORMAT = "{owner_username}/{created_year}-{created_month}-{created_day}_{asn}_{title}";
+      PAPERLESS_FILENAME_FORMAT = "{{ owner_username }}/{{ created_year }}-{{ created_month }}-{{ created_day }}_{{ asn }}_{{ title }}";
 
       # Nginx does that better.
       PAPERLESS_ENABLE_COMPRESSION = false;

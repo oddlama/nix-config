@@ -46,5 +46,6 @@
       # firefly-iii = uidGid 965;
       # firefly-pico = uidGid 964;
       avahi = uidGid 963;
+      ente = uidGid 962;
     };
 }

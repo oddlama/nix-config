@@ -150,7 +150,7 @@
       }
       // mkMicrovm "ai" { }
       // mkMicrovm "minecraft" { }
-      #// mkMicrovm "firefly" {}
+      // mkMicrovm "ente" { }
       #// mkMicrovm "fasten-health" {}
     );
 }

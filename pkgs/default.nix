@@ -18,8 +18,6 @@ _inputs: [
     #   })
     # ];
 
-    firefly-pico = prev.callPackage ./firefly-pico.nix { };
-
     formats = prev.formats // {
       ron = import ./ron.nix { inherit (prev) lib pkgs; };
     };

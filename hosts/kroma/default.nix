@@ -91,9 +91,6 @@
   programs.nix-ld.enable = true;
   topology.self.icon = "devices.desktop";
 
-  # Mainly for client-side formatting in websites like firefly-iii
-  i18n.supportedLocales = [ "de_DE.UTF-8/UTF-8" ];
-
   hardware.nvidia-container-toolkit.enable = true;
   virtualisation.containers.enable = true;
   virtualisation.podman = {

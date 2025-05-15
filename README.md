@@ -46,12 +46,11 @@ I've included the major components in the lists below.
 
 | ~~~~~~~~~~~~ | Service | Source | Description
 ---|---|---|---
-💸 Budgeting | Firefly III \& Firefly Pico | [Link](./hosts/ward/guests/firefly.nix) | Budgeting application to track income and expenses
 🛡️ Adblock | AdGuard Home | [Link](./hosts/ward/guests/adguardhome.nix) | DNS level adblocker
 🔒 SSO | Kanidm | [Link](./hosts/ward/guests/kanidm.nix) | Identity provider for Single-Sign-On on my hosted services, with provisioning.
 🐙 Git | Forgejo | [Link](./hosts/ward/guests/forgejo.nix) | Forgejo with SSO
 🔑 Passwords | Vaultwarden | [Link](./hosts/ward/guests/vaultwarden.nix) | Self-hosted password manager
-📷 Photos | Immich | [Link](./hosts/sire/guests/immich.nix) | Self-hosted photo and video backup solution
+📷 Photos | Ente | [Link](./hosts/sire/guests/ente.nix) | E2E encrypted photo and video backup solution
 📄 Documents | Paperless | [Link](./hosts/sire/guests/paperless.nix) | Document management system. With per-user Samba share integration (consume & archive)
 🗓️ CalDAV/CardDAV | Radicale | [Link](./hosts/ward/guests/radicale.nix) | Contacts, Calender and Tasks synchronization
 📁 NAS | Samba | [Link](./hosts/sire/guests/samba.nix) | Network attached storage. Cross-integration with paperless

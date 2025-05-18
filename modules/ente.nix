@@ -319,6 +319,9 @@ in
             locations."/" = {
               root = webPackage "accounts";
               tryFiles = "$uri $uri.html /index.html";
+              extraConfig = ''
+                add_header Access-Control-Allow-Origin 'https://${cfgWeb.domains.api}';
+              '';
             };
           };
           virtualHosts.${domainFor "cast"} = {
@@ -326,6 +329,9 @@ in
             locations."/" = {
               root = webPackage "cast";
               tryFiles = "$uri $uri.html /index.html";
+              extraConfig = ''
+                add_header Access-Control-Allow-Origin 'https://${cfgWeb.domains.api}';
+              '';
             };
           };
           virtualHosts.${domainFor "photos"} = {
@@ -336,6 +342,9 @@ in
             locations."/" = {
               root = webPackage "photos";
               tryFiles = "$uri $uri.html /index.html";
+              extraConfig = ''
+                add_header Access-Control-Allow-Origin 'https://${cfgWeb.domains.api}';
+              '';
             };
           };
         };

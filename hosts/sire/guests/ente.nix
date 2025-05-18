@@ -80,6 +80,7 @@ in
     client.via = "sentinel";
     firewallRuleForNode.sentinel.allowedTCPPorts = [
       80
+      8080
       9000
     ];
   };
@@ -88,6 +89,7 @@ in
     client.via = "ward";
     firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [
       80
+      8080
       9000
     ];
   };
@@ -173,6 +175,11 @@ in
     mode = "440";
     group = "ente";
   };
+  age.secrets.ente-smtp-password = {
+    generator.script = "alnum";
+    mode = "440";
+    group = "ente";
+  };
 
   services.minio = {
     enable = true;
@@ -205,6 +212,15 @@ in
         rpid = enteAccountsDomain;
         rporigins = [ "https://${enteAccountsDomain}" ];
       };
+
+      # FIXME: blocked on https://github.com/ente-io/ente/issues/5958
+      # smtp = {
+      #   host = config.repo.secrets.local.ente.mail.host;
+      #   port = 465;
+      #   email = config.repo.secrets.local.ente.mail.from;
+      #   username = config.repo.secrets.local.ente.mail.user;
+      #   password._secret = config.age.secrets.ente-smtp-password.path;
+      # };
 
       s3 = {
         use_path_style_urls = true;

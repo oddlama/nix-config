@@ -39,6 +39,7 @@ in
   age.secrets.kanidm-oauth2-grafana = mkRandomSecret;
   age.secrets.kanidm-oauth2-immich = mkRandomSecret;
   age.secrets.kanidm-oauth2-firezone = mkRandomSecret;
+  age.secrets.kanidm-oauth2-mealie = mkRandomSecret;
   age.secrets.kanidm-oauth2-paperless = mkRandomSecret;
   age.secrets.kanidm-oauth2-web-sentinel = mkRandomSecret;
 
@@ -153,6 +154,29 @@ in
           "email"
           "profile"
         ];
+      };
+
+      # Mealie
+      groups."mealie.access" = { };
+      groups."mealie.admins" = { };
+      systems.oauth2.mealie = {
+        displayName = "Mealie";
+        originUrl = "https://${globals.services.mealie.domain}/login";
+        originLanding = "https://${globals.services.mealie.domain}/";
+        basicSecretFile = config.age.secrets.kanidm-oauth2-mealie.path;
+        preferShortUsername = true;
+        scopeMaps."mealie.access" = [
+          "openid"
+          "email"
+          "profile"
+        ];
+        claimMaps.groups = {
+          joinType = "array";
+          valuesByGroup = {
+            "mealie.access" = [ "user" ];
+            "mealie.admins" = [ "admin" ];
+          };
+        };
       };
 
       # Paperless

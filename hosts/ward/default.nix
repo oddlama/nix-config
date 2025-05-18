@@ -20,6 +20,7 @@ let
     "cast.photos.${globals.domains.me}"
     "photos.${globals.domains.me}"
     "s3.photos.${globals.domains.me}"
+    globals.services.mealie.domain
     globals.services.immich.domain
     globals.services.influxdb.domain
     globals.services.loki.domain
@@ -142,6 +143,7 @@ in
       // mkMicrovm "adguardhome"
       // mkMicrovm "forgejo"
       // mkMicrovm "kanidm"
+      // mkMicrovm "mealie"
       // mkMicrovm "radicale"
       // mkMicrovm "vaultwarden"
       // mkMicrovm "web-proxy"

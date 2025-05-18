@@ -20,11 +20,13 @@ in
   };
 
   globals.services.mealie.domain = mealieDomain;
-  globals.monitoring.http.mealie = {
-    url = "https://${mealieDomain}";
-    expectedBodyRegex = ''<title>Mealie<\title>'';
-    network = "home-lan.vlans.services";
-  };
+  # FIXME: internal monitoring not possible because DNS resolves to sentinel
+  # since adguardhome is not active in server's dns
+  # globals.monitoring.http.mealie = {
+  #   url = "https://${mealieDomain}";
+  #   expectedBodyRegex = ''<title>Mealie'';
+  #   network = "home-lan.vlans.services";
+  # };
 
   environment.persistence."/persist".directories = [
     {
@@ -62,7 +64,7 @@ in
         monitoring = {
           enable = true;
           expectedStatus = 200;
-          expectedBodyRegex = ''<title>Mealie<\title>'';
+          expectedBodyRegex = ''<title>Mealie'';
         };
       };
       virtualHosts.${mealieDomain} = {

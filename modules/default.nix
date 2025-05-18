@@ -4,6 +4,7 @@
     ./backups.nix
     ./deterministic-ids.nix
     ./distributed-config.nix
+    ./ente.nix
     ./globals.nix
     ./meta.nix
     ./nginx-upstream-monitoring.nix

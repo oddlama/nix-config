@@ -18,6 +18,8 @@ _inputs: [
     #   })
     # ];
 
+    ente-web = prev.callPackage ./ente-web.nix { };
+
     formats = prev.formats // {
       ron = import ./ron.nix { inherit (prev) lib pkgs; };
     };

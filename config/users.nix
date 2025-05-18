@@ -47,5 +47,6 @@
       # firefly-pico = uidGid 964;
       avahi = uidGid 963;
       ente = uidGid 962;
+      minio = uidGid 961;
     };
 }

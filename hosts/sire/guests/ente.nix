@@ -29,6 +29,7 @@ let
         zone museum 64k;
         keepalive 20;
       '';
+      monitoring.enable = true;
     };
 
     upstreams.minio = {
@@ -37,6 +38,7 @@ let
         zone minio 64k;
         keepalive 20;
       '';
+      monitoring.enable = true;
     };
 
     virtualHosts =
@@ -243,7 +245,7 @@ in
 
   # NOTE: services.ente.web is configured separately on both proxy servers!
   nodes.sentinel.services.nginx = proxyConfig config.wireguard.proxy-sentinel.ipv4 "";
-  nodes.ward-web-prox.services.nginxy = proxyConfig config.wireguard.proxy-home.ipv4 ''
+  nodes.ward-web-proxy.services.nginx = proxyConfig config.wireguard.proxy-home.ipv4 ''
     allow ${globals.net.home-lan.vlans.home.cidrv4};
     allow ${globals.net.home-lan.vlans.home.cidrv6};
     # Firezone traffic

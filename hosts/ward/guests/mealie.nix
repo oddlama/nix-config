@@ -13,9 +13,23 @@ in
     firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [ config.services.mealie.port ];
   };
 
-  # Mirror the original oauth2 secret
-  age.secrets.mealie-oauth2-client-secret = {
-    inherit (nodes.ward-kanidm.config.age.secrets.kanidm-oauth2-mealie) rekeyFile;
+  # Mirror the original oauth2 secret, but prepend OIDC_CLIENT_SECRET=
+  # so it can be used as an EnvironmentFile
+  age.secrets.oauth2-client-secret = {
+    generator.dependencies = [
+      nodes.ward-kanidm.config.age.secrets.kanidm-oauth2-mealie
+    ];
+    generator.script =
+      {
+        lib,
+        decrypt,
+        deps,
+        ...
+      }:
+      ''
+        echo -n "OIDC_CLIENT_SECRET="
+        ${decrypt} ${lib.escapeShellArg (lib.head deps).file}
+      '';
     mode = "440";
   };
 
@@ -41,16 +55,22 @@ in
       ALLOW_SIGNUP = "false";
       BASE_URL = "https://${mealieDomain}";
       TZ = config.time.timeZone;
-
       TOKEN_TIME = 87600; # 10 years session time - this is only internal so who cares
+
       OIDC_AUTH_ENABLED = "true";
-      OIDC_AUTO_REDIRECT = "true";
-      OIDC_CLIENT_ID = "mealie";
-      OIDC_CONFIGURATION_URL = "https://${globals.services.kanidm.domain}/oauth2/openid/${OIDC_CLIENT_ID}/.well-known/openid-configuration";
       OIDC_SIGNUP_ENABLED = "true";
+      OIDC_AUTO_REDIRECT = "true";
+      OIDC_REMEMBER_ME = "true";
+
+      OIDC_CLIENT_ID = "mealie";
+      OIDC_SIGNING_ALGORITHM = "ES256";
+      OIDC_USER_CLAIM = "preferred_username";
+      OIDC_PROVIDER_NAME = "Kanidm";
+      OIDC_CONFIGURATION_URL = "https://${globals.services.kanidm.domain}/oauth2/openid/${OIDC_CLIENT_ID}/.well-known/openid-configuration";
       OIDC_USER_GROUP = "user";
       OIDC_ADMIN_GROUP = "admin";
     };
+    credentialsFile = config.age.secrets.oauth2-client-secret.path;
   };
 
   nodes.ward-web-proxy = {

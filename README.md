@@ -54,7 +54,8 @@ I've included the major components in the lists below.
 📄 Documents | Paperless | [Link](./hosts/sire/guests/paperless.nix) | Document management system. With per-user Samba share integration (consume & archive)
 🗓️ CalDAV/CardDAV | Radicale | [Link](./hosts/ward/guests/radicale.nix) | Contacts, Calender and Tasks synchronization
 📁 NAS | Samba | [Link](./hosts/sire/guests/samba.nix) | Network attached storage. Cross-integration with paperless
-🌐 VPN | Firezone | [Link](./hosts/ward/guests/firezone.nix) | Internal network gateway and wireguard VPN server with dynamic peer configuration and SSO authentication.
+🌐 VPN | Firezone | [Link](./hosts/ward/guests/firezone.nix) | Internal network gateway and wireguard VPN server with dynamic peer configuration and SSO authentication
+🥗 Recipes | Mealie | [Link](./hosts/ward/guests/mealie.nix) | Recipe manager and meal planner
 🏠 Home Automation | Home Assistant | [Link](./hosts/zackbiene/home-assistant.nix) | Automation with Home Assistant and many related services
 📧 Mailserver | Stalwart | [Link](./hosts/envoy/stalwart-mail.nix) | Modern mail server setup with custom self-service alias management including Bitwarden integration
 🧱 Minecraft | PaperMC | [Link](./hosts/sire/guests/minecraft.nix) | Minecraft game server. Autostart on connect, systemd service with background console, automatic backups

@@ -55,7 +55,7 @@ in
   nodes.ward-web-proxy = {
     services.nginx = {
       upstreams.mealie = {
-        servers."${config.wireguard.proxy-home.ipv4}:${config.services.mealie.port}" = { };
+        servers."${config.wireguard.proxy-home.ipv4}:${toString config.services.mealie.port}" = { };
         extraConfig = ''
           zone mealie 64k;
           keepalive 2;

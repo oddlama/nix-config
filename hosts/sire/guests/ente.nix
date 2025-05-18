@@ -14,22 +14,17 @@ let
   s3Domain = "s3.photos.${globals.domains.me}";
 
   proxyConfig = remoteAddr: nginxExtraConfig: {
-    upstreams.ente = {
-      servers."${remoteAddr}:80" = { };
-      extraConfig = ''
-        zone ente 64k;
-        keepalive 20;
-      '';
-      monitoring.enable = true;
-    };
-
     upstreams.museum = {
       servers."${remoteAddr}:8080" = { };
       extraConfig = ''
         zone museum 64k;
         keepalive 20;
       '';
-      monitoring.enable = true;
+      monitoring = {
+        enable = true;
+        path = "/ping";
+        expectedStatus = 200;
+      };
     };
 
     upstreams.minio = {
@@ -38,7 +33,11 @@ let
         zone minio 64k;
         keepalive 20;
       '';
-      monitoring.enable = true;
+      monitoring = {
+        enable = true;
+        path = "/minio/health/live";
+        expectedStatus = 200;
+      };
     };
 
     virtualHosts =
@@ -81,7 +80,6 @@ in
   wireguard.proxy-sentinel = {
     client.via = "sentinel";
     firewallRuleForNode.sentinel.allowedTCPPorts = [
-      80
       8080
       9000
     ];
@@ -90,7 +88,6 @@ in
   wireguard.proxy-home = {
     client.via = "ward";
     firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [
-      80
       8080
       9000
     ];

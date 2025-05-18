@@ -5,7 +5,7 @@
   ...
 }:
 let
-  mealieDomain = "mealie.${globals.domains.personal}";
+  mealieDomain = "mealie.${globals.domains.me}";
 in
 {
   wireguard.proxy-home = {
@@ -22,9 +22,8 @@ in
   globals.services.mealie.domain = mealieDomain;
   globals.monitoring.http.mealie = {
     url = "https://${mealieDomain}";
-    # FIXME: todooooooooooo
-    expectedBodyRegex = "TODO";
-    network = "internet";
+    expectedBodyRegex = ''<title>Mealie<\title>'';
+    network = "home-lan.vlans.services";
   };
 
   environment.persistence."/persist".directories = [
@@ -62,8 +61,8 @@ in
         '';
         monitoring = {
           enable = true;
-          # FIXME: todooooooooooo
-          expectedBodyRegex = "TODO";
+          expectedStatus = 200;
+          expectedBodyRegex = ''<title>Mealie<\title>'';
         };
       };
       virtualHosts.${mealieDomain} = {

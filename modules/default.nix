@@ -1,4 +1,7 @@
 {
+  disabledModules = [
+    "services/web-apps/mealie.nix"
+  ];
   imports = [
     ./acme-wildcard.nix
     ./backups.nix
@@ -6,6 +9,7 @@
     ./distributed-config.nix
     ./ente.nix
     ./globals.nix
+    ./mealie.nix
     ./meta.nix
     ./nginx-upstream-monitoring.nix
     ./oauth2-proxy.nix

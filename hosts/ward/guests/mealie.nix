@@ -52,24 +52,24 @@ in
   services.mealie = {
     enable = true;
     settings = rec {
-      ALLOW_SIGNUP = "false";
       BASE_URL = "https://${mealieDomain}";
       TZ = config.time.timeZone;
       TOKEN_TIME = 87600; # 10 years session time - this is only internal so who cares
 
+      ALLOW_SIGNUP = "false";
       OIDC_AUTH_ENABLED = "true";
       OIDC_SIGNUP_ENABLED = "true";
       OIDC_AUTO_REDIRECT = "true";
       OIDC_REMEMBER_ME = "true";
 
       OIDC_CLIENT_ID = "mealie";
-      OIDC_SIGNING_ALGORITHM = "ES256";
       OIDC_USER_CLAIM = "preferred_username";
       OIDC_PROVIDER_NAME = "Kanidm";
       OIDC_CONFIGURATION_URL = "https://${globals.services.kanidm.domain}/oauth2/openid/${OIDC_CLIENT_ID}/.well-known/openid-configuration";
-      OIDC_USER_GROUP = "user";
-      OIDC_ADMIN_GROUP = "admin";
+      OIDC_USER_GROUP = "mealie.access@${globals.services.kanidm.domain}";
+      OIDC_ADMIN_GROUP = "mealie.admins@${globals.services.kanidm.domain}";
     };
+    trustedProxies = [ nodes.ward-web-proxy.config.wireguard.proxy-home.ipv4 ];
     credentialsFile = config.age.secrets.oauth2-client-secret.path;
   };
 

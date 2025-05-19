@@ -169,14 +169,8 @@ in
           "openid"
           "email"
           "profile"
+          "groups"
         ];
-        claimMaps.groups = {
-          joinType = "array";
-          valuesByGroup = {
-            "mealie.access" = [ "user" ];
-            "mealie.admins" = [ "admin" ];
-          };
-        };
       };
 
       # Paperless

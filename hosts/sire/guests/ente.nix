@@ -5,6 +5,9 @@
   pkgs,
   ...
 }:
+# NOTE: To increase storage for all users:
+#  $ runuser -u ente -- psql
+#  ente => UPDATE subscriptions SET storage = 6597069766656;
 let
   enteAccountsDomain = "accounts.photos.${globals.domains.me}";
   enteAlbumsDomain = "albums.photos.${globals.domains.me}";
@@ -191,7 +194,7 @@ in
       ${lib.getExe pkgs.curl} --retry 5 --retry-connrefused --fail --no-progress-meter -o /dev/null "http://localhost:9000/minio/health/live"
 
       # Make sure bucket exists
-      mkdir -p ${lib.escapeShellArg config.services.minio.dataDir}/data/ente
+      mkdir -p ${lib.escapeShellArg config.services.minio.dataDir}/ente
     '';
   };
 

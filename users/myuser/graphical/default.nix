@@ -54,18 +54,13 @@
     ];
 
     # TODO wrap thunderbird bin and set LC_ALL=de_DE.UTF-8 because thunderbird uses wrong date and time formatting with C.UTF-8
-    # TODO make screenshot copy work even if notification fails (set -e does its thing here)
     # TODO pavucontrol shortcut or bar button
-    # TODO keyboard stays lit on poweroff -> add systemd service to disable it on shutdown
-    # TODO on neogit close do neotree update
+    # TODO keyboard stays lit on poweroff -> add systemd service to disable it on shutdown, current workaround echo -n 1 > /sys/bus/usb/devices/usb1/remove; poweroff
     # TODO neovim gitsigns toggle_deleted keybind
     # TODO neovim gitsigns stage hunk shortcut
-    # TODO neovim directtly opening file has different syntax
     # TODO neovim reopening file should continue at the previous position
     # TODO thunderbird doesn't use passwords from password command
     # TODO accounts.concats accounts.calendar
-    # TODO mod+f1-4 for left monitor?
-    # TODO sway shortcuts
     # TODO VP9 hardware video decoding blocklisted
 
     persistence."/state".directories = [

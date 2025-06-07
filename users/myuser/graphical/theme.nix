@@ -1,6 +1,6 @@
 {
   config,
-  nixosConfig,
+  lib,
   pkgs,
   ...
 }:
@@ -35,6 +35,17 @@
         package = pkgs.whitesur-icon-theme;
       };
 
+      font = {
+        package = pkgs.segoe-ui-ttf;
+        name = "Segoe UI";
+        size = 10;
+      };
+
+      theme = {
+        package = pkgs.adw-gtk3;
+        name = "adw-gtk3";
+      };
+
       gtk2.extraConfig = "gtk-application-prefer-dark-theme = true";
       gtk3.extraConfig = gtk34extraConfig;
       gtk4.extraConfig = gtk34extraConfig;
@@ -44,21 +55,36 @@
 
   qt = {
     enable = true;
-    style.name = "kvantum";
-    platformTheme.name = "qtct";
+    platformTheme.name = "gtk3";
   };
 
-  xdg.configFile."Kvantum/kvantum.kvconfig".text = "theme=Base16Kvantum";
-  xdg.configFile."Kvantum/Base16Kvantum".source = ./Base16Kvantum;
+  home.pointerCursor = {
+    name = "Bibata-Modern-Ice";
+    size = 20;
+    package = pkgs.bibata-cursors;
+    x11.enable = true;
+    gtk.enable = true;
+  };
 
-  stylix = {
-    inherit (nixosConfig.stylix) polarity base16Scheme;
-    targets.gtk.enable = true;
-
-    cursor = {
-      package = pkgs.bibata-cursors;
-      name = "Bibata-Modern-Ice";
-      size = 20;
+  lib.colors = rec {
+    withHashtag = lib.mapAttrs (_: v: "#${v}") hex;
+    hex = {
+      base00 = "101419";
+      base01 = "171b20";
+      base02 = "21262e";
+      base03 = "242931";
+      base04 = "485263";
+      base05 = "b6beca";
+      base06 = "dee1e6";
+      base07 = "e3e6eb";
+      base08 = "e05f65";
+      base09 = "f9a872";
+      base0A = "f1cf8a";
+      base0B = "78dba9";
+      base0C = "74bee9";
+      base0D = "70a5eb";
+      base0E = "c68aee";
+      base0F = "9378de";
     };
   };
 }

@@ -90,35 +90,6 @@
         escape = true;
       };
 
-      #"custom/whisper_overlay" = {
-      #  tooltip = true;
-      #  format = "{icon}";
-      #  format-icons = {
-      #    disconnected = "<span foreground='gray'></span>";
-      #    connected = "<span foreground='#4ab0fa'></span>";
-      #    connected-active = "<span foreground='red'></span>";
-      #  };
-      #  return-type = "json";
-      #  exec = "${lib.getExe pkgs.whisper-overlay} waybar-status";
-      #  on-click-right = lib.getExe (pkgs.writeShellApplication {
-      #    name = "toggle-realtime-stt-server";
-      #    runtimeInputs = [
-      #      pkgs.systemd
-      #      pkgs.libnotify
-      #    ];
-      #    text = ''
-      #      if systemctl --user is-active --quiet realtime-stt-server; then
-      #        systemctl --user stop realtime-stt-server.service
-      #        notify-send "Stopped realtime-stt-server" "⛔ Stopped" --transient || true
-      #      else
-      #        systemctl --user start realtime-stt-server.service
-      #        notify-send "Started realtime-stt-server" "✅ Started" --transient || true
-      #      fi
-      #    '';
-      #  });
-      #  escape = true;
-      #};
-
       battery = {
         interval = 2;
         format = "{icon}  {capacity}%";

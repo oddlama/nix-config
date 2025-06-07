@@ -5,7 +5,7 @@
   ...
 }:
 let
-  colors = config.lib.stylix.colors.withHashtag;
+  colors = config.lib.colors.withHashtag;
 in
 {
   xdg.configFile."flameshot/flameshot.ini".source = (pkgs.formats.ini { }).generate "flameshot.ini" {

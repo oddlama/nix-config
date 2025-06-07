@@ -21,8 +21,6 @@ writeShellApplication {
       --transient \
       --hint=string:image-path:"$image" \
       --hint=int:value:"$value" \
-      --hint="string:wired-tag:indicator" \
-      --hint="string:wired-note:brightness" \
       --expire-time=1000 \
       || true
   '';

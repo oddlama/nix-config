@@ -57,13 +57,6 @@
 
   graphical.gaming.enable = true;
 
-  stylix.fonts.sizes = {
-    #desktop = 20;
-    applications = 10;
-    terminal = 20;
-    popups = 20;
-  };
-
   nix.settings.trusted-substituters = [
     "https://ai.cachix.org"
   ];

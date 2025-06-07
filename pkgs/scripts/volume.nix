@@ -27,10 +27,8 @@ writeShellApplication {
     fi
 
     if [[ "$value" -gt 100 ]]; then
-      note=volume-overdrive
       indicator_value=$((value - 100))
     else
-      note=volume
       indicator_value="$value"
     fi
 
@@ -39,8 +37,6 @@ writeShellApplication {
       --transient \
       --hint=string:image-path:"$image" \
       --hint=int:value:"$indicator_value" \
-      --hint="string:wired-tag:indicator" \
-      --hint="string:wired-note:$note" \
       --expire-time=1000 \
       || true
   '';

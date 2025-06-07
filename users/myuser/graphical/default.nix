@@ -18,7 +18,6 @@
       # X11
       ./i3.nix
       ./flameshot.nix
-      ./wired-notify.nix
 
       # Wayland
       ./gpu-screen-recorder.nix
@@ -27,7 +26,6 @@
       ./sway.nix
       ./swaync.nix
       ./waybar.nix
-      ./whisper-overlay.nix
     ]
     ++ lib.optionals nixosConfig.graphical.gaming.enable [
       ./games

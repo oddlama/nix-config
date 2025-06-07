@@ -238,7 +238,6 @@ in
   };
 
   systemd.user.services = {
-    wired.Install.WantedBy = lib.mkForce [ "i3-session.target" ];
     flameshot.Install.WantedBy = lib.mkForce [ "i3-session.target" ];
   };
 

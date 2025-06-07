@@ -19,7 +19,6 @@ writeShellApplication {
     grimblast --freeze save screen "$out" || exit 2
     notify-send \
       "📷 Screenshot captured" "💾 Saved to $out" \
-      --hint="string:wired-tag:screenshot-$date" \
       || true
   '';
 }

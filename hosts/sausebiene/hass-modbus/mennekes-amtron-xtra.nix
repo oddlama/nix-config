@@ -47,6 +47,7 @@
         ];
       }
     ];
+
     template = [
       {
         sensor = [

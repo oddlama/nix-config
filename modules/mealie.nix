@@ -48,6 +48,12 @@ in
       '';
     };
 
+    trustedProxies = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = "A list of trusted proxies. You must set this when you are using OIDC behind https, otherwise the generated redirect url will have the wrong url scheme.";
+    };
+
     credentialsFile = lib.mkOption {
       type = with lib.types; nullOr path;
       default = null;
@@ -69,20 +75,14 @@ in
         '';
       };
     };
-
-    trustedProxies = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [ ];
-      description = "A list of trusted proxies. You must set this when you are using OIDC behind https, otherwise the generated redirect url will have the wrong url scheme.";
-    };
   };
 
   config = lib.mkIf cfg.enable {
     systemd.services.mealie = {
       description = "Mealie, a self hosted recipe manager and meal planner";
 
-      after = [ "network-online.target" ] ++ lib.optional cfg.database.createLocally "postgresql.service";
-      requires = lib.optional cfg.database.createLocally "postgresql.service";
+      after = [ "network-online.target" ] ++ lib.optional cfg.database.createLocally "postgresql.target";
+      requires = lib.optional cfg.database.createLocally "postgresql.target";
       wants = [ "network-online.target" ];
       wantedBy = [ "multi-user.target" ];
 
@@ -91,8 +91,9 @@ in
         API_PORT = toString cfg.port;
         BASE_URL = "http://localhost:${toString cfg.port}";
         DATA_DIR = "/var/lib/mealie";
-        NLTK_DATA = pkgs.nltk-data.averaged_perceptron_tagger_eng;
-      } // (builtins.mapAttrs (_: toString) cfg.settings);
+        NLTK_DATA = pkgs.nltk-data.averaged-perceptron-tagger-eng;
+      }
+      // (builtins.mapAttrs (_: toString) cfg.settings);
 
       serviceConfig = {
         DynamicUser = true;

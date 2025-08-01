@@ -48,5 +48,6 @@
       avahi = uidGid 963;
       ente = uidGid 962;
       minio = uidGid 961;
+      kea = uidGid 960;
     };
 }

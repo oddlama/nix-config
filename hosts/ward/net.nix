@@ -85,111 +85,109 @@
     }
   );
 
-  systemd.network.networks =
-    {
-      "10-lan" = {
-        matchConfig.Name = "lan";
-        # This interface should only be used from attached vlans.
+  systemd.network.networks = {
+    "10-lan" = {
+      matchConfig.Name = "lan";
+      # This interface should only be used from attached vlans.
+      # So don't acquire a link local address and only wait for
+      # this interface to gain a carrier.
+      networkConfig.LinkLocalAddressing = "no";
+      linkConfig.RequiredForOnline = "carrier";
+      vlan = map (name: "vlan-${name}") (builtins.attrNames globals.net.home-lan.vlans);
+    };
+    "10-wan" = {
+      #DHCP = "yes";
+      #dhcpV4Config.UseDNS = false;
+      #dhcpV6Config.UseDNS = false;
+      #ipv6AcceptRAConfig.UseDNS = false;
+      address = [ globals.net.home-wan.hosts.ward.cidrv4 ];
+      gateway = [ globals.net.home-wan.hosts.fritzbox.ipv4 ];
+      matchConfig.Name = "wan";
+      networkConfig.IPv6PrivacyExtensions = "yes";
+      # dhcpV6Config.PrefixDelegationHint = "::/64";
+      # FIXME: This should not be needed, but for some reason part of networkd
+      # isn't seeing the RAs and not triggering DHCPv6. Even though some other
+      # part of networkd is properly seeing them and logging accordingly.
+      dhcpV6Config.WithoutRA = "solicit";
+      linkConfig.RequiredForOnline = "routable";
+    };
+    # Remaining macvtap interfaces should not be touched.
+    "90-macvtap-ignore" = {
+      matchConfig.Kind = "macvtap";
+      linkConfig.ActivationPolicy = "manual";
+      linkConfig.Unmanaged = "yes";
+    };
+  }
+  // lib.flip lib.concatMapAttrs globals.net.home-lan.vlans (
+    vlanName: vlanCfg: {
+      "30-vlan-${vlanName}" = {
+        matchConfig.Name = "vlan-${vlanName}";
+        # This interface should only be used from attached macvlans.
         # So don't acquire a link local address and only wait for
         # this interface to gain a carrier.
         networkConfig.LinkLocalAddressing = "no";
+        networkConfig.MACVLAN = "me-${vlanName}";
         linkConfig.RequiredForOnline = "carrier";
-        vlan = map (name: "vlan-${name}") (builtins.attrNames globals.net.home-lan.vlans);
       };
-      "10-wan" = {
-        #DHCP = "yes";
-        #dhcpV4Config.UseDNS = false;
-        #dhcpV6Config.UseDNS = false;
-        #ipv6AcceptRAConfig.UseDNS = false;
-        address = [ globals.net.home-wan.hosts.ward.cidrv4 ];
-        gateway = [ globals.net.home-wan.hosts.fritzbox.ipv4 ];
-        matchConfig.Name = "wan";
-        networkConfig.IPv6PrivacyExtensions = "yes";
-        # dhcpV6Config.PrefixDelegationHint = "::/64";
-        # FIXME: This should not be needed, but for some reason part of networkd
-        # isn't seeing the RAs and not triggering DHCPv6. Even though some other
-        # part of networkd is properly seeing them and logging accordingly.
-        dhcpV6Config.WithoutRA = "solicit";
+      "40-me-${vlanName}" = {
+        address = [
+          vlanCfg.hosts.ward.cidrv4
+          vlanCfg.hosts.ward.cidrv6
+        ];
+        matchConfig.Name = "me-${vlanName}";
+        networkConfig = {
+          IPv4Forwarding = "yes";
+          IPv6PrivacyExtensions = "yes";
+          IPv6SendRA = true;
+          IPv6AcceptRA = false;
+          # DHCPPrefixDelegation = true;
+        };
+        # dhcpPrefixDelegationConfig.UplinkInterface = "wan";
+        # dhcpPrefixDelegationConfig.Token = "::ff";
+        # Announce a static prefix
+        ipv6Prefixes = [
+          { Prefix = vlanCfg.cidrv6; }
+        ];
+        # Delegate prefix
+        # dhcpPrefixDelegationConfig = {
+        #   SubnetId = vlanCfg.id;
+        # };
+        # Provide a DNS resolver
+        # ipv6SendRAConfig = {
+        #   Managed = true;
+        #   EmitDNS = true;
+        # FIXME: this is not the true ipv6 of adguardhome   DNS = globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv6;
+        # FIXME: todo assign static additional to reservation in kea
+        # };
         linkConfig.RequiredForOnline = "routable";
       };
-      # Remaining macvtap interfaces should not be touched.
-      "90-macvtap-ignore" = {
-        matchConfig.Kind = "macvtap";
-        linkConfig.ActivationPolicy = "manual";
-        linkConfig.Unmanaged = "yes";
-      };
     }
-    // lib.flip lib.concatMapAttrs globals.net.home-lan.vlans (
-      vlanName: vlanCfg: {
-        "30-vlan-${vlanName}" = {
-          matchConfig.Name = "vlan-${vlanName}";
-          # This interface should only be used from attached macvlans.
-          # So don't acquire a link local address and only wait for
-          # this interface to gain a carrier.
-          networkConfig.LinkLocalAddressing = "no";
-          networkConfig.MACVLAN = "me-${vlanName}";
-          linkConfig.RequiredForOnline = "carrier";
-        };
-        "40-me-${vlanName}" = {
-          address = [
-            vlanCfg.hosts.ward.cidrv4
-            vlanCfg.hosts.ward.cidrv6
-          ];
-          matchConfig.Name = "me-${vlanName}";
-          networkConfig = {
-            IPv4Forwarding = "yes";
-            IPv6PrivacyExtensions = "yes";
-            IPv6SendRA = true;
-            IPv6AcceptRA = false;
-            # DHCPPrefixDelegation = true;
-          };
-          # dhcpPrefixDelegationConfig.UplinkInterface = "wan";
-          # dhcpPrefixDelegationConfig.Token = "::ff";
-          # Announce a static prefix
-          ipv6Prefixes = [
-            { Prefix = vlanCfg.cidrv6; }
-          ];
-          # Delegate prefix
-          # dhcpPrefixDelegationConfig = {
-          #   SubnetId = vlanCfg.id;
-          # };
-          # Provide a DNS resolver
-          # ipv6SendRAConfig = {
-          #   Managed = true;
-          #   EmitDNS = true;
-          # FIXME: this is not the true ipv6 of adguardhome   DNS = globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv6;
-          # FIXME: todo assign static additional to reservation in kea
-          # };
-          linkConfig.RequiredForOnline = "routable";
-        };
-      }
-    );
+  );
 
   networking.nftables = {
     firewall = {
-      zones =
-        {
-          untrusted.interfaces = [ "wan" ];
-          proxy-home.interfaces = [ "proxy-home" ];
-          firezone.interfaces = [ "tun-firezone" ];
-          adguardhome.ipv4Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv4 ];
-          adguardhome.ipv6Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv6 ];
-          web-proxy.ipv4Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv4 ];
-          web-proxy.ipv6Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv6 ];
-          samba.ipv4Addresses = [ globals.net.home-lan.vlans.services.hosts.sire-samba.ipv4 ];
-          samba.ipv6Addresses = [ globals.net.home-lan.vlans.services.hosts.sire-samba.ipv6 ];
-          scanner-ads-4300n.ipv4Addresses = [
-            globals.net.home-lan.vlans.devices.hosts.scanner-ads-4300n.ipv4
-          ];
-          scanner-ads-4300n.ipv6Addresses = [
-            globals.net.home-lan.vlans.devices.hosts.scanner-ads-4300n.ipv6
-          ];
+      zones = {
+        untrusted.interfaces = [ "wan" ];
+        proxy-home.interfaces = [ "proxy-home" ];
+        firezone.interfaces = [ "tun-firezone" ];
+        adguardhome.ipv4Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv4 ];
+        adguardhome.ipv6Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv6 ];
+        web-proxy.ipv4Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv4 ];
+        web-proxy.ipv6Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv6 ];
+        samba.ipv4Addresses = [ globals.net.home-lan.vlans.services.hosts.sire-samba.ipv4 ];
+        samba.ipv6Addresses = [ globals.net.home-lan.vlans.services.hosts.sire-samba.ipv6 ];
+        scanner-ads-4300n.ipv4Addresses = [
+          globals.net.home-lan.vlans.devices.hosts.scanner-ads-4300n.ipv4
+        ];
+        scanner-ads-4300n.ipv6Addresses = [
+          globals.net.home-lan.vlans.devices.hosts.scanner-ads-4300n.ipv6
+        ];
+      }
+      // lib.flip lib.concatMapAttrs globals.net.home-lan.vlans (
+        vlanName: _: {
+          "vlan-${vlanName}".interfaces = [ "me-${vlanName}" ];
         }
-        // lib.flip lib.concatMapAttrs globals.net.home-lan.vlans (
-          vlanName: _: {
-            "vlan-${vlanName}".interfaces = [ "me-${vlanName}" ];
-          }
-        );
+      );
 
       rules = {
         masquerade-internet = {
@@ -280,6 +278,7 @@
           verdict = "accept";
         };
 
+        # FIXME: is this needed? conntrack should take care of it and we want to masquerade anyway
         forward-outgoing-firezone-traffic = {
           from = [ "vlan-services" ];
           to = [ "firezone" ];

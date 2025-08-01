@@ -88,6 +88,31 @@ in
               id = 22;
               mac = globals.macs.bambulab-p1s;
             };
+            hosts.shelly-mains = {
+              id = 23;
+              mac = globals.macs.shelly-mains;
+            };
+            hosts.shelly-solar = {
+              id = 24;
+              mac = globals.macs.shelly-solar;
+            };
+            # FIXME: forbid these devices on other interfaces... maybe put them into separate switches vlan.
+            # hosts.tl-sg105e-flur = {
+            #   id = ;
+            #   mac = globals.macs.tl-sg105e-flur;
+            # };
+            # hosts.tl-sg105e-garage = {
+            #   id = ;
+            #   mac = globals.macs.tl-sg105e-garage;
+            # };
+            # hosts.tl-sg105e-keller = {
+            #   id = ;
+            #   mac = globals.macs.tl-sg105e-keller;
+            # };
+            # hosts.tl-sg108e-dach = {
+            #   id = ;
+            #   mac = globals.macs.tl-sg108e-dach;
+            # };
           };
           guests = {
             id = 50;

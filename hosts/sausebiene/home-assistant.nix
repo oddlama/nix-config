@@ -49,6 +49,7 @@ in
       "mqtt"
       "ollama"
       "radio_browser"
+      "shelly"
       "soundtouch" # Bose SoundTouch
       "spotify"
       "wake_word"

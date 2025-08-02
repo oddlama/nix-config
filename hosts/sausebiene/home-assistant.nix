@@ -161,26 +161,6 @@ in
           types = [ "Papiermüll" ];
         }
       ];
-
-      template = [
-        {
-          sensor = [
-            {
-              name = "Total Grid Return Energy";
-              unique_id = "calculated_total_grid_return_energy";
-              device_class = "energy";
-              unit_of_measurement = "kWh";
-              state_class = "total_increasing";
-              state = ''
-                {% set solar = states('sensor.pro3em_solar_total_active_energy') | float(0) %}
-                {% set mains = states('sensor.pro3em_mains_total_active_energy') | float(0) %}
-                {% set export = solar - mains %}
-                {{ [export, 0] | max }}
-              '';
-            }
-          ];
-        }
-      ];
     };
 
     extraPackages =

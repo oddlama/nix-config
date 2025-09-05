@@ -19,7 +19,7 @@ let
     "photos.${globals.domains.me}"
     "s3.photos.${globals.domains.me}"
     globals.services.mealie.domain
-    globals.services.immich.domain
+    # globals.services.immich.domain
     globals.services.influxdb.domain
     globals.services.loki.domain
     globals.services.paperless.domain

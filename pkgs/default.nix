@@ -5,6 +5,7 @@ _inputs: [
     git-fuzzy = prev.callPackage ./git-fuzzy { };
     segoe-ui-ttf = prev.callPackage ./segoe-ui-ttf.nix { };
     zsh-histdb-skim = prev.callPackage ./zsh-skim-histdb.nix { };
+    nix-plugins = prev.callPackage ./nix-plugins.nix { };
     neovim-clean = prev.neovim-unwrapped.overrideAttrs (old: {
       nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ prev.makeWrapper ];
       postInstall = ''

@@ -29,8 +29,7 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
 
     home-manager = {
-      # FIXME: only using a fork to fix https://github.com/nix-community/home-manager/issues/6638
-      url = "github:oddlama/home-manager";
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

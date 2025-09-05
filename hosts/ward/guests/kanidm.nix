@@ -37,7 +37,7 @@ in
 
   age.secrets.kanidm-oauth2-forgejo = mkRandomSecret;
   age.secrets.kanidm-oauth2-grafana = mkRandomSecret;
-  age.secrets.kanidm-oauth2-immich = mkRandomSecret;
+  # age.secrets.kanidm-oauth2-immich = mkRandomSecret;
   age.secrets.kanidm-oauth2-firezone = mkRandomSecret;
   age.secrets.kanidm-oauth2-mealie = mkRandomSecret;
   age.secrets.kanidm-oauth2-paperless = mkRandomSecret;
@@ -115,27 +115,27 @@ in
 
       inherit (globals.kanidm) persons;
 
-      # Immich
-      groups."immich.access" = { };
-      systems.oauth2.immich = {
-        displayName = "Immich";
-        originUrl = [
-          "https://${globals.services.immich.domain}/auth/login"
-          "https://${globals.services.immich.domain}/api/oauth/mobile-redirect"
-        ];
-        originLanding = "https://${globals.services.immich.domain}/";
-        basicSecretFile = config.age.secrets.kanidm-oauth2-immich.path;
-        preferShortUsername = true;
-        # XXX: PKCE is currently not supported by immich
-        allowInsecureClientDisablePkce = true;
-        # XXX: RS256 is used instead of ES256 so additionally we need legacy crypto
-        enableLegacyCrypto = true;
-        scopeMaps."immich.access" = [
-          "openid"
-          "email"
-          "profile"
-        ];
-      };
+      # # Immich
+      # groups."immich.access" = { };
+      # systems.oauth2.immich = {
+      #   displayName = "Immich";
+      #   originUrl = [
+      #     "https://${globals.services.immich.domain}/auth/login"
+      #     "https://${globals.services.immich.domain}/api/oauth/mobile-redirect"
+      #   ];
+      #   originLanding = "https://${globals.services.immich.domain}/";
+      #   basicSecretFile = config.age.secrets.kanidm-oauth2-immich.path;
+      #   preferShortUsername = true;
+      #   # XXX: PKCE is currently not supported by immich
+      #   allowInsecureClientDisablePkce = true;
+      #   # XXX: RS256 is used instead of ES256 so additionally we need legacy crypto
+      #   enableLegacyCrypto = true;
+      #   scopeMaps."immich.access" = [
+      #     "openid"
+      #     "email"
+      #     "profile"
+      #   ];
+      # };
 
       # Firezone
       groups."firezone.access" = { };

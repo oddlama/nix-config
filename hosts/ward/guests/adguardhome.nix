@@ -91,42 +91,41 @@ in
         ];
         dhcp.enabled = false;
       };
-      filtering.rewrites =
-        [
-          # Undo the /etc/hosts entry so we don't answer with the internal
-          # wireguard address for influxdb
-          {
-            inherit (globals.services.influxdb) domain;
-            answer = globals.domains.me;
-          }
-        ]
-        # Use the local mirror-proxy for some services (not necessary, just for speed)
-        ++
-          map
-            (domain: {
-              inherit domain;
-              answer = globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv4;
-            })
-            [
-              # FIXME: dont hardcode, filter global service domains by internal state
-              # FIXME: new entry here? make new firezone entry too.
-              # FIXME: new entry here? make new firezone gateway on ward entry too.
-              globals.services.grafana.domain
-              "accounts.photos.${globals.domains.me}"
-              "albums.photos.${globals.domains.me}"
-              "api.photos.${globals.domains.me}"
-              "cast.photos.${globals.domains.me}"
-              "photos.${globals.domains.me}"
-              "s3.photos.${globals.domains.me}"
-              globals.services.mealie.domain
-              globals.services.immich.domain
-              globals.services.influxdb.domain
-              globals.services.loki.domain
-              globals.services.paperless.domain
-              globals.services.esphome.domain
-              globals.services.home-assistant.domain
-              "fritzbox.${globals.domains.personal}"
-            ];
+      filtering.rewrites = [
+        # Undo the /etc/hosts entry so we don't answer with the internal
+        # wireguard address for influxdb
+        {
+          inherit (globals.services.influxdb) domain;
+          answer = globals.domains.me;
+        }
+      ]
+      # Use the local mirror-proxy for some services (not necessary, just for speed)
+      ++
+        map
+          (domain: {
+            inherit domain;
+            answer = globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv4;
+          })
+          [
+            # FIXME: dont hardcode, filter global service domains by internal state
+            # FIXME: new entry here? make new firezone entry too.
+            # FIXME: new entry here? make new firezone gateway on ward entry too.
+            globals.services.grafana.domain
+            "accounts.photos.${globals.domains.me}"
+            "albums.photos.${globals.domains.me}"
+            "api.photos.${globals.domains.me}"
+            "cast.photos.${globals.domains.me}"
+            "photos.${globals.domains.me}"
+            "s3.photos.${globals.domains.me}"
+            globals.services.mealie.domain
+            # globals.services.immich.domain
+            globals.services.influxdb.domain
+            globals.services.loki.domain
+            globals.services.paperless.domain
+            globals.services.esphome.domain
+            globals.services.home-assistant.domain
+            "fritzbox.${globals.domains.personal}"
+          ];
       filters = [
         {
           name = "AdGuard DNS filter";

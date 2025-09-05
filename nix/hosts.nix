@@ -34,6 +34,9 @@
           modules = [
             {
               nixpkgs.config.allowUnfree = true;
+              nixpkgs.config.permittedInsecurePackages = [
+                "qtwebengine-5.15.19" # teamspeak3, whatever I don't visit any untrusted servers
+              ];
               nixpkgs.overlays = (import ../pkgs/default.nix inputs) ++ [
                 inputs.idmail.overlays.default
                 # inputs.nixos-cosmic.overlays.default

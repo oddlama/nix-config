@@ -22,7 +22,8 @@
       # Commenting
       comment.enable = true;
       # Extend vim's "%" key
-      vim-matchup.enable = true;
+      # XXX: disabled because it makes stuff slow
+      vim-matchup.enable = false;
 
       # Fzf picker for arbitrary stuff
       telescope = {

@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   ...
@@ -12,7 +13,7 @@
     envExtra = ''
       umask 077
     '';
-    dotDir = ".config/zsh";
+    dotDir = "${config.xdg.configHome}/zsh";
     history = {
       path = "\${XDG_DATA_HOME-$HOME/.local/share}/zsh/history";
       save = 1000500;

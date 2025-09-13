@@ -11,8 +11,8 @@
     verbose = true;
     sharedModules = [
       (inputs.nixos-extra-modules + "/hm-modules")
-      inputs.nix-index-database.hmModules.nix-index
-      inputs.nixvim.homeManagerModules.nixvim
+      inputs.nix-index-database.homeModules.nix-index
+      inputs.nixvim.homeModules.nixvim
       {
         home.stateVersion = config.system.stateVersion;
       }

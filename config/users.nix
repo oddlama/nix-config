@@ -43,8 +43,8 @@
       unifi = uidGid 968;
       plugdev.gid = 967;
       tss = uidGid 966;
-      # firefly-iii = uidGid 965;
-      # firefly-pico = uidGid 964;
+      immich = uidGid 965;
+      redis-immich = uidGid 964;
       avahi = uidGid 963;
       ente = uidGid 962;
       minio = uidGid 961;

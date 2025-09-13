@@ -40,6 +40,7 @@ in
     }
   ];
 
+  fileSystems."/storage".neededForBoot = true;
   environment.persistence."/storage".directories = [
     {
       directory = "/var/lib/immich";

@@ -15,10 +15,8 @@ let
   };
 in
 {
-  wireguard.proxy-sentinel = {
-    client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [ kanidmPort ];
-  };
+  globals.wireguard.proxy-sentinel.hosts.${config.node.name}.firewallRuleForNode.sentinel.allowedTCPPorts =
+    [ kanidmPort ];
 
   age.secrets."kanidm-self-signed.crt" = {
     rekeyFile = config.node.secretsDir + "/kanidm-self-signed.crt.age";

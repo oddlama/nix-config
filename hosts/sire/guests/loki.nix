@@ -10,19 +10,15 @@ let
   lokiDomain = "loki.${globals.domains.me}";
 in
 {
-  wireguard.proxy-sentinel = {
-    client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [
+  globals.wireguard.proxy-sentinel.hosts.${config.node.name}.firewallRuleForNode.sentinel.allowedTCPPorts =
+    [
       config.services.loki.configuration.server.http_listen_port
     ];
-  };
 
-  wireguard.proxy-home = {
-    client.via = "ward";
-    firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [
+  globals.wireguard.proxy-home.hosts.${config.node.name}.firewallRuleForNode.ward-web-proxy.allowedTCPPorts =
+    [
       config.services.loki.configuration.server.http_listen_port
     ];
-  };
 
   globals.services.loki.domain = lokiDomain;
 

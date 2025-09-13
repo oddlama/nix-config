@@ -46,7 +46,4 @@ in
   };
 
   networking.nftables.firewall.zones.untrusted.interfaces = [ "wan" ];
-
-  # Allow accessing influx
-  wireguard.proxy-sentinel.client.via = "sentinel";
 }

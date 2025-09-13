@@ -10,15 +10,10 @@ let
   influxdbPort = 8086;
 in
 {
-  wireguard.proxy-sentinel = {
-    client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [ influxdbPort ];
-  };
-
-  wireguard.proxy-home = {
-    client.via = "ward";
-    firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [ influxdbPort ];
-  };
+  globals.wireguard.proxy-sentinel.hosts.${config.node.name}.firewallRuleForNode.sentinel.allowedTCPPorts =
+    [ influxdbPort ];
+  globals.wireguard.proxy-home.hosts.${config.node.name}.firewallRuleForNode.ward-web-proxy.allowedTCPPorts =
+    [ influxdbPort ];
 
   age.secrets.github-access-token = {
     rekeyFile = config.node.secretsDir + "/github-access-token.age";

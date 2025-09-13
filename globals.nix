@@ -22,6 +22,50 @@ in
 
   globals = {
     wireguard = {
+      proxy-home = {
+        host = globals.net.home-lan.vlans.services.hosts.ward.ipv4;
+        port = 51444;
+        cidrv4 = "10.44.0.0/24";
+        cidrv6 = "fd00:44::/120";
+        hosts = {
+          sausebiene.id = 10;
+          sire-ente.id = 101;
+          sire-grafana.id = 221;
+          sire-immich.id = 225;
+          sire-influxdb.id = 141;
+          sire-loki.id = 109;
+          sire-paperless.id = 147;
+          sire-samba.id = 38;
+          ward.id = 94;
+          ward-adguardhome.id = 148;
+          ward-mealie.id = 128;
+          ward-web-proxy.id = 11;
+        };
+      };
+
+      proxy-sentinel = {
+        port = 51443;
+        cidrv4 = "10.43.0.0/24";
+        cidrv6 = "fd00:43::/120";
+        hosts = {
+          envoy.id = 135;
+          sentinel.id = 29;
+          sire-ai.id = 171;
+          sire-ente.id = 101;
+          sire-grafana.id = 221;
+          sire-immich.id = 225;
+          sire-influxdb.id = 141;
+          sire-loki.id = 109;
+          sire-minecraft.id = 163;
+          sire-paperless.id = 147;
+          sire.id = 14;
+          ward-adguardhome.id = 148;
+          ward-forgejo.id = 128;
+          ward-kanidm.id = 197;
+          ward-radicale.id = 252;
+          ward-vaultwarden.id = 142;
+        };
+      };
     };
 
     net = {
@@ -124,11 +168,6 @@ in
             hosts.ward.id = 1;
           };
         };
-      };
-
-      proxy-home = {
-        cidrv4 = "10.44.0.0/24";
-        cidrv6 = "fd00:44::/120";
       };
     };
 

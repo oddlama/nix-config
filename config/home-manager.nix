@@ -10,7 +10,7 @@
     useUserPackages = true;
     verbose = true;
     sharedModules = [
-      inputs.nixos-extra-modules.homeManagerModules.default
+      (inputs.nixos-extra-modules + "/hm-modules")
       inputs.nix-index-database.hmModules.nix-index
       inputs.nixvim.homeManagerModules.nixvim
       {

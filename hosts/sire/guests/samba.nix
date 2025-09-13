@@ -27,7 +27,8 @@ let
       "create mask" = "0740";
       "directory mask" = "0750";
       "acl allow execute always" = "yes";
-    } // cfg;
+    }
+    // cfg;
   };
 
   mkGroupShares =
@@ -77,9 +78,6 @@ let
     );
 in
 {
-  # For influxdb communication channel
-  wireguard.proxy-home.client.via = "ward";
-
   age.secrets."samba-passdb.tdb" = {
     rekeyFile = config.node.secretsDir + "/samba-passdb.tdb.age";
     mode = "600";
@@ -383,7 +381,8 @@ in
 
   users.groups = {
     paperless.gid = config.ids.gids.paperless;
-  } // lib.mapAttrs (_: cfg: { gid = cfg.id; }) (smbUsers // smbGroups);
+  }
+  // lib.mapAttrs (_: cfg: { gid = cfg.id; }) (smbUsers // smbGroups);
 
   backups.storageBoxes.dusk = {
     subuser = "samba";

@@ -22,13 +22,15 @@
   nixpkgs.hostPlatform = "x86_64-linux";
   boot.mode = "bios";
 
-  wireguard.proxy-sentinel.firewallRuleForAll.allowedTCPPorts = [
-    80
-    443
-  ];
-  wireguard.proxy-sentinel.firewallRuleForAll.allowedUDPPorts = [
-    443
-  ];
+  globals.wireguard.proxy-sentinel.hosts.${config.node.name}.firewallRuleForAll = {
+    allowedTCPPorts = [
+      80
+      443
+    ];
+    allowedUDPPorts = [
+      443
+    ];
+  };
 
   users.groups.acme.members = [ "nginx" ];
   services.nginx.enable = true;

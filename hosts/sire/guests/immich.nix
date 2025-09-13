@@ -19,14 +19,10 @@ in
     group = "immich";
   };
 
-  wireguard.proxy-sentinel = {
-    client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [ 2283 ];
-  };
-  wireguard.proxy-home = {
-    client.via = "ward";
-    firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [ 2283 ];
-  };
+  globals.wireguard.proxy-sentinel.hosts.${config.node.name}.firewallRuleForNode.sentinel.allowedTCPPorts =
+    [ 2283 ];
+  globals.wireguard.proxy-home.hosts.${config.node.name}.firewallRuleForNode.ward-web-proxy.allowedTCPPorts =
+    [ 2283 ];
 
   globals.services.immich.domain = immichDomain;
   globals.monitoring.http.immich = {

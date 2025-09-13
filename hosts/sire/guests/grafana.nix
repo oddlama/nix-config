@@ -9,19 +9,15 @@ let
   grafanaDomain = "grafana.${globals.domains.me}";
 in
 {
-  wireguard.proxy-sentinel = {
-    client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [
+  globals.wireguard.proxy-sentinel.hosts.${config.node.name}.firewallRuleForNode.sentinel.allowedTCPPorts =
+    [
       config.services.grafana.settings.server.http_port
     ];
-  };
 
-  wireguard.proxy-home = {
-    client.via = "ward";
-    firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [
+  globals.wireguard.proxy-home.hosts.${config.node.name}.firewallRuleForNode.ward-web-proxy.allowedTCPPorts =
+    [
       config.services.grafana.settings.server.http_port
     ];
-  };
 
   age.secrets.grafana-secret-key = {
     rekeyFile = config.node.secretsDir + "/grafana-secret-key.age";

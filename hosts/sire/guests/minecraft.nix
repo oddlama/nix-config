@@ -350,14 +350,12 @@ in
   microvm.mem = 1024 * 24;
   microvm.vcpu = 16;
 
-  wireguard.proxy-sentinel = {
-    client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [
+  globals.wireguard.proxy-sentinel.hosts.${config.node.name}.firewallRuleForNode.sentinel.allowedTCPPorts =
+    [
       80
       25565
       25566
     ];
-  };
 
   users.groups.minecraft.members = [ "nginx" ];
   users.users.minecraft = {

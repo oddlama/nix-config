@@ -12,9 +12,10 @@ in
 {
   imports = [ ./hass-modbus/mennekes-amtron-xtra.nix ];
 
-  wireguard.proxy-home.firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [
-    config.services.home-assistant.config.http.server_port
-  ];
+  globals.wireguard.proxy-home.hosts.${config.node.name}.firewallRuleForNode.ward-web-proxy.allowedTCPPorts =
+    [
+      config.services.home-assistant.config.http.server_port
+    ];
 
   environment.persistence."/persist".directories = [
     {

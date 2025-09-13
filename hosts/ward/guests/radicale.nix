@@ -7,10 +7,8 @@ let
   radicaleDomain = "radicale.${globals.domains.personal}";
 in
 {
-  wireguard.proxy-sentinel = {
-    client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [ 8000 ];
-  };
+  globals.wireguard.proxy-sentinel.hosts.${config.node.name}.firewallRuleForNode.sentinel.allowedTCPPorts =
+    [ 8000 ];
 
   globals.services.radicale.domain = radicaleDomain;
   globals.monitoring.http.radicale = {

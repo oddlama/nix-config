@@ -10,8 +10,7 @@ in
 {
   microvm.mem = 1024 * 4; # Need more /tmp space so nginx can store intermediary files
 
-  wireguard.proxy-home = {
-    client.via = "ward";
+  globals.wireguard.proxy-home.hosts.${config.node.name} = {
     firewallRuleForAll.allowedTCPPorts = [
       80
       443

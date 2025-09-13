@@ -8,10 +8,10 @@ let
   vaultwardenDomain = "pw.${globals.domains.personal}";
 in
 {
-  wireguard.proxy-sentinel = {
-    client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [ config.services.vaultwarden.config.rocketPort ];
-  };
+  globals.wireguard.proxy-sentinel.hosts.${config.node.name}.firewallRuleForNode.sentinel.allowedTCPPorts =
+    [
+      config.services.vaultwarden.config.rocketPort
+    ];
 
   age.secrets.vaultwarden-env = {
     rekeyFile = config.node.secretsDir + "/vaultwarden-env.age";

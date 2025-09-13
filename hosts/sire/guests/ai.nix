@@ -10,10 +10,10 @@ in
   microvm.mem = 1024 * 16;
   microvm.vcpu = 20;
 
-  wireguard.proxy-sentinel = {
-    client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [ config.services.open-webui.port ];
-  };
+  globals.wireguard.proxy-sentinel.hosts.${config.node.name}.firewallRuleForNode.sentinel.allowedTCPPorts =
+    [
+      config.services.open-webui.port
+    ];
 
   networking.firewall.allowedTCPPorts = [ config.services.ollama.port ];
 

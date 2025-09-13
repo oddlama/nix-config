@@ -7,9 +7,10 @@ let
   esphomeDomain = "esphome.${globals.domains.personal}";
 in
 {
-  wireguard.proxy-home.firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [
-    config.services.esphome.port
-  ];
+  globals.wireguard.proxy-home.hosts.${config.node.name}.firewallRuleForNode.ward-web-proxy.allowedTCPPorts =
+    [
+      config.services.esphome.port
+    ];
 
   environment.persistence."/persist".directories = [
     {

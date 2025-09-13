@@ -1,4 +1,7 @@
-{ inputs, ... }:
+{ config, inputs, ... }:
+let
+  topConfig = config;
+in
 {
   flake =
     {
@@ -12,7 +15,6 @@
         filterAttrs
         flip
         genAttrs
-        mapAttrs
         mapAttrs'
         nameValuePair
         ;
@@ -30,6 +32,7 @@
             inherit (pkgs) lib;
             inherit (config) nodes globals;
             inherit inputs minimal;
+            extraModules = topConfig.globals.optModules;
           };
           modules = [
             {
@@ -49,7 +52,8 @@
               node.secretsDir = ../hosts/${name}/secrets;
             }
             ../hosts/${name}
-          ];
+          ]
+          ++ topConfig.globals.optModules;
         };
 
       # Get all folders in hosts/
@@ -66,7 +70,7 @@
       # True NixOS nodes can define additional guest nodes that are built
       # together with it. We collect all defined guests from each node here
       # to allow accessing any node via the unified attribute `nodes`.
-      guestConfigs = flip concatMapAttrs config.nixosConfigurations (
+      guestConfigurations = flip concatMapAttrs config.nixosConfigurations (
         _: node:
         flip mapAttrs' (node.config.guests or { }) (
           guestName: guestDef:
@@ -81,8 +85,6 @@
 
       # All nixosSystem instanciations are collected here, so that we can refer
       # to any system via nodes.<name>
-      nodes = config.nixosConfigurations // config.guestConfigs;
-      # Add a shorthand to easily target toplevel derivations
-      "@" = mapAttrs (_: v: v.config.system.build.toplevel) config.nodes;
+      nodes = config.nixosConfigurations // config.guestConfigurations;
     };
 }

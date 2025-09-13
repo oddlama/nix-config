@@ -71,52 +71,48 @@ in
     }
   );
 
-  systemd.network.networks =
-    {
-      "10-lan" = {
-        matchConfig.Name = "lan";
-        # This interface should only be used from attached vlans.
+  systemd.network.networks = {
+    "10-lan" = {
+      matchConfig.Name = "lan";
+      # This interface should only be used from attached vlans.
+      # So don't acquire a link local address and only wait for
+      # this interface to gain a carrier.
+      networkConfig.LinkLocalAddressing = "no";
+      linkConfig.RequiredForOnline = "carrier";
+      vlan = map (name: "vlan-${name}") (builtins.attrNames localVlans);
+    };
+    # Remaining macvtap interfaces should not be touched.
+    "90-macvtap-ignore" = {
+      matchConfig.Kind = "macvtap";
+      linkConfig.ActivationPolicy = "manual";
+      linkConfig.Unmanaged = "yes";
+    };
+  }
+  // lib.flip lib.concatMapAttrs localVlans (
+    vlanName: vlanCfg: {
+      "30-vlan-${vlanName}" = {
+        matchConfig.Name = "vlan-${vlanName}";
+        # This interface should only be used from attached macvlans.
         # So don't acquire a link local address and only wait for
         # this interface to gain a carrier.
         networkConfig.LinkLocalAddressing = "no";
+        networkConfig.MACVLAN = "me-${vlanName}";
         linkConfig.RequiredForOnline = "carrier";
-        vlan = map (name: "vlan-${name}") (builtins.attrNames localVlans);
       };
-      # Remaining macvtap interfaces should not be touched.
-      "90-macvtap-ignore" = {
-        matchConfig.Kind = "macvtap";
-        linkConfig.ActivationPolicy = "manual";
-        linkConfig.Unmanaged = "yes";
+      "40-me-${vlanName}" = {
+        address = [
+          vlanCfg.hosts.sire.cidrv4
+          vlanCfg.hosts.sire.cidrv6
+        ];
+        gateway = lib.optionals (vlanName == "services") [ vlanCfg.hosts.ward.ipv4 ];
+        matchConfig.Name = "me-${vlanName}";
+        networkConfig.IPv6PrivacyExtensions = "yes";
+        linkConfig.RequiredForOnline = "routable";
       };
     }
-    // lib.flip lib.concatMapAttrs localVlans (
-      vlanName: vlanCfg: {
-        "30-vlan-${vlanName}" = {
-          matchConfig.Name = "vlan-${vlanName}";
-          # This interface should only be used from attached macvlans.
-          # So don't acquire a link local address and only wait for
-          # this interface to gain a carrier.
-          networkConfig.LinkLocalAddressing = "no";
-          networkConfig.MACVLAN = "me-${vlanName}";
-          linkConfig.RequiredForOnline = "carrier";
-        };
-        "40-me-${vlanName}" = {
-          address = [
-            vlanCfg.hosts.sire.cidrv4
-            vlanCfg.hosts.sire.cidrv6
-          ];
-          gateway = lib.optionals (vlanName == "services") [ vlanCfg.hosts.ward.ipv4 ];
-          matchConfig.Name = "me-${vlanName}";
-          networkConfig.IPv6PrivacyExtensions = "yes";
-          linkConfig.RequiredForOnline = "routable";
-        };
-      }
-    );
+  );
 
   networking.nftables.firewall = {
     zones.untrusted.interfaces = [ "me-services" ];
   };
-
-  # Allow accessing influx
-  wireguard.proxy-sentinel.client.via = "sentinel";
 }

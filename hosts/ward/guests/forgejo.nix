@@ -10,12 +10,10 @@ let
   forgejoDomain = "git.${globals.domains.me}";
 in
 {
-  wireguard.proxy-sentinel = {
-    client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [
+  globals.wireguard.proxy-sentinel.hosts.${config.node.name}.firewallRuleForNode.sentinel.allowedTCPPorts =
+    [
       config.services.forgejo.settings.server.HTTP_PORT
     ];
-  };
 
   age.secrets.forgejo-mailer-password.rekeyFile =
     config.node.secretsDir + "/forgejo-mailer-password.age";

@@ -55,9 +55,7 @@ in
 
   globals.wireguard.proxy-sentinel = {
     host = config.networking.fqdn;
-    port = 51443;
-    cidrv4 = "10.43.0.0/24";
-    cidrv6 = "fd00:43::/120";
     openFirewall = true;
+    hosts.${config.node.name}.server = true;
   };
 }

@@ -8,16 +8,16 @@ let
   adguardhomeDomain = "adguardhome.${globals.domains.me}";
 in
 {
-  wireguard.proxy-sentinel = {
-    client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [ config.services.adguardhome.port ];
-  };
+  globals.wireguard.proxy-sentinel.hosts.${config.node.name}.firewallRuleForNode.sentinel.allowedTCPPorts =
+    [
+      config.services.adguardhome.port
+    ];
 
   # Allow home-assistant to access it directly
-  wireguard.proxy-home = {
-    client.via = "ward";
-    firewallRuleForNode.sausebiene.allowedTCPPorts = [ config.services.adguardhome.port ];
-  };
+  globals.wireguard.proxy-home.hosts.${config.node.name}.firewallRuleForNode.sausebiene.allowedTCPPorts =
+    [
+      config.services.adguardhome.port
+    ];
 
   globals.services.adguardhome.domain = adguardhomeDomain;
   globals.monitoring.dns.adguardhome = {

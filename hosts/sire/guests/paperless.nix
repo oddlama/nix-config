@@ -14,15 +14,15 @@ in
   microvm.mem = 1024 * 9;
   microvm.vcpu = 8;
 
-  wireguard.proxy-sentinel = {
-    client.via = "sentinel";
-    firewallRuleForNode.sentinel.allowedTCPPorts = [ config.services.paperless.port ];
-  };
+  globals.wireguard.proxy-sentinel.hosts.${config.node.name}.firewallRuleForNode.sentinel.allowedTCPPorts =
+    [
+      config.services.paperless.port
+    ];
 
-  wireguard.proxy-home = {
-    client.via = "ward";
-    firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [ config.services.paperless.port ];
-  };
+  globals.wireguard.proxy-home.hosts.${config.node.name}.firewallRuleForNode.ward-web-proxy.allowedTCPPorts =
+    [
+      config.services.paperless.port
+    ];
 
   globals.services.paperless.domain = paperlessDomain;
   # FIXME: also monitor from internal network

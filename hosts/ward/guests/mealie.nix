@@ -8,10 +8,10 @@ let
   mealieDomain = "mealie.${globals.domains.me}";
 in
 {
-  wireguard.proxy-home = {
-    client.via = "ward";
-    firewallRuleForNode.ward-web-proxy.allowedTCPPorts = [ config.services.mealie.port ];
-  };
+  globals.wireguard.proxy-home.hosts.${config.node.name}.firewallRuleForNode.ward-web-proxy.allowedTCPPorts =
+    [
+      config.services.mealie.port
+    ];
 
   # Mirror the original oauth2 secret, but prepend OIDC_CLIENT_SECRET=
   # so it can be used as an EnvironmentFile

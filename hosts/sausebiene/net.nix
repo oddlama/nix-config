@@ -59,43 +59,41 @@ in
     }
   );
 
-  systemd.network.networks =
-    {
-      "10-lan" = {
-        matchConfig.Name = "lan";
-        # This interface should only be used from attached vlans.
-        # So don't acquire a link local address and only wait for
-        # this interface to gain a carrier.
-        networkConfig.LinkLocalAddressing = "no";
-        linkConfig.RequiredForOnline = "carrier";
-        vlan = map (name: "vlan-${name}") (builtins.attrNames localVlans);
+  systemd.network.networks = {
+    "10-lan" = {
+      matchConfig.Name = "lan";
+      # This interface should only be used from attached vlans.
+      # So don't acquire a link local address and only wait for
+      # this interface to gain a carrier.
+      networkConfig.LinkLocalAddressing = "no";
+      linkConfig.RequiredForOnline = "carrier";
+      vlan = map (name: "vlan-${name}") (builtins.attrNames localVlans);
+    };
+  }
+  // lib.flip lib.concatMapAttrs localVlans (
+    vlanName: vlanCfg: {
+      "30-vlan-${vlanName}" = {
+        address = [
+          vlanCfg.hosts.sausebiene.cidrv4
+          vlanCfg.hosts.sausebiene.cidrv6
+        ];
+        gateway = lib.optionals (vlanName == "services") [ vlanCfg.hosts.ward.ipv4 ];
+        matchConfig.Name = "vlan-${vlanName}";
+        networkConfig.IPv6PrivacyExtensions = "yes";
+        linkConfig.RequiredForOnline = "routable";
       };
     }
-    // lib.flip lib.concatMapAttrs localVlans (
-      vlanName: vlanCfg: {
-        "30-vlan-${vlanName}" = {
-          address = [
-            vlanCfg.hosts.sausebiene.cidrv4
-            vlanCfg.hosts.sausebiene.cidrv6
-          ];
-          gateway = lib.optionals (vlanName == "services") [ vlanCfg.hosts.ward.ipv4 ];
-          matchConfig.Name = "vlan-${vlanName}";
-          networkConfig.IPv6PrivacyExtensions = "yes";
-          linkConfig.RequiredForOnline = "routable";
-        };
-      }
-    );
+  );
 
   networking.nftables.firewall = {
-    zones =
-      {
-        untrusted.interfaces = [ "vlan-services" ];
+    zones = {
+      untrusted.interfaces = [ "vlan-services" ];
+    }
+    // lib.flip lib.concatMapAttrs localVlans (
+      vlanName: _: {
+        "vlan-${vlanName}".interfaces = [ "vlan-${vlanName}" ];
       }
-      // lib.flip lib.concatMapAttrs localVlans (
-        vlanName: _: {
-          "vlan-${vlanName}".interfaces = [ "vlan-${vlanName}" ];
-        }
-      );
+    );
 
     rules = {
       # Allow devices to be discovered through various protocols
@@ -134,6 +132,4 @@ in
       };
     };
   };
-
-  wireguard.proxy-home.client.via = "ward";
 }

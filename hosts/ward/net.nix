@@ -331,11 +331,8 @@
     };
   };
 
-  globals.wireguard.proxy-home.server = {
-    host = globals.net.home-lan.vlans.services.hosts.ward.ipv4;
-    port = 51444;
-    inherit (globals.net.proxy-home) cidrv4;
-    inherit (globals.net.proxy-home) cidrv6;
+  globals.wireguard.proxy-home = {
     openFirewall = false; # Explicitly opened only for lan
+    hosts.${config.node.name}.server = true;
   };
 }

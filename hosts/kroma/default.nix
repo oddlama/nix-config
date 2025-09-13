@@ -42,7 +42,13 @@
     "usb_storage"
     "sd_mod"
   ];
-  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+  boot.binfmt.emulatedSystems = [
+    "aarch64-linux"
+    "i686-linux"
+    "x86_64-windows"
+    "riscv32-linux"
+    "riscv64-linux"
+  ];
 }
 // lib.optionalAttrs (!minimal) {
   # TODO goodbye once -sk keys.

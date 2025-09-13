@@ -1,6 +1,7 @@
 {
   disabledModules = [
     "services/web-apps/mealie.nix"
+    "services/web-apps/immich.nix"
   ];
   imports = [
     ./acme-wildcard.nix
@@ -10,6 +11,7 @@
     ./ente.nix
     ./globals.nix
     ./mealie.nix
+    ./immich.nix
     ./meta.nix
     ./nginx-upstream-monitoring.nix
     ./oauth2-proxy.nix

@@ -14,7 +14,7 @@
     inputs.idmail.nixosModules.default
     inputs.impermanence.nixosModules.impermanence
     inputs.nix-topology.nixosModules.default
-    inputs.nixos-extra-modules.nixosModules.default
+    (inputs.nixos-extra-modules + "/modules")
     inputs.nixos-nftables-firewall.nixosModules.default
 
     ../modules

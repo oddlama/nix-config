@@ -88,7 +88,7 @@ let
 in
 {
   options.nodes = mkOption {
-    description = "Options forwareded to the given node.";
+    description = "Options forwarded to the given node.";
     default = { };
     type = types.attrsOf (
       types.submodule {

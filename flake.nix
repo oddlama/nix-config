@@ -104,14 +104,15 @@
     inputs:
     inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
-        ./nix/agenix-rekey.nix
-        ./nix/devshell.nix
-        ./nix/globals.nix
-        ./nix/hosts.nix
-        ./nix/iso.nix
-        ./nix/pkgs.nix
-        ./nix/storage-box.nix
+        ./flake/agenix-rekey.nix
+        ./flake/devshell.nix
+        ./flake/globals.nix
+        ./flake/hosts.nix
+        ./flake/iso.nix
+        ./flake/pkgs.nix
+        ./flake/storage-box.nix
         ./topology/flake-module.nix
+        (inputs.nixos-extra-modules + "/flake-modules/globals.nix")
       ];
 
       systems = [

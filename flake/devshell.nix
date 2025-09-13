@@ -81,7 +81,7 @@
             name = "NIX_CONFIG";
             value = ''
               plugin-files = ${pkgs.nix-plugins}/lib/nix/plugins
-              extra-builtins-file = ${./..}/nix/extra-builtins.nix
+              extra-builtins-file = ${./..}/flake/extra-builtins.nix
             '';
           }
         ];

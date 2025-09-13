@@ -6,7 +6,6 @@
   ...
 }:
 let
-  wardWebProxyCfg = nodes.ward-web-proxy.config;
   grafanaDomain = "grafana.${globals.domains.me}";
 in
 {
@@ -88,7 +87,9 @@ in
 
     services.nginx = {
       upstreams.grafana = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.grafana.settings.server.http_port}" =
+        servers."${
+          globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv4
+        }:${toString config.services.grafana.settings.server.http_port}" =
           { };
         extraConfig = ''
           zone grafana 64k;
@@ -113,7 +114,9 @@ in
   nodes.ward-web-proxy = {
     services.nginx = {
       upstreams.grafana = {
-        servers."${config.wireguard.proxy-home.ipv4}:${toString config.services.grafana.settings.server.http_port}" =
+        servers."${
+          globals.wireguard.proxy-home.hosts.${config.node.name}.ipv4
+        }:${toString config.services.grafana.settings.server.http_port}" =
           { };
         extraConfig = ''
           zone grafana 64k;
@@ -152,7 +155,7 @@ in
     }
   ];
 
-  networking.hosts.${wardWebProxyCfg.wireguard.proxy-home.ipv4} = [
+  networking.hosts.${globals.wireguard.proxy-home.hosts.ward-web-proxy.ipv4} = [
     globals.services.influxdb.domain # technically a duplicate (see ./common.nix)...
     globals.services.loki.domain
   ];

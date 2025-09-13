@@ -43,30 +43,30 @@ let
       };
     };
 
-    virtualHosts =
-      {
-        ${enteApiDomain} = {
-          forceSSL = true;
-          useACMEWildcardHost = true;
-          locations."/".proxyPass = "http://museum";
-          extraConfig = ''
-            client_max_body_size 4M;
-            ${nginxExtraConfig}
-          '';
-        };
-        ${s3Domain} = {
-          forceSSL = true;
-          useACMEWildcardHost = true;
-          locations."/".proxyPass = "http://minio";
-          extraConfig = ''
-            client_max_body_size 32M;
-            proxy_buffering off;
-            proxy_request_buffering off;
-            ${nginxExtraConfig}
-          '';
-        };
-      }
-      // lib.genAttrs
+    virtualHosts = {
+      ${enteApiDomain} = {
+        forceSSL = true;
+        useACMEWildcardHost = true;
+        locations."/".proxyPass = "http://museum";
+        extraConfig = ''
+          client_max_body_size 4M;
+          ${nginxExtraConfig}
+        '';
+      };
+      ${s3Domain} = {
+        forceSSL = true;
+        useACMEWildcardHost = true;
+        locations."/".proxyPass = "http://minio";
+        extraConfig = ''
+          client_max_body_size 32M;
+          proxy_buffering off;
+          proxy_request_buffering off;
+          ${nginxExtraConfig}
+        '';
+      };
+    }
+    //
+      lib.genAttrs
         [
           enteAccountsDomain
           enteAlbumsDomain
@@ -244,13 +244,17 @@ in
   };
 
   # NOTE: services.ente.web is configured separately on both proxy servers!
-  nodes.sentinel.services.nginx = proxyConfig config.wireguard.proxy-sentinel.ipv4 "";
-  nodes.ward-web-proxy.services.nginx = proxyConfig config.wireguard.proxy-home.ipv4 ''
-    allow ${globals.net.home-lan.vlans.home.cidrv4};
-    allow ${globals.net.home-lan.vlans.home.cidrv6};
-    # Firezone traffic
-    allow ${globals.net.home-lan.vlans.services.hosts.ward.ipv4};
-    allow ${globals.net.home-lan.vlans.services.hosts.ward.ipv6};
-    deny all;
-  '';
+  nodes.sentinel.services.nginx =
+    proxyConfig globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv4
+      "";
+  nodes.ward-web-proxy.services.nginx =
+    proxyConfig globals.wireguard.proxy-home.hosts.${config.node.name}.ipv4
+      ''
+        allow ${globals.net.home-lan.vlans.home.cidrv4};
+        allow ${globals.net.home-lan.vlans.home.cidrv6};
+        # Firezone traffic
+        allow ${globals.net.home-lan.vlans.services.hosts.ward.ipv4};
+        allow ${globals.net.home-lan.vlans.services.hosts.ward.ipv6};
+        deny all;
+      '';
 }

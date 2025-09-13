@@ -84,12 +84,5 @@
       nodes = config.nixosConfigurations // config.guestConfigs;
       # Add a shorthand to easily target toplevel derivations
       "@" = mapAttrs (_: v: v.config.system.build.toplevel) config.nodes;
-
-      # Pre-evaluate the wireguard network information to avoid recalculating it
-      # for every host and every location it is used.
-      wireguardEvalCache = config.pkgs.x86_64-linux.lib.wireguard.createEvalCache inputs [
-        "proxy-sentinel"
-        "proxy-home"
-      ];
     };
 }

@@ -7,8 +7,6 @@
   ...
 }:
 let
-  sentinelCfg = nodes.sentinel.config;
-  wardWebProxyCfg = nodes.ward-web-proxy.config;
   paperlessDomain = "paperless.${globals.domains.me}";
   paperlessBackupDir = "/var/cache/paperless-backup";
 in
@@ -37,7 +35,10 @@ in
   nodes.sentinel = {
     services.nginx = {
       upstreams.paperless = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.paperless.port}" = { };
+        servers."${
+          globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv4
+        }:${toString config.services.paperless.port}" =
+          { };
         extraConfig = ''
           zone paperless 64k;
           keepalive 2;
@@ -65,7 +66,10 @@ in
   nodes.ward-web-proxy = {
     services.nginx = {
       upstreams.paperless = {
-        servers."${config.wireguard.proxy-home.ipv4}:${toString config.services.paperless.port}" = { };
+        servers."${
+          globals.wireguard.proxy-home.hosts.${config.node.name}.ipv4
+        }:${toString config.services.paperless.port}" =
+          { };
         extraConfig = ''
           zone paperless 64k;
           keepalive 2;
@@ -129,8 +133,8 @@ in
       PAPERLESS_ALLOWED_HOSTS = paperlessDomain;
       PAPERLESS_CORS_ALLOWED_HOSTS = "https://${paperlessDomain}";
       PAPERLESS_TRUSTED_PROXIES = lib.concatStringsSep "," [
-        sentinelCfg.wireguard.proxy-sentinel.ipv4
-        wardWebProxyCfg.wireguard.proxy-home.ipv4
+        globals.wireguard.proxy-home.hosts.ward-web-proxy.ipv4
+        globals.wireguard.proxy-sentinel.hosts.sentinel.ipv4
       ];
 
       # Authentication via kanidm

@@ -54,7 +54,10 @@ in
   nodes.sentinel = {
     services.nginx = {
       upstreams.kanidm = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString kanidmPort}" = { };
+        servers."${
+          globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv4
+        }:${toString kanidmPort}" =
+          { };
         extraConfig = ''
           zone kanidm 64k;
           keepalive 2;

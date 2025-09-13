@@ -1,7 +1,6 @@
 {
   globals,
   inputs,
-  nodes,
   pkgs,
   lib,
   ...
@@ -63,7 +62,7 @@
   };
 
   # Connect safely via wireguard to skip authentication
-  networking.hosts.${nodes.ward-web-proxy.config.wireguard.proxy-home.ipv4} = [
+  networking.hosts.${globals.wireguard.proxy-home.hosts.ward-web-proxy.ipv4} = [
     globals.services.influxdb.domain
   ];
   meta.telegraf = {

@@ -261,7 +261,7 @@
         services-to-local = {
           from = [ "vlan-services" ];
           to = [ "local" ];
-          allowedUDPPorts = [ config.wireguard.proxy-home.server.port ];
+          allowedUDPPorts = [ globals.wireguard.proxy-home.port ];
         };
 
         # Forward traffic between wireguard participants
@@ -331,20 +331,11 @@
     };
   };
 
-  #wireguard.home.server = {
-  #  host = todo # config.networking.fqdn;
-  #  port = 51192;
-  #  reservedAddresses = ["10.10.0.1/24" "fd00:10::/120"];
-  #  openFirewall = true;
-  #};
-
-  wireguard.proxy-home.server = {
+  globals.wireguard.proxy-home.server = {
     host = globals.net.home-lan.vlans.services.hosts.ward.ipv4;
     port = 51444;
-    reservedAddresses = [
-      globals.net.proxy-home.cidrv4
-      globals.net.proxy-home.cidrv6
-    ];
+    inherit (globals.net.proxy-home) cidrv4;
+    inherit (globals.net.proxy-home) cidrv6;
     openFirewall = false; # Explicitly opened only for lan
   };
 }

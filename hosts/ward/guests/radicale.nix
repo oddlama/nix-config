@@ -22,7 +22,7 @@ in
   nodes.sentinel = {
     services.nginx = {
       upstreams.radicale = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:8000" = { };
+        servers."${globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv4}:8000" = { };
         extraConfig = ''
           zone radicale 64k;
           keepalive 2;

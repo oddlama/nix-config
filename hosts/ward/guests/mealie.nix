@@ -69,14 +69,17 @@ in
       OIDC_USER_GROUP = "mealie.access@${globals.services.kanidm.domain}";
       OIDC_ADMIN_GROUP = "mealie.admins@${globals.services.kanidm.domain}";
     };
-    trustedProxies = [ nodes.ward-web-proxy.config.wireguard.proxy-home.ipv4 ];
+    trustedProxies = [ globals.wireguard.proxy-home.hosts.ward-web-proxy.ipv4 ];
     credentialsFile = config.age.secrets.oauth2-client-secret.path;
   };
 
   nodes.ward-web-proxy = {
     services.nginx = {
       upstreams.mealie = {
-        servers."${config.wireguard.proxy-home.ipv4}:${toString config.services.mealie.port}" = { };
+        servers."${
+          globals.wireguard.proxy-home.hosts.${config.node.name}.ipv4
+        }:${toString config.services.mealie.port}" =
+          { };
         extraConfig = ''
           zone mealie 64k;
           keepalive 2;

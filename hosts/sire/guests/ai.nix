@@ -66,7 +66,10 @@ in
   nodes.sentinel = {
     services.nginx = {
       upstreams.open-webui = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.open-webui.port}" = { };
+        servers."${
+          globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv4
+        }:${toString config.services.open-webui.port}" =
+          { };
         extraConfig = ''
           zone open-webui 64k;
           keepalive 2;

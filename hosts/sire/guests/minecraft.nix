@@ -396,26 +396,42 @@ in
       postrouting.to-minecraft = {
         after = [ "hook" ];
         rules = [
-          "iifname wan ip daddr ${config.wireguard.proxy-sentinel.ipv4} tcp dport 25565 masquerade random"
-          "iifname wan ip6 daddr ${config.wireguard.proxy-sentinel.ipv6} tcp dport 25565 masquerade random"
-          "iifname wan ip daddr ${config.wireguard.proxy-sentinel.ipv4} tcp dport 25566 masquerade random"
-          "iifname wan ip6 daddr ${config.wireguard.proxy-sentinel.ipv6} tcp dport 25566 masquerade random"
+          "iifname wan ip daddr ${
+            globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv4
+          } tcp dport 25565 masquerade random"
+          "iifname wan ip6 daddr ${
+            globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv6
+          } tcp dport 25565 masquerade random"
+          "iifname wan ip daddr ${
+            globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv4
+          } tcp dport 25566 masquerade random"
+          "iifname wan ip6 daddr ${
+            globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv6
+          } tcp dport 25566 masquerade random"
         ];
       };
       prerouting.to-minecraft = {
         after = [ "hook" ];
         rules = [
-          "iifname wan tcp dport 25565 dnat ip to ${config.wireguard.proxy-sentinel.ipv4}"
-          "iifname wan tcp dport 25565 dnat ip6 to ${config.wireguard.proxy-sentinel.ipv6}"
-          "iifname wan tcp dport 25566 dnat ip to ${config.wireguard.proxy-sentinel.ipv4}"
-          "iifname wan tcp dport 25566 dnat ip6 to ${config.wireguard.proxy-sentinel.ipv6}"
+          "iifname wan tcp dport 25565 dnat ip to ${
+            globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv4
+          }"
+          "iifname wan tcp dport 25565 dnat ip6 to ${
+            globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv6
+          }"
+          "iifname wan tcp dport 25566 dnat ip to ${
+            globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv4
+          }"
+          "iifname wan tcp dport 25566 dnat ip6 to ${
+            globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv6
+          }"
         ];
       };
     };
 
     services.nginx = {
       upstreams.minecraft = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:80" = { };
+        servers."${globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv4}:80" = { };
         extraConfig = ''
           zone minecraft 64k;
           keepalive 2;

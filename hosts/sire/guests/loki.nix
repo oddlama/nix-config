@@ -35,7 +35,9 @@ in
 
     services.nginx = {
       upstreams.loki = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.loki.configuration.server.http_listen_port}" =
+        servers."${
+          globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv4
+        }:${toString config.services.loki.configuration.server.http_listen_port}" =
           { };
         extraConfig = ''
           zone loki 64k;
@@ -83,7 +85,9 @@ in
 
     services.nginx = {
       upstreams.loki = {
-        servers."${config.wireguard.proxy-home.ipv4}:${toString config.services.loki.configuration.server.http_listen_port}" =
+        servers."${
+          globals.wireguard.proxy-home.hosts.${config.node.name}.ipv4
+        }:${toString config.services.loki.configuration.server.http_listen_port}" =
           { };
         extraConfig = ''
           zone loki 64k;

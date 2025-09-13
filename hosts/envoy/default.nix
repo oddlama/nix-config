@@ -1,6 +1,5 @@
 {
   globals,
-  nodes,
   ...
 }:
 {
@@ -29,7 +28,7 @@
   };
 
   # Connect safely via wireguard to skip authentication
-  networking.hosts.${nodes.sentinel.config.wireguard.proxy-sentinel.ipv4} = [
+  networking.hosts.${globals.wireguard.proxy-sentinel.hosts.sentinel.ipv4} = [
     globals.services.influxdb.domain
   ];
   meta.telegraf = {

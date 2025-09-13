@@ -21,6 +21,9 @@ in
   ];
 
   globals = {
+    wireguard = {
+    };
+
     net = {
       home-wan = {
         cidrv4 = "192.168.178.0/24";

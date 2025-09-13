@@ -29,7 +29,9 @@ in
   nodes.sentinel = {
     services.nginx = {
       upstreams.adguardhome = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.adguardhome.port}" =
+        servers."${
+          globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv4
+        }:${toString config.services.adguardhome.port}" =
           { };
         extraConfig = ''
           zone adguardhome 64k;

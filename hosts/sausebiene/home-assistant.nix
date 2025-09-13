@@ -2,7 +2,6 @@
   config,
   globals,
   lib,
-  nodes,
   pkgs,
   ...
 }:
@@ -89,7 +88,7 @@ in
         server_host = [ "0.0.0.0" ];
         server_port = 8123;
         use_x_forwarded_for = true;
-        trusted_proxies = [ nodes.ward-web-proxy.config.wireguard.proxy-home.ipv4 ];
+        trusted_proxies = [ globals.wireguard.proxy-home.hosts.nodes.ward-web-proxy.ipv4 ];
       };
 
       zha.zigpy_config.source_routing = true;
@@ -210,14 +209,16 @@ in
     fritzboxDomain
   ];
 
-  networking.hosts.${nodes.ward-adguardhome.config.wireguard.proxy-home.ipv4} = [
+  networking.hosts.${globals.wireguard.proxy-home.hosts.ward-adguardhome.ipv4} = [
     "adguardhome.internal"
   ];
 
   nodes.ward-web-proxy = {
     services.nginx = {
       upstreams."home-assistant" = {
-        servers."${config.wireguard.proxy-home.ipv4}:${toString config.services.home-assistant.config.http.server_port}" =
+        servers."${
+          globals.wireguard.proxy-home.hosts.${config.node.name}.ipv4
+        }:${toString config.services.home-assistant.config.http.server_port}" =
           { };
         extraConfig = ''
           zone home-assistant 64k;

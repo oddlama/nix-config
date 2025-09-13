@@ -35,7 +35,10 @@ in
   nodes.ward-web-proxy = {
     services.nginx = {
       upstreams."esphome" = {
-        servers."${config.wireguard.proxy-home.ipv4}:${toString config.services.esphome.port}" = { };
+        servers."${
+          globals.wireguard.proxy-home.hosts.${config.node.name}.ipv4
+        }:${toString config.services.esphome.port}" =
+          { };
         extraConfig = ''
           zone esphome 64k;
           keepalive 2;

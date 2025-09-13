@@ -2,13 +2,8 @@
   config,
   globals,
   lib,
-  nodes,
   ...
 }:
-let
-  sentinelCfg = nodes.sentinel.config;
-  wardWebProxyCfg = nodes.ward-web-proxy.config;
-in
 {
   meta.promtail = {
     enable = true;
@@ -17,11 +12,12 @@ in
 
   # Connect safely via wireguard to skip http authentication
   networking.hosts.${
-    if config.wireguard ? proxy-home then
-      wardWebProxyCfg.wireguard.proxy-home.ipv4
+    if globals.wireguard ? proxy-home then
+      globals.wireguard.proxy-home.hosts.ward-web-proxy.ipv4
     else
-      sentinelCfg.wireguard.proxy-sentinel.ipv4
-  } = [ globals.services.influxdb.domain ];
+      globals.wireguard.proxy-sentinel.hosts.sentinel.ipv4
+  } =
+    [ globals.services.influxdb.domain ];
 
   meta.telegraf = lib.mkIf (!config.boot.isContainer) {
     enable = true;

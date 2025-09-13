@@ -53,13 +53,11 @@ in
     rules = [ "ct status dnat accept" ];
   };
 
-  wireguard.proxy-sentinel.server = {
+  globals.wireguard.proxy-sentinel = {
     host = config.networking.fqdn;
     port = 51443;
-    reservedAddresses = [
-      "10.43.0.0/24"
-      "fd00:43::/120"
-    ];
+    cidrv4 = "10.43.0.0/24";
+    cidrv6 = "fd00:43::/120";
     openFirewall = true;
   };
 }

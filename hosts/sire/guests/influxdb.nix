@@ -2,13 +2,10 @@
   config,
   globals,
   lib,
-  nodes,
   pkgs,
   ...
 }:
 let
-  sentinelCfg = nodes.sentinel.config;
-  wardCfg = nodes.ward.config;
   influxdbDomain = "influxdb.${globals.domains.me}";
   influxdbPort = 8086;
 in
@@ -55,7 +52,10 @@ in
   nodes.sentinel = {
     services.nginx = {
       upstreams.influxdb = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString influxdbPort}" = { };
+        servers."${
+          globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv4
+        }:${toString influxdbPort}" =
+          { };
         extraConfig = ''
           zone influxdb 64k;
           keepalive 2;
@@ -68,9 +68,8 @@ in
       virtualHosts.${influxdbDomain} =
         let
           accessRules = ''
-            ${lib.concatMapStrings (
-              cidr: "allow ${cidr};\n"
-            ) sentinelCfg.wireguard.proxy-sentinel.server.reservedAddresses}
+            allow ${globals.wireguard.proxy-sentinel.cidrv4};
+            allow ${globals.wireguard.proxy-sentinel.cidrv6};
             deny all;
           '';
         in
@@ -97,7 +96,8 @@ in
   nodes.ward-web-proxy = {
     services.nginx = {
       upstreams.influxdb = {
-        servers."${config.wireguard.proxy-home.ipv4}:${toString influxdbPort}" = { };
+        servers."${globals.wireguard.proxy-home.hosts.${config.node.name}.ipv4}:${toString influxdbPort}" =
+          { };
         extraConfig = ''
           zone influxdb 64k;
           keepalive 2;
@@ -110,7 +110,8 @@ in
       virtualHosts.${influxdbDomain} =
         let
           accessRules = ''
-            ${lib.concatMapStrings (ip: "allow ${ip};\n") wardCfg.wireguard.proxy-home.server.reservedAddresses}
+            allow ${globals.wireguard.proxy-home.cidrv4};
+            allow ${globals.wireguard.proxy-home.cidrv6};
             deny all;
           '';
         in

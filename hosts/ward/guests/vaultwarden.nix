@@ -38,7 +38,9 @@ in
   nodes.sentinel = {
     services.nginx = {
       upstreams.vaultwarden = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:${toString config.services.vaultwarden.config.rocketPort}" =
+        servers."${
+          globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv4
+        }:${toString config.services.vaultwarden.config.rocketPort}" =
           { };
         extraConfig = ''
           zone vaultwarden 64k;

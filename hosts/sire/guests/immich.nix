@@ -218,7 +218,7 @@ in
   nodes.sentinel = {
     services.nginx = {
       upstreams.immich = {
-        servers."${config.wireguard.proxy-sentinel.ipv4}:2283" = { };
+        servers."${globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv4}:2283" = { };
         extraConfig = ''
           zone immich 64k;
           keepalive 2;
@@ -250,7 +250,7 @@ in
   nodes.ward-web-proxy = {
     services.nginx = {
       upstreams.immich = {
-        servers."${config.wireguard.proxy-home.ipv4}:2283" = { };
+        servers."${globals.wireguard.proxy-home.hosts.${config.node.name}.ipv4}:2283" = { };
         extraConfig = ''
           zone immich 64k;
           keepalive 2;

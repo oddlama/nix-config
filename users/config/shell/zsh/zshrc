@@ -227,7 +227,9 @@ zstyle ':completion:*' verbose true
 # provide .. as a completion
 zstyle ':completion:*' special-dirs ..
 # match uppercase from lowercase
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+# (disabled because very slow, completing even subdirectories of large
+# directories takes multiple seconds e.g. /nix/store/whatever/bin/<TAB>)
+#zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 
 
 # --------------------------------------------------------------------------------

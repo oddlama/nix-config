@@ -68,6 +68,7 @@ in
       in
       lib.mkForce {
         config.local-keys = [
+          "config.local-keys.*"
           "store.*"
           "directory.*"
           "tracer.*"
@@ -85,6 +86,9 @@ in
           "certificate.*"
           "auth.dkim.*"
           "signature.*"
+          "imap.*"
+          "session.*"
+          "resolver.*"
         ];
 
         authentication.fallback-admin = {
@@ -518,21 +522,21 @@ in
         keepalive 2;
       '';
     };
-    virtualHosts =
-      {
-        ${stalwartDomain} = {
-          forceSSL = true;
-          useACMEWildcardHost = true;
-          extraConfig = ''
-            client_max_body_size 512M;
-          '';
-          locations."/" = {
-            proxyPass = "http://stalwart";
-            proxyWebsockets = true;
-          };
+    virtualHosts = {
+      ${stalwartDomain} = {
+        forceSSL = true;
+        useACMEWildcardHost = true;
+        extraConfig = ''
+          client_max_body_size 512M;
+        '';
+        locations."/" = {
+          proxyPass = "http://stalwart";
+          proxyWebsockets = true;
         };
-      }
-      // lib.genAttrs
+      };
+    }
+    //
+      lib.genAttrs
         [
           "autoconfig.${primaryDomain}"
           "autodiscover.${primaryDomain}"
@@ -579,7 +583,7 @@ in
         ReadWritePaths = [ config.services.idmail.dataDir ];
         ExecStart = lib.mkForce [
           ""
-          "${cfg.package}/bin/stalwart-mail --config=/run/stalwart-mail/config.toml"
+          "${lib.getExe cfg.package} --config=/run/stalwart-mail/config.toml"
         ];
         RestartSec = "60"; # Retry every minute
       };

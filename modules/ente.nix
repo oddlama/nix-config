@@ -48,6 +48,7 @@ in
       domains = {
         api = mkOption {
           type = types.str;
+          example = "api.ente.example.com";
           description = ''
             The domain under which the api is served. This will NOT serve the api itself,
             but is a required setting to host the frontends! This will automatically be set
@@ -57,21 +58,25 @@ in
 
         accounts = mkOption {
           type = types.str;
+          example = "accounts.ente.example.com";
           description = "The domain under which the accounts frontend will be served.";
         };
 
         cast = mkOption {
           type = types.str;
+          example = "cast.ente.example.com";
           description = "The domain under which the cast frontend will be served.";
         };
 
         albums = mkOption {
           type = types.str;
+          example = "albums.ente.example.com";
           description = "The domain under which the albums frontend will be served.";
         };
 
         photos = mkOption {
           type = types.str;
+          example = "photos.ente.example.com";
           description = "The domain under which the photos frontend will be served.";
         };
       };
@@ -85,17 +90,18 @@ in
       user = mkOption {
         type = types.str;
         default = defaultUser;
-        description = "User under which museum runs.";
+        description = "User under which museum runs. If you set this option you must make sure the user exists.";
       };
 
       group = mkOption {
         type = types.str;
         default = defaultGroup;
-        description = "Group under which museum runs.";
+        description = "Group under which museum runs. If you set this option you must make sure the group exists.";
       };
 
       domain = mkOption {
         type = types.str;
+        example = "api.ente.example.com";
         description = "The domain under which the api will be served.";
       };
 
@@ -182,6 +188,7 @@ in
 
       services.ente.web.domains.api = mkIf cfgWeb.enable cfgApi.domain;
       services.ente.api.settings = {
+        # This will cause logs to be written to stdout/err, which then end up in the journal
         log-file = mkDefault "";
         db = mkIf cfgApi.enableLocalDB {
           host = "/run/postgresql";
@@ -245,6 +252,7 @@ in
           BindReadOnlyPaths = [
             "${cfgApi.package}/share/museum/migrations:${dataDir}/migrations"
             "${cfgApi.package}/share/museum/mail-templates:${dataDir}/mail-templates"
+            "${cfgApi.package}/share/museum/web-templates:${dataDir}/web-templates"
           ];
 
           User = cfgApi.user;

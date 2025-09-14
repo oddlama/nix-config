@@ -12,7 +12,7 @@
     # The identities that are used to rekey agenix secrets and to
     # decrypt all repository-wide secrets.
     secretsConfig = {
-      masterIdentities = [ "\"$PRJ_ROOT\"/secrets/yk1-nix-rage.pub" ];
+      masterIdentities = [ ../secrets/yk1-nix-rage.pub ];
       extraEncryptionPubkeys = [ ../secrets/backup.pub ];
     };
   };

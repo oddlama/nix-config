@@ -52,11 +52,14 @@ in
 
   services.immich = {
     enable = true;
+    host = "0.0.0.0";
     # We use VectorChord from the beginning
     database.enableVectors = false;
     environment = {
       IMMICH_LOG_LEVEL = "verbose";
       IMMICH_TRUSTED_PROXIES = lib.concatStringsSep "," [
+        globals.wireguard.proxy-home.hosts.ward-web-proxy.ipv4
+        globals.wireguard.proxy-sentinel.hosts.sentinel.ipv4
       ];
     };
     settings = {
@@ -269,9 +272,9 @@ in
           client_max_body_size 50G;
           proxy_buffering off;
           proxy_request_buffering off;
-          proxy_read_timeout 600s;
-          proxy_send_timeout 600s;
-          send_timeout       600s;
+          proxy_read_timeout 1200s;
+          proxy_send_timeout 1200s;
+          send_timeout       1200s;
           allow ${globals.net.home-lan.vlans.home.cidrv4};
           allow ${globals.net.home-lan.vlans.home.cidrv6};
           # Firezone traffic

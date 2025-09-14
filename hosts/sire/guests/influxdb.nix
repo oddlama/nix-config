@@ -105,6 +105,8 @@ in
       virtualHosts.${influxdbDomain} =
         let
           accessRules = ''
+            allow ${globals.net.home-lan.vlans.services.cidrv4};
+            allow ${globals.net.home-lan.vlans.services.cidrv6};
             allow ${globals.wireguard.proxy-home.cidrv4};
             allow ${globals.wireguard.proxy-home.cidrv6};
             deny all;

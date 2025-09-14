@@ -285,4 +285,9 @@ in
       };
     };
   };
+
+  backups.storageBoxes.dusk = {
+    subuser = "immich";
+    paths = [ "/var/lib/immich" ];
+  };
 }

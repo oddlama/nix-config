@@ -89,7 +89,7 @@ in
         server_host = [ "0.0.0.0" ];
         server_port = 8123;
         use_x_forwarded_for = true;
-        trusted_proxies = [ globals.wireguard.proxy-home.hosts.nodes.ward-web-proxy.ipv4 ];
+        trusted_proxies = [ globals.wireguard.proxy-home.hosts.ward-web-proxy.ipv4 ];
       };
 
       zha.zigpy_config.source_routing = true;

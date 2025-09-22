@@ -66,7 +66,7 @@ in
       backup.database = {
         cronExpression = "0 02 * * *";
         enabled = true;
-        keepLastAmount = 14;
+        keepLastAmount = 3;
       };
       ffmpeg = {
         accel = "disabled";
@@ -151,7 +151,7 @@ in
         facialRecognition = {
           enabled = true;
           maxDistance = 0.5;
-          minFaces = 2;
+          minFaces = 3;
           minScore = 0.65;
           modelName = "buffalo_l";
         };
@@ -204,7 +204,7 @@ in
       storageTemplate = {
         enabled = true;
         hashVerificationEnabled = true;
-        template = "{{y}}/{{y}}-{{MM}}-{{dd}}/{{filename}}";
+        template = "{{y}}/{{y}}-{{MM}}-{{dd}}/{{{filename}}}";
       };
       theme.customCss = "";
       trash = {
@@ -266,15 +266,14 @@ in
         locations."/" = {
           proxyPass = "http://immich";
           proxyWebsockets = true;
-          extraConfig = '''';
         };
         extraConfig = ''
           client_max_body_size 50G;
           proxy_buffering off;
           proxy_request_buffering off;
-          proxy_read_timeout 1200s;
-          proxy_send_timeout 1200s;
-          send_timeout       1200s;
+          proxy_read_timeout 3600s;
+          proxy_send_timeout 3600s;
+          send_timeout       3600s;
           allow ${globals.net.home-lan.vlans.home.cidrv4};
           allow ${globals.net.home-lan.vlans.home.cidrv6};
           # Firezone traffic

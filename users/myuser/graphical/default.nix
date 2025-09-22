@@ -5,31 +5,30 @@
   ...
 }:
 {
-  imports =
-    [
-      ./discord.nix
-      ./firefox.nix
-      ./kitty.nix
-      ./signal.nix
-      ./theme.nix
-      ./thunderbird.nix
-      ./ts3.nix
+  imports = [
+    ./discord.nix
+    ./firefox.nix
+    ./kitty.nix
+    ./signal.nix
+    ./theme.nix
+    ./thunderbird.nix
+    # ./ts3.nix
 
-      # X11
-      ./i3.nix
-      ./flameshot.nix
+    # X11
+    ./i3.nix
+    ./flameshot.nix
 
-      # Wayland
-      ./gpu-screen-recorder.nix
-      ./hyprland.nix
-      ./fuzzel.nix
-      ./sway.nix
-      ./swaync.nix
-      ./waybar.nix
-    ]
-    ++ lib.optionals nixosConfig.graphical.gaming.enable [
-      ./games
-    ];
+    # Wayland
+    ./gpu-screen-recorder.nix
+    ./hyprland.nix
+    ./fuzzel.nix
+    ./sway.nix
+    ./swaync.nix
+    ./waybar.nix
+  ]
+  ++ lib.optionals nixosConfig.graphical.gaming.enable [
+    ./games
+  ];
 
   home = {
     packages = [

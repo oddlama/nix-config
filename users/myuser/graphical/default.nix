@@ -47,7 +47,6 @@
       pkgs.gpu-screen-recorder
       pkgs.gpu-screen-recorder-gtk
       pkgs.spotify
-      pkgs.ente-desktop
     ];
 
     # TODO wrap thunderbird bin and set LC_ALL=de_DE.UTF-8 because thunderbird uses wrong date and time formatting with C.UTF-8
@@ -81,7 +80,6 @@
       ".config/gpu-screen-recorder"
       ".config/obsidian"
       ".config/spotify"
-      ".config/ente"
       ".factorio" # XDG spec? nah, apprently overrated.
     ];
   };

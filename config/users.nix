@@ -46,7 +46,7 @@
       immich = uidGid 965;
       redis-immich = uidGid 964;
       avahi = uidGid 963;
-      ente = uidGid 962;
+      # ente = uidGid 962;
       minio = uidGid 961;
       kea = uidGid 960;
     };

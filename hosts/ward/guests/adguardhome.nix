@@ -113,12 +113,6 @@ in
             # FIXME: new entry here? make new firezone entry too.
             # FIXME: new entry here? make new firezone gateway on ward entry too.
             globals.services.grafana.domain
-            "accounts.photos.${globals.domains.me}"
-            "albums.photos.${globals.domains.me}"
-            "api.photos.${globals.domains.me}"
-            "cast.photos.${globals.domains.me}"
-            "photos.${globals.domains.me}"
-            "s3.photos.${globals.domains.me}"
             globals.services.mealie.domain
             globals.services.immich.domain
             globals.services.influxdb.domain

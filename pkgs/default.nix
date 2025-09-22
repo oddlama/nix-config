@@ -18,7 +18,5 @@ _inputs: [
     #     xy = pythonPrev.xy.overrideAttrs { };
     #   })
     # ];
-
-    ente-web = prev.callPackage ./ente-web.nix { };
   })
 ]

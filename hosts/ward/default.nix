@@ -13,13 +13,6 @@ let
   # FIXME: new entry here? make new firezone entry too.
   homeDomains = [
     globals.services.grafana.domain
-    # TODO: allow multiple domains per global service.
-    "accounts.photos.${globals.domains.me}"
-    "albums.photos.${globals.domains.me}"
-    "api.photos.${globals.domains.me}"
-    "cast.photos.${globals.domains.me}"
-    "photos.${globals.domains.me}"
-    "s3.photos.${globals.domains.me}"
     globals.services.mealie.domain
     globals.services.immich.domain
     globals.services.influxdb.domain

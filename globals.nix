@@ -29,7 +29,6 @@ in
         cidrv6 = "fd00:44::/120";
         hosts = {
           sausebiene.id = 10;
-          sire-ente.id = 101;
           sire-grafana.id = 221;
           sire-immich.id = 225;
           sire-influxdb.id = 141;
@@ -51,7 +50,6 @@ in
           envoy.id = 135;
           sentinel.id = 29;
           sire-ai.id = 171;
-          sire-ente.id = 101;
           sire-grafana.id = 221;
           sire-immich.id = 225;
           sire-influxdb.id = 141;

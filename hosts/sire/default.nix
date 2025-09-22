@@ -150,9 +150,5 @@
       }
       // mkMicrovm "ai" { }
       // mkMicrovm "minecraft" { }
-      // mkMicrovm "ente" {
-        enableStorageDataset = true;
-      }
-      #// mkMicrovm "fasten-health" {}
     );
 }

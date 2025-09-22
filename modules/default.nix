@@ -8,7 +8,6 @@
     ./backups.nix
     ./deterministic-ids.nix
     ./distributed-config.nix
-    ./ente.nix
     ./globals.nix
     ./mealie.nix
     ./immich.nix

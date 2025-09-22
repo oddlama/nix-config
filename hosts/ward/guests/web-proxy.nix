@@ -84,15 +84,4 @@ in
   users.groups.acme.members = [ "nginx" ];
   services.nginx.enable = true;
   services.nginx.recommendedSetup = true;
-
-  services.ente.web = {
-    enable = true;
-    domains = {
-      api = "api.photos.${globals.domains.me}";
-      accounts = "accounts.photos.${globals.domains.me}";
-      albums = "albums.photos.${globals.domains.me}";
-      cast = "cast.photos.${globals.domains.me}";
-      photos = "photos.${globals.domains.me}";
-    };
-  };
 }

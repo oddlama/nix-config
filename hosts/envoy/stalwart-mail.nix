@@ -68,7 +68,7 @@ in
       in
       lib.mkForce {
         config.local-keys = [
-          "config.local-keys.*"
+          # defaults
           "store.*"
           "directory.*"
           "tracer.*"
@@ -76,12 +76,17 @@ in
           "!server.blocked-ip.*"
           "!server.allowed-ip.*"
           "authentication.fallback-admin.*"
-          "cluster.node-id"
+          "cluster.*"
           "storage.data"
           "storage.blob"
           "storage.lookup"
           "storage.fts"
           "storage.directory"
+          # new
+          "spam-filter.resource"
+          "web-admin.resource"
+          "web-admin.path"
+          "config.local-keys.*"
           "lookup.default.hostname"
           "certificate.*"
           "auth.dkim.*"
@@ -250,79 +255,6 @@ in
                       AND u.active = true
                   ORDER BY rowOrder, address ASC
                 )
-              '';
-              # "SELECT address FROM emails WHERE address LIKE '%' || ?1 || '%' AND type = 'primary' ORDER BY address LIMIT 5";
-              verify = toSingleLineSql ''
-                SELECT m.address AS address
-                  FROM mailboxes AS m
-                  JOIN domains AS d ON m.domain = d.domain
-                  JOIN users AS u ON m.owner = u.username
-                  WHERE m.address LIKE '%' || ?1 || '%'
-                    AND m.active = true
-                    AND d.active = true
-                    AND u.active = true
-                UNION
-                SELECT a.address AS address
-                  FROM aliases AS a
-                  JOIN domains AS d ON a.domain = d.domain
-                  JOIN (
-                    -- To check whether the owner is active we need to make a subquery
-                    -- because the owner could be a user or mailbox
-                    SELECT username
-                      FROM users
-                      WHERE active = true
-                    UNION
-                    SELECT m.address AS username
-                      FROM mailboxes AS m
-                      JOIN users AS u ON m.owner = u.username
-                      WHERE m.active = true
-                        AND u.active = true
-                  ) AS u ON a.owner = u.username
-                  WHERE a.address LIKE '%' || ?1 || '%'
-                    AND a.active = true
-                    AND d.active = true
-                ORDER BY address
-                LIMIT 5
-              '';
-              # "SELECT p.address FROM emails AS p JOIN emails AS l ON p.name = l.name WHERE p.type = 'primary' AND l.address = ?1 AND l.type = 'list' ORDER BY p.address LIMIT 50";
-              # XXX: We don't actually expand, but return the same address if it exists since we don't support mailing lists
-              expand = toSingleLineSql ''
-                SELECT m.address AS address
-                  FROM mailboxes AS m
-                  JOIN domains AS d ON m.domain = d.domain
-                  JOIN users AS u ON m.owner = u.username
-                  WHERE m.address = ?1
-                    AND m.active = true
-                    AND d.active = true
-                    AND u.active = true
-                UNION
-                SELECT a.address AS address
-                  FROM aliases AS a
-                  JOIN domains AS d ON a.domain = d.domain
-                  JOIN (
-                    -- To check whether the owner is active we need to make a subquery
-                    -- because the owner could be a user or mailbox
-                    SELECT username
-                      FROM users
-                      WHERE active = true
-                    UNION
-                    SELECT m.address AS username
-                      FROM mailboxes AS m
-                      JOIN users AS u ON m.owner = u.username
-                      WHERE m.active = true
-                        AND u.active = true
-                  ) AS u ON a.owner = u.username
-                  WHERE a.address = ?1
-                    AND a.active = true
-                    AND d.active = true
-                ORDER BY address
-                LIMIT 50
-              '';
-              # "SELECT 1 FROM emails WHERE address LIKE '%@' || ?1 LIMIT 1";
-              domains = toSingleLineSql ''
-                SELECT domain
-                  FROM domains
-                  WHERE domain = ?1
               '';
             };
         };

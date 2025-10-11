@@ -151,6 +151,6 @@
       }
       // mkMicrovm "ai" { }
       // mkMicrovm "minecraft" { }
-      # // mkMicrovm "linkwarden" { }
+      // mkMicrovm "linkwarden" { }
     );
 }

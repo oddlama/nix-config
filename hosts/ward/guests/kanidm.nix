@@ -34,6 +34,7 @@ in
   age.secrets.kanidm-idm-admin-password = mkRandomSecret;
 
   age.secrets.kanidm-oauth2-affine = mkRandomSecret;
+  age.secrets.kanidm-oauth2-linkwarden = mkRandomSecret;
   age.secrets.kanidm-oauth2-forgejo = mkRandomSecret;
   age.secrets.kanidm-oauth2-grafana = mkRandomSecret;
   age.secrets.kanidm-oauth2-immich = mkRandomSecret;
@@ -127,6 +128,24 @@ in
         basicSecretFile = config.age.secrets.kanidm-oauth2-affine.path;
         preferShortUsername = true;
         scopeMaps."affine.access" = [
+          "openid"
+          "email"
+          "profile"
+        ];
+        # XXX: PKCE is currently not supported, see .
+        allowInsecureClientDisablePkce = true;
+      };
+
+      # Linkwarden
+      groups."linkwarden.access" = { };
+      groups."linkwarden.admins" = { };
+      systems.oauth2.linkwarden = {
+        displayName = "Linkwarden";
+        originUrl = "https://${globals.services.linkwarden.domain}/oauth/callback";
+        originLanding = "https://${globals.services.linkwarden.domain}/";
+        basicSecretFile = config.age.secrets.kanidm-oauth2-linkwarden.path;
+        preferShortUsername = true;
+        scopeMaps."linkwarden.access" = [
           "openid"
           "email"
           "profile"

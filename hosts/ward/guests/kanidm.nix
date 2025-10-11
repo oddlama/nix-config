@@ -145,6 +145,7 @@ in
         originLanding = "https://${globals.services.linkwarden.domain}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-linkwarden.path;
         preferShortUsername = true;
+        enableLegacyCrypto = true; # XXX: ES256 not supported, yay legacy shit :(
         scopeMaps."linkwarden.access" = [
           "openid"
           "email"

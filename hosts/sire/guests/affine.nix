@@ -64,6 +64,7 @@ in
         host = "0.0.0.0";
         https = true;
         hosts = [
+          globals.wireguard.proxy-sentinel.hosts.sentinel.ipv4
           globals.wireguard.proxy-home.hosts.ward-web-proxy.ipv4
         ];
         externalUrl = "https://${affineDomain}";

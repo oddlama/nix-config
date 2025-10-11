@@ -48,10 +48,10 @@ in
         allowSignupForOauth = true;
         "session.ttl" = 365 * 86400; # ~1 year
       };
-      oauth."providers.oidc" = {
+      oauth."providers.oidc" = rec {
         clientId = "affine";
         clientSecret._secret = config.age.secrets.affine-oauth2-client-secret.path;
-        issuer = "https://${globals.services.kanidm.domain}";
+        issuer = "https://${globals.services.kanidm.domain}/oauth2/openid/${clientId}";
         args = {
           scope = "openid profile email";
           claim_id = "preferred_username";

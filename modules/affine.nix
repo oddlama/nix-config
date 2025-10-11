@@ -193,6 +193,11 @@ in
       wantedBy = [ "multi-user.target" ];
 
       preStart = ''
+        if [[ ! -e .affine/config/private.key ]]; then
+          echo "Generating affine private key"
+          ${lib.getExe pkgs.openssl} ecparam -name prime256v1 -genkey -noout -out .affine/config/private.key
+        fi
+
         # Generate config including secret values.
         ${utils.genJqSecretsReplacementSnippet cfg.settings "/run/affine/config.json"}
         mkdir -p ${dataDir}/.affine/config

@@ -44,7 +44,7 @@ in
     enableLocalDB = true;
     settings = {
       auth = {
-        allowSignup = false;
+        allowSignup = true;
         allowSignupForOauth = true;
         "session.ttl" = 365 * 86400; # ~1 year
       };

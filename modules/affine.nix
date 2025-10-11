@@ -194,6 +194,7 @@ in
 
       preStart = ''
         if [[ ! -e .affine/config/private.key ]]; then
+          mkdir -p .affine/config
           echo "Generating affine private key"
           ${lib.getExe pkgs.openssl} ecparam -name prime256v1 -genkey -noout -out .affine/config/private.key
         fi

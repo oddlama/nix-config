@@ -2,17 +2,23 @@
   config,
   globals,
   lib,
+  pkgs,
   ...
 }:
 let
   inherit (lib)
+    any
     attrValues
     flip
+    mkForce
     mkIf
     mkMerge
     mkOption
+    optionals
     types
     ;
+
+  anyPostgres = any (boxCfg: boxCfg.withPostgres) (attrValues config.backups.storageBoxes);
 in
 {
   options.backups.storageBoxes = mkOption {
@@ -36,6 +42,12 @@ in
             description = "The paths to backup.";
             type = types.listOf types.path;
           };
+
+          withPostgres = mkOption {
+            description = "Whether to enable and configure services.postgresqlBackup to also backup all postgres databases.";
+            type = types.bool;
+            default = false;
+          };
         };
       })
     );
@@ -44,6 +56,24 @@ in
   config = mkIf (config.backups.storageBoxes != { }) {
     age.secrets.restic-encryption-password.generator.script = "alnum";
     age.secrets.restic-ssh-privkey.generator.script = "ssh-ed25519";
+
+    environment.persistence."/persist".directories = mkIf anyPostgres [
+      {
+        directory = "/var/cache/postgresql_backups";
+        user = "postgres";
+        group = "postgres";
+        mode = "0750";
+      }
+    ];
+
+    # Enable postgresql backups if any storagebox backup needs them
+    services.postgresqlBackup = mkIf anyPostgres {
+      enable = true;
+      backupAll = true;
+    };
+
+    # Disable automatic backups, let the restic service require this service.
+    systemd.services.postgresqlBackup.startAt = mkForce [ ];
 
     services.restic.backups = mkMerge (
       flip map (attrValues config.backups.storageBoxes) (boxCfg: {
@@ -65,7 +95,28 @@ in
           #    just access our backup server.
           user = "root";
 
-          inherit (boxCfg) paths;
+          backupPrepareCommand = mkIf anyPostgres (
+            lib.getExe (
+              pkgs.writeShellApplication {
+                name = "backup-postgres";
+                runtimeInputs = [
+                  config.services.postgresql.package
+                  pkgs.util-linux
+                ];
+                text = ''
+                  umask 0077
+                  runuser -u postgres pg_dumpall > /var/cache/postgresql_backups/database.sql
+                '';
+              }
+            )
+          );
+
+          paths =
+            boxCfg.paths
+            ++ optionals boxCfg.withPostgres [
+              "/var/cache/postgresql_backups"
+            ];
+
           timerConfig = {
             OnCalendar = "06:15";
             RandomizedDelaySec = "3h";

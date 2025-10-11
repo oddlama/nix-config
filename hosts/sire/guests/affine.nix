@@ -135,5 +135,6 @@ in
   backups.storageBoxes.dusk = {
     subuser = "affine";
     paths = [ "/var/lib/affine" ];
+    withPostgres = true;
   };
 }

@@ -65,8 +65,8 @@ in
     secretSettings.oauth.clientSecret = config.age.secrets.immich-oauth2-client-secret.path;
     settings = {
       backup.database = {
+        enabled = false; # we backup using our restic module
         cronExpression = "0 02 * * *";
-        enabled = true;
         keepLastAmount = 3;
       };
       ffmpeg = {
@@ -288,5 +288,6 @@ in
   backups.storageBoxes.dusk = {
     subuser = "immich";
     paths = [ "/var/lib/immich" ];
+    withPostgres = true;
   };
 }

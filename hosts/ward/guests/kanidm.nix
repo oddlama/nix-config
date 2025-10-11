@@ -132,7 +132,7 @@ in
           "email"
           "profile"
         ];
-        # XXX: PKCE is currently not supported, see .
+        # XXX: PKCE is currently not supported, see https://github.com/toeverything/AFFiNE/issues/13730
         allowInsecureClientDisablePkce = true;
       };
 
@@ -141,7 +141,7 @@ in
       groups."linkwarden.admins" = { };
       systems.oauth2.linkwarden = {
         displayName = "Linkwarden";
-        originUrl = "https://${globals.services.linkwarden.domain}/oauth/callback";
+        originUrl = "https://${globals.services.linkwarden.domain}/api/v1/auth/callback/authentik";
         originLanding = "https://${globals.services.linkwarden.domain}/";
         basicSecretFile = config.age.secrets.kanidm-oauth2-linkwarden.path;
         preferShortUsername = true;

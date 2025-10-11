@@ -51,5 +51,6 @@
       kea = uidGid 960;
       affine = uidGid 959;
       redis-affine = uidGid 958;
+      linkwarden = uidGid 957;
     };
 }

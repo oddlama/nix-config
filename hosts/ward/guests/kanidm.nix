@@ -33,6 +33,7 @@ in
   age.secrets.kanidm-admin-password = mkRandomSecret;
   age.secrets.kanidm-idm-admin-password = mkRandomSecret;
 
+  age.secrets.kanidm-oauth2-affine = mkRandomSecret;
   age.secrets.kanidm-oauth2-forgejo = mkRandomSecret;
   age.secrets.kanidm-oauth2-grafana = mkRandomSecret;
   age.secrets.kanidm-oauth2-immich = mkRandomSecret;
@@ -91,7 +92,7 @@ in
   ];
 
   services.kanidm = {
-    package = pkgs.kanidm.withSecretProvisioning;
+    package = pkgs.kanidmWithSecretProvisioning_1_7;
     enableServer = true;
     serverSettings = {
       domain = kanidmDomain;
@@ -115,6 +116,22 @@ in
       idmAdminPasswordFile = config.age.secrets.kanidm-idm-admin-password.path;
 
       inherit (globals.kanidm) persons;
+
+      # AFFiNE
+      groups."affine.access" = { };
+      groups."affine.admins" = { };
+      systems.oauth2.affine = {
+        displayName = "AFFiNE";
+        originUrl = "https://${globals.services.affine.domain}/oauth/callback";
+        originLanding = "https://${globals.services.affine.domain}/";
+        basicSecretFile = config.age.secrets.kanidm-oauth2-affine.path;
+        preferShortUsername = true;
+        scopeMaps."affine.access" = [
+          "openid"
+          "email"
+          "profile"
+        ];
+      };
 
       # Immich
       groups."immich.access" = { };

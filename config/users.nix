@@ -49,5 +49,7 @@
       # ente = uidGid 962;
       minio = uidGid 961;
       kea = uidGid 960;
+      affine = uidGid 959;
+      redis-affine = uidGid 958;
     };
 }

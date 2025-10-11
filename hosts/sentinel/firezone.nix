@@ -11,6 +11,7 @@ let
   # FIXME: new entry here? make new adguardhome entry too.
   # FIXME: new entry here? make new firezone gateway on ward entry too.
   homeDomains = [
+    globals.services.affine.domain
     globals.services.grafana.domain
     globals.services.mealie.domain
     globals.services.immich.domain

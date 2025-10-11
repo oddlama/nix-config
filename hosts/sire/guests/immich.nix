@@ -62,6 +62,7 @@ in
         globals.wireguard.proxy-sentinel.hosts.sentinel.ipv4
       ];
     };
+    secretSettings.oauth.clientSecret = config.age.secrets.immich-oauth2-client-secret.path;
     settings = {
       backup.database = {
         cronExpression = "0 02 * * *";
@@ -183,7 +184,6 @@ in
         autoRegister = true;
         buttonText = "Login with Kanidm";
         clientId = "immich";
-        clientSecret._secret = config.age.secrets.immich-oauth2-client-secret.path;
         defaultStorageQuota = null;
         enabled = true;
         issuerUrl = "https://${globals.services.kanidm.domain}/oauth2/openid/${clientId}";
@@ -239,9 +239,9 @@ in
           client_max_body_size 50G;
           proxy_buffering off;
           proxy_request_buffering off;
-          proxy_read_timeout 600s;
-          proxy_send_timeout 600s;
-          send_timeout       600s;
+          proxy_read_timeout 3600s;
+          proxy_send_timeout 3600s;
+          send_timeout       3600s;
         '';
       };
     };

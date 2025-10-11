@@ -37,6 +37,7 @@
       pkgs.feh
       pkgs.gamescope
       pkgs.obsidian
+      pkgs.affine
       pkgs.pavucontrol
       pkgs.pinentry-gnome3 # For yubikey, gnome = gtk3 variant
       pkgs.thunderbird
@@ -72,6 +73,7 @@
       "projects"
       "Pictures" # config.xdg.userDirs.pictures (infinite recursion)
       "Videos" # This is where I store clips from gpu-screen-recorder-gtk
+      ".config/AFFiNE"
       ".config/AusweisApp"
       ".config/OrcaSlicer"
       ".config/kicad"

@@ -52,6 +52,7 @@ I've included the major components in the lists below.
 🔑 Passwords | Vaultwarden | [Link](./hosts/ward/guests/vaultwarden.nix) | Self-hosted password manager
 📷 Photos | Immich | [Link](./hosts/sire/guests/immich.nix) | Self-hosted photo and video management solution
 📄 Documents | Paperless | [Link](./hosts/sire/guests/paperless.nix) | Document management system. With per-user Samba share integration (consume & archive)
+📔 Notes | AFFiNE | [Link](./hosts/sire/guests/affine.nix) | Next-gen knowledge base similar to Notion or Obsidian
 🗓️ CalDAV/CardDAV | Radicale | [Link](./hosts/ward/guests/radicale.nix) | Contacts, Calender and Tasks synchronization
 📁 NAS | Samba | [Link](./hosts/sire/guests/samba.nix) | Network attached storage. Cross-integration with paperless
 🌐 VPN | Firezone | [Link](./hosts/ward/guests/firezone.nix) | Internal network gateway and wireguard VPN server with dynamic peer configuration and SSO authentication

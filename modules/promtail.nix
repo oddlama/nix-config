@@ -2,7 +2,6 @@
   config,
   lib,
   minimal,
-  nodes,
   globals,
   ...
 }:

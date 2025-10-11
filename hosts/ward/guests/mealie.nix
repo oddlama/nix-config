@@ -69,7 +69,9 @@ in
       OIDC_USER_GROUP = "mealie.access@${globals.services.kanidm.domain}";
       OIDC_ADMIN_GROUP = "mealie.admins@${globals.services.kanidm.domain}";
     };
-    trustedProxies = [ globals.wireguard.proxy-home.hosts.ward-web-proxy.ipv4 ];
+    extraOptions = [
+      "--forwarded-allow-ips=${globals.wireguard.proxy-home.hosts.ward-web-proxy.ipv4}"
+    ];
     credentialsFile = config.age.secrets.oauth2-client-secret.path;
   };
 

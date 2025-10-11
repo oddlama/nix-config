@@ -1,6 +1,7 @@
 _inputs: [
   (import ./scripts)
   (_final: prev: {
+    affine-server = prev.callPackage ./affine-server.nix { };
     deploy = prev.callPackage ./deploy.nix { };
     git-fuzzy = prev.callPackage ./git-fuzzy { };
     segoe-ui-ttf = prev.callPackage ./segoe-ui-ttf.nix { };

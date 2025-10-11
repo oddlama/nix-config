@@ -134,6 +134,7 @@
     in
     lib.mkIf (!minimal) (
       { }
+      // mkMicrovm "affine" { }
       // mkMicrovm "samba" {
         enableStorageDataset = true;
         enableBunkerDataset = true;
@@ -150,5 +151,6 @@
       }
       // mkMicrovm "ai" { }
       // mkMicrovm "minecraft" { }
+      # // mkMicrovm "linkwarden" { }
     );
 }

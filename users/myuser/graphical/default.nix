@@ -12,7 +12,6 @@
     ./signal.nix
     ./theme.nix
     ./thunderbird.nix
-    # ./ts3.nix
 
     # X11
     ./i3.nix
@@ -37,7 +36,7 @@
       pkgs.feh
       pkgs.gamescope
       pkgs.obsidian
-      pkgs.affine
+      (pkgs.affine.override { electron_35 = pkgs.electron_37; })
       pkgs.pavucontrol
       pkgs.pinentry-gnome3 # For yubikey, gnome = gtk3 variant
       pkgs.thunderbird

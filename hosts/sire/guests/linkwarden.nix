@@ -61,6 +61,7 @@ in
       NEXTAUTH_URL = "https://${linkwardenDomain}/api/v1/auth";
       NEXT_PUBLIC_CREDENTIALS_ENABLED = "false"; # disables username / pass authentication
       NEXT_PUBLIC_AUTHENTIK_ENABLED = "true";
+      NEXT_PUBLIC_MAX_FILE_BUFFER = "100"; # in MB
       AUTHENTIK_ISSUER = "https://${globals.services.kanidm.domain}/oauth2/openid/${AUTHENTIK_CLIENT_ID}";
       AUTHENTIK_CLIENT_ID = "linkwarden";
       AUTHENTIK_CUSTOM_NAME = "Kanidm (SSO)";
@@ -86,6 +87,7 @@ in
         locations."/" = {
           proxyPass = "http://linkwarden";
           proxyWebsockets = true;
+          X-Frame-Options = "SAMEORIGIN";
         };
         extraConfig = ''
           client_max_body_size 128M;
@@ -113,6 +115,7 @@ in
         locations."/" = {
           proxyPass = "http://linkwarden";
           proxyWebsockets = true;
+          X-Frame-Options = "SAMEORIGIN";
         };
         extraConfig = ''
           client_max_body_size 128M;

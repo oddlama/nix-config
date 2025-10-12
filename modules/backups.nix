@@ -10,7 +10,6 @@ let
     any
     attrValues
     flip
-    mkForce
     mkIf
     mkMerge
     mkOption
@@ -65,15 +64,6 @@ in
         mode = "0750";
       }
     ];
-
-    # Enable postgresql backups if any storagebox backup needs them
-    services.postgresqlBackup = mkIf anyPostgres {
-      enable = true;
-      backupAll = true;
-    };
-
-    # Disable automatic backups, let the restic service require this service.
-    systemd.services.postgresqlBackup.startAt = mkForce [ ];
 
     services.restic.backups = mkMerge (
       flip map (attrValues config.backups.storageBoxes) (boxCfg: {

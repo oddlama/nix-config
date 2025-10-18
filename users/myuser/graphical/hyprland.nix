@@ -46,57 +46,56 @@ in
             "GDK_BACKEND,wayland"
           ];
 
-        bind =
-          [
-            "SUPER + CTRL + SHIFT,q,exec,uwsm stop"
+        bind = [
+          "SUPER + CTRL + SHIFT,q,exec,uwsm stop"
 
-            # Applications
-            "SUPER,code:49,exec,fuzzel" # SUPER+^
-            ",Menu,exec,fuzzel"
-            "SUPER,t,exec,kitty"
-            "SUPER,b,exec,uwsm app firefox"
-            "SUPER,c,exec,${getExe pkgs.scripts.clone-term}"
+          # Applications
+          "SUPER,code:49,exec,fuzzel" # SUPER+^
+          ",Menu,exec,fuzzel"
+          "SUPER,t,exec,kitty"
+          "SUPER,b,exec,uwsm app firefox"
+          "SUPER,c,exec,${getExe pkgs.scripts.clone-term}"
 
-            # Shortcuts & Actions
-            "SUPER + SHIFT,s,exec,${getExe pkgs.scripts.screenshot-area}"
-            "SUPER,F11,exec,${getExe pkgs.scripts.screenshot-area-scan-qr}"
-            "SUPER,F12,exec,${getExe pkgs.scripts.screenshot-screen}"
+          # Shortcuts & Actions
+          "SUPER + SHIFT,s,exec,${getExe pkgs.scripts.screenshot-area}"
+          "SUPER,F11,exec,${getExe pkgs.scripts.screenshot-area-scan-qr}"
+          "SUPER,F12,exec,${getExe pkgs.scripts.screenshot-screen}"
 
-            "SUPER,End,exec,${getExe config.lib.gpu-screen-recorder.save-replay}"
-            "SUPER,Prior,exec,systemctl --user restart gpu-screen-recorder.service"
-            "SUPER,Next,exec,systemctl --user stop gpu-screen-recorder.service"
+          "SUPER,End,exec,${getExe config.lib.gpu-screen-recorder.save-replay}"
+          "SUPER,Prior,exec,systemctl --user restart gpu-screen-recorder.service"
+          "SUPER,Next,exec,systemctl --user stop gpu-screen-recorder.service"
 
-            # Per-window actions
-            "SUPER,q,killactive,"
-            "SUPER,return,fullscreen,"
-            "SUPER + SHIFT,return,fullscreenstate,0 2"
-            "SUPER,f,togglefloating"
+          # Per-window actions
+          "SUPER,q,killactive,"
+          "SUPER,return,fullscreen,"
+          "SUPER + SHIFT,return,fullscreenstate,0 2"
+          "SUPER,f,togglefloating"
 
-            "SUPER,tab,cyclenext,"
-            "ALT,tab,cyclenext,"
-            "SUPER + SHIFT,tab,cyclenext,prev"
-            "ALT + SHIFT,tab,cyclenext,prev"
-            "SUPER,r,submap,resize"
+          "SUPER,tab,cyclenext,"
+          "ALT,tab,cyclenext,"
+          "SUPER + SHIFT,tab,cyclenext,prev"
+          "ALT + SHIFT,tab,cyclenext,prev"
+          "SUPER,r,submap,resize"
 
-            "SUPER,left,movefocus,l"
-            "SUPER,right,movefocus,r"
-            "SUPER,up,movefocus,u"
-            "SUPER,down,movefocus,d"
+          "SUPER,left,movefocus,l"
+          "SUPER,right,movefocus,r"
+          "SUPER,up,movefocus,u"
+          "SUPER,down,movefocus,d"
 
-            "SUPER + SHIFT,left,movewindow,l"
-            "SUPER + SHIFT,right,movewindow,r"
-            "SUPER + SHIFT,up,movewindow,u"
-            "SUPER + SHIFT,down,movewindow,d"
+          "SUPER + SHIFT,left,movewindow,l"
+          "SUPER + SHIFT,right,movewindow,r"
+          "SUPER + SHIFT,up,movewindow,u"
+          "SUPER + SHIFT,down,movewindow,d"
 
-            "SUPER,comma,workspace,-1"
-            "SUPER,period,workspace,+1"
-            "SUPER + SHIFT,comma,movetoworkspacesilent,-1"
-            "SUPER + SHIFT,period,movetoworkspacesilent,+1"
-          ]
-          ++ flip concatMap (map toString (lib.lists.range 1 9)) (x: [
-            "SUPER,${x},workspace,${x}"
-            "SUPER + SHIFT,${x},movetoworkspacesilent,${x}"
-          ]);
+          "SUPER,comma,workspace,-1"
+          "SUPER,period,workspace,+1"
+          "SUPER + SHIFT,comma,movetoworkspacesilent,-1"
+          "SUPER + SHIFT,period,movetoworkspacesilent,+1"
+        ]
+        ++ flip concatMap (map toString (lib.lists.range 1 9)) (x: [
+          "SUPER,${x},workspace,${x}"
+          "SUPER + SHIFT,${x},movetoworkspacesilent,${x}"
+        ]);
 
         bindm = [
           # mouse movements
@@ -159,6 +158,7 @@ in
           vrr = 1; # 1 = always on
           disable_hyprland_logo = true;
           mouse_move_focuses_monitor = false;
+          background_color = "0x000000";
         };
       }
       (mkIf (nixosConfig.node.name == "kroma") {

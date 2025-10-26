@@ -542,7 +542,7 @@ in
           runtimeInputs = [ pkgs.sqlite ];
           text = ''
             sqlite3 "$STALWART_DATA/database.sqlite3" ".backup '$BACKUP_DIR/database.sqlite3'"
-            sqlite3 "$IDMAIL_DATA/database.sqlite3" ".backup '$BACKUP_DIR/idmail.db'"
+            sqlite3 "$IDMAIL_DATA/idmail.db" ".backup '$BACKUP_DIR/idmail.db'"
             cp -r "$STALWART_DATA/dkim" "$BACKUP_DIR/"
           '';
         }

@@ -161,3 +161,9 @@ openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
   -keyout selfcert.key -out selfcert.crt -subj \
   "/CN=example.com" -addext "subjectAltName=DNS:example.com,DNS:sub1.example.com,DNS:sub2.example.com,IP:10.0.0.1"
 ```
+
+## Access backups
+
+```
+restic -o rclone.program="ssh -p 23 u000000@u000000.your-storagebox.de rclone" -o rclone.args="serve restic --stdio /home/restic/<subuser>/repo" -r rclone: stats
+```

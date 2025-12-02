@@ -46,7 +46,7 @@
   };
 
   system = {
-    extraSystemBuilderCmds = ''
+    systemBuilderCommands = ''
       ln -sv ${inputs.nixpkgs} $out/nixpkgs
     '';
     stateVersion = "24.11";

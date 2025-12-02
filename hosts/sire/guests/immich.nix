@@ -62,7 +62,6 @@ in
         globals.wireguard.proxy-sentinel.hosts.sentinel.ipv4
       ];
     };
-    secretSettings.oauth.clientSecret = config.age.secrets.immich-oauth2-client-secret.path;
     settings = {
       backup.database = {
         enabled = false; # we backup using our restic module
@@ -184,6 +183,7 @@ in
         autoRegister = true;
         buttonText = "Login with Kanidm";
         clientId = "immich";
+        clientSecret._secret = config.age.secrets.immich-oauth2-client-secret.path;
         defaultStorageQuota = null;
         enabled = true;
         issuerUrl = "https://${globals.services.kanidm.domain}/oauth2/openid/${clientId}";

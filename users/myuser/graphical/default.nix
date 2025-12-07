@@ -36,12 +36,12 @@
       pkgs.feh
       pkgs.gamescope
       pkgs.obsidian
-      (pkgs.affine.override { electron_35 = pkgs.electron_37; })
+      pkgs.affine
       pkgs.pavucontrol
       pkgs.pinentry-gnome3 # For yubikey, gnome = gtk3 variant
       pkgs.thunderbird
       pkgs.xdg-utils
-      pkgs.xdragon
+      pkgs.dragon-drop
       pkgs.yt-dlp
       pkgs.zathura
       pkgs.gpu-screen-recorder

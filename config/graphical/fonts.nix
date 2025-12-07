@@ -32,8 +32,8 @@
       pkgs.noto-fonts
       pkgs.noto-fonts-cjk-sans
       pkgs.noto-fonts-cjk-serif
-      pkgs.noto-fonts-emoji
-      pkgs.noto-fonts-extra
+      pkgs.noto-fonts-color-emoji
+      pkgs.noto-fonts
 
       pkgs.dejavu_fonts
       pkgs.segoe-ui-ttf

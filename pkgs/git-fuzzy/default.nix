@@ -3,7 +3,8 @@
   stdenvNoCC,
   lib,
   makeWrapper,
-  gitAndTools,
+  hub,
+  delta,
   bc,
   bat,
   extraPackages ? [ ],
@@ -11,8 +12,8 @@
 let
   binPath = lib.makeBinPath (
     [
-      gitAndTools.hub
-      gitAndTools.delta
+      hub
+      delta
       bc
       bat
     ]

@@ -46,6 +46,7 @@ in
                 inputs.nix-topology.overlays.default
                 inputs.nixos-extra-modules.overlays.default
                 inputs.nixvim.overlays.default
+                inputs.niri.overlays.niri
               ];
 
               node.name = name;

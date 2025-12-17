@@ -16,21 +16,6 @@ let
   bindWithModifier = mapAttrs' (k: nameValuePair (cfg.modifier + "+" + k));
   cfg = config.xsession.windowManager.i3.config;
 
-  i3-per-workspace-layout = pkgs.rustPlatform.buildRustPackage {
-    pname = "i3-per-workspace-layout";
-    version = "1.0.0";
-
-    src = ./i3-per-workspace-layout;
-    cargoHash = "sha256-Sr++AnE/b7vj7dhoQhHW+riwkAOhueGusW0RtHciDK0=";
-
-    meta = with lib; {
-      description = "A helper utility to allow assigning a layout to each workspace in i3";
-      license = licenses.mit;
-      maintainers = with maintainers; [ oddlama ];
-      mainProgram = "i3-per-workspace-layout";
-    };
-  };
-
   sway-overfocus = pkgs.rustPlatform.buildRustPackage {
     pname = "sway-overfocus";
     version = "1.0.0";
@@ -66,91 +51,90 @@ in
 
       # TODO menu = "rofi -show run";
 
-      keybindings =
-        {
-          "XF86AudioRaiseVolume" =
-            "exec --no-startup-id ${getExe pkgs.scripts.volume} set-volume @DEFAULT_AUDIO_SINK@ 5%+";
-          "XF86AudioLowerVolume" =
-            "exec --no-startup-id ${getExe pkgs.scripts.volume} set-volume @DEFAULT_AUDIO_SINK@ 5%-";
-          "XF86AudioMute" =
-            "exec --no-startup-id ${getExe pkgs.scripts.volume} set-mute @DEFAULT_AUDIO_SINK@ toggle";
-          "XF86AudioMicMute" =
-            "exec --no-startup-id ${getExe pkgs.scripts.volume} set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
-          "XF86AudioPlay" = "exec --no-startup-id ${getExe pkgs.playerctl} play-pause";
-          "XF86AudioNext" = "exec --no-startup-id ${getExe pkgs.playerctl} next";
-          "XF86AudioPrev" = "exec --no-startup-id ${getExe pkgs.playerctl} previous";
-          "XF86MonBrightnessUp" = "exec --no-startup-id ${getExe pkgs.scripts.brightness} set +5%";
-          "XF86MonBrightnessDown" = "exec --no-startup-id ${getExe pkgs.scripts.brightness} set 5%-";
-        }
-        // {
-          "Menu" = "exec ${cfg.menu}";
-        }
-        # General mappings that start with $modifier+...
-        // bindWithModifier {
-          "t" = "exec ${cfg.terminal}";
-          "asciicircum" = "exec ${cfg.menu}";
-          # TODO only open if not already open
-          # TODO shortcut to open these from eww bar with 1 click
-          "b" = "exec firefox"; # TODO ; exec signal-desktop; exec discord
-          "Shift+s" = "exec --no-startup-id ${getExe pkgs.scripts.screenshot-area}";
-          "F11" = "exec --no-startup-id ${getExe pkgs.scripts.screenshot-area-scan-qr}";
-          # Exlicitly without --no-startup-id to show the spinner
-          "F12" = "exec ${getExe pkgs.scripts.screenshot-screen}";
-          "Print" =
-            "exec --no-startup-id env QT_AUTO_SCREEN_SCALE_FACTOR=0 QT_SCREEN_SCALE_FACTORS='' ${getExe pkgs.flameshot} gui";
+      keybindings = {
+        "XF86AudioRaiseVolume" =
+          "exec --no-startup-id ${getExe pkgs.scripts.volume} set-volume @DEFAULT_AUDIO_SINK@ 5%+";
+        "XF86AudioLowerVolume" =
+          "exec --no-startup-id ${getExe pkgs.scripts.volume} set-volume @DEFAULT_AUDIO_SINK@ 5%-";
+        "XF86AudioMute" =
+          "exec --no-startup-id ${getExe pkgs.scripts.volume} set-mute @DEFAULT_AUDIO_SINK@ toggle";
+        "XF86AudioMicMute" =
+          "exec --no-startup-id ${getExe pkgs.scripts.volume} set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
+        "XF86AudioPlay" = "exec --no-startup-id ${getExe pkgs.playerctl} play-pause";
+        "XF86AudioNext" = "exec --no-startup-id ${getExe pkgs.playerctl} next";
+        "XF86AudioPrev" = "exec --no-startup-id ${getExe pkgs.playerctl} previous";
+        "XF86MonBrightnessUp" = "exec --no-startup-id ${getExe pkgs.scripts.brightness} set +5%";
+        "XF86MonBrightnessDown" = "exec --no-startup-id ${getExe pkgs.scripts.brightness} set 5%-";
+      }
+      // {
+        "Menu" = "exec ${cfg.menu}";
+      }
+      # General mappings that start with $modifier+...
+      // bindWithModifier {
+        "t" = "exec ${cfg.terminal}";
+        "asciicircum" = "exec ${cfg.menu}";
+        # TODO only open if not already open
+        # TODO shortcut to open these from eww bar with 1 click
+        "b" = "exec firefox"; # TODO ; exec signal-desktop; exec discord
+        "Shift+s" = "exec --no-startup-id ${getExe pkgs.scripts.screenshot-area}";
+        "F11" = "exec --no-startup-id ${getExe pkgs.scripts.screenshot-area-scan-qr}";
+        # Exlicitly without --no-startup-id to show the spinner
+        "F12" = "exec ${getExe pkgs.scripts.screenshot-screen}";
+        "Print" =
+          "exec --no-startup-id env QT_AUTO_SCREEN_SCALE_FACTOR=0 QT_SCREEN_SCALE_FACTORS='' ${getExe pkgs.flameshot} gui";
 
-          "Shift+r" = "reload";
-          "q" = "kill";
+        "Shift+r" = "reload";
+        "q" = "kill";
 
-          # Don't focus tabs
-          "Left" = "exec --no-startup-id ${getExe sway-overfocus} split-lt float-lt output-ls";
-          "Right" = "exec --no-startup-id ${getExe sway-overfocus} split-rt float-rt output-rs";
-          "Up" = "exec --no-startup-id ${getExe sway-overfocus} split-ut float-ut output-us";
-          "Down" = "exec --no-startup-id ${getExe sway-overfocus} split-dt float-dt output-ds";
-          "Tab" = "exec --no-startup-id ${getExe sway-overfocus} group-rw group-dw";
-          "Shift+Tab" = "exec --no-startup-id ${getExe sway-overfocus} group-lw group-uw";
+        # Don't focus tabs
+        "Left" = "exec --no-startup-id ${getExe sway-overfocus} split-lt float-lt output-ls";
+        "Right" = "exec --no-startup-id ${getExe sway-overfocus} split-rt float-rt output-rs";
+        "Up" = "exec --no-startup-id ${getExe sway-overfocus} split-ut float-ut output-us";
+        "Down" = "exec --no-startup-id ${getExe sway-overfocus} split-dt float-dt output-ds";
+        "Tab" = "exec --no-startup-id ${getExe sway-overfocus} group-rw group-dw";
+        "Shift+Tab" = "exec --no-startup-id ${getExe sway-overfocus} group-lw group-uw";
 
-          "Shift+Left" = "move left";
-          "Shift+Right" = "move right";
-          "Shift+Up" = "move up";
-          "Shift+Down" = "move down";
+        "Shift+Left" = "move left";
+        "Shift+Right" = "move right";
+        "Shift+Up" = "move up";
+        "Shift+Down" = "move down";
 
-          "space" = "layout toggle tabbed splitv splith";
-          "s" = "splitv";
-          "v" = "splith";
-          "f" = "floating toggle";
-          "Shift+f" = "focus mode_toggle";
-          "Return" = "fullscreen toggle";
-          "a" = "focus parent";
+        "space" = "layout toggle tabbed splitv splith";
+        "s" = "splitv";
+        "v" = "splith";
+        "f" = "floating toggle";
+        "Shift+f" = "focus mode_toggle";
+        "Return" = "fullscreen toggle";
+        "a" = "focus parent";
 
-          "Shift+Ctrl+q" =
-            "exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'";
-          "r" = "mode resize";
+        "Shift+Ctrl+q" =
+          "exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'";
+        "r" = "mode resize";
 
-          "1" = "workspace number 1";
-          "2" = "workspace number 2";
-          "3" = "workspace number 3";
-          "4" = "workspace number 4";
-          "5" = "workspace number 5";
-          "6" = "workspace number 6";
-          "7" = "workspace number 7";
-          "8" = "workspace number 8";
-          "9" = "workspace number 9";
-          "Comma" = "workspace prev";
-          "Period" = "workspace next";
+        "1" = "workspace number 1";
+        "2" = "workspace number 2";
+        "3" = "workspace number 3";
+        "4" = "workspace number 4";
+        "5" = "workspace number 5";
+        "6" = "workspace number 6";
+        "7" = "workspace number 7";
+        "8" = "workspace number 8";
+        "9" = "workspace number 9";
+        "Comma" = "workspace prev";
+        "Period" = "workspace next";
 
-          "Shift+1" = "move container to workspace number 1";
-          "Shift+2" = "move container to workspace number 2";
-          "Shift+3" = "move container to workspace number 3";
-          "Shift+4" = "move container to workspace number 4";
-          "Shift+5" = "move container to workspace number 5";
-          "Shift+6" = "move container to workspace number 6";
-          "Shift+7" = "move container to workspace number 7";
-          "Shift+8" = "move container to workspace number 8";
-          "Shift+9" = "move container to workspace number 9";
-          "Shift+Comma" = "move container to workspace prev";
-          "Shift+Period" = "move container to workspace next";
-        };
+        "Shift+1" = "move container to workspace number 1";
+        "Shift+2" = "move container to workspace number 2";
+        "Shift+3" = "move container to workspace number 3";
+        "Shift+4" = "move container to workspace number 4";
+        "Shift+5" = "move container to workspace number 5";
+        "Shift+6" = "move container to workspace number 6";
+        "Shift+7" = "move container to workspace number 7";
+        "Shift+8" = "move container to workspace number 8";
+        "Shift+9" = "move container to workspace number 9";
+        "Shift+Comma" = "move container to workspace prev";
+        "Shift+Period" = "move container to workspace next";
+      };
 
       window.titlebar = false;
 
@@ -213,27 +197,6 @@ in
                 ];
         }
         .${nixosConfig.node.name} or [ ];
-
-      startup =
-        let
-          configLayouts = (pkgs.formats.toml { }).generate "per-workspace-layouts.toml" {
-            force = true;
-            layouts = {
-              "1" = "tabbed";
-              "5" = "tabbed";
-              "7" = "tabbed";
-              "8" = "tabbed";
-              "9" = "tabbed";
-            };
-          };
-        in
-        [
-          {
-            command = "${getExe i3-per-workspace-layout} --config ${configLayouts}";
-            always = false;
-            notification = false;
-          }
-        ];
     };
   };
 

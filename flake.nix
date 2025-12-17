@@ -60,10 +60,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # nixos-cosmic = {
-    #   url = "github:lilyinstarlight/nixos-cosmic";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
+    niri = {
+      url = "github:sodiboo/niri-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     nixos-extra-modules = {
       url = "github:oddlama/nixos-extra-modules";
@@ -86,6 +86,11 @@
 
     nixvim = {
       url = "github:nix-community/nixvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    noctalia = {
+      url = "github:noctalia-dev/noctalia-shell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

@@ -19,11 +19,10 @@
 
     # Wayland
     ./gpu-screen-recorder.nix
-    ./hyprland.nix
+    ./niri.nix
+    ./noctalia.nix
+    ./wlr-whichkey.nix
     ./fuzzel.nix
-    ./sway.nix
-    ./swaync.nix
-    ./waybar.nix
   ]
   ++ lib.optionals nixosConfig.graphical.gaming.enable [
     ./games
@@ -82,28 +81,14 @@
       ".config/obsidian"
       ".config/spotify"
       ".factorio" # XDG spec? nah, apprently overrated.
+      ".claude" # was probably vibecoded, and thus XDG spec has been ignored
+    ];
+
+    persistence."/persist".files = [
+      ".claude.json"
+      ".claude.json.backup"
     ];
   };
 
   xdg.mimeApps.enable = true;
-
-  xdg.portal = {
-    enable = true;
-    xdgOpenUsePortal = true;
-    config.common = {
-      default = [
-        "gtk"
-        "hyprland"
-      ];
-      "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
-      "org.freedesktop.impl.portal.ScreenCast" = [ "hyprland" ];
-      "org.freedesktop.impl.portal.Screenshot" = [ "hyprland" ];
-      "org.freedesktop.portal.FileChooser" = [ "xdg-desktop-portal-gtk" ];
-    };
-    extraPortals = [
-      # automatically added by hyprland module
-      #pkgs.xdg-desktop-portal-hyprland
-      pkgs.xdg-desktop-portal-gtk
-    ];
-  };
 }

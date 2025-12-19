@@ -31,16 +31,16 @@ I've included the major components in the lists below.
 | ~~~~~~~~~~~~ | Program | Source | Description
 ---|---|---|---
 🐚 Shell | ZSH & Starship | [Link](./users/config/shell) | ZSH configuration with FZF, starship prompt, sqlite history and histdb-skim for fancy <kbd>Ctrl</kbd><kbd>R</kbd>
-🖥️ Terminal | Kitty | [Link](./users/myuser/graphical/kitty.nix) | Terminal configuration with nerdfonts and history <kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>H</kbd> to view scrollback buffer in neovim
-🪟 WM | hyprland & i3 | [Link](./users/myuser/graphical/hyprland.nix), [Link](./users/myuser/graphical/i3.nix) | Tiling window manager, heavily customized to my personal preferences
-🔋 Bar | waybar | [Link](./users/myuser/graphical/waybar.nix) | Taskbar and status
-🌐 Browser | Firefox | [Link](./users/myuser/graphical/firefox.nix) | Firefox with many privacy settings and betterfox
-🖊️ Editor | Neovim | [Link](./users/myuser/neovim) | Extensive neovim configuration, made with nixvim
+🖥️ Terminal | Kitty | [Link](./users/malte/graphical/kitty.nix) | Terminal configuration with nerdfonts and history <kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>H</kbd> to view scrollback buffer in neovim
+🪟 WM | hyprland & i3 | [Link](./users/malte/graphical/hyprland.nix), [Link](./users/malte/graphical/i3.nix) | Tiling window manager, heavily customized to my personal preferences
+🔋 Bar | waybar | [Link](./users/malte/graphical/waybar.nix) | Taskbar and status
+🌐 Browser | Firefox | [Link](./users/malte/graphical/firefox.nix) | Firefox with many privacy settings and betterfox
+🖊️ Editor | Neovim | [Link](./users/malte/neovim) | Extensive neovim configuration, made with nixvim
 📜 Manpager | Neovim | [Link](./users/config/manpager.nix) | Isolated neovim as manpager via nixvim
 📷 Screenshots | Custom based on grimblast | [Link](./pkgs/scripts) | Custom scripts utilizing grimblast for [QR code detection](./pkgs/scripts/screenshot-area-scan-qr.nix) and [OCR / satty editing](./pkgs/scripts/screenshot-area.nix)
-🗨️ Notifications | SwayNotificationCenter | [Link](./users/myuser/graphical/swaync.nix) | Notification center with customized color scheme
-🎮 Gaming | Steam & Bottles | [Link](./users/myuser/graphical/games) | Setup for gaming
-📫 Mail | Thunderbird | [Link](./users/myuser/graphical/thunderbird.nix) | Your regular thunderbird setup
+🗨️ Notifications | SwayNotificationCenter | [Link](./users/malte/graphical/swaync.nix) | Notification center with customized color scheme
+🎮 Gaming | Steam & Bottles | [Link](./users/malte/graphical/games) | Setup for gaming
+📫 Mail | Thunderbird | [Link](./users/malte/graphical/thunderbird.nix) | Your regular thunderbird setup
 
 #### Services
 

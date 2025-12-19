@@ -99,23 +99,22 @@ in
       #PartOf = ["graphical-session.target"];
     };
     Service = {
-      Environment =
-        [
-          "GSR_CONTAINER=mkv"
-          "GSR_QUALITY=ultra"
-          "GSR_FRAMERATE=144"
-          "GSR_MODE=cfr"
-          "GSR_CODEC=auto"
-          "GSR_AUDIO_CODEC=opus"
-          "GSR_REPLAYDURATION=30"
-          "GSR_OUTPUTDIR=%h/Videos"
-          "GSR_MAKEFOLDERS=no"
-          "GSR_COLOR_RANGE=full"
-          "GSR_FPSPPS=no"
-        ]
-        ++ lib.optionals (nixosConfig.node.name == "kroma") [
-          "GSR_WINDOW=DP-2" # Primary monitor
-        ];
+      Environment = [
+        "GSR_CONTAINER=mkv"
+        "GSR_QUALITY=ultra"
+        "GSR_FRAMERATE=144"
+        "GSR_MODE=cfr"
+        "GSR_CODEC=auto"
+        "GSR_AUDIO_CODEC=opus"
+        "GSR_REPLAYDURATION=30"
+        "GSR_OUTPUTDIR=%h/Videos"
+        "GSR_MAKEFOLDERS=no"
+        "GSR_COLOR_RANGE=full"
+        "GSR_FPSPPS=no"
+      ]
+      ++ lib.optionals (nixosConfig.node.name == "kroma") [
+        "GSR_WINDOW=DP-2" # Primary monitor
+      ];
 
       ExecStart = lib.getExe start-service;
       ExecStopPost = lib.getExe on-stop-service;

@@ -23,7 +23,7 @@
     ../../config/optional/sound.nix
     ../../config/optional/zfs.nix
 
-    ../../users/myuser
+    ../../users/malte
 
     ./fs.nix
     ./net.nix

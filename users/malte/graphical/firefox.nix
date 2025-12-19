@@ -29,12 +29,10 @@ in
   programs.firefox = {
     enable = true;
     package = pkgs.firefox.overrideAttrs (old: {
-      buildCommand =
-        old.buildCommand
-        + ''
-          substituteInPlace $out/bin/firefox \
-            --replace "exec -a" ${escapeShellArg envStr}" exec -a"
-        '';
+      buildCommand = old.buildCommand + ''
+        substituteInPlace $out/bin/firefox \
+          --replace "exec -a" ${escapeShellArg envStr}" exec -a"
+      '';
     });
 
     profiles.default = {

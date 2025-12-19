@@ -13,7 +13,7 @@
       "macs"
       "mail"
       "monitoring"
-      "myuser"
+      "malte"
       "net"
       "root"
       "services"

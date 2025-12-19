@@ -6,16 +6,13 @@
   minimal,
   ...
 }:
-let
-  myuser = globals.myuser.name;
-in
 lib.optionalAttrs (!minimal) {
-  users.groups.${myuser}.gid = config.users.users.${myuser}.uid;
-  users.users.${myuser} = {
+  users.groups.malte.gid = config.users.users.malte.uid;
+  users.users.malte = {
     uid = 1000;
-    inherit (globals.myuser) hashedPassword;
+    inherit (globals.malte) hashedPassword;
     createHome = true;
-    group = myuser;
+    group = "malte";
     extraGroups = [
       "wheel"
       "input"
@@ -27,21 +24,21 @@ lib.optionalAttrs (!minimal) {
     shell = pkgs.zsh;
   };
 
-  repo.secretFiles.user-myuser = ./secrets/user.nix.age;
+  repo.secretFiles.user-malte = ./secrets/user.nix.age;
 
   age.secrets.my-gpg-pubkey-yubikey = {
     rekeyFile = ./secrets/yubikey.gpg.age;
-    group = myuser;
+    group = "malte";
     mode = "640";
   };
 
   age.secrets."my-gpg-yubikey-keygrip.tar" = {
     rekeyFile = ./secrets/gpg-keygrip.tar.age;
-    group = myuser;
+    group = "malte";
     mode = "640";
   };
 
-  home-manager.users.${myuser} = {
+  home-manager.users.malte = {
     imports = [
       ../config
       ./dev
@@ -55,9 +52,9 @@ lib.optionalAttrs (!minimal) {
 
     # Remove dependence on username (which also comes from these secrets) to
     # avoid triggering infinite recursion.
-    userSecretsName = "user-myuser";
+    userSecretsName = "user-malte";
     home = {
-      username = config.users.users.${myuser}.name;
+      username = config.users.users.malte.name;
     };
 
     # Autostart hyprland if on tty1 (once, don't restart after logout)
@@ -70,7 +67,7 @@ lib.optionalAttrs (!minimal) {
   };
 
   # Autologin
-  services.getty.autologinUser = myuser;
+  services.getty.autologinUser = "malte";
 
   # Allow screen recorder to access the framebuffer as root
   programs.gpu-screen-recorder.enable = true;

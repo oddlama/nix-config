@@ -106,90 +106,35 @@ in
           "Mod+asciicircum".action = spawn "fuzzel";
           "Mod+Alt+l".action = spawn "systemctl suspend";
 
-          XF86AudioRaiseVolume = {
-            action = spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1+";
-            allow-when-locked = true;
-          };
-          XF86AudioLowerVolume = {
-            action = spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1-";
-            allow-when-locked = true;
-          };
-          XF86AudioMute = {
-            action = spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle";
-            allow-when-locked = true;
-          };
-          XF86AudioMicMute = {
-            action = spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle";
-            allow-when-locked = true;
-          };
-
           "Mod+q".action = close-window;
-          "Mod+Return".action = fullscreen-window;
           "Mod+f".action = toggle-window-floating;
           "Mod+Ctrl+f".action = switch-focus-between-floating-and-tiling;
+          "Mod+Return".action = maximize-column;
+          "Mod+Ctrl+Return".action = expand-column-to-available-width;
+          "Mod+Space".action = fullscreen-window;
 
-          "Mod+left".action = focus-column-left;
-          "Mod+right".action = focus-column-right;
-          "Mod+up".action = focus-window-or-workspace-up;
-          "Mod+down".action = focus-window-or-workspace-down;
+          "Mod+Left".action = focus-column-left;
+          "Mod+Right".action = focus-column-right;
+          "Mod+Up".action = focus-window-or-workspace-up;
+          "Mod+Down".action = focus-window-or-workspace-down;
 
-          "Mod+Shift+left".action = move-column-left;
-          "Mod+Shift+right".action = move-column-right;
-          "Mod+Shift+up".action = move-window-up;
-          "Mod+Shift+down".action = move-window-down;
+          "Mod+Shift+Left".action = move-column-left;
+          "Mod+Shift+Right".action = move-column-right;
+          "Mod+Shift+Up".action = move-window-up;
+          "Mod+Shift+Down".action = move-window-down;
 
-          "Mod+Ctrl+n".action = focus-monitor-left;
-          "Mod+Ctrl+r".action = focus-monitor-down;
-          "Mod+Ctrl+l".action = focus-monitor-up;
-          "Mod+Ctrl+s".action = focus-monitor-right;
+          "Mod+Ctrl+Left".action = focus-monitor-left;
+          "Mod+Ctrl+Right".action = focus-monitor-right;
+          "Mod+Ctrl+Up".action = focus-monitor-up;
+          "Mod+Ctrl+Down".action = focus-monitor-down;
 
-          "Mod+Shift+Ctrl+n".action = move-column-to-monitor-left;
-          "Mod+Shift+Ctrl+r".action = move-column-to-monitor-down;
-          "Mod+Shift+Ctrl+l".action = move-column-to-monitor-up;
-          "Mod+Shift+Ctrl+s".action = move-column-to-monitor-right;
+          "Mod+Shift+Ctrl+Left".action = move-column-to-monitor-left;
+          "Mod+Shift+Ctrl+Right".action = move-column-to-monitor-right;
+          "Mod+Shift+Ctrl+Up".action = move-column-to-monitor-up;
+          "Mod+Shift+Ctrl+Down".action = move-column-to-monitor-down;
 
-          "Mod+h".action = focus-column-first;
-          "Mod+Shift+h".action = consume-or-expel-window-left;
-          "Mod+m".action = focus-column-last;
-          "Mod+Shift+m".action = consume-or-expel-window-right;
-
-          "Mod+Period".action = focus-workspace-down;
-          "Mod+Shift+Period".action = move-column-to-workspace-down;
-          "Mod+Ctrl+Period".action = move-workspace-down;
-          "Mod+comma".action = focus-workspace-up;
-          "Mod+Shift+comma".action = move-column-to-workspace-up;
-          "Mod+Ctrl+comma".action = move-workspace-up;
-
-          "Mod+WheelScrollDown" = {
-            action = focus-workspace-down;
-            cooldown-ms = 150;
-          };
-          "Mod+WheelScrollUp" = {
-            action = focus-workspace-up;
-            cooldown-ms = 150;
-          };
-          "Mod+Ctrl+WheelScrollDown" = {
-            action = move-column-to-workspace-down;
-            cooldown-ms = 150;
-          };
-          "Mod+Ctrl+WheelScrollUp" = {
-            action = move-column-to-workspace-up;
-            cooldown-ms = 150;
-          };
-          "Mod+WheelScrollRight".action = focus-column-right;
-          "Mod+WheelScrollLeft".action = focus-column-left;
-          "Mod+Ctrl+WheelScrollRight".action = move-column-right;
-          "Mod+Ctrl+WheelScrollLeft".action = move-column-left;
-          "Mod+Shift+WheelScrollDown".action = focus-column-right;
-          "Mod+Shift+WheelScrollUp".action = focus-column-left;
-          "Mod+Ctrl+Shift+WheelScrollDown".action = move-column-right;
-          "Mod+Ctrl+Shift+WheelScrollUp".action = move-column-left;
-
-          "Mod+v".action = maximize-column;
-          "Mod+Ctrl+v".action = expand-column-to-available-width;
-          "Mod+Minus".action = set-column-width "-10%";
-          "Mod+Shift+0".action = set-column-width "+10%";
-
+          "Mod+Alt+Left".action = consume-or-expel-window-left;
+          "Mod+Alt+Right".action = consume-or-expel-window-right;
           "Mod+y".action = toggle-column-tabbed-display;
 
           #"Print".action = screenshot;
@@ -206,6 +151,23 @@ in
           # Powers off the monitors. To turn them back on, do any input like
           # moving the mouse or pressing any other key.
           "Mod+Shift+p".action = power-off-monitors;
+
+          XF86AudioRaiseVolume = {
+            action = spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1+";
+            allow-when-locked = true;
+          };
+          XF86AudioLowerVolume = {
+            action = spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1-";
+            allow-when-locked = true;
+          };
+          XF86AudioMute = {
+            action = spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle";
+            allow-when-locked = true;
+          };
+          XF86AudioMicMute = {
+            action = spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle";
+            allow-when-locked = true;
+          };
         };
 
         window-rules = [
@@ -316,8 +278,9 @@ in
             mode = {
               width = 3840;
               height = 2160;
-              refresh = 120.0;
+              refresh = 119.880;
             };
+            scale = 1;
             position = {
               x = 0;
               y = 0;
@@ -325,6 +288,7 @@ in
             variable-refresh-rate = "on-demand";
           };
           "DP-3" = {
+            scale = 1;
             position = {
               x = -3840;
               y = 0;
@@ -336,37 +300,48 @@ in
           };
         };
 
-        workspaces = {
-          "1browser" = {
-            name = "browser";
-            open-on-output = "DP-2";
-          };
-          "2default" = {
-            name = "default";
-            open-on-output = "DP-2";
-          };
-          "3term" = {
-            name = "term";
-            open-on-output = "DP-2";
-          };
-          "5games" = {
-            name = "games";
-            open-on-output = "DP-2";
+        workspaces =
+          let
+            ws = open-on-output: name: { inherit name open-on-output; };
+          in
+          {
+            "1browser" = ws "DP-2" "browser";
+            "2default" = ws "DP-2" "default";
+            "3term" = ws "DP-2" "term";
+            "4term2" = ws "DP-2" "term2";
+            "5games" = ws "DP-2" "games";
+            "6misc" = ws "DP-2" "misc";
+
+            "7browser2" = ws "DP-3" "browser2";
+            "8comms" = ws "DP-3" "comms";
+            "9notes" = ws "DP-3" "notes";
           };
 
-          "7browser" = {
-            name = "browser2";
-            open-on-output = "DP-3";
-          };
-          "8comms" = {
-            name = "comms";
-            open-on-output = "DP-3";
-          };
-          "9notes" = {
-            name = "notes";
-            open-on-output = "DP-3";
-          };
-        };
+        binds =
+          let
+            mappings = {
+              "browser" = "1";
+              "default" = "2";
+              "term" = "3";
+              "term2" = "4";
+              "games" = "5";
+              "misc" = "6";
+              "browser2" = "7";
+              "comms" = "8";
+              "notes" = "9";
+            };
+          in
+          lib.mergeAttrsList (
+            lib.mapAttrsToList (
+              workspace: key: with config.lib.niri.actions; {
+                "Mod+${key}".action = focus-workspace workspace;
+                "Mod+Shift+${key}".action.move-window-to-workspace = [
+                  { focus = false; }
+                  workspace
+                ];
+              }
+            ) mappings
+          );
       })
     ];
   };

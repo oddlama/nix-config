@@ -1672,6 +1672,26 @@
         "type": "github"
       }
     },
+    "noctalia": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1766161753,
+        "narHash": "sha256-8IiZyT/Sldwm6BekJXChPQbEZzIxPoVP82a0A36rkjo=",
+        "owner": "noctalia-dev",
+        "repo": "noctalia-shell",
+        "rev": "2d81050db006385fc92350d0a18e613a958bed17",
+        "type": "github"
+      },
+      "original": {
+        "owner": "noctalia-dev",
+        "repo": "noctalia-shell",
+        "type": "github"
+      }
+    },
     "nosys": {
       "locked": {
         "lastModified": 1668010795,
@@ -2127,6 +2147,7 @@
         "nixos-nftables-firewall": "nixos-nftables-firewall",
         "nixpkgs": "nixpkgs_2",
         "nixvim": "nixvim",
+        "noctalia": "noctalia",
         "pre-commit-hooks": "pre-commit-hooks_6",
         "treefmt-nix": "treefmt-nix_4"
       }

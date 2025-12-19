@@ -9,6 +9,6 @@
   ];
 
   home.packages = [
-    pkgs.path-of-building
+    pkgs.rusty-path-of-building
   ];
 }

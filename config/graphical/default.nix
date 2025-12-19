@@ -46,19 +46,5 @@ in
     ];
 
     services.displayManager.enable = true;
-    programs.uwsm = {
-      enable = true;
-      waylandCompositors.sway = {
-        prettyName = "Sway";
-        comment = "Sway";
-        binPath = lib.getExe pkgs.sway;
-      };
-
-      waylandCompositors.hyprland = {
-        prettyName = "Hyprland";
-        comment = "Hyprland";
-        binPath = lib.getExe pkgs.hyprland;
-      };
-    };
   };
 }

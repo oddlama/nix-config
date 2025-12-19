@@ -59,9 +59,9 @@ lib.optionalAttrs (!minimal) {
 
     # Autostart hyprland if on tty1 (once, don't restart after logout)
     programs.zsh.initContent = lib.mkOrder 9999 ''
-      if [[ -t 0 && "$(tty || true)" == /dev/tty1 && -z "$DISPLAY" && -z "$WAYLAND_DISPLAY" ]] && uwsm check may-start; then
-        echo "Login shell detected. Starting Hyprland..."
-        uwsm start -S -F Hyprland
+      if [[ -t 0 && "$(tty || true)" == /dev/tty1 && -z "$DISPLAY" && -z "$WAYLAND_DISPLAY" ]]; then
+        echo "Login shell detected. Starting wayland..."
+        niri
       fi
     '';
   };

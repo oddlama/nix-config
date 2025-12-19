@@ -15,11 +15,12 @@ writeShellApplication {
     jq
   ];
   text = ''
-
     if [[ ''${XDG_CURRENT_DESKTOP-} == sway ]]; then
       PAREN=$(swaymsg -t get_tree | jq '.. | select(.type?) | select(.focused==true).pid')
     elif [[ ''${XDG_CURRENT_DESKTOP-} == Hyprland ]]; then
       PAREN=$(hyprctl activewindow -j | jq '.pid')
+    elif [[ ''${XDG_CURRENT_DESKTOP-} == niri ]]; then
+      PAREN=$(niri msg -j focused-window | jq '.pid')
     else
       PAREN=$(xdotool getwindowfocus getwindowpid)
     fi
@@ -28,8 +29,8 @@ writeShellApplication {
     SELECTED=0
 
     function recurse() {
-      #shellcheck disable=SC2207
-    	for i in $(pgrep -P "$1"); do
+      readarray -t CHILDREN < <(pgrep -P "$1")
+    	for i in "''${CHILDREN[@]}"; do
 
     		if [[ "$(readlink -e "/proc/''${i}/exe")" == *"zsh"* ]] && [[ $2 -gt $MAXDEPTH ]]; then
     			SELECTED="$i"
@@ -47,6 +48,6 @@ writeShellApplication {
     fi
 
     # kitty should be from user env
-    kitty --detach -d "$(readlink "/proc/''${SELECTED}/cwd")"
+    $TERMINAL --detach -d "$(readlink "/proc/''${SELECTED}/cwd")"
   '';
 }

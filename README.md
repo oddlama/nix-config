@@ -32,7 +32,7 @@ I've included the major components in the lists below.
 ---|---|---|---
 🐚 Shell | ZSH & Starship | [Link](./users/config/shell) | ZSH configuration with FZF, starship prompt, sqlite history and histdb-skim for fancy <kbd>Ctrl</kbd><kbd>R</kbd>
 🖥️ Terminal | Kitty | [Link](./users/malte/graphical/kitty.nix) | Terminal configuration with nerdfonts and history <kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>H</kbd> to view scrollback buffer in neovim
-🪟 WM | hyprland & i3 | [Link](./users/malte/graphical/hyprland.nix), [Link](./users/malte/graphical/i3.nix) | Tiling window manager, heavily customized to my personal preferences
+🪟 WM | niri | [Link](./users/malte/graphical/niri.nix) | Dynamic tiling window manager
 🔋 Bar | waybar | [Link](./users/malte/graphical/waybar.nix) | Taskbar and status
 🌐 Browser | Firefox | [Link](./users/malte/graphical/firefox.nix) | Firefox with many privacy settings and betterfox
 🖊️ Editor | Neovim | [Link](./users/malte/neovim) | Extensive neovim configuration, made with nixvim

@@ -22,6 +22,7 @@ in
     pkgs.nirius
   ];
 
+  services.gnome-keyring.enable = true;
   xdg.portal = {
     enable = true;
     xdgOpenUsePortal = true;
@@ -96,7 +97,6 @@ in
         };
 
         gestures.hot-corners.enable = false;
-        debug.honor-xdg-activation-with-invalid-serial = true;
 
         binds = with config.lib.niri.actions; {
           "Mod+t".action = spawn "kitty";

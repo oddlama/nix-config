@@ -25,7 +25,6 @@ in
   xdg.portal = {
     enable = true;
     xdgOpenUsePortal = true;
-    wlr.enable = false;
     config.niri = {
       default = [
         "gnome"
@@ -52,6 +51,21 @@ in
       {
         xwayland-satellite.path = getExe pkgs.xwayland-satellite-stable;
 
+        environment = {
+          "QT_QPA_PLATFORM" = "wayland";
+          "XDG_SESSION_TYPE" = "wayland";
+          "NIXOS_OZONE_WL" = "1";
+          "MOZ_ENABLE_WAYLAND" = "1";
+          "MOZ_WEBRENDER" = "1";
+          "_JAVA_AWT_WM_NONREPARENTING" = "1";
+          "QT_WAYLAND_DISABLE_WINDOWDECORATION" = "1";
+          "GDK_BACKEND" = "wayland";
+        };
+
+        prefer-no-csd = true;
+        screenshot-path = "~/Pictures/screenshots/%Y-%m-%dT%H:%M:%S%:z.png";
+        hotkey-overlay.skip-at-startup = true;
+
         input = {
           keyboard = {
             xkb = {
@@ -61,18 +75,19 @@ in
 
             repeat-delay = 235;
             repeat-rate = 60;
+            numlock = true;
           };
 
           touchpad = {
             tap = true;
             dwt = true;
             dwtp = true;
-            natural-scroll = true;
+            natural-scroll = false;
             accel-profile = "flat";
           };
 
           mouse = {
-            accel-speed = 0.2;
+            accel-speed = 0.0;
             accel-profile = "flat";
           };
 
@@ -82,12 +97,15 @@ in
 
         gestures.hot-corners.enable = false;
         debug.honor-xdg-activation-with-invalid-serial = true;
+
         binds = with config.lib.niri.actions; {
-          "Mod+T".action = spawn "kitty";
-          "Mod+c".action = spawn "clone-term";
+          "Mod+t".action = spawn "kitty";
+          "Mod+c".action = spawn "${getExe pkgs.scripts.clone-term}";
           "Mod+b".action = spawn "firefox";
           "Menu".action = spawn "fuzzel";
-          "Super+Alt+L".action = spawn "systemctl suspend";
+          "Mod+asciicircum".action = spawn "fuzzel";
+          "Mod+Alt+l".action = spawn "systemctl suspend";
+
           XF86AudioRaiseVolume = {
             action = spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1+";
             allow-when-locked = true;
@@ -104,41 +122,36 @@ in
             action = spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle";
             allow-when-locked = true;
           };
-          "Mod+Q".action = close-window;
 
-          "Mod+n".action = focus-column-left;
+          "Mod+q".action = close-window;
+          "Mod+Return".action = fullscreen-window;
+          "Mod+f".action = toggle-window-floating;
+          "Mod+Ctrl+f".action = switch-focus-between-floating-and-tiling;
+
           "Mod+left".action = focus-column-left;
-          "Mod+Shift+n".action = move-column-left;
-          "Mod+Shift+left".action = move-column-left;
-
-          "Mod+r".action = focus-window-or-workspace-down;
+          "Mod+right".action = focus-column-right;
+          "Mod+up".action = focus-window-or-workspace-up;
           "Mod+down".action = focus-window-or-workspace-down;
-          "Mod+Shift+r".action = move-window-down;
+
+          "Mod+Shift+left".action = move-column-left;
+          "Mod+Shift+right".action = move-column-right;
+          "Mod+Shift+up".action = move-window-up;
           "Mod+Shift+down".action = move-window-down;
 
-          "Mod+l".action = focus-window-or-workspace-up;
-          "Mod+up".action = focus-window-or-workspace-up;
-          "Mod+Shift+l".action = move-window-up;
-          "Mod+Shift+up".action = move-window-up;
+          "Mod+Ctrl+n".action = focus-monitor-left;
+          "Mod+Ctrl+r".action = focus-monitor-down;
+          "Mod+Ctrl+l".action = focus-monitor-up;
+          "Mod+Ctrl+s".action = focus-monitor-right;
 
-          "Mod+s".action = focus-column-right;
-          "Mod+right".action = focus-column-right;
-          "Mod+Shift+s".action = move-column-right;
-          "Mod+Shift+right".action = move-column-right;
+          "Mod+Shift+Ctrl+n".action = move-column-to-monitor-left;
+          "Mod+Shift+Ctrl+r".action = move-column-to-monitor-down;
+          "Mod+Shift+Ctrl+l".action = move-column-to-monitor-up;
+          "Mod+Shift+Ctrl+s".action = move-column-to-monitor-right;
 
           "Mod+h".action = focus-column-first;
           "Mod+Shift+h".action = consume-or-expel-window-left;
           "Mod+m".action = focus-column-last;
           "Mod+Shift+m".action = consume-or-expel-window-right;
-
-          "Mod+Ctrl+n".action = focus-monitor-left;
-          "Mod+Shift+Ctrl+n".action = move-column-to-monitor-left;
-          "Mod+Ctrl+r".action = focus-monitor-down;
-          "Mod+Shift+Ctrl+r".action = move-column-to-monitor-down;
-          "Mod+Ctrl+l".action = focus-monitor-up;
-          "Mod+Shift+Ctrl+l".action = move-column-to-monitor-up;
-          "Mod+Ctrl+s".action = focus-monitor-right;
-          "Mod+Shift+Ctrl+s".action = move-column-to-monitor-right;
 
           "Mod+Period".action = focus-workspace-down;
           "Mod+Shift+Period".action = move-column-to-workspace-down;
@@ -172,14 +185,10 @@ in
           "Mod+Ctrl+Shift+WheelScrollDown".action = move-column-right;
           "Mod+Ctrl+Shift+WheelScrollUp".action = move-column-left;
 
-          "Mod+V".action = maximize-column;
-          "Mod+Ctrl+V".action = expand-column-to-available-width;
-          "Mod+return".action = fullscreen-window;
+          "Mod+v".action = maximize-column;
+          "Mod+Ctrl+v".action = expand-column-to-available-width;
           "Mod+Minus".action = set-column-width "-10%";
           "Mod+Shift+0".action = set-column-width "+10%";
-
-          "Mod+F".action = toggle-window-floating;
-          "Mod+Ctrl+F".action = switch-focus-between-floating-and-tiling;
 
           "Mod+y".action = toggle-column-tabbed-display;
 
@@ -193,39 +202,10 @@ in
           };
 
           # The quit action will show a confirmation dialog to avoid accidental exits.
-          "Mod+Ctrl+Escape".action = quit;
+          "Mod+Ctrl+Shift+q".action = quit;
           # Powers off the monitors. To turn them back on, do any input like
           # moving the mouse or pressing any other key.
-          "Mod+Shift+P".action = power-off-monitors;
-
-          # You can refer to workspaces by index. However, keep in mind that
-          # niri is a dynamic workspace system, so these commands are kind of
-          # "best effort". Trying to refer to a workspace index bigger than
-          # the current workspace count will instead refer to the bottommost
-          # (empty) workspace.
-          #
-          # For example, with 2 workspaces + 1 empty, indices 3, 4, 5 and so on
-          # will all refer to the 3rd workspace.
-          "Mod+j".action = focus-workspace "default";
-          "Mod+Shift+j".action.move-window-to-workspace = "default";
-
-          "Mod+d".action = focus-workspace "mail";
-          "Mod+Shift+d".action.move-window-to-workspace = "mail";
-
-          "Mod+u".action = focus-workspace "games";
-          "Mod+Shift+u".action.move-window-to-workspace = "games";
-
-          "Mod+F1".action = focus-workspace "twitch";
-          "Mod+Shift+F1".action.move-window-to-workspace = "twitch";
-
-          "Mod+F2".action = focus-workspace "comms";
-          "Mod+Shift+F2".action.move-window-to-workspace = "comms";
-
-          "Mod+F3".action = focus-workspace "browser";
-          "Mod+Shift+F3".action.move-window-to-workspace = "browser";
-
-          "Mod+F4".action = focus-workspace "notes";
-          "Mod+Shift+F4".action.move-window-to-workspace = "notes";
+          "Mod+Shift+p".action = power-off-monitors;
         };
 
         window-rules = [
@@ -233,7 +213,6 @@ in
             matches = [ { app-id = "firefox"; } ];
             open-on-workspace = "default";
           }
-
           {
             matches = [ { app-id = "thunderbird"; } ];
             open-on-workspace = "mail";
@@ -243,80 +222,58 @@ in
             matches = [ { app-id = "steam"; } ];
             open-on-workspace = "games";
           }
-
-          {
-            matches = [ { app-id = "streamlink-twitch-gui"; } ];
-            open-on-workspace = "twitch";
-          }
-          {
-            matches = [ { app-id = "mpv"; } ];
-            open-on-workspace = "twitch";
-            default-column-width.proportion = 0.9;
-          }
-
-          {
-            matches = [ { app-id = "Element"; } ];
-            open-on-workspace = "comms";
-          }
           {
             matches = [ { app-id = "signal"; } ];
             open-on-workspace = "comms";
+            block-out-from = "screencast";
           }
           {
             matches = [ { app-id = "discord"; } ];
             open-on-workspace = "comms";
-          }
-
-          {
-            matches = [ { app-id = "obsidian"; } ];
-            open-on-workspace = "notes";
             block-out-from = "screencast";
           }
           {
-            matches = [ { app-id = "Zotero"; } ];
+            matches = [ { app-id = "affine"; } ];
             open-on-workspace = "notes";
             block-out-from = "screencast";
           }
         ];
 
-        spawn-at-startup = [
-          { command = [ "obsidian" ]; }
-          { command = [ "firefox" ]; }
-        ];
-
-        prefer-no-csd = true;
-        hotkey-overlay = {
-          skip-at-startup = true;
-        };
         layout = {
           gaps = 1;
           center-focused-column = "never";
           empty-workspace-above-first = true;
+
           preset-column-widths = [
             { proportion = 0.33333; }
             { proportion = 0.5; }
             { proportion = 0.66667; }
           ];
+
           default-column-width = {
             proportion = 0.5;
           };
+
           preset-window-heights = [
             { proportion = 0.33333; }
             { proportion = 0.5; }
             { proportion = 0.66667; }
           ];
+
           focus-ring = {
             enable = true;
             width = 2;
             active.color = "#7fc8ff";
             inactive.color = "#505050";
           };
+
           border = {
             enable = false;
             width = 2;
             active.color = "#ffc87f";
             inactive.color = "#505050";
           };
+
           shadow = {
             # on
             softness = 30;
@@ -329,6 +286,7 @@ in
             color = "#00000070";
             # inactive-color "#00000054"
           };
+
           tab-indicator = {
             # off
             hide-when-single-tab = true;
@@ -344,12 +302,14 @@ in
             active.color = "red";
             inactive.color = "gray";
           };
+
           insert-hint = {
             # off
             display.color = "#ffc87f80";
           };
         };
       }
+
       (mkIf (nixosConfig.node.name == "kroma") {
         outputs = {
           "DP-2" = {
@@ -375,43 +335,38 @@ in
             enable = false;
           };
         };
+
         workspaces = {
-          "1default" = {
-            name = "default";
-            open-on-output = "DP-3";
+          "1browser" = {
+            name = "browser";
+            open-on-output = "DP-2";
           };
-          "2mail" = {
-            name = "mail";
-            open-on-output = "DP-3";
+          "2default" = {
+            name = "default";
+            open-on-output = "DP-2";
+          };
+          "3term" = {
+            name = "term";
+            open-on-output = "DP-2";
           };
           "5games" = {
             name = "games";
+            open-on-output = "DP-2";
+          };
+
+          "7browser" = {
+            name = "browser2";
             open-on-output = "DP-3";
           };
-
-          "1browser" = {
-            name = "browser";
-            open-on-output = "HDMI-A-1";
-          };
-          "2notes" = {
-            name = "notes";
-            open-on-output = "HDMI-A-1";
-          };
-
-          "1twitch" = {
-            name = "twitch";
-            open-on-output = "DVI-D-1";
-          };
-          "2comms" = {
+          "8comms" = {
             name = "comms";
-            open-on-output = "DVI-D-1";
+            open-on-output = "DP-3";
+          };
+          "9notes" = {
+            name = "notes";
+            open-on-output = "DP-3";
           };
         };
-
-        spawn-at-startup = [
-          { command = [ "thunderbird" ]; }
-          { command = [ "zotero" ]; }
-        ];
       })
     ];
   };

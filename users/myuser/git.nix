@@ -10,14 +10,15 @@
   ];
 
   programs.gitui.enable = true;
+  programs.difftastic = {
+    enable = true;
+    options.background = "dark";
+    git.enable = true;
+  };
   programs.git = {
     enable = true;
-    difftastic = {
-      enable = true;
-      background = "dark";
-    };
     lfs.enable = lib.mkDefault false;
-    extraConfig = {
+    settings = {
       core.pager = "${pkgs.delta}/bin/delta";
       delta = {
         hyperlinks = true;
@@ -48,16 +49,16 @@
       pull.rebase = true;
       rebase.autostash = true;
       push.autoSetupRemote = true;
-    };
-    aliases = {
-      unstash = "stash pop";
-      s = "status";
-      tags = "tag -l";
-      t = "tag -s -m ''";
-      fixup = ''!f() { TARGET=$(git rev-parse "$1"); git commit --fixup=$TARGET ''${@:2} && EDITOR=true git rebase -i --gpg-sign --autostash --autosquash $TARGET^; }; f'';
-      # An alias that uses the previous commit message by default.
-      # Useful when you mess up entering the signing password and git aborts.
-      commit-reuse-message = ''!git commit --edit --file "$(git rev-parse --git-dir)"/COMMIT_EDITMSG'';
+      alias = {
+        unstash = "stash pop";
+        s = "status";
+        tags = "tag -l";
+        t = "tag -s -m ''";
+        fixup = ''!f() { TARGET=$(git rev-parse "$1"); git commit --fixup=$TARGET ''${@:2} && EDITOR=true git rebase -i --gpg-sign --autostash --autosquash $TARGET^; }; f'';
+        # An alias that uses the previous commit message by default.
+        # Useful when you mess up entering the signing password and git aborts.
+        commit-reuse-message = ''!git commit --edit --file "$(git rev-parse --git-dir)"/COMMIT_EDITMSG'';
+      };
     };
   };
 

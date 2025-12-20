@@ -56,14 +56,6 @@ lib.optionalAttrs (!minimal) {
     home = {
       username = config.users.users.malte.name;
     };
-
-    # Autostart hyprland if on tty1 (once, don't restart after logout)
-    programs.zsh.initContent = lib.mkOrder 9999 ''
-      if [[ -t 0 && "$(tty || true)" == /dev/tty1 && -z "$DISPLAY" && -z "$WAYLAND_DISPLAY" ]]; then
-        echo "Login shell detected. Starting wayland..."
-        niri
-      fi
-    '';
   };
 
   # Autologin

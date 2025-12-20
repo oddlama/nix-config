@@ -20,6 +20,7 @@ in
 
   home.packages = [
     pkgs.nirius
+    pkgs.wl-clipboard-rs
   ];
 
   services.gnome-keyring.enable = true;
@@ -28,21 +29,30 @@ in
     xdgOpenUsePortal = true;
     config.niri = {
       default = [
-        "gnome"
         "gtk"
+        "gnome"
       ];
-      "org.freedesktop.impl.portal.Access" = "gtk";
-      "org.freedesktop.impl.portal.Notification" = "gtk";
-      "org.freedesktop.impl.portal.Secret" = "gnome-keyring";
-      "org.freedesktop.impl.portal.FileChooser" = "gtk";
-      "org.freedesktop.impl.portal.ScreenCast" = [ "gnome" ];
-      "org.freedesktop.impl.portal.Screenshot" = [ "gnome" ];
+      "org.freedesktop.impl.portal.Access" = [ "gtk" ];
+      "org.freedesktop.impl.portal.Notification" = [ "gtk" ];
+      "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
+      "org.freedesktop.impl.portal.FileChooser" = [ "gtk" ];
+      "org.freedesktop.impl.portal.ScreenCast" = [ "xdg-desktop-portal-gnome" ];
+      "org.freedesktop.impl.portal.Screenshot" = [ "xdg-desktop-portal-gnome" ];
     };
-    extraPortals = with pkgs; [
-      xdg-desktop-portal-gtk
-      xdg-desktop-portal-gnome
+    extraPortals = [
+      pkgs.gnome-keyring
+      pkgs.xdg-desktop-portal-gtk
+      pkgs.xdg-desktop-portal-gnome
     ];
   };
+
+  # Autostart hyprland if on tty1 (once, don't restart after logout)
+  programs.zsh.initContent = lib.mkOrder 9999 ''
+    if [[ -t 0 && "$(tty || true)" == /dev/tty1 && -z "$DISPLAY" && -z "$WAYLAND_DISPLAY" ]]; then
+      echo "Login shell detected. Starting wayland..."
+      niri-session
+    fi
+  '';
 
   programs.niri = {
     enable = true;
@@ -93,14 +103,14 @@ in
           };
 
           power-key-handling.enable = false;
-          workspace-auto-back-and-forth = true;
+          workspace-auto-back-and-forth = false;
         };
 
         gestures.hot-corners.enable = false;
 
         binds = with config.lib.niri.actions; {
           "Mod+t".action = spawn "kitty";
-          "Mod+c".action = spawn "${getExe pkgs.scripts.clone-term}";
+          "Mod+c".action = spawn (getExe pkgs.scripts.clone-term);
           "Mod+b".action = spawn "firefox";
           "Menu".action = spawn "fuzzel";
           "Mod+asciicircum".action = spawn "fuzzel";
@@ -173,7 +183,8 @@ in
         window-rules = [
           {
             matches = [ { app-id = "firefox"; } ];
-            open-on-workspace = "default";
+            open-on-workspace = "browser";
+            open-maximized = true;
           }
           {
             matches = [ { app-id = "thunderbird"; } ];
@@ -288,6 +299,11 @@ in
             variable-refresh-rate = "on-demand";
           };
           "DP-3" = {
+            mode = {
+              width = 3840;
+              height = 2160;
+              refresh = 143.999;
+            };
             scale = 1;
             position = {
               x = -3840;
@@ -312,8 +328,8 @@ in
             "5games" = ws "DP-2" "games";
             "6misc" = ws "DP-2" "misc";
 
-            "7browser2" = ws "DP-3" "browser2";
-            "8comms" = ws "DP-3" "comms";
+            "7comms" = ws "DP-3" "comms";
+            "8browser2" = ws "DP-3" "browser2";
             "9notes" = ws "DP-3" "notes";
           };
 
@@ -326,8 +342,8 @@ in
               "term2" = "4";
               "games" = "5";
               "misc" = "6";
-              "browser2" = "7";
-              "comms" = "8";
+              "comms" = "7";
+              "browser2" = "8";
               "notes" = "9";
             };
           in

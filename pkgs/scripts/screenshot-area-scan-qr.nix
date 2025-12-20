@@ -3,7 +3,7 @@
   grimblast,
   libnotify,
   tesseract,
-  wl-clipboard,
+  wl-clipboard-rs,
   yq,
   zbar,
 }:
@@ -13,7 +13,7 @@ writeShellApplication {
     grimblast
     libnotify
     tesseract
-    wl-clipboard
+    wl-clipboard-rs
     yq
     zbar
   ];

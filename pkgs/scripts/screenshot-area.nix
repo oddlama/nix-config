@@ -4,7 +4,7 @@
   libnotify,
   satty,
   tesseract,
-  wl-clipboard,
+  wl-clipboard-rs,
 }:
 writeShellApplication {
   name = "screenshot-area";
@@ -13,7 +13,7 @@ writeShellApplication {
     libnotify
     satty
     tesseract
-    wl-clipboard
+    wl-clipboard-rs
   ];
   text = ''
     umask 077

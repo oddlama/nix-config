@@ -38,14 +38,15 @@
         position = "bottom";
         showCapsule = false;
         showOutline = false;
-        transparent = true;
+        transparent = false;
+        outerCorners = false;
         widgets = {
           center = [
             {
               id = "Tray";
               blacklist = [ ];
               colorizeIcons = false;
-              drawerEnabled = true;
+              drawerEnabled = false;
               hidePassive = false;
               pinned = [ ];
             }
@@ -153,7 +154,7 @@
         };
       };
       colorSchemes = {
-        predefinedScheme = "Tokyo Night";
+        predefinedScheme = "Ayu";
       };
       general = {
         animationSpeed = 1.5;

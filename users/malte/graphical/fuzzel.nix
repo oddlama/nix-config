@@ -19,9 +19,6 @@
       counter = "${base06}ff";
       border = "${base0D}ff";
     };
-    settings.main = {
-      font = "Segoe UI:size=20";
-      launch-prefix = "uwsm app --";
-    };
+    settings.main.font = "Segoe UI:size=20";
   };
 }

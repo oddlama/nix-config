@@ -143,6 +143,8 @@ in
           "Mod+Shift+Ctrl+Up".action = move-column-to-monitor-up;
           "Mod+Shift+Ctrl+Down".action = move-column-to-monitor-down;
 
+          "Mod+Home".action = focus-column-first;
+          "Mod+End".action = focus-column-last;
           "Mod+Alt+Left".action = consume-or-expel-window-left;
           "Mod+Alt+Right".action = consume-or-expel-window-right;
           "Mod+y".action = toggle-column-tabbed-display;

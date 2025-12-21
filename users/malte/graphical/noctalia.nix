@@ -30,6 +30,7 @@
     settings = {
       audio = {
         cavaFrameRate = 60;
+        volumeOverdrive = true;
       };
       bar = {
         density = "compact";
@@ -179,7 +180,7 @@
       notifications.enabled = true;
       dock.enabled = false;
       wallpaper = {
-        directory = "~/.local/share/wallpapers";
+        directory = "/home/malte/.local/share/wallpapers";
         randomEnabled = true;
       };
     };

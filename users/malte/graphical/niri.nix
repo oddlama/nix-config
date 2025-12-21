@@ -293,7 +293,7 @@ in
               height = 2160;
               refresh = 119.880;
             };
-            scale = 1;
+            scale = 1.5;
             position = {
               x = 0;
               y = 0;
@@ -306,9 +306,9 @@ in
               height = 2160;
               refresh = 143.999;
             };
-            scale = 1;
+            scale = 1.5;
             position = {
-              x = -3840;
+              x = -2560; # -3840 / 1.5
               y = 0;
             };
             variable-refresh-rate = "on-demand";

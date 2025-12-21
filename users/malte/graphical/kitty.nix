@@ -12,7 +12,7 @@
     font = {
       package = pkgs.jetbrains-mono;
       name = "JetBrains Mono";
-      size = 20;
+      size = 14;
     };
     settings = {
       bold_font = "JetBrains Mono Bold";

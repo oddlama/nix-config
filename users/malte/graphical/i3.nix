@@ -240,11 +240,6 @@ in
     }
     .${nixosConfig.node.name} or { };
 
-  home.sessionVariables = {
-    # Make gtk apps bigger
-    GDK_SCALE = 2;
-  };
-
   xsession.wallpapers.enable = true;
 
   home.file.".xinitrc".text = ''

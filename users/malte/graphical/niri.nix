@@ -313,9 +313,6 @@ in
             };
             variable-refresh-rate = "on-demand";
           };
-          "Unknown-1" = {
-            enable = false;
-          };
         };
 
         workspaces =
@@ -334,6 +331,47 @@ in
             "8browser2" = ws "DP-3" "browser2";
             "9notes" = ws "DP-3" "notes";
           };
+
+        binds =
+          let
+            mappings = {
+              "browser" = "1";
+              "default" = "2";
+              "term" = "3";
+              "term2" = "4";
+              "games" = "5";
+              "misc" = "6";
+              "comms" = "7";
+              "browser2" = "8";
+              "notes" = "9";
+            };
+          in
+          lib.mergeAttrsList (
+            lib.mapAttrsToList (
+              workspace: key: with config.lib.niri.actions; {
+                "Mod+${key}".action = focus-workspace workspace;
+                "Mod+Shift+${key}".action.move-window-to-workspace = [
+                  { focus = false; }
+                  workspace
+                ];
+              }
+            ) mappings
+          );
+      })
+
+      (mkIf (nixosConfig.node.name == "nom") {
+        workspaces = {
+          "1browser".name = "browser";
+          "2default".name = "default";
+          "3term".name = "term";
+          "4term2".name = "term2";
+          "5games".name = "games";
+          "6misc".name = "misc";
+
+          "7comms".name = "comms";
+          "8browser2".name = "browser2";
+          "9notes".name = "notes";
+        };
 
         binds =
           let

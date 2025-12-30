@@ -4,10 +4,10 @@
   # services.tlp.enable = true;
   services.physlock.enable = true;
   services.logind.settings.Login = {
-    LidSwitch = "ignore";
-    LidSwitchDocked = "ignore";
-    LidSwitchExternalPower = "ignore";
-    HandlePowerKey = "suspend";
+    HandleLidSwitch = "ignore";
+    HandleLidSwitchDocked = "ignore";
+    HandleLidSwitchExternalPower = "ignore";
+    HandlePowerKey = "ignore";
     HandleSuspendKey = "suspend";
     HandleHibernateKey = "suspend";
     PowerKeyIgnoreInhibited = "yes";

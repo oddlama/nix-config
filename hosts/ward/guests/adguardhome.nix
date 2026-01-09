@@ -99,6 +99,7 @@ in
         {
           inherit (globals.services.influxdb) domain;
           answer = globals.domains.me;
+          enabled = true;
         }
       ]
       # Use the local mirror-proxy for some services (not necessary, just for speed)
@@ -107,6 +108,7 @@ in
           (domain: {
             inherit domain;
             answer = globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv4;
+            enabled = true;
           })
           [
             # FIXME: dont hardcode, filter global service domains by internal state

@@ -173,6 +173,7 @@ in
         psycopg2
         pyatv
         pyipp
+        pymiele
         pymodbus
         zlib-ng
       ];

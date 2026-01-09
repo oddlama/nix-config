@@ -520,7 +520,7 @@ in
           ""
           "${lib.getExe cfg.package} --config=/run/stalwart-mail/config.toml"
         ];
-        RestartSec = "60"; # Retry every minute
+        RestartSec = lib.mkForce "60"; # Retry every minute
       };
     };
 

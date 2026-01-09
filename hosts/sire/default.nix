@@ -3,7 +3,6 @@
   globals,
   inputs,
   lib,
-  nodes,
   minimal,
   ...
 }:

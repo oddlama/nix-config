@@ -63,7 +63,7 @@ rustPlatform.buildRustPackage rec {
   # Tests are long to compile
   doCheck = false;
 
-  setupHook = "${path}/pkgs/by-name/pr/prisma-engines/setup-hook.sh";
+  setupHook = "${path}/pkgs/by-name/pr/prisma-engines_6/setup-hook.sh";
 
   meta = with lib; {
     description = "Collection of engines that power the core stack for Prisma";

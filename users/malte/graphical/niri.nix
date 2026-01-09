@@ -98,7 +98,7 @@ in
           };
 
           mouse = {
-            accel-speed = 0.0;
+            accel-speed = -0.5;
             accel-profile = "flat";
           };
 
@@ -287,11 +287,11 @@ in
 
       (mkIf (nixosConfig.node.name == "kroma") {
         outputs = {
-          "DP-2" = {
+          "DP-3" = {
             mode = {
               width = 3840;
               height = 2160;
-              refresh = 119.880;
+              refresh = 240.000;
             };
             scale = 1.5;
             position = {
@@ -300,7 +300,7 @@ in
             };
             variable-refresh-rate = "on-demand";
           };
-          "DP-3" = {
+          "DP-2" = {
             mode = {
               width = 3840;
               height = 2160;
@@ -320,16 +320,16 @@ in
             ws = open-on-output: name: { inherit name open-on-output; };
           in
           {
-            "1browser" = ws "DP-2" "browser";
-            "2default" = ws "DP-2" "default";
-            "3term" = ws "DP-2" "term";
-            "4term2" = ws "DP-2" "term2";
-            "5games" = ws "DP-2" "games";
-            "6misc" = ws "DP-2" "misc";
+            "1browser" = ws "DP-3" "browser";
+            "2default" = ws "DP-3" "default";
+            "3term" = ws "DP-3" "term";
+            "4term2" = ws "DP-3" "term2";
+            "5games" = ws "DP-3" "games";
+            "6misc" = ws "DP-3" "misc";
 
-            "7comms" = ws "DP-3" "comms";
-            "8browser2" = ws "DP-3" "browser2";
-            "9notes" = ws "DP-3" "notes";
+            "7comms" = ws "DP-2" "comms";
+            "8browser2" = ws "DP-2" "browser2";
+            "9notes" = ws "DP-2" "notes";
           };
 
         binds =

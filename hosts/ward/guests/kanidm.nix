@@ -93,7 +93,7 @@ in
   ];
 
   services.kanidm = {
-    package = pkgs.kanidmWithSecretProvisioning_1_7;
+    package = pkgs.kanidmWithSecretProvisioning_1_8;
     enableServer = true;
     serverSettings = {
       domain = kanidmDomain;

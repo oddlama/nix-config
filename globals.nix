@@ -36,6 +36,7 @@ in
           sire-influxdb.id = 141;
           sire-loki.id = 109;
           sire-paperless.id = 147;
+          sire-part-db.id = 40;
           sire-samba.id = 38;
           ward.id = 94;
           ward-adguardhome.id = 148;

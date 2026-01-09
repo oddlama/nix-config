@@ -52,5 +52,6 @@
       affine = uidGid 959;
       redis-affine = uidGid 958;
       linkwarden = uidGid 957;
+      part-db = uidGid 956;
     };
 }

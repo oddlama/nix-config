@@ -53,5 +53,6 @@
       redis-affine = uidGid 958;
       linkwarden = uidGid 957;
       part-db = uidGid 956;
+      lpadmin = uidGid 955;
     };
 }

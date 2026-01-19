@@ -35,10 +35,16 @@ in
     enableNginx = true;
     virtualHost = "0.0.0.0";
     settings = {
+      APP_SHARE_DIR = "/var/lib/part-db/share";
+      # FIXME: we should change APP_SECRET = "";
+
+      DEFAULT_URI = "https://${partdbDomain}/";
+
       DEFAULT_LANG = "en";
       DEFAULT_TIMEZONE = "Europe/Berlin";
       BASE_CURRENCY = "EUR";
       BANNER = "Achtarmig reinlöten";
+      PROVIDER_LCSC_ENABLED = "1";
     };
   };
 

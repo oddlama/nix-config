@@ -101,7 +101,6 @@ in
       tls_chain = config.age.secrets."kanidm-self-signed.crt".path;
       tls_key = config.age.secrets."kanidm-self-signed.key".path;
       bindaddress = "0.0.0.0:${toString kanidmPort}";
-      trust_x_forward_for = true;
     };
 
     enableClient = true;
@@ -297,4 +296,5 @@ in
   };
 
   systemd.services.kanidm.serviceConfig.RestartSec = "60"; # Retry every minute
+  systemd.services.kanidm.environment.KANIDM_TRUST_X_FORWARD_FOR = "true";
 }

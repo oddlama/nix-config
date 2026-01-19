@@ -278,6 +278,16 @@ in
               type = types.str;
               description = "My personal domain.";
             };
+
+            company-main = mkOption {
+              type = types.str;
+              description = "My own company's main domain.";
+            };
+
+            company-shop = mkOption {
+              type = types.str;
+              description = "My own company's shop domain.";
+            };
           };
 
           macs = mkOption {

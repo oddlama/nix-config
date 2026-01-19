@@ -38,13 +38,13 @@ in
     programs.dconf.enable = true;
     # Required for gnome3 pinentry
     services.dbus.packages = [ pkgs.gcr ];
+    services.printing.enable = true;
+    services.printing.drivers = [ pkgs.epson-escpr ];
 
     # We actually use the home-manager module to add the actual portal config,
     # but need this so relevant implementations are found
     environment.pathsToLink = [
       "/share/xdg-desktop-portal"
     ];
-
-    services.displayManager.enable = true;
   };
 }

@@ -14,7 +14,7 @@
 }:
 let
   pname = "part-db";
-  version = "2.4.0";
+  version = "2.5.0";
 
   srcWithVendor = php.buildComposerProject2 {
     inherit pname version;
@@ -23,7 +23,7 @@ let
       owner = "Part-DB";
       repo = "Part-DB-server";
       tag = "v${version}";
-      hash = "sha256-z/bvFFzKVMN6lr9RnrBc/hTrZ9a/mjgpkDYslUFHM50=";
+      hash = "sha256-PIEPnqplHkHlZ7469whkGD6IsIBWPJFTWAmYxmhvn1M=";
     };
 
     php = php.buildEnv {
@@ -35,7 +35,7 @@ let
         ]);
     };
 
-    vendorHash = "sha256-cEg03tdeeIq02pCR/fXjXACcwkvciuHrylZnX9d9aM0=";
+    vendorHash = "sha256-D5hSUiDq8pUf/r8iPdkGpE1rzhZDguaGG1dOGDQCUvE=";
 
     # Upstream composer.json file is missing the description field
     composerStrictValidation = false;
@@ -64,7 +64,7 @@ stdenv.mkDerivation (finalAttrs: {
 
   yarnOfflineCache = fetchYarnDeps {
     yarnLock = finalAttrs.src + "/yarn.lock";
-    hash = "sha256-F9kZ8nAIghkg+xUkglvRZXOSadv2lbKTP0gNfLD4LYE=";
+    hash = "sha256-RmU1842CELJ9Ge6VtEcZHLMLnCrJILWr3JkiV8FWo28=";
   };
 
   nativeBuildInputs = [
@@ -91,7 +91,6 @@ stdenv.mkDerivation (finalAttrs: {
     homepage = "https://docs.part-db.de/";
     changelog = "https://github.com/Part-DB/Part-DB-server/releases/tag/v${version}";
     license = lib.licenses.agpl3Plus;
-    teams = with lib.teams; [ secshell ];
     maintainers = with lib.maintainers; [ oddlama ];
     platforms = lib.platforms.linux;
   };

@@ -79,6 +79,7 @@
               width = 20;
             }
             {
+              compactMode = false;
               id = "SystemMonitor";
               diskPath = "/persist";
               showCpuTemp = true;
@@ -180,8 +181,9 @@
       notifications.enabled = true;
       dock.enabled = false;
       wallpaper = {
+        enabled = true;
         directory = "/home/malte/.local/share/wallpapers";
-        randomEnabled = true;
+        wallpaperChangeMode = "random";
       };
     };
   };

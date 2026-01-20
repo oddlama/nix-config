@@ -149,9 +149,7 @@ in
           "Mod+Alt+Right".action = consume-or-expel-window-right;
           "Mod+y".action = toggle-column-tabbed-display;
 
-          #"Print".action = screenshot;
-          #"Ctrl+Print".action = screenshot-screen {};
-          #"Alt+Print".action = screenshot-window;
+          "Mod+Shift+s".action.screenshot = [ ]; # XXX : https://github.com/sodiboo/niri-flake/issues/1380
 
           "Mod+Escape" = {
             action = toggle-keyboard-shortcuts-inhibit;
@@ -177,6 +175,10 @@ in
             allow-when-locked = true;
           };
           XF86AudioMicMute = {
+            action = spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle";
+            allow-when-locked = true;
+          };
+          "Mod+MouseForward" = {
             action = spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle";
             allow-when-locked = true;
           };

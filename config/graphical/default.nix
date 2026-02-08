@@ -41,6 +41,10 @@ in
     services.printing.enable = true;
     services.printing.drivers = [ pkgs.epson-escpr ];
 
+    # For some reason this is default enabled by this file
+    # https://github.com/nixos/nixpkgs/blob/master/nixos/modules/services/misc/graphical-desktop.nix
+    services.speechd.enable = false;
+
     # We actually use the home-manager module to add the actual portal config,
     # but need this so relevant implementations are found
     environment.pathsToLink = [

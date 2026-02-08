@@ -281,3 +281,21 @@ setopt auto_list
 setopt auto_menu
 # Move cursor to end of word if there was only one match
 setopt always_to_end
+
+function mcd() {
+	mkdir -p "$1"
+	cd "$1"
+}
+
+function wo() {
+	realpath -e "$(which "$1")"
+}
+
+function realize() {
+	if [[ -L "$1" ]]; then
+		cp --remove-destination "$(realpath -e "$1")" "$1"
+	else
+		echo "$1 must be a symbolic link" >&2
+		return 1
+	fi
+}

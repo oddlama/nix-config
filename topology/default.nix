@@ -11,7 +11,7 @@ in
 {
   # TODO: collect networks from globals
   networks.ward-kea.name = "Home LAN";
-  networks.zackbiene-kea.name = "Isolated IoT Network";
+  # networks.zackbiene-kea.name = "Isolated IoT Network";
   networks.home-fritzbox = {
     name = "Home Fritzbox";
     cidrv4 = "192.168.178.0/24";
@@ -59,7 +59,7 @@ in
     ];
     connections.eth1 = mkConnection "ward" "lan";
     connections.eth2 = mkConnection "sire" "lan";
-    connections.eth7 = mkConnection "zackbiene" "lan1";
+    # connections.eth7 = mkConnection "zackbiene" "lan1";
   };
 
   nodes.switch-bedroom-1 = mkSwitch "Switch Bedroom 1" {

@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }:
 {
@@ -11,7 +10,7 @@
   # Failure to import is important to notice!
   boot.zfs.forceImportRoot = false;
 
-  environment.systemPackages = with pkgs; [ zfs ];
+  environment.systemPackages = [ config.boot.zfs.package ];
 
   services.zfs = {
     autoScrub = {
@@ -39,7 +38,7 @@
     unitConfig.DefaultDependencies = "no";
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${pkgs.zfs}/bin/zfs rollback -r rpool/local/root@blank";
+      ExecStart = "${lib.getExe config.boot.zfs.package} rollback -r rpool/local/root@blank";
     };
   };
 }

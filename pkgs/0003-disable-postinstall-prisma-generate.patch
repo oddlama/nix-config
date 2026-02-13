@@ -1,0 +1,28 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: oddlama <oddlama@oddlama.org>
+Date: Mon, 10 Feb 2026 12:00:00 +0100
+Subject: [PATCH 3/3] disable postinstall prisma generate
+
+Skip prisma generate in postinstall to allow offline builds.
+The Nix build phase runs prisma generate manually with the
+correct engine paths after yarn install completes.
+---
+ packages/backend/server/package.json | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/packages/backend/server/package.json b/packages/backend/server/package.json
+index 1234567..abcdefg 100644
+--- a/packages/backend/server/package.json
++++ b/packages/backend/server/package.json
+@@ -23,7 +23,6 @@
+     "seed": "r ./src/seed/index.ts",
+     "genconfig": "r ./scripts/genconfig.ts",
+     "cli": "cross-env SERVER_FLAVOR=script node ./dist/main.js",
+-    "predeploy": "yarn prisma migrate deploy && yarn cli run",
+-    "postinstall": "prisma generate"
++    "predeploy": "yarn prisma migrate deploy && yarn cli run"
+   },
+   "dependencies": {
+--
+2.45.0
+

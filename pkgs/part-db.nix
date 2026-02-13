@@ -35,7 +35,7 @@ let
         ]);
     };
 
-    vendorHash = "sha256-D5hSUiDq8pUf/r8iPdkGpE1rzhZDguaGG1dOGDQCUvE=";
+    vendorHash = "sha256-Di44Bea+xj9SDF4Pt0jKNeH/AEnhvab7diFktyrU4rg=";
 
     # Upstream composer.json file is missing the description field
     composerStrictValidation = false;

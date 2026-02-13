@@ -14,6 +14,7 @@
     ../../config
     ../../config/hardware/intel.nix
     ../../config/hardware/physical.nix
+    ../../config/hardware/nvidia.nix
     ../../config/optional/zfs.nix
 
     ./fs.nix

@@ -1,7 +1,8 @@
 _inputs: [
   (import ./scripts)
-  (_final: prev: {
-    affine-server = prev.callPackage ./affine-server.nix { };
+  (final: prev: {
+    affine-server = prev.callPackage ./affine-server.nix { prisma-engines = final.prisma-engines_6_7; };
+    prisma-engines_6_7 = prev.callPackage ./prisma-engines.nix { };
     deploy = prev.callPackage ./deploy.nix { };
     git-fuzzy = prev.callPackage ./git-fuzzy { };
     segoe-ui-ttf = prev.callPackage ./segoe-ui-ttf.nix { };

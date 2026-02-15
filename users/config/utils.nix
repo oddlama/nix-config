@@ -7,7 +7,7 @@
 lib.optionalAttrs (!minimal) {
   home = {
     packages = with pkgs; [
-      btop
+      btop-cuda
       delta
       fd
       file

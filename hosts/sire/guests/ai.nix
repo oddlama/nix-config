@@ -1,14 +1,113 @@
 {
   config,
   globals,
+  pkgs,
+  lib,
   ...
 }:
 let
   openWebuiDomain = "chat.${globals.domains.me}";
 in
 {
-  microvm.mem = 1024 * 16;
-  microvm.vcpu = 20;
+  imports = [
+    ../../../config/hardware/nvidia.nix
+  ];
+
+  hardware.nvidia.nvidiaPersistenced = true;
+
+  systemd.targets.nvidia-ready = {
+    description = "NVIDIA driver initialized and ready";
+    wantedBy = [ "multi-user.target" ];
+  };
+  systemd.services.nvidia-ready = {
+    description = "Wait until NVIDIA GPUs are usable";
+
+    before = [ "nvidia-ready.target" ];
+    wantedBy = [ "nvidia-ready.target" ];
+
+    after = [ "systemd-modules-load.service" ];
+    wants = [ "systemd-modules-load.service" ];
+
+    path = [
+      config.hardware.nvidia.package
+      pkgs.gnugrep
+    ];
+
+    serviceConfig = {
+      Type = "oneshot";
+      TimeoutStartSec = "120";
+      RestartSec = "60";
+    };
+
+    script = ''
+      echo "Waiting for NVIDIA GPUs..."
+
+      EXPECTED_UUIDS=(
+        "GPU-36edecae-1d42-dca5-ab0f-89f7287743dd"
+      )
+
+      for i in $(seq 1 60); do
+        # Get currently visible UUIDs
+        FOUND_UUIDS=$(nvidia-smi -L | grep -o 'GPU-[0-9a-f-]*')
+
+        # Check if all expected UUIDs are present
+        ALL_PRESENT=1
+        for uuid in "''${EXPECTED_UUIDS[@]}"; do
+          if ! grep -q "$uuid" <<< "$FOUND_UUIDS"; then
+            ALL_PRESENT=0
+            break
+          fi
+        done
+
+        if [[ "$ALL_PRESENT" -eq 1 ]]; then
+          echo "All expected GPUs detected:"
+          echo "$FOUND_UUIDS"
+          exit 0
+        fi
+
+        sleep 2
+      done
+
+      echo "Timed out waiting for GPUs."
+      exit 1
+    '';
+  };
+
+  systemd.services.nvidia-power-limit = {
+    description = "Set NVIDIA GPU Power Limit";
+
+    wantedBy = [ "nvidia-ready.target" ];
+    requires = [ "nvidia-ready.target" ];
+    after = [ "nvidia-ready.target" ];
+
+    path = [ config.hardware.nvidia.package ];
+
+    script = ''
+      nvidia-smi -pl 250
+    '';
+
+    serviceConfig.Type = "oneshot";
+  };
+
+  systemd.services.ollama = {
+    wantedBy = lib.mkForce [ "nvidia-ready.target" ];
+
+    requires = [ "nvidia-ready.target" ];
+    after = [ "nvidia-ready.target" ];
+  };
+
+  microvm.mem = 1024 * 48;
+  microvm.vcpu = 24;
+  microvm.devices = [
+    {
+      bus = "pci";
+      path = "0000:43:00.0";
+    }
+    {
+      bus = "pci";
+      path = "0000:43:00.1";
+    }
+  ];
 
   globals.wireguard.proxy-sentinel.hosts.${config.node.name}.firewallRuleForNode.sentinel.allowedTCPPorts =
     [
@@ -32,6 +131,7 @@ in
     enable = true;
     host = "0.0.0.0";
     port = 11434;
+    package = pkgs.ollama-cuda;
   };
 
   services.open-webui = {

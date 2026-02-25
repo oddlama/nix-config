@@ -44,6 +44,7 @@ in
 
       EXPECTED_UUIDS=(
         "GPU-36edecae-1d42-dca5-ab0f-89f7287743dd"
+        "GPU-a29946ab-ad82-62bc-6c5a-a06bab6bb799"
       )
 
       for i in $(seq 1 60); do
@@ -106,6 +107,14 @@ in
     {
       bus = "pci";
       path = "0000:43:00.1";
+    }
+    {
+      bus = "pci";
+      path = "0000:07:00.0";
+    }
+    {
+      bus = "pci";
+      path = "0000:07:00.1";
     }
   ];
 

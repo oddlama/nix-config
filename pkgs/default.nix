@@ -16,9 +16,22 @@ _inputs: [
         wrapProgram $out/bin/nvim --add-flags "--clean"
       '';
     });
+    pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+      (_pythonFinal: pythonPrev: {
+        pyhumps = pythonPrev.pyhumps.overrideAttrs (old: {
+          patches = (old.patches or [ ]) ++ [
+            (prev.fetchpatch {
+              url = "https://github.com/nficano/humps/commit/f61bb34de152e0cc6904400c573bcf83cfdb67f9.patch";
+              hash = "sha256-nLmRRxedpB/O4yVBMY0cqNraDUJ6j7kSBG4J8JKZrrE=";
+            })
+          ];
+        });
+      })
+    ];
     # pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
-    #   (_pythonFinal: pythonPrev: {
+    #   (pythonFinal: pythonPrev: {
     #     xy = pythonPrev.xy.overrideAttrs { };
+    #     foo = pythonFinal.callPackage ./foo.nix { };
     #   })
     # ];
   })

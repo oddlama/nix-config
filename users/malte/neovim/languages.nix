@@ -28,12 +28,7 @@
       };
 
       # Cargo.toml dependency completion
-      crates = {
-        enable = true;
-        settings = {
-          completion.cmp.enabled = true;
-        };
-      };
+      crates.enable = true;
 
       rustaceanvim = {
         enable = true;

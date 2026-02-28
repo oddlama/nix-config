@@ -51,7 +51,7 @@ in
     network = "internet";
   };
 
-  services.stalwart-mail = {
+  services.stalwart = {
     enable = true;
     settings =
       let
@@ -287,8 +287,8 @@ in
           ];
         };
 
-        spam-filter.resource = "file://${config.services.stalwart-mail.package}/etc/stalwart/spamfilter.toml";
-        webadmin.resource = "file://${config.services.stalwart-mail.package.webadmin}/webadmin.zip";
+        spam-filter.resource = "file://${config.services.stalwart.package}/etc/stalwart/spamfilter.toml";
+        webadmin.resource = "file://${config.services.stalwart.package.webadmin}/webadmin.zip";
         webadmin.path = "/var/cache/stalwart-mail";
 
         certificate.default = {
@@ -483,9 +483,9 @@ in
         });
   };
 
-  systemd.services.stalwart-mail =
+  systemd.services.stalwart =
     let
-      cfg = config.services.stalwart-mail;
+      cfg = config.services.stalwart;
       configFormat = pkgs.formats.toml { };
       configFile = configFormat.generate "stalwart-mail.toml" cfg.settings;
     in

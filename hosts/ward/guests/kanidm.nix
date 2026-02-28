@@ -94,8 +94,8 @@ in
 
   services.kanidm = {
     package = pkgs.kanidmWithSecretProvisioning_1_8;
-    enableServer = true;
-    serverSettings = {
+    server.enable = true;
+    server.settings = {
       domain = kanidmDomain;
       origin = "https://${kanidmDomain}";
       tls_chain = config.age.secrets."kanidm-self-signed.crt".path;
@@ -103,9 +103,9 @@ in
       bindaddress = "0.0.0.0:${toString kanidmPort}";
     };
 
-    enableClient = true;
-    clientSettings = {
-      uri = config.services.kanidm.serverSettings.origin;
+    client.enable = true;
+    client.settings = {
+      uri = config.services.kanidm.server.settings.origin;
       verify_ca = true;
       verify_hostnames = true;
     };

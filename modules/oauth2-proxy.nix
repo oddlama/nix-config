@@ -131,9 +131,9 @@ in
       # reuses refresh tokens but kanidm forbids that. Not sure though.
       #cookie.refresh = "5m";
       cookie.expire = "30m";
-      cookie.secret = mkDefault null;
+      cookie.secretFile = mkDefault null;
 
-      clientSecret = mkDefault null;
+      clientSecretFile = mkDefault null;
       reverseProxy = true;
       httpAddress = "unix:///run/oauth2-proxy/oauth2-proxy.sock";
       redirectURL = "https://${cfg.portalDomain}/oauth2/callback";

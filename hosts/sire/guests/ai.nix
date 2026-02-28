@@ -13,6 +13,8 @@ in
     ../../../config/hardware/nvidia.nix
   ];
 
+  environment.systemPackages = [ pkgs.llama-cpp ];
+
   hardware.nvidia.nvidiaPersistenced = true;
 
   systemd.targets.nvidia-ready = {

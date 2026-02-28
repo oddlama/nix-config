@@ -9,6 +9,8 @@ _inputs: [
     zsh-histdb-skim = prev.callPackage ./zsh-skim-histdb.nix { };
     nix-plugins = prev.callPackage ./nix-plugins.nix { };
     part-db = prev.callPackage ./part-db.nix { };
+    ollama-cuda = prev.callPackage ./ollama.nix { acceleration = "cuda"; };
+    llama-cpp = prev.callPackage ./llama-cpp.nix { cudaSupport = true; };
     neovim-clean = prev.neovim-unwrapped.overrideAttrs (old: {
       nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ prev.makeWrapper ];
       postInstall = ''

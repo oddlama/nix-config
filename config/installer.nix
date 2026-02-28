@@ -16,7 +16,7 @@ let
     ${disko-script}/bin/disko-script
 
     echo "Installing system..."
-    nixos-install --no-root-password --system ${config.system.build.toplevel}
+    nixos-install --no-channel-copy --no-root-password --system ${config.system.build.toplevel}
 
     echo "Done!"
     echo "[33mDONT FORGET TO EXPORT YOUR ZFS POOL(S)![m"

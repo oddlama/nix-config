@@ -146,6 +146,10 @@ in
               id = 24;
               mac = globals.macs.shelly-solar;
             };
+            hosts.snapmaker-u1 = {
+              id = 25;
+              mac = globals.macs.snapmaker-u1;
+            };
             # FIXME: forbid these devices on other interfaces... maybe put them into separate switches vlan.
             # hosts.tl-sg105e-flur = {
             #   id = ;

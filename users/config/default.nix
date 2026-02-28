@@ -9,5 +9,6 @@
     ./utils.nix
   ];
 
-  xdg.configFile."nixpkgs/config.nix".text = "{ allowUnfree = true; }";
+  xdg.configFile."nixpkgs/config.nix".text =
+    "{ segger-jlink.acceptLicense = true; allowUnfree = true; }";
 }

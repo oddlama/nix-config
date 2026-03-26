@@ -14,7 +14,7 @@ lib.optionalAttrs (!minimal) {
       hexyl
       killall
       ncdu
-      neofetch
+      fastfetch
       nvd
       rage
       rclone

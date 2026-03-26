@@ -92,7 +92,7 @@ in
     serviceConfig.Type = "oneshot";
   };
 
-  systemd.services.ollama = {
+  systemd.services.llama-cpp = {
     wantedBy = lib.mkForce [ "nvidia-ready.target" ];
 
     requires = [ "nvidia-ready.target" ];
@@ -125,11 +125,11 @@ in
       config.services.open-webui.port
     ];
 
-  networking.firewall.allowedTCPPorts = [ config.services.ollama.port ];
+  networking.firewall.allowedTCPPorts = [ config.services.llama-cpp.port ];
 
   environment.persistence."/state".directories = [
     {
-      directory = "/var/lib/private/ollama";
+      directory = "/var/lib/private/llama-cpp";
       mode = "0700";
     }
     {
@@ -138,11 +138,32 @@ in
     }
   ];
 
-  services.ollama = {
+  services.llama-cpp = {
     enable = true;
-    host = "0.0.0.0";
+    package = pkgs.llama-cpp.override { cudaSupport = true; };
     port = 11434;
-    package = pkgs.ollama-cuda;
+    host = "127.0.0.1";
+    openFirewall = false;
+    model = "/persist/unsloth/Qwen3.5-35B-A3B-GGUF/Qwen3.5-35B-A3B-UD-Q8_K_XL.gguf";
+    extraFlags = [
+      # "-ngl" "999"
+      # "-np" "1"
+      "--ctx-size"
+      "131072"
+      "--temp"
+      "0.6"
+      "--top-p"
+      "0.95"
+      "--top-k"
+      "20"
+      "--min-p"
+      "0.0"
+      "--mmproj"
+      "/persist/unsloth/Qwen3.5-35B-A3B-GGUF/mmproj-F16.gguf"
+      "--chat-template-kwargs"
+      "{\"enable_thinking\":true}"
+      "--jinja"
+    ];
   };
 
   services.open-webui = {
@@ -168,11 +189,11 @@ in
   };
 
   globals.services.open-webui.domain = openWebuiDomain;
-  globals.monitoring.http.ollama = {
-    url = config.services.open-webui.environment.OLLAMA_BASE_URL;
-    expectedBodyRegex = "Ollama is running";
-    network = "local-${config.node.name}";
-  };
+  # globals.monitoring.http.ollama = {
+  #   url = config.services.open-webui.environment.OLLAMA_BASE_URL;
+  #   expectedBodyRegex = "Ollama is running";
+  #   network = "local-${config.node.name}";
+  # };
 
   nodes.sentinel = {
     services.nginx = {

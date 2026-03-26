@@ -59,7 +59,7 @@ I've included the major components in the lists below.
 🏠 Home Automation | Home Assistant | [Link](./hosts/zackbiene/home-assistant.nix) | Automation with Home Assistant and many related services
 📧 Mailserver | Stalwart | [Link](./hosts/envoy/stalwart-mail.nix) | Modern mail server setup with custom self-service alias management including Bitwarden integration
 🧱 Minecraft | PaperMC | [Link](./hosts/sire/guests/minecraft.nix) | Minecraft game server. Autostart on connect, systemd service with background console, automatic backups
-🐒 Local LLM | Ollama & open-webui | [Link](./hosts/sire/guests/ai.nix) | Local LLM and AI Chat
+🐒 Local LLM | llama-cpp & open-webui | [Link](./hosts/sire/guests/ai.nix) | Local LLM and AI Chat
 📊 Dashboard | Grafana | [Link](./hosts/sire/guests/grafana.nix) | Logs and metrics dashboard and alerting
 📔 Logs DB | Loki | [Link](./hosts/sire/guests/loki.nix) | Central log aggregation service
 📔 Logs Agent | Promtail | [Link](./modules/promtail.nix) | Log shipping agent
@@ -69,8 +69,6 @@ I've included the major components in the lists below.
 <!--
 - home assistant & subcomponents
 - scrutiny
-- ollama
-- open-webui
 -->
 
 #### General & Miscellaneous

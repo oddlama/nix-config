@@ -7,6 +7,10 @@
     inputs.noctalia.homeModules.default
   ];
 
+  home.persistence."/state".directories = [
+    ".cache/noctalia"
+  ];
+
   programs.niri.settings = {
     layer-rules = [
       {

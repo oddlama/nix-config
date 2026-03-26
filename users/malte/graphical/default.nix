@@ -47,6 +47,9 @@
       pkgs.gpu-screen-recorder-gtk
       pkgs.spotify
       pkgs.claude-code
+
+      pkgs.nrfconnect
+      pkgs.nrfutil
     ];
 
     # TODO wrap thunderbird bin and set LC_ALL=de_DE.UTF-8 because thunderbird uses wrong date and time formatting with C.UTF-8
@@ -81,6 +84,9 @@
       ".config/gpu-screen-recorder"
       ".config/obsidian"
       ".config/spotify"
+      ".config/nrfconnect"
+      ".nrfconnect-apps" # yeah thanks for XDG, or not
+      ".nrfutil" # GRRRRRRRRRR
       ".factorio" # XDG spec? nah, apprently overrated.
       ".claude" # was probably vibecoded, and thus XDG spec has been ignored
     ];

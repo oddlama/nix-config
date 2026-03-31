@@ -83,6 +83,7 @@
     };
 
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-2511.url = "github:NixOS/nixpkgs/nixos-25.11";
 
     nixvim = {
       url = "github:nix-community/nixvim";

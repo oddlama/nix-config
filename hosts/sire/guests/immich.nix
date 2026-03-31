@@ -53,8 +53,6 @@ in
   services.immich = {
     enable = true;
     host = "0.0.0.0";
-    # We use VectorChord from the beginning
-    database.enableVectors = false;
     environment = {
       IMMICH_LOG_LEVEL = "verbose";
       IMMICH_TRUSTED_PROXIES = lib.concatStringsSep "," [

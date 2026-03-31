@@ -16,6 +16,7 @@
     ../../config/hardware/physical.nix
     ../../config/optional/zfs.nix
 
+    ./ai.nix
     ./fs.nix
     ./net.nix
   ];

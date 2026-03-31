@@ -38,6 +38,7 @@ in
           sire-paperless.id = 147;
           sire-part-db.id = 40;
           sire-samba.id = 38;
+          sire.id = 14;
           ward.id = 94;
           ward-adguardhome.id = 148;
           ward-mealie.id = 128;

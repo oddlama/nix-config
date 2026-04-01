@@ -24,5 +24,19 @@ inputs: [
     #     foo = pythonFinal.callPackage ./foo.nix { };
     #   })
     # ];
+    pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+      (_pythonFinal: pythonPrev: {
+        reactivex = pythonPrev.reactivex.overridePythonAttrs (old: rec {
+          version = "5.0.0a2";
+          disabled = false;
+          src = old.src.override {
+            rev = null;
+            tag = "v${version}";
+            hash = "sha256-91pPWYXPuGR0++AzpglMFWMPKtY5jFa7YGwU8GPVJ1U=";
+          };
+          build-system = [ pythonPrev.hatchling ];
+        });
+      })
+    ];
   })
 ]

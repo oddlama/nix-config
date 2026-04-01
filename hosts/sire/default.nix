@@ -41,6 +41,9 @@
     proxy = "sentinel";
   };
 
+  hardware.nvidia-container-toolkit.enable = true;
+  virtualisation.docker.enable = true;
+
   # Connect safely via wireguard to skip authentication
   networking.hosts.${globals.wireguard.proxy-sentinel.hosts.sentinel.ipv4} = [
     globals.services.influxdb.domain

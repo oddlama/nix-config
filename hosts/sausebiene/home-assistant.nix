@@ -62,6 +62,7 @@ in
 
     customComponents = with pkgs.home-assistant-custom-components; [
       (pkgs.home-assistant.python.pkgs.callPackage ./hass-components/ha-bambulab.nix { })
+      (pkgs.home-assistant.python.pkgs.callPackage ./hass-components/hass-local-openai-llm.nix { })
       dwd
       waste_collection_schedule
     ];

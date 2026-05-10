@@ -6,8 +6,8 @@
   home.packages = with pkgs; [
     bottles
     winetricks
-    wineWowPackages.fonts
-    wineWowPackages.stagingFull
+    wineWow64Packages.fonts
+    wineWow64Packages.stagingFull
   ];
 
   home.persistence."/state".directories = [

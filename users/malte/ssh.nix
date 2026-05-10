@@ -7,6 +7,7 @@
     enableDefaultConfig = false;
     matchBlocks = lib.recursiveUpdate {
       "*" = {
+        user = "root";
         forwardAgent = false;
         addKeysToAgent = "no";
         compression = false;

@@ -42,7 +42,12 @@
   };
 
   hardware.nvidia-container-toolkit.enable = true;
-  virtualisation.docker.enable = true;
+  virtualisation.containers.enable = true;
+  virtualisation.podman = {
+    enable = true;
+    dockerCompat = true;
+    defaultNetwork.settings.dns_enabled = true;
+  };
 
   # Connect safely via wireguard to skip authentication
   networking.hosts.${globals.wireguard.proxy-sentinel.hosts.sentinel.ipv4} = [

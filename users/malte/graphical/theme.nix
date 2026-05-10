@@ -49,6 +49,7 @@
       gtk2.extraConfig = "gtk-application-prefer-dark-theme = true";
       gtk3.extraConfig = gtk34extraConfig;
       gtk4.extraConfig = gtk34extraConfig;
+      gtk4.theme = config.gtk.theme;
     };
 
   xdg.configFile =

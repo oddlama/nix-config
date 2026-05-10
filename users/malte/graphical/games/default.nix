@@ -1,7 +1,7 @@
 {
   imports = [
     ./minecraft.nix
-    ./bottles.nix
+    # ./bottles.nix
     ./poe.nix
   ];
 

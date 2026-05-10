@@ -89,6 +89,7 @@
       ".nrfutil" # GRRRRRRRRRR
       ".factorio" # XDG spec? nah, apprently overrated.
       ".claude" # was probably vibecoded, and thus XDG spec has been ignored
+      ".pi" # I can't anymore
     ];
 
     persistence."/persist".files = [

@@ -68,15 +68,8 @@
               "lsp"
               "path"
               "snippets"
-              "emoji"
               "buffer"
             ];
-            providers = {
-              emoji = {
-                name = "emoji";
-                module = "blink.compat.source";
-              };
-            };
           };
 
           signature.enabled = true;
@@ -90,7 +83,6 @@
         };
       };
 
-      cmp-emoji.enable = true;
       lsp.capabilities = # lua
         ''
           capabilities = require('blink.cmp').get_lsp_capabilities(capabilities)

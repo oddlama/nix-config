@@ -27,6 +27,7 @@
       pkgs.gh-dash
       pkgs.git-lfs
       pkgs.jq
+      pkgs.bubblewrap
     ];
   };
 }

@@ -50,10 +50,7 @@ in
       "mqtt"
       "music_assistant"
       "ollama"
-      "radio_browser"
       "shelly"
-      "soundtouch" # Bose SoundTouch
-      "spotify"
       "wake_word"
       "webostv" # LG WebOS TV
       "whisper"
@@ -114,6 +111,7 @@ in
         themes = "!include_dir_merge_named themes";
       };
       "automation ui" = "!include automations.yaml";
+      "script ui" = "!include scripts.yaml";
       "scene" = "!include scenes.yaml";
 
       influxdb = {

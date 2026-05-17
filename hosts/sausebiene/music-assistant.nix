@@ -17,7 +17,9 @@ in
 
   services.music-assistant = {
     enable = true;
+    openFirewall = true;
     providers = [
+      "airplay"
       "builtin"
       "chromecast"
       "dlna"

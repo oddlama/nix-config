@@ -48,6 +48,7 @@ in
       "matter"
       "met"
       "mqtt"
+      "music_assistant"
       "ollama"
       "radio_browser"
       "shelly"

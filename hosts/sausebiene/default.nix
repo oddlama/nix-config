@@ -19,8 +19,8 @@
     ./fs.nix
     ./net.nix
 
-    ./esphome.nix
     ./home-assistant.nix
+    ./music-assistant.nix
     ./influxdb.nix
     ./mosquitto.nix
     ./wyoming.nix

@@ -20,8 +20,8 @@ let
     globals.services.loki.domain
     globals.services.paperless.domain
     globals.services.part-db.domain
-    globals.services.esphome.domain
     globals.services.home-assistant.domain
+    globals.services.music-assistant.domain
     "fritzbox.${globals.domains.personal}"
   ];
 

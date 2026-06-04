@@ -59,9 +59,10 @@ in
     ];
 
     customComponents = with pkgs.home-assistant-custom-components; [
-      (pkgs.home-assistant.python.pkgs.callPackage ./hass-components/ha-bambulab.nix { })
-      (pkgs.home-assistant.python.pkgs.callPackage ./hass-components/hass-local-openai-llm.nix { })
+      (pkgs.home-assistant.python3Packages.callPackage ./hass-components/ha-bambulab.nix { })
+      (pkgs.home-assistant.python3Packages.callPackage ./hass-components/hass-local-openai-llm.nix { })
       dwd
+      moonraker
       waste_collection_schedule
     ];
 
@@ -104,8 +105,6 @@ in
         internal_url = "https://${homeassistantDomain}";
         packages.manual = "!include manual.yaml";
       };
-
-      lovelace.mode = "yaml";
 
       frontend = {
         themes = "!include_dir_merge_named themes";

@@ -85,6 +85,11 @@
       ".config/obsidian"
       ".config/spotify"
       ".config/nrfconnect"
+      ".local/share/MuseScore"
+      ".local/share/MuseSampler"
+      ".local/share/Muse Sounds"
+      ".local/share/muse-sounds-manager"
+      ".config/MuseScore"
       ".nrfconnect-apps" # yeah thanks for XDG, or not
       ".nrfutil" # GRRRRRRRRRR
       ".factorio" # XDG spec? nah, apprently overrated.

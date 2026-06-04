@@ -18,9 +18,22 @@ lib.optionalAttrs (!minimal) {
       "input"
       "video"
       "plugdev"
+      "podman"
     ];
     isNormalUser = true;
     autoSubUidGidRange = false;
+    subGidRanges = [
+      {
+        count = 65536;
+        startGid = 10000;
+      }
+    ];
+    subUidRanges = [
+      {
+        count = 65536;
+        startUid = 10000;
+      }
+    ];
     shell = pkgs.zsh;
   };
 

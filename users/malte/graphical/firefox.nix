@@ -71,7 +71,7 @@ in
         "devtools.chrome.enabled" = true;
         # Disable browser crash reporting
         "browser.tabs.crashReporting.sendReport" = false;
-        # Allow userCrome.css
+        # Allow userChrome.css
         "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
         # Why the fuck can my search window make bell sounds
         "accessibility.typeaheadfind.enablesound" = false;

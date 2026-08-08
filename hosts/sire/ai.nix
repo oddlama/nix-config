@@ -3,7 +3,6 @@
   pkgs,
   globals,
   lib,
-  utils,
   ...
 }:
 let
@@ -24,9 +23,9 @@ in
   ];
 
   globals.wireguard.proxy-home.hosts.${config.node.name}.firewallRuleForNode.ward-web-proxy.allowedTCPPorts =
-    [ config.services.llama-cpp.port ];
+    [ config.services.llama-cpp.settings.port ];
   globals.wireguard.proxy-sentinel.hosts.${config.node.name}.firewallRuleForNode.sentinel.allowedTCPPorts =
-    [ config.services.llama-cpp.port ];
+    [ config.services.llama-cpp.settings.port ];
 
   # one key per line, no comments allowed
   age.secrets.llama-cpp-api-keys = {
@@ -38,31 +37,21 @@ in
   services.llama-cpp = {
     enable = true;
     package = pkgs.llama-cpp.override { cudaSupport = true; };
-    port = 11434;
-    host = "0.0.0.0";
     openFirewall = false;
-    model = "/persist/unsloth/Qwen3.5-27B-Uncensored-HauhauCS-Aggressive/Qwen3.5-27B-Uncensored-HauhauCS-Aggressive-Q8_0.gguf";
-    extraFlags = [
-      "-ngl"
-      "999"
-      "-np"
-      "1"
-      "--ctx-size"
-      # "262144"
-      "131072"
-      "--temp"
-      "0.6"
-      "--top-p"
-      "0.95"
-      "--top-k"
-      "20"
-      "--min-p"
-      "0.0"
-      "--mmproj"
-      "/persist/unsloth/Qwen3.5-27B-Uncensored-HauhauCS-Aggressive/mmproj-Qwen3.5-27B-Uncensored-HauhauCS-Aggressive-f16.gguf"
-      "--reasoning"
-      "off"
-    ];
+    settings = {
+      port = 11434;
+      host = "0.0.0.0";
+      model = "/persist/unsloth/Qwen3.5-27B-Uncensored-HauhauCS-Aggressive/Qwen3.5-27B-Uncensored-HauhauCS-Aggressive-Q8_0.gguf";
+      gpu-layers = 999;
+      parallel = 1;
+      ctx-size = 131072; # "262144"
+      temp = "0.6";
+      top-p = "0.95";
+      top-k = 20;
+      min-p = "0.0";
+      mmproj = "/persist/unsloth/Qwen3.5-27B-Uncensored-HauhauCS-Aggressive/mmproj-Qwen3.5-27B-Uncensored-HauhauCS-Aggressive-f16.gguf";
+      reasoning = "off";
+    };
   };
 
   systemd.services.llama-cpp = {
@@ -75,23 +64,17 @@ in
     serviceConfig.ExecStart =
       let
         cfg = config.services.llama-cpp;
-        args = [
-          "--host"
-          cfg.host
-          "--port"
-          (toString cfg.port)
-        ]
-        ++ lib.optionals (cfg.model != null) [
-          "-m"
-          cfg.model
-        ]
-        ++ lib.optionals (cfg.modelsDir != null) [
-          "--models-dir"
-          cfg.modelsDir
-        ]
-        ++ cfg.extraFlags;
       in
-      lib.mkForce "${cfg.package}/bin/llama-server --api-key-file %d/api-keys.txt ${utils.escapeSystemdExecArgs args}";
+      lib.mkForce (toString [
+        (lib.getExe' cfg.package "llama-server")
+        "--api-key-file %d/api-keys.txt"
+        (lib.cli.toCommandLine (optionName: {
+          option = if builtins.stringLength optionName > 1 then "--${optionName}" else "-${optionName}";
+          sep = " ";
+          explicitBool = false;
+          formatArg = lib.generators.mkValueStringDefault { };
+        }) cfg.settings)
+      ]);
   };
 
   systemd.targets.nvidia-ready = {
@@ -175,7 +158,7 @@ in
     upstreams.llama-cpp = {
       servers."${
         globals.wireguard.proxy-home.hosts.${config.node.name}.ipv4
-      }:${toString config.services.llama-cpp.port}" =
+      }:${toString config.services.llama-cpp.settings.port}" =
         { };
       extraConfig = ''
         zone llama-cpp 64k;
@@ -205,7 +188,7 @@ in
     upstreams.llama-cpp = {
       servers."${
         globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv4
-      }:${toString config.services.llama-cpp.port}" =
+      }:${toString config.services.llama-cpp.settings.port}" =
         { };
       extraConfig = ''
         zone llama-cpp 64k;

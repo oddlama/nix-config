@@ -1,4 +1,4 @@
-From 54d56b4a87e1a15199c5180e8203ba88498b904b Mon Sep 17 00:00:00 2001
+From 692d662ecae05431ada9f8c4d5200bb61e721482 Mon Sep 17 00:00:00 2001
 From: oddlama <oddlama@oddlama.org>
 Date: Sat, 11 Oct 2025 14:27:45 +0200
 Subject: [PATCH] chore: disable telemetry by default
@@ -8,18 +8,15 @@ Subject: [PATCH] chore: disable telemetry by default
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/packages/common/infra/src/atom/settings.ts b/packages/common/infra/src/atom/settings.ts
-index 2e6d727..2c5a267 100644
+index 404cf44..abbf851 100644
 --- a/packages/common/infra/src/atom/settings.ts
 +++ b/packages/common/infra/src/atom/settings.ts
-@@ -33,7 +33,7 @@ const appSettingBaseAtom = atomWithStorage<AppSetting>(
+@@ -34,7 +34,7 @@ const appSettingBaseAtom = atomWithStorage<AppSetting>(
      enableNoisyBackground: true,
      autoCheckUpdate: true,
      autoDownloadUpdate: true,
 -    enableTelemetry: true,
 +    enableTelemetry: false,
      showLinkedDocInSidebar: true,
+     disableImageAntialiasing: false,
    },
-   undefined,
--- 
-2.51.0
-

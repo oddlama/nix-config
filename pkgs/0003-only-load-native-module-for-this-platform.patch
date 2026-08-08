@@ -1,0 +1,32 @@
+From d25216766cb430bf53bd7235986357288bb4eb3a Mon Sep 17 00:00:00 2001
+From: oddlama <oddlama@oddlama.org>
+Date: Sat, 8 Aug 2026 17:16:40 +0200
+Subject: [PATCH] build: only load the native module built for this platform
+
+The bundler statically resolves every require() in this file, so the
+fallback chain makes it emit a copy of the native module for every
+architecture it mentions, even though only the local one is ever loaded.
+---
+ packages/backend/native/index.js | 12 +-----------
+ 1 file changed, 1 insertion(+), 11 deletions(-)
+
+diff --git a/packages/backend/native/index.js b/packages/backend/native/index.js
+index 5392699..476c2f0 100644
+--- a/packages/backend/native/index.js
++++ b/packages/backend/native/index.js
+@@ -1,14 +1,4 @@
+ /** @type {import('.')} */
+-let binding;
+-try {
+-  binding = require('./server-native.node');
+-} catch {
+-  binding =
+-    process.arch === 'arm64'
+-      ? require('./server-native.arm64.node')
+-      : process.arch === 'arm'
+-        ? require('./server-native.armv7.node')
+-        : require('./server-native.x64.node');
+-}
++const binding = require('./server-native.node');
+ 
+ module.exports = binding;

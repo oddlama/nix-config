@@ -10,10 +10,6 @@
   cargo,
   rustc,
   openssl,
-  findutils,
-  zip,
-  rsync,
-  jq,
   makeWrapper,
   nix-update-script,
   testers,
@@ -24,28 +20,29 @@ let
 in
 stdenv.mkDerivation (finalAttrs: {
   pname = "affine-server";
-  version = "0.26.3";
+  version = "0.27.3";
   src = fetchFromGitHub {
     owner = "toeverything";
     repo = "AFFiNE";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-r7sjiaHgqWPOFXHTFJ/orOog7VtBmKt4x2YCsI+L9+g=";
+    hash = "sha256-GQ56cuJyAtgRz/hHXW7P7stnSNPMbSVS9KHuNLoHpDk=";
   };
 
   patches = [
     ./0001-dont-try-to-write-schema.gql-into-nix-store.patch
     ./0002-chore-disable-telemetry-by-default.patch
+    ./0003-only-load-native-module-for-this-platform.patch
   ];
 
   cargoDeps = rustPlatform.fetchCargoVendor {
     inherit (finalAttrs) pname version src;
-    hash = "sha256-vZkKFUaNe9iIAkdUfXnnuD2lM6kuzwqj1Dyt5GAgXsM=";
+    hash = "sha256-jtoF+KUo+C9WctKWJHGrvFPYNEWOkehagRYLORBz04A=";
   };
 
   missingHashes = ./affine-server-hashes.json;
   offlineCache = yarn-berry.fetchYarnBerryDeps {
     inherit (finalAttrs) src missingHashes;
-    hash = "sha256-z5kBWw6xp1y6H845pVp3DFcmSEklYdVcP2yPULxpIfw=";
+    hash = "sha256-5WFnvgL9yVAX8IMQEPoCpkRgn9hTz/MMDvQil9jWlv4=";
   };
 
   nativeBuildInputs = [
@@ -54,11 +51,9 @@ stdenv.mkDerivation (finalAttrs: {
     yarn-berry.yarnBerryConfigHook
     cargo
     rustc
-    findutils
+    rustPlatform.cargoSetupHook
+    # prisma generate probes `openssl version` to pick a query engine
     openssl
-    zip
-    jq
-    rsync
     writableTmpDirAsHomeHook
     makeWrapper
   ];
@@ -72,27 +67,11 @@ stdenv.mkDerivation (finalAttrs: {
     CI = "1";
   };
 
-  configurePhase = ''
-    runHook preConfigure
-
-    # cargo config
-    mkdir -p .cargo
-    cat $cargoDeps/.cargo/config.toml >> .cargo/config.toml
-    ln -s $cargoDeps @vendor@
-
-    runHook postConfigure
-  '';
-
   buildPhase = ''
     runHook preBuild
 
-    yarn install
-    CARGO_NET_OFFLINE=true yarn affine @affine/server-native build
-
-    # yikes, pls no
-    cp packages/backend/native/server-native.node packages/backend/native/server-native.x64.node
-    cp packages/backend/native/server-native.node packages/backend/native/server-native.arm64.node
-    cp packages/backend/native/server-native.node packages/backend/native/server-native.armv7.node
+    # The dependencies were already installed by yarnBerryConfigHook.
+    yarn affine @affine/server-native build
 
     yarn affine @affine/reader build
     yarn affine @affine/server build
@@ -100,18 +79,28 @@ stdenv.mkDerivation (finalAttrs: {
     yarn affine @affine/admin build
     yarn affine @affine/mobile build
 
+    # The server bundle only imports the production dependencies of @affine/server;
+    # everything else in node_modules is build tooling and frontend dependencies that
+    # were needed above but must not end up in the output. Note that the prisma CLI
+    # used by the wrapper is a production dependency, so it survives this.
+    yarn workspaces focus --production @affine/server
+
+    # Upstream's container image drops these too. The server's own sourcemap is kept
+    # for readable stacktraces, only the ones of its dependencies are removed.
+    find node_modules -name '*.map' -type f -delete
+
     runHook postBuild
   '';
 
   installPhase = ''
     runHook preInstall
 
-    mkdir $out/{,bin}
+    mkdir -p $out/bin
 
     cp -r node_modules $out/node_modules
     cp -r packages/backend/server/dist $out/dist
-    cp -r packages/backend/server/schema.prisma $out
     cp -r packages/backend/server/migrations $out
+    cp packages/backend/server/schema.prisma $out
 
     cp -r packages/frontend/apps/web/dist $out/static
     cp -r packages/frontend/admin/dist $out/static/admin
@@ -128,7 +117,7 @@ stdenv.mkDerivation (finalAttrs: {
         ]
       } \
       --run "$out/node_modules/.bin/prisma migrate deploy" \
-      --run "$out/node_modules/.bin/cross-env SERVER_FLAVOR=script ${lib.getExe nodejs} $out/dist/main.js run" \
+      --run "SERVER_FLAVOR=script ${lib.getExe nodejs} $out/dist/main.js run" \
       --add-flags "$out/dist/main.js"
 
     # remove dangling symlinks
@@ -190,7 +179,14 @@ stdenv.mkDerivation (finalAttrs: {
       and digital assets
     '';
     homepage = "https://affine.pro/";
-    license = lib.licenses.unfree;
+    # Everything under packages/backend is covered by the AFFiNE Enterprise Edition
+    # license, which only permits production use with a valid subscription. The rest
+    # of the repository is MIT.
+    license = {
+      fullName = "AFFiNE Enterprise Edition License";
+      url = "https://github.com/toeverything/AFFiNE/blob/v${finalAttrs.version}/packages/backend/server/LICENSE";
+      free = false;
+    };
     maintainers = with lib.maintainers; [ oddlama ];
     platforms = [
       "aarch64-linux"

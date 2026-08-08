@@ -9,21 +9,24 @@
   stdenv,
 }:
 
-# Updating this package will force an update for prisma. The
-# version of prisma-engines and prisma must be the same for them to
-# function correctly.
+# Pinned to the engines that AFFiNE's yarn.lock resolves to: it depends on
+# @prisma/engines-version 6.8.0-43.2060c79ba17c6bb9f5823312b6f6b7f4a845738e,
+# and the 6.8.2 tag of this repository is exactly that commit (6.8.0, 6.8.1
+# and 6.8.2 all point at it). Keep this in sync with the `prisma` and
+# `@prisma/client` versions in AFFiNE's lockfile when updating affine-server;
+# prisma and prisma-engines must match for them to function correctly.
 rustPlatform.buildRustPackage rec {
   pname = "prisma-engines";
-  version = "6.7.0";
+  version = "6.8.2";
 
   src = fetchFromGitHub {
     owner = "prisma";
     repo = "prisma-engines";
     rev = version;
-    hash = "sha256-Ty8BqWjZluU6a5xhSAVb2VoTVY91UUj6zoVXMKeLO4o=";
+    hash = "sha256-YvP3yJQoe+q7jjpwntaYkYjxyoDzqnXcpIZa4Y+I/+E=";
   };
 
-  cargoHash = "sha256-HjDoWa/JE6izUd+hmWVI1Yy3cTBlMcvD9ANsvqAoHBI=";
+  cargoHash = "sha256-lRM5Ha0+f+srxYaosbCe/hhpzIPVc7f+ux4FFvISHmM=";
 
   # Use system openssl.
   OPENSSL_NO_VENDOR = 1;

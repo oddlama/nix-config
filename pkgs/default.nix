@@ -16,6 +16,18 @@ inputs: [
       prisma-engines_6_8 = pkgs2511.callPackage ./prisma-engines.nix { };
       deploy = prev.callPackage ./deploy.nix { };
       git-fuzzy = prev.callPackage ./git-fuzzy { };
+      # Nixpkgs dropped libdisplay-info_0_2 on 2026-08-04, but niri-flake still builds
+      # niri against the 0.2 ABI and asserts on the exact version. Rebuild it from the
+      # generic builder nixpkgs still ships, until niri-flake moves to a newer release.
+      libdisplay-info_0_2 =
+        prev.lib.warn
+          "using local libdisplay-info_0_2 shim; drop it once niri-flake builds against libdisplay-info 0.3/0.4"
+          (
+            prev.callPackage (import "${inputs.nixpkgs}/pkgs/by-name/li/libdisplay-info/generic.nix" {
+              version = "0.2.0";
+              hash = "sha256-6xmWBrPHghjok43eIDGeshpUEQTuwWLXNHg7CnBUt3Q=";
+            }) { }
+          );
       segoe-ui-ttf = prev.callPackage ./segoe-ui-ttf.nix { };
       zsh-histdb-skim = prev.callPackage ./zsh-skim-histdb.nix { };
       nix = prev.nixVersions.nix_2_31;

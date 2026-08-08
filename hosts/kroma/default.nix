@@ -2,7 +2,6 @@
   inputs,
   lib,
   minimal,
-  pkgs,
   ...
 }:
 {
@@ -93,7 +92,9 @@
 
   services.mullvad-vpn = {
     enable = true;
-    package = pkgs.mullvad-vpn;
+    # pkgs.mullvad-vpn is now GUI-only; the daemon lives in pkgs.mullvad, which
+    # the unset `package` option already defaults to.
+    gui.enable = true;
   };
   environment.persistence."/persist".directories = [
     "/etc/mullvad-vpn"

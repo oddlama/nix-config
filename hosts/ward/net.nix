@@ -169,7 +169,6 @@
       zones = {
         untrusted.interfaces = [ "wan" ];
         proxy-home.interfaces = [ "proxy-home" ];
-        firezone.interfaces = [ "tun-firezone" ];
         adguardhome.ipv4Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv4 ];
         adguardhome.ipv6Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-adguardhome.ipv6 ];
         web-proxy.ipv4Addresses = [ globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv4 ];
@@ -198,15 +197,6 @@
             "vlan-guests"
           ];
           to = [ "untrusted" ];
-          # masquerade = true; NOTE: custom rule below for ip4 + ip6
-          late = true; # Only accept after any rejects have been processed
-          verdict = "accept";
-        };
-
-        # masquerade firezone traffic
-        masquerade-firezone = {
-          from = [ "firezone" ];
-          to = [ "vlan-services" ];
           # masquerade = true; NOTE: custom rule below for ip4 + ip6
           late = true; # Only accept after any rejects have been processed
           verdict = "accept";
@@ -270,43 +260,10 @@
           to = [ "proxy-home" ];
           verdict = "accept";
         };
-
-        # forward firezone traffic
-        forward-incoming-firezone-traffic = {
-          from = [ "firezone" ];
-          to = [ "vlan-services" ];
-          verdict = "accept";
-        };
-
-        # FIXME: is this needed? conntrack should take care of it and we want to masquerade anyway
-        forward-outgoing-firezone-traffic = {
-          from = [ "vlan-services" ];
-          to = [ "firezone" ];
-          verdict = "accept";
-        };
       };
     };
 
     chains.postrouting = {
-      masquerade-firezone = {
-        after = [ "hook" ];
-        late = true;
-        rules =
-          lib.forEach
-            [
-              "firezone"
-            ]
-            (
-              zone:
-              lib.concatStringsSep " " [
-                "meta protocol { ip, ip6 }"
-                (lib.head config.networking.nftables.firewall.zones.${zone}.ingressExpression)
-                (lib.head config.networking.nftables.firewall.zones.vlan-services.egressExpression)
-                "masquerade random"
-              ]
-            );
-      };
-
       masquerade-internet = {
         after = [ "hook" ];
         late = true;

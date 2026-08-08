@@ -9,7 +9,6 @@
 let
   # FIXME: dont hardcode, filter global service domains by internal state
   # FIXME: new entry here? make new adguardhome entry too.
-  # FIXME: new entry here? make new firezone entry too.
   homeDomains = [
     globals.services.affine.domain
     globals.services.linkwarden.domain
@@ -75,20 +74,8 @@ in
     };
   };
 
-  # NOTE: state: this token is from a manually created service account
-  age.secrets.firezone-gateway-token = {
-    rekeyFile = config.node.secretsDir + "/firezone-gateway-token.age";
-  };
-
   networking.hosts.${globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv6} = homeDomains;
   networking.hosts.${globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv4} = homeDomains;
-  systemd.services.firezone-gateway.environment.HEALTH_CHECK_ADDR = "127.0.0.1:17999";
-  services.firezone.gateway = {
-    enable = true;
-    name = "ward";
-    apiUrl = "wss://${globals.services.firezone.domain}/api/";
-    tokenFile = config.age.secrets.firezone-gateway-token.path;
-  };
 
   guests =
     let

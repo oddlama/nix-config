@@ -13,7 +13,6 @@
     ./blog.nix
     ./fs.nix
     ./net.nix
-    ./firezone.nix
     ./oauth2.nix
     ./plausible.nix
     ./postgresql.nix

@@ -54,7 +54,6 @@ I've included the major components in the lists below.
 📔 Notes | AFFiNE | [Link](./hosts/sire/guests/affine.nix) | Next-gen knowledge base similar to Notion or Obsidian
 🗓️ CalDAV/CardDAV | Radicale | [Link](./hosts/ward/guests/radicale.nix) | Contacts, Calender and Tasks synchronization
 📁 NAS | Samba | [Link](./hosts/sire/guests/samba.nix) | Network attached storage. Cross-integration with paperless
-🌐 VPN | Firezone | [Link](./hosts/ward/guests/firezone.nix) | Internal network gateway and wireguard VPN server with dynamic peer configuration and SSO authentication
 🥗 Recipes | Mealie | [Link](./hosts/ward/guests/mealie.nix) | Recipe manager and meal planner
 🏠 Home Automation | Home Assistant | [Link](./hosts/zackbiene/home-assistant.nix) | Automation with Home Assistant and many related services
 📧 Mailserver | Stalwart | [Link](./hosts/envoy/stalwart-mail.nix) | Modern mail server setup with custom self-service alias management including Bitwarden integration

@@ -86,9 +86,6 @@ in
           client_max_body_size 512M;
           allow ${globals.net.home-lan.vlans.home.cidrv4};
           allow ${globals.net.home-lan.vlans.home.cidrv6};
-          # Firezone traffic
-          allow ${globals.net.home-lan.vlans.services.hosts.ward.ipv4};
-          allow ${globals.net.home-lan.vlans.services.hosts.ward.ipv6};
           deny all;
         '';
         locations."/" = {
@@ -171,7 +168,6 @@ in
 
       PAPERLESS_CONSUMER_ENABLE_BARCODES = true;
       PAPERLESS_CONSUMER_ENABLE_ASN_BARCODE = true;
-      PAPERLESS_CONSUMER_BARCODE_SCANNER = "ZXING";
       PAPERLESS_CONSUMER_RECURSIVE = true;
       PAPERLESS_FILENAME_FORMAT = "{{ owner_username }}/{{ created_year }}-{{ created_month }}-{{ created_day }}_{{ asn }}_{{ title }}";
 
@@ -202,6 +198,16 @@ in
         --arg oidcSecret "$oidcSecret" '.openid_connect.APPS.[0].secret = $oidcSecret'
     )
   '';
+  systemd.services.paperless-web.serviceConfig.ExecStart = lib.mkForce (
+    pkgs.writeShellScript "paperless-web" ''
+      paperlessClientSecret=$(< ${config.age.secrets.paperless-oauth2-client-secret.path})
+      export PAPERLESS_SOCIALACCOUNT_PROVIDERS="$( <<< $PAPERLESS_SOCIALACCOUNT_PROVIDERS \
+        ${pkgs.jq}/bin/jq -c \
+        --arg paperlessClientSecret "$paperlessClientSecret" '.openid_connect.APPS.[0].secret = $paperlessClientSecret'
+      )"
+      exec ${lib.getExe config.services.paperless.package.python.pkgs.granian} --interface asginl --ws paperless.asgi:application
+    ''
+  );
 
   systemd.services.paperless-backup =
     let

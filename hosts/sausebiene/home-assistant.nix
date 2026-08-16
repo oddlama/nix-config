@@ -61,6 +61,7 @@ in
     customComponents = with pkgs.home-assistant-custom-components; [
       (pkgs.home-assistant.python3Packages.callPackage ./hass-components/ha-bambulab.nix { })
       (pkgs.home-assistant.python3Packages.callPackage ./hass-components/hass-local-openai-llm.nix { })
+      (pkgs.home-assistant.python3Packages.callPackage ./hass-components/hass-local-openai-stt.nix { })
       dwd
       moonraker
       waste_collection_schedule

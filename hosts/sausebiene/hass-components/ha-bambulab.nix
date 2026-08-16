@@ -2,23 +2,23 @@
   lib,
   buildHomeAssistantComponent,
   fetchFromGitHub,
-  cloudscraper,
+  beautifulsoup4,
 }:
 
 buildHomeAssistantComponent rec {
   owner = "greghesp";
   domain = "bambu_lab";
-  version = "2.0.40";
+  version = "2.2.22";
 
   src = fetchFromGitHub {
     owner = "greghesp";
     repo = "ha-bambulab";
     rev = "v${version}";
-    sha256 = "sha256-ygbNq7B/ZBQ8/al9ADPSru+VpzmMESwxhKA0YkKKOrE=";
+    sha256 = "sha256-JRJ+tfllDuMrtz+5VQL2l5nkhJQXRoNvsvFnrReSZHE=";
   };
 
   dependencies = [
-    cloudscraper
+    beautifulsoup4
   ];
 
   meta = {

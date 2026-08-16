@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   pkgs,
   globals,
   lib,
@@ -7,10 +8,13 @@
 }:
 let
   llamacppDomain = "llm.${globals.domains.me}";
+  omnivoiceDomain = "tts.${globals.domains.me}";
 in
 {
   imports = [
     ../../config/hardware/nvidia.nix
+    # Provides services.omnivoice and pkgs.omnivoice{,-cuda}
+    inputs.omnivoice-rs.nixosModules.default
   ];
 
   hardware.nvidia.nvidiaPersistenced = true;
@@ -22,14 +26,38 @@ in
     }
   ];
 
-  globals.wireguard.proxy-home.hosts.${config.node.name}.firewallRuleForNode.ward-web-proxy.allowedTCPPorts =
-    [ config.services.llama-cpp.settings.port ];
+  # Model weights are downloaded from huggingface on first start.
+  environment.persistence."/persist".directories = [
+    {
+      directory = config.services.omnivoice.dataDir;
+      inherit (config.services.omnivoice) user group;
+      mode = "0750";
+    }
+  ];
+
+  globals.wireguard.proxy-home.hosts.${config.node.name}.firewallRuleForNode = {
+    ward-web-proxy.allowedTCPPorts = [
+      config.services.llama-cpp.settings.port
+      config.services.omnivoice.port
+    ];
+    # Home Assistant talks to the wyoming endpoint directly, it isn't proxied.
+    sausebiene.allowedTCPPorts = [ config.services.omnivoice.wyoming.port ];
+  };
   globals.wireguard.proxy-sentinel.hosts.${config.node.name}.firewallRuleForNode.sentinel.allowedTCPPorts =
-    [ config.services.llama-cpp.settings.port ];
+    [
+      config.services.llama-cpp.settings.port
+      config.services.omnivoice.port
+    ];
 
   # one key per line, no comments allowed
   age.secrets.llama-cpp-api-keys = {
     rekeyFile = ./secrets/llama-cpp-api-keys.age;
+    mode = "400";
+  };
+
+  age.secrets.omnivoice-api-key = {
+    rekeyFile = ./secrets/omnivoice-api-key.age;
+    generator.script = "alnum";
     mode = "400";
   };
 
@@ -41,15 +69,14 @@ in
     settings = {
       port = 11434;
       host = "0.0.0.0";
-      model = "/persist/unsloth/Qwen3.5-27B-Uncensored-HauhauCS-Aggressive/Qwen3.5-27B-Uncensored-HauhauCS-Aggressive-Q8_0.gguf";
+      model = "/persist/unsloth/Qwen3.8-27B-GGUF/Qwen3.8-27B-UD-Q8_K_XL.gguf";
       gpu-layers = 999;
-      parallel = 1;
-      ctx-size = 131072; # "262144"
-      temp = "0.6";
+      ctx-size = 222144;
+      temp = "1.0";
       top-p = "0.95";
       top-k = 20;
       min-p = "0.0";
-      mmproj = "/persist/unsloth/Qwen3.5-27B-Uncensored-HauhauCS-Aggressive/mmproj-Qwen3.5-27B-Uncensored-HauhauCS-Aggressive-f16.gguf";
+      mmproj = "/persist/unsloth/Qwen3.8-27B-GGUF/mmproj-BF16.gguf";
       reasoning = "off";
     };
   };
@@ -59,6 +86,12 @@ in
 
     requires = [ "nvidia-ready.target" ];
     after = [ "nvidia-ready.target" ];
+
+    # Both 3090s, the 2080 Ti (index 1) is reserved for omnivoice.
+    environment = {
+      CUDA_DEVICE_ORDER = "PCI_BUS_ID";
+      CUDA_VISIBLE_DEVICES = "0,2";
+    };
 
     serviceConfig.LoadCredential = [ "api-keys.txt:${config.age.secrets.llama-cpp-api-keys.path}" ];
     serviceConfig.ExecStart =
@@ -75,6 +108,33 @@ in
           formatArg = lib.generators.mkValueStringDefault { };
         }) cfg.settings)
       ]);
+  };
+
+  services.omnivoice = {
+    enable = true;
+    # cudaCapability 7.5 == the RTX 2080 Ti. The kernels are compiled to PTX for
+    # exactly this capability and PTX is only forward compatible, so this build
+    # would also run on the 3090s, but not the other way around.
+    package = pkgs.omnivoice-cuda.override { cudaCapability = "75"; };
+    host = "0.0.0.0";
+    port = 11435;
+    openFirewall = false;
+    device = "cuda";
+    # Leave both 3090s (index 0 and 2 in PCI bus order) to llama-cpp.
+    cuda.visibleDevices = [ "1" ];
+    apiKeyFile = config.age.secrets.omnivoice-api-key.path;
+    wyoming = {
+      enable = true;
+      # No authentication, only reachable via wireguard.
+      openFirewall = false;
+    };
+  };
+
+  systemd.services.omnivoice-server = {
+    wantedBy = lib.mkForce [ "nvidia-ready.target" ];
+
+    requires = [ "nvidia-ready.target" ];
+    after = [ "nvidia-ready.target" ];
   };
 
   systemd.targets.nvidia-ready = {
@@ -153,6 +213,7 @@ in
   };
 
   globals.services.llama-cpp.domain = llamacppDomain;
+  globals.services.omnivoice.domain = omnivoiceDomain;
 
   nodes.ward-web-proxy.services.nginx = {
     upstreams.llama-cpp = {
@@ -178,6 +239,37 @@ in
       '';
       locations."/" = {
         proxyPass = "http://llama-cpp";
+        proxyWebsockets = true;
+        X-Frame-Options = "SAMEORIGIN";
+      };
+    };
+
+    upstreams.omnivoice = {
+      servers."${
+        globals.wireguard.proxy-home.hosts.${config.node.name}.ipv4
+      }:${toString config.services.omnivoice.port}" =
+        { };
+      extraConfig = ''
+        zone omnivoice 64k;
+        keepalive 2;
+      '';
+      monitoring = {
+        enable = true;
+        path = "/health";
+        expectedBodyRegex = ''"status": ?"ok"'';
+      };
+    };
+    virtualHosts.${omnivoiceDomain} = {
+      forceSSL = true;
+      useACMEWildcardHost = true;
+      extraConfig = ''
+        client_max_body_size ${toString config.services.omnivoice.maxBodyMb}M;
+        # Synthesis of long inputs can take a while.
+        proxy_read_timeout ${toString config.services.omnivoice.requestTimeout}s;
+        proxy_send_timeout ${toString config.services.omnivoice.requestTimeout}s;
+      '';
+      locations."/" = {
+        proxyPass = "http://omnivoice";
         proxyWebsockets = true;
         X-Frame-Options = "SAMEORIGIN";
       };
@@ -208,6 +300,37 @@ in
       '';
       locations."/" = {
         proxyPass = "http://llama-cpp";
+        proxyWebsockets = true;
+        X-Frame-Options = "SAMEORIGIN";
+      };
+    };
+
+    upstreams.omnivoice = {
+      servers."${
+        globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv4
+      }:${toString config.services.omnivoice.port}" =
+        { };
+      extraConfig = ''
+        zone omnivoice 64k;
+        keepalive 2;
+      '';
+      monitoring = {
+        enable = true;
+        path = "/health";
+        expectedBodyRegex = ''"status": ?"ok"'';
+      };
+    };
+    virtualHosts.${omnivoiceDomain} = {
+      forceSSL = true;
+      useACMEWildcardHost = true;
+      extraConfig = ''
+        client_max_body_size ${toString config.services.omnivoice.maxBodyMb}M;
+        # Synthesis of long inputs can take a while.
+        proxy_read_timeout ${toString config.services.omnivoice.requestTimeout}s;
+        proxy_send_timeout ${toString config.services.omnivoice.requestTimeout}s;
+      '';
+      locations."/" = {
+        proxyPass = "http://omnivoice";
         proxyWebsockets = true;
         X-Frame-Options = "SAMEORIGIN";
       };

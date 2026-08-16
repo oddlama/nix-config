@@ -55,5 +55,6 @@
       part-db = uidGid 956;
       lpadmin = uidGid 955;
       pcscd = uidGid 954;
+      omnivoice = uidGid 953;
     };
 }

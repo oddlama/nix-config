@@ -2,6 +2,7 @@
   inputs,
   lib,
   minimal,
+  pkgs,
   ...
 }:
 {
@@ -98,5 +99,32 @@
   };
   environment.persistence."/persist".directories = [
     "/etc/mullvad-vpn"
+    "/var/lib/flatpak"
   ];
+
+  environment.systemPackages = [
+    pkgs.flatpak
+    pkgs.fuse3
+  ];
+
+  programs.fuse.enable = true;
+  security.polkit.enable = true;
+  fonts.fontDir.enable = true;
+
+  services.dbus.packages = [ pkgs.flatpak ];
+  systemd.packages = [ pkgs.flatpak ];
+  systemd.tmpfiles.packages = [ pkgs.flatpak ];
+
+  environment.profiles = [
+    "$HOME/.local/share/flatpak/exports"
+    "/var/lib/flatpak/exports"
+  ];
+
+  users.users.flatpak = {
+    description = "Flatpak system helper";
+    group = "flatpak";
+    isSystemUser = true;
+  };
+
+  users.groups.flatpak = { };
 }

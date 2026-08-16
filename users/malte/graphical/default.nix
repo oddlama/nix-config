@@ -50,6 +50,7 @@
 
       pkgs.nrfconnect
       pkgs.nrfutil
+      pkgs.flatpak
     ];
 
     # TODO wrap thunderbird bin and set LC_ALL=de_DE.UTF-8 because thunderbird uses wrong date and time formatting with C.UTF-8
@@ -95,6 +96,8 @@
       ".factorio" # XDG spec? nah, apprently overrated.
       ".claude" # was probably vibecoded, and thus XDG spec has been ignored
       ".pi" # I can't anymore
+      ".local/share/flatpak"
+      ".var/app"
     ];
 
     persistence."/persist".files = [

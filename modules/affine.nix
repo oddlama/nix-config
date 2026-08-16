@@ -12,9 +12,11 @@ let
     mkDefault
     mkEnableOption
     mkIf
+    mkMerge
     mkOption
     mkPackageOption
     optional
+    optionalAttrs
     types
     ;
 
@@ -25,6 +27,48 @@ let
   defaultGroup = "affine";
 
   settingsFormat = pkgs.formats.json { };
+
+  # Shared by services.affine.ai.text and services.affine.ai.embedding.
+  aiEndpointOptions = {
+    baseUrl = mkOption {
+      type = types.str;
+      example = "http://127.0.0.1:8080";
+      description = ''
+        Base url of the OpenAI-compatible server. A trailing `/v1` is stripped before
+        the api paths are appended, so both `http://host:8080` and `http://host:8080/v1`
+        work.
+      '';
+    };
+
+    apiKeyFile = mkOption {
+      type = types.nullOr types.path;
+      default = null;
+      example = "/run/secrets/affine-openai-key";
+      description = ''
+        File containing the api key to authenticate with, if the server requires one.
+
+        When unset a placeholder is sent instead of nothing, because AFFiNE treats a
+        provider with an empty key as not configured and silently skips it.
+      '';
+    };
+  };
+
+  # AFFiNE wants an api key even for servers that do not check one.
+  aiApiKey =
+    endpoint: if endpoint.apiKeyFile != null then { _secret = endpoint.apiKeyFile; } else "local";
+
+  aiProfile = id: endpoint: extraConfig: {
+    inherit id;
+    type = "openai";
+    # Restrict each profile to the one model it serves, so AFFiNE never probes the
+    # local server for models it does not have.
+    models = [ endpoint.model ];
+    config = {
+      apiKey = aiApiKey endpoint;
+      baseURL = endpoint.baseUrl;
+    }
+    // extraConfig;
+  };
 in
 {
   options.services.affine = {
@@ -45,6 +89,72 @@ in
 
     enableLocalDB = mkEnableOption "the automatic creation of a local postgres database for affine.";
     # enableIndexer = mkEnableOption "server-side indexing by setting up services.manticoresearch locally.";
+
+    ai = {
+      enable = mkEnableOption ''
+        AFFiNE AI (copilot) backed by OpenAI-compatible servers, for example llama.cpp
+        or vLLM. See `services.affine.ai.text` for the model naming constraints
+      '';
+
+      text = mkOption {
+        description = ''
+          The server used for chat and structured output. Required when AI is enabled.
+        '';
+        type = types.submodule {
+          options = aiEndpointOptions // {
+            model = mkOption {
+              type = types.enum [
+                "o1"
+                "o3"
+                "o4-mini"
+              ];
+              default = "o3";
+              description = ''
+                Name your local model must be served under.
+
+                AFFiNE resolves models against a registry that is compiled into its rust
+                native module, so an unknown name simply has no provider and every request
+                fails with `no_copilot_provider_available`. Only these three ids exist for
+                the chat-completions API that llama.cpp and vLLM implement, so serve your
+                model under one of them (llama-server --alias o3, or vLLM
+                --served-model-name o3). Which one you pick makes no difference beyond the
+                name, the actual model is whatever your server loaded.
+              '';
+            };
+          };
+        };
+      };
+
+      embedding = mkOption {
+        default = null;
+        description = ''
+          The server used to embed documents, enabling AI search over the workspace.
+          Set to null to leave embedding disabled.
+
+          This is a separate option because AFFiNE only knows its embedding models under
+          the openai responses api, while chat has to use the chat-completions api, and a
+          single provider entry cannot be both. Pointing both at one server is fine.
+        '';
+        type = types.nullOr (
+          types.submodule {
+            options = aiEndpointOptions // {
+              model = mkOption {
+                type = types.enum [
+                  "text-embedding-3-large"
+                  "text-embedding-3-small"
+                ];
+                default = "text-embedding-3-large";
+                description = ''
+                  Name your local embedding model must be served under. As with
+                  `services.affine.ai.text.model` only these registry ids resolve.
+                  Embedding requests always go to `/v1/embeddings`.
+                '';
+              };
+            };
+          }
+        );
+      };
+    };
 
     database = {
       host = mkOption {
@@ -72,7 +182,7 @@ in
     };
 
     settings = mkOption {
-      description = '''';
+      description = "";
       default = { };
       type = types.submodule {
         freeformType = settingsFormat.type;
@@ -156,17 +266,45 @@ in
       user = "affine";
     };
 
-    services.affine.settings = {
-      auth.passwordRequirements.min = mkDefault 8;
-      auth.passwordRequirements.max = mkDefault 1024; # Increase password-length limit from originally 32 to something more reasonable. Why limit this to something so small??
-      flags.allowGuestDemoWorkspace = mkDefault false;
+    services.affine.settings = mkMerge [
+      {
+        auth.passwordRequirements.min = mkDefault 8;
+        auth.passwordRequirements.max = mkDefault 1024; # Increase password-length limit from originally 32 to something more reasonable. Why limit this to something so small??
+        flags.allowGuestDemoWorkspace = mkDefault false;
 
-      # indexer = mkIf cfg.enableIndexer {
-      #   enabled = true;
-      #   "provider.type" = "manticoresearch";
-      #   "provider.endpoint" = "http://localhost:9308";
-      # };
-    };
+        # indexer = mkIf cfg.enableIndexer {
+        #   enabled = true;
+        #   "provider.type" = "manticoresearch";
+        #   "provider.endpoint" = "http://localhost:9308";
+        # };
+      }
+      (mkIf cfg.ai.enable {
+        copilot = {
+          enabled = true;
+          providers = {
+            profiles = [
+              # llama.cpp and vLLM implement the chat-completions api, not the newer
+              # responses api that AFFiNE would use for openai by default.
+              (aiProfile "local-text" cfg.ai.text { oldApiStyle = true; })
+            ]
+            ++ optional (cfg.ai.embedding != null) (aiProfile "local-embedding" cfg.ai.embedding { });
+
+            # These name profile ids, not models. AFFiNE refuses to start if one of
+            # them refers to a profile that does not exist.
+            #
+            # `structured` and `image` are deliberately unset: the chat-completions
+            # models only declare text and object output, so nothing would be able to
+            # serve those requests anyway.
+            defaults = {
+              text = "local-text";
+              object = "local-text";
+              fallback = "local-text";
+            }
+            // optionalAttrs (cfg.ai.embedding != null) { embedding = "local-embedding"; };
+          };
+        };
+      })
+    ];
 
     users = {
       users = mkIf (cfg.user == defaultUser) {

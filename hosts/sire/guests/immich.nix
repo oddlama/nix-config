@@ -72,7 +72,7 @@ in
         acceptedAudioCodecs = [
           "aac"
           "mp3"
-          "libopus"
+          "opus"
           "pcm_s16le"
         ];
         acceptedContainers = [
@@ -97,6 +97,7 @@ in
         tonemap = "hable";
         transcode = "required";
         twoPass = false;
+        realtime.enabled = false;
       };
       image = {
         colorspace = "p3";

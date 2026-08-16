@@ -3,6 +3,7 @@
   services.postgresql = {
     enable = true;
     package = pkgs.postgresql_16_jit;
+    settings.wal_level = "logical";
 
     # Doesn't work with plausible, since it wants to connect as the postgres user
     # for some (probably unecessary) reason.

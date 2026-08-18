@@ -125,9 +125,9 @@ in
     apiKeyFile = config.age.secrets.omnivoice-api-key.path;
     wyoming = {
       enable = true;
-      # No authentication, only reachable via wireguard.
       openFirewall = false;
     };
+    voicesConfigFile = "/var/lib/omnivoice/voices.toml";
   };
 
   systemd.services.omnivoice-server = {

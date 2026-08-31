@@ -129,6 +129,7 @@ in
       PAPERLESS_URL = "https://${paperlessDomain}";
       PAPERLESS_ALLOWED_HOSTS = paperlessDomain;
       PAPERLESS_CORS_ALLOWED_HOSTS = "https://${paperlessDomain}";
+      PAPERLESS_ALLAUTH_TRUSTED_PROXY_COUNT = 1;
       PAPERLESS_TRUSTED_PROXIES = lib.concatStringsSep "," [
         globals.wireguard.proxy-home.hosts.ward-web-proxy.ipv4
         globals.wireguard.proxy-sentinel.hosts.sentinel.ipv4

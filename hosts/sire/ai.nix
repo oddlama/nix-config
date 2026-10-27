@@ -9,6 +9,7 @@
 let
   llamacppDomain = "llm.${globals.domains.me}";
   omnivoiceDomain = "tts.${globals.domains.me}";
+  qwenModelDir = "/persist/bartowski/orcarouter_Qwen3.8-27B-Uncensored-GGUF";
 in
 {
   imports = [
@@ -69,15 +70,51 @@ in
     settings = {
       port = 11434;
       host = "0.0.0.0";
-      model = "/persist/unsloth/Qwen3.8-27B-GGUF/Qwen3.8-27B-UD-Q8_K_XL.gguf";
+      model = "${qwenModelDir}/orcarouter_Qwen3.8-27B-Uncensored-IQ4_XS.gguf";
+      mmproj = "${qwenModelDir}/mmproj-orcarouter_Qwen3.8-27B-Uncensored-f16.gguf";
+      alias = "orcarouter-qwen38-27b";
+
+      # Language model and vision projector stay on the first 3090.
       gpu-layers = 999;
-      ctx-size = 222144;
+      split-mode = "none";
+      device = "CUDA0";
+      fit = "off";
+      mmproj-offload = true;
+      image-max-tokens = 4096;
+
+      # Shared total, including images/output: 2 x 50K or 1 x 150K, not 2 x 150K.
+      # Measured on b10273 with only ~700 MiB VRAM spare; recheck after upgrades.
+      ctx-size = 155648;
+      parallel = 2;
+      kv-unified = true;
+      cont-batching = true;
+      cache-type-k = "q8_0";
+      cache-type-v = "q8_0";
+      flash-attn = "on";
+      batch-size = 4096;
+      ubatch-size = 512;
+      threads = 8;
+      threads-batch = 16;
+
+      spec-type = "draft-mtp";
+      spec-draft-n-max = 2;
+      spec-draft-type-k = "q8_0";
+      spec-draft-type-v = "q8_0";
+
+      # RAM cache for idle conversations; checkpoints allow recent-turn edits.
+      cache-ram = 4096;
+      ctx-checkpoints = 4;
+      cache-prompt = true;
+      no-context-shift = true;
+
       temp = "1.0";
       top-p = "0.95";
       top-k = 20;
       min-p = "0.0";
-      mmproj = "/persist/unsloth/Qwen3.8-27B-GGUF/mmproj-BF16.gguf";
       reasoning = "off";
+      metrics = true;
+      offline = true;
+      # no-webui = true;
     };
   };
 
@@ -87,10 +124,10 @@ in
     requires = [ "nvidia-ready.target" ];
     after = [ "nvidia-ready.target" ];
 
-    # Both 3090s, the 2080 Ti (index 1) is reserved for omnivoice.
+    # First 3090 for Qwen; reserve the other 3090 for OXR and the 2080 Ti for speech.
     environment = {
       CUDA_DEVICE_ORDER = "PCI_BUS_ID";
-      CUDA_VISIBLE_DEVICES = "0,2";
+      CUDA_VISIBLE_DEVICES = "GPU-a29946ab-ad82-62bc-6c5a-a06bab6bb799";
     };
 
     serviceConfig.LoadCredential = [ "api-keys.txt:${config.age.secrets.llama-cpp-api-keys.path}" ];
@@ -124,7 +161,7 @@ in
     port = 11435;
     openFirewall = false;
     device = "cuda";
-    # Leave both 3090s (index 0 and 2 in PCI bus order) to llama-cpp.
+    # Keep the 2080 Ti dedicated to speech; the 3090s are for Qwen and OXR.
     cuda.visibleDevices = [ "1" ];
     apiKeyFile = config.age.secrets.omnivoice-api-key.path;
     wyoming = {

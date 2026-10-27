@@ -115,7 +115,11 @@ in
     # cudaCapability 7.5 == the RTX 2080 Ti. The kernels are compiled to PTX for
     # exactly this capability and PTX is only forward compatible, so this build
     # would also run on the 3090s, but not the other way around.
-    package = pkgs.omnivoice-cuda.override { cudaCapability = "75"; };
+    package = pkgs.omnivoice-cuda.override {
+      cudaCapability = "75";
+      # cudarc 0.19.4 supports at most CUDA 13.2; nixpkgs defaults to 13.4.
+      cudaPackages = pkgs.cudaPackages_13_2;
+    };
     host = "0.0.0.0";
     port = 11435;
     openFirewall = false;

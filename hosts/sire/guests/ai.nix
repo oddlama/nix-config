@@ -1,6 +1,7 @@
 {
   config,
   globals,
+  pkgs,
   ...
 }:
 let
@@ -24,6 +25,16 @@ in
 
   services.open-webui = {
     enable = true;
+    # Open WebUI 0.12.x still uses MCP 1.x. Nixpkgs' MCP 2.x default
+    # also breaks posthog's tests; keep the compatibility override local.
+    package = pkgs.open-webui.override {
+      python3Packages =
+        (pkgs.python3.override {
+          packageOverrides = pythonFinal: _: {
+            mcp = pythonFinal.mcp_1;
+          };
+        }).pkgs;
+    };
     host = "0.0.0.0";
     port = 11222;
     environment = {

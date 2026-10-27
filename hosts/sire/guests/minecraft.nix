@@ -566,11 +566,11 @@ in
   services.phpfpm.pools.dynmap = {
     user = "nginx";
     group = "nginx";
-    phpPackage = pkgs.php82;
-    phpOptions = ''
-      error_log = 'stderr'
-      log_errors = on
-    '';
+    phpPackage = pkgs.php84;
+    phpOptions = {
+      error_log = "stderr";
+      log_errors = true;
+    };
     settings = {
       "listen.owner" = "nginx";
       "listen.group" = "nginx";

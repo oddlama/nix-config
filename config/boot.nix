@@ -9,7 +9,6 @@
   config = lib.mkIf (!config.boot.isContainer) {
     boot = {
       initrd.systemd = {
-        enable = true;
         emergencyAccess = globals.root.hashedPassword;
         # TODO good idea? targets.emergency.wants = ["network.target" "sshd.service"];
         extraBin.ip = "${pkgs.iproute2}/bin/ip";

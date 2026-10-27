@@ -2,6 +2,7 @@
   imports = [
     ./acme-wildcard.nix
     ./affine.nix
+    ./antirion.nix
     ./backups.nix
     ./deterministic-ids.nix
     ./distributed-config.nix

@@ -13,6 +13,7 @@ inputs: [
         # build needs a yarn from before that change.
         inherit (pkgs2511) yarn-berry_4;
       };
+      antirion = prev.callPackage ./antirion.nix { };
       prisma-engines_6_8 = pkgs2511.callPackage ./prisma-engines.nix { };
       deploy = prev.callPackage ./deploy.nix { };
       git-fuzzy = prev.callPackage ./git-fuzzy { };

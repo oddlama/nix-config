@@ -307,6 +307,27 @@
         "type": "github"
       }
     },
+    "devshell_8": {
+      "inputs": {
+        "nixpkgs": [
+          "somark-oxr",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791918082,
+        "narHash": "sha256-oN9JrhRfHa7MUTdUq+11dHn7u0Z4WfEA4mhzBq0/zoQ=",
+        "owner": "numtide",
+        "repo": "devshell",
+        "rev": "9e29c63dde99a2d80c94b3d024c9768c01544558",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "devshell",
+        "type": "github"
+      }
+    },
     "disko": {
       "inputs": {
         "nixpkgs": [
@@ -825,6 +846,27 @@
         "owner": "hercules-ci",
         "repo": "flake-parts",
         "rev": "427bf4bd9435fdf21321c8cc628c24efc14c0f7a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
+      }
+    },
+    "flake-parts_9": {
+      "inputs": {
+        "nixpkgs-lib": [
+          "somark-oxr",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790898470,
+        "narHash": "sha256-zTwuwezD0w3hpga6a6P8emidzAZFyWqlNeRBlpWOOl8=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "024633cd702b10285db5cb19b40ad48d2399ba60",
         "type": "github"
       },
       "original": {
@@ -1746,6 +1788,22 @@
         "type": "github"
       }
     },
+    "nixpkgs_5": {
+      "locked": {
+        "lastModified": 1792773339,
+        "narHash": "sha256-rZLrzrC6i+jnTAlvPZHogKDulY7WWDEv9hJeHieO7Zw=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "3ec636362e1816bc2f0888fa0fa2c69f1bc9e504",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixt": {
       "inputs": {
         "flake-compat": "flake-compat_8",
@@ -1873,6 +1931,23 @@
       "original": {
         "owner": "oddlama",
         "repo": "omnivoice-rs",
+        "type": "github"
+      }
+    },
+    "oxr-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792856708,
+        "narHash": "sha256-AqYSRFh3uxJDszxBbE/cP5kRiWAtV3YtsbKLA/sM9OY=",
+        "owner": "SoMarkAI",
+        "repo": "OXR",
+        "rev": "c1a1dcb312ee9f691404f127785510453c0d9350",
+        "type": "github"
+      },
+      "original": {
+        "owner": "SoMarkAI",
+        "repo": "OXR",
+        "rev": "c1a1dcb312ee9f691404f127785510453c0d9350",
         "type": "github"
       }
     },
@@ -2266,6 +2341,35 @@
         "type": "github"
       }
     },
+    "pyproject-build-systems": {
+      "inputs": {
+        "nixpkgs": [
+          "somark-oxr",
+          "nixpkgs"
+        ],
+        "pyproject-nix": [
+          "somark-oxr",
+          "pyproject-nix"
+        ],
+        "uv2nix": [
+          "somark-oxr",
+          "uv2nix"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792499785,
+        "narHash": "sha256-mGOkvueuMGSRiD75ccxFzfEvSlIU9ztjFluHMKOtogY=",
+        "owner": "pyproject-nix",
+        "repo": "build-system-pkgs",
+        "rev": "a17819c85163988e063806ffc4f6d2716bc8ead8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pyproject-nix",
+        "repo": "build-system-pkgs",
+        "type": "github"
+      }
+    },
     "pyproject-nix": {
       "inputs": {
         "nixpkgs": [
@@ -2335,6 +2439,27 @@
         "type": "github"
       }
     },
+    "pyproject-nix_4": {
+      "inputs": {
+        "nixpkgs": [
+          "somark-oxr",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791657700,
+        "narHash": "sha256-vcCAvhtA7hG+/gOge29hYHy7I/dLkIsr5nLx4sFEQic=",
+        "owner": "pyproject-nix",
+        "repo": "pyproject.nix",
+        "rev": "ddc400a6883b042646d0940e65971bb7f7e96107",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pyproject-nix",
+        "repo": "pyproject.nix",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "agenix": "agenix",
@@ -2361,7 +2486,8 @@
         "noctalia": "noctalia",
         "omnivoice-rs": "omnivoice-rs",
         "pre-commit-hooks": "pre-commit-hooks_5",
-        "treefmt-nix": "treefmt-nix_6"
+        "somark-oxr": "somark-oxr",
+        "treefmt-nix": "treefmt-nix_7"
       }
     },
     "rust-analyzer-src": {
@@ -2571,6 +2697,32 @@
         "owner": "thomashoneyman",
         "repo": "slimlock",
         "type": "github"
+      }
+    },
+    "somark-oxr": {
+      "inputs": {
+        "devshell": "devshell_8",
+        "flake-parts": "flake-parts_9",
+        "nixpkgs": "nixpkgs_5",
+        "oxr-src": "oxr-src",
+        "pyproject-build-systems": "pyproject-build-systems",
+        "pyproject-nix": "pyproject-nix_4",
+        "treefmt-nix": "treefmt-nix_6",
+        "uv2nix": "uv2nix"
+      },
+      "locked": {
+        "lastModified": 1792964718,
+        "narHash": "sha256-rqLRF4SMf7Vh3AZaHaL6rMIJrBzRAUPROUGI1yHuogI=",
+        "ref": "main",
+        "rev": "83fd07b5d90580a77cbcc10bcab926c65c87bec1",
+        "revCount": 23,
+        "type": "git",
+        "url": "ssh://git@github.com/oddlama/nix-somark-oxr"
+      },
+      "original": {
+        "ref": "main",
+        "type": "git",
+        "url": "ssh://git@github.com/oddlama/nix-somark-oxr"
       }
     },
     "spectrum": {
@@ -2830,6 +2982,27 @@
     "treefmt-nix_6": {
       "inputs": {
         "nixpkgs": [
+          "somark-oxr",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791885023,
+        "narHash": "sha256-C3alQ2MEt0zVrUSho5NUDo3jmhbff72++bfwoqT9Omo=",
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "rev": "0d6d739a833ba9a9c93034862e4a7b061a062a1c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "treefmt-nix_7": {
+      "inputs": {
+        "nixpkgs": [
           "nixpkgs"
         ]
       },
@@ -2888,6 +3061,31 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "uv2nix": {
+      "inputs": {
+        "nixpkgs": [
+          "somark-oxr",
+          "nixpkgs"
+        ],
+        "pyproject-nix": [
+          "somark-oxr",
+          "pyproject-nix"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792666911,
+        "narHash": "sha256-UWo7wDPi00YXOI1Io7g4vGKuCSPJ863kHJVDzsgqtoM=",
+        "owner": "pyproject-nix",
+        "repo": "uv2nix",
+        "rev": "0fdaa03ea3c3c16dbb1fe4d69108f07227a4b42d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pyproject-nix",
+        "repo": "uv2nix",
         "type": "github"
       }
     },

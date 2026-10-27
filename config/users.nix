@@ -56,5 +56,9 @@
       lpadmin = uidGid 955;
       pcscd = uidGid 954;
       omnivoice = uidGid 953;
+      somark-oxr-layout = uidGid 952;
+      somark-oxr-recognition = uidGid 951;
+      somark-oxr-api = uidGid 950;
+      somark-oxr-watchdog = uidGid 949;
     };
 }

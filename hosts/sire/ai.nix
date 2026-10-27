@@ -14,6 +14,7 @@ in
 {
   imports = [
     ../../config/hardware/nvidia.nix
+    ./somark-oxr.nix
     # Provides services.omnivoice and pkgs.omnivoice{,-cuda}
     inputs.omnivoice-rs.nixosModules.default
   ];

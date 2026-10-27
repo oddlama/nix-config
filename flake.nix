@@ -101,6 +101,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Keep its tested nixpkgs/CUDA environment instead of following ours.
+    somark-oxr.url = "git+ssh://git@github.com/oddlama/nix-somark-oxr?ref=main";
+
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";

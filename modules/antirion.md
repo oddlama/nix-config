@@ -1,7 +1,8 @@
 # Antirion
 
 `modules/antirion.nix` is imported by `modules/default.nix`; the overlay provides
-`pkgs.antirion`. Nothing enables the service on a host automatically.
+`pkgs.antirion`. The module does not enable itself; `hosts/sire/antirion.nix`
+now enables it on `sire`. See [the host runbook](../hosts/sire/antirion.md).
 
 The module is intentionally tailored to a single gateway:
 
@@ -34,7 +35,7 @@ addresses/model names before using it:
 
       providers.llamacpp = {
         type = "openai_compatible";
-        base_url = "http://llama.internal:8080";
+        base_url = "http://llama.internal:8080/v1";
         auth.method = "none";
         # For an authenticated backend, instead use:
         # auth = {
@@ -70,6 +71,10 @@ This example limits requests/concurrency; declare prices and budgets separately
 if you also want monetary accounting/enforcement. The module accepts upstream
 configuration under `settings`, rather than introducing a second configuration
 schema for providers, users or policies.
+
+For OpenAI-compatible native routes, include `/v1` in the provider's `base_url`;
+Antirion appends paths such as `/chat/completions` and `/audio/speech`.
+Passthrough instead appends the path below its mount unchanged.
 
 For the other backends:
 
@@ -190,5 +195,6 @@ nix-build --impure --no-out-link --max-jobs 2 --cores 2 --expr '
 '
 ```
 
-Real inference backends, streaming and audio metering still need integration
-testing when the host configuration is wired up.
+`hosts/sire/tests/antirion.nix` additionally tests nginx routing, chat/SSE,
+speech, OXR passthrough/artifacts, permissions and accounting with mock backends.
+Real GPU inference and backend-reported usage still need deployment-time testing.

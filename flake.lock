@@ -1921,11 +1921,11 @@
         "treefmt-nix": "treefmt-nix_5"
       },
       "locked": {
-        "lastModified": 1786920150,
-        "narHash": "sha256-w4M1jY2EwJWi5kG8Dy4LD37VtIgQxCflDSXcXSDcKLU=",
+        "lastModified": 1793111500,
+        "narHash": "sha256-cHRyYc0yEESsWzr0uA61Zt2dZZ0YqVrx0wcGQCA8JzA=",
         "owner": "oddlama",
         "repo": "omnivoice-rs",
-        "rev": "0d0b92380034909f3b93dd6c4efd9c9955c388c5",
+        "rev": "21d4cab5dc797d18c3740735e48af4b96b51970e",
         "type": "github"
       },
       "original": {

@@ -7,13 +7,12 @@
   ...
 }:
 let
-  llamacppDomain = "llm.${globals.domains.me}";
-  omnivoiceDomain = "tts.${globals.domains.me}";
   qwenModelDir = "/persist/bartowski/orcarouter_Qwen3.8-27B-Uncensored-GGUF";
 in
 {
   imports = [
     ../../config/hardware/nvidia.nix
+    ./antirion.nix
     ./somark-oxr.nix
     # Provides services.omnivoice and pkgs.omnivoice{,-cuda}
     inputs.omnivoice-rs.nixosModules.default
@@ -37,31 +36,9 @@ in
     }
   ];
 
-  globals.wireguard.proxy-home.hosts.${config.node.name}.firewallRuleForNode = {
-    ward-web-proxy.allowedTCPPorts = [
-      config.services.llama-cpp.settings.port
-      config.services.omnivoice.port
-    ];
-    # Home Assistant talks to the wyoming endpoint directly, it isn't proxied.
-    sausebiene.allowedTCPPorts = [ config.services.omnivoice.wyoming.port ];
-  };
-  globals.wireguard.proxy-sentinel.hosts.${config.node.name}.firewallRuleForNode.sentinel.allowedTCPPorts =
-    [
-      config.services.llama-cpp.settings.port
-      config.services.omnivoice.port
-    ];
-
-  # one key per line, no comments allowed
-  age.secrets.llama-cpp-api-keys = {
-    rekeyFile = ./secrets/llama-cpp-api-keys.age;
-    mode = "400";
-  };
-
-  age.secrets.omnivoice-api-key = {
-    rekeyFile = ./secrets/omnivoice-api-key.age;
-    generator.script = "alnum";
-    mode = "400";
-  };
+  # Wyoming is deliberately separate from the HTTP gateway and its accounting.
+  globals.wireguard.proxy-home.hosts.${config.node.name}.firewallRuleForNode.sausebiene.allowedTCPPorts =
+    [ config.services.omnivoice.wyoming.port ];
 
   environment.systemPackages = [ pkgs.llama-cpp ];
   services.llama-cpp = {
@@ -70,7 +47,7 @@ in
     openFirewall = false;
     settings = {
       port = 11434;
-      host = "0.0.0.0";
+      host = "127.0.0.1";
       model = "${qwenModelDir}/orcarouter_Qwen3.8-27B-Uncensored-IQ4_XS.gguf";
       mmproj = "${qwenModelDir}/mmproj-orcarouter_Qwen3.8-27B-Uncensored-f16.gguf";
       alias = "orcarouter-qwen38-27b";
@@ -130,22 +107,6 @@ in
       CUDA_DEVICE_ORDER = "PCI_BUS_ID";
       CUDA_VISIBLE_DEVICES = "GPU-a29946ab-ad82-62bc-6c5a-a06bab6bb799";
     };
-
-    serviceConfig.LoadCredential = [ "api-keys.txt:${config.age.secrets.llama-cpp-api-keys.path}" ];
-    serviceConfig.ExecStart =
-      let
-        cfg = config.services.llama-cpp;
-      in
-      lib.mkForce (toString [
-        (lib.getExe' cfg.package "llama-server")
-        "--api-key-file %d/api-keys.txt"
-        (lib.cli.toCommandLine (optionName: {
-          option = if builtins.stringLength optionName > 1 then "--${optionName}" else "-${optionName}";
-          sep = " ";
-          explicitBool = false;
-          formatArg = lib.generators.mkValueStringDefault { };
-        }) cfg.settings)
-      ]);
   };
 
   services.omnivoice = {
@@ -153,20 +114,29 @@ in
     # cudaCapability 7.5 == the RTX 2080 Ti. The kernels are compiled to PTX for
     # exactly this capability and PTX is only forward compatible, so this build
     # would also run on the 3090s, but not the other way around.
-    package = pkgs.omnivoice-cuda.override {
-      cudaCapability = "75";
-      # cudarc 0.19.4 supports at most CUDA 13.2; nixpkgs defaults to 13.4.
-      cudaPackages = pkgs.cudaPackages_13_2;
-    };
-    host = "0.0.0.0";
+    package =
+      (pkgs.omnivoice-cuda.override {
+        cudaCapability = "75";
+        # cudarc 0.19.4 supports at most CUDA 13.2; nixpkgs defaults to 13.4.
+        cudaPackages = pkgs.cudaPackages_13_2;
+      }).overrideAttrs
+        (old: {
+          patches = (old.patches or [ ]) ++ [ ../../pkgs/omnivoice-loopback-no-auth.patch ];
+        });
+    host = "127.0.0.1";
     port = 11435;
     openFirewall = false;
     device = "cuda";
     # Keep the 2080 Ti dedicated to speech; the 3090s are for Qwen and OXR.
     cuda.visibleDevices = [ "1" ];
-    apiKeyFile = config.age.secrets.omnivoice-api-key.path;
+    # Upstream's module insists on a credential source. An empty EnvironmentFile
+    # satisfies that assertion without loading/sending any token. The local patch
+    # makes --no-auth explicit and refuses non-loopback HTTP bind addresses.
+    environmentFile = "/dev/null";
+    extraArgs = [ "--no-auth" ];
     wyoming = {
       enable = true;
+      host = globals.wireguard.proxy-home.hosts.${config.node.name}.ipv4;
       openFirewall = false;
     };
     voicesConfigFile = "/var/lib/omnivoice/voices.toml";
@@ -252,130 +222,5 @@ in
     '';
 
     serviceConfig.Type = "oneshot";
-  };
-
-  globals.services.llama-cpp.domain = llamacppDomain;
-  globals.services.omnivoice.domain = omnivoiceDomain;
-
-  nodes.ward-web-proxy.services.nginx = {
-    upstreams.llama-cpp = {
-      servers."${
-        globals.wireguard.proxy-home.hosts.${config.node.name}.ipv4
-      }:${toString config.services.llama-cpp.settings.port}" =
-        { };
-      extraConfig = ''
-        zone llama-cpp 64k;
-        keepalive 2;
-      '';
-      monitoring = {
-        enable = true;
-        path = "/health";
-        expectedBodyRegex = ''{"status": ?"ok"}'';
-      };
-    };
-    virtualHosts.${llamacppDomain} = {
-      forceSSL = true;
-      useACMEWildcardHost = true;
-      extraConfig = ''
-        client_max_body_size 1G;
-      '';
-      locations."/" = {
-        proxyPass = "http://llama-cpp";
-        proxyWebsockets = true;
-        X-Frame-Options = "SAMEORIGIN";
-      };
-    };
-
-    upstreams.omnivoice = {
-      servers."${
-        globals.wireguard.proxy-home.hosts.${config.node.name}.ipv4
-      }:${toString config.services.omnivoice.port}" =
-        { };
-      extraConfig = ''
-        zone omnivoice 64k;
-        keepalive 2;
-      '';
-      monitoring = {
-        enable = true;
-        path = "/health";
-        expectedBodyRegex = ''"status": ?"ok"'';
-      };
-    };
-    virtualHosts.${omnivoiceDomain} = {
-      forceSSL = true;
-      useACMEWildcardHost = true;
-      extraConfig = ''
-        client_max_body_size ${toString config.services.omnivoice.maxBodyMb}M;
-        # Synthesis of long inputs can take a while.
-        proxy_read_timeout ${toString config.services.omnivoice.requestTimeout}s;
-        proxy_send_timeout ${toString config.services.omnivoice.requestTimeout}s;
-      '';
-      locations."/" = {
-        proxyPass = "http://omnivoice";
-        proxyWebsockets = true;
-        X-Frame-Options = "SAMEORIGIN";
-      };
-    };
-  };
-
-  nodes.sentinel.services.nginx = {
-    upstreams.llama-cpp = {
-      servers."${
-        globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv4
-      }:${toString config.services.llama-cpp.settings.port}" =
-        { };
-      extraConfig = ''
-        zone llama-cpp 64k;
-        keepalive 2;
-      '';
-      monitoring = {
-        enable = true;
-        path = "/health";
-        expectedBodyRegex = ''{"status": ?"ok"}'';
-      };
-    };
-    virtualHosts.${llamacppDomain} = {
-      forceSSL = true;
-      useACMEWildcardHost = true;
-      extraConfig = ''
-        client_max_body_size 1G;
-      '';
-      locations."/" = {
-        proxyPass = "http://llama-cpp";
-        proxyWebsockets = true;
-        X-Frame-Options = "SAMEORIGIN";
-      };
-    };
-
-    upstreams.omnivoice = {
-      servers."${
-        globals.wireguard.proxy-sentinel.hosts.${config.node.name}.ipv4
-      }:${toString config.services.omnivoice.port}" =
-        { };
-      extraConfig = ''
-        zone omnivoice 64k;
-        keepalive 2;
-      '';
-      monitoring = {
-        enable = true;
-        path = "/health";
-        expectedBodyRegex = ''"status": ?"ok"'';
-      };
-    };
-    virtualHosts.${omnivoiceDomain} = {
-      forceSSL = true;
-      useACMEWildcardHost = true;
-      extraConfig = ''
-        client_max_body_size ${toString config.services.omnivoice.maxBodyMb}M;
-        # Synthesis of long inputs can take a while.
-        proxy_read_timeout ${toString config.services.omnivoice.requestTimeout}s;
-        proxy_send_timeout ${toString config.services.omnivoice.requestTimeout}s;
-      '';
-      locations."/" = {
-        proxyPass = "http://omnivoice";
-        proxyWebsockets = true;
-        X-Frame-Options = "SAMEORIGIN";
-      };
-    };
   };
 }

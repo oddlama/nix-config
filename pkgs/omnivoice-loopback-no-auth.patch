@@ -1,0 +1,133 @@
+--- a/crates/omnivoice-server/src/args.rs
++++ b/crates/omnivoice-server/src/args.rs
+@@ -41,6 +41,10 @@
+     #[arg(long, env = "OMNIVOICE_API_KEY")]
+     pub api_key: Option<String>,
+ 
++    /// Disable HTTP authentication, only on a literal loopback bind address.
++    #[arg(long, conflicts_with = "api_key")]
++    pub no_auth: bool,
++
+     #[arg(long, default_value_t = 50)]
+     pub max_body_mb: usize,
+ 
+@@ -94,7 +98,18 @@
+                 "request_timeout_secs must be greater than zero",
+             ));
+         }
+-        if self
++        if self.no_auth {
++            if self.api_key.is_some()
++                || !self
++                    .host
++                    .parse::<std::net::IpAddr>()
++                    .is_ok_and(|ip| ip.is_loopback())
++            {
++                return Err(ServerError::validation(
++                    "--no-auth requires a literal loopback HTTP host and no API key",
++                ));
++            }
++        } else if self
+             .api_key
+             .as_deref()
+             .is_none_or(|value| value.trim().is_empty())
+@@ -141,6 +156,48 @@
+     use super::ServerArgs;
+ 
+     #[test]
++    fn no_auth_is_opt_in_and_loopback_only() {
++        assert!(ServerArgs::try_parse_from(["omnivoice-server"])
++            .unwrap()
++            .validate()
++            .is_err());
++        for host in ["127.0.0.1", "::1"] {
++            let args = ServerArgs::try_parse_from([
++                "omnivoice-server",
++                "--no-auth",
++                "--host",
++                host,
++                "--wyoming-port",
++                "10200",
++                "--wyoming-host",
++                "0.0.0.0",
++            ])
++            .unwrap();
++            assert!(args.validate().is_ok());
++            assert_eq!(args.resolved_wyoming_host(), "0.0.0.0");
++        }
++        for host in [
++            "0.0.0.0",
++            "::",
++            "192.0.2.1",
++            "localhost",
++            "127.0.0.1.example.com",
++        ] {
++            let args =
++                ServerArgs::try_parse_from(["omnivoice-server", "--no-auth", "--host", host])
++                    .unwrap();
++            assert!(args.validate().is_err(), "{host}");
++        }
++        assert!(ServerArgs::try_parse_from([
++            "omnivoice-server",
++            "--no-auth",
++            "--api-key",
++            "test-key",
++        ])
++        .is_err());
++    }
++
++    #[test]
+     fn model_dir_is_optional() {
+         let args =
+             ServerArgs::try_parse_from(["omnivoice-server", "--api-key", "test-key"]).unwrap();
+--- a/crates/omnivoice-server/src/server.rs
++++ b/crates/omnivoice-server/src/server.rs
+@@ -93,6 +93,10 @@
+ }
+ 
+ fn authorize(headers: &HeaderMap, state: &AppState) -> Result<(), ServerError> {
++    // ServerConfig::from_args only permits an absent key with --no-auth on loopback.
++    if state.config.api_key.is_empty() {
++        return Ok(());
++    }
+     let header = headers
+         .get(header::AUTHORIZATION)
+         .ok_or_else(|| ServerError::unauthorized("missing Authorization header"))?;
+--- a/crates/omnivoice-server/tests/openai_server.rs
++++ b/crates/omnivoice-server/tests/openai_server.rs
+@@ -82,6 +82,35 @@
+     }
+ }
+ 
++#[tokio::test]
++async fn explicit_loopback_no_auth_serves_models_and_speech_without_a_token() {
++    use clap::Parser;
++    use omnivoice_server::ServerArgs;
++
++    let args = ServerArgs::try_parse_from(["omnivoice-server", "--no-auth", "--host", "127.0.0.1"])
++        .unwrap();
++    let (app, runtime) = app_with_config(ServerConfig::from_args(&args).unwrap());
++    let models = app
++        .clone()
++        .oneshot(
++            Request::builder()
++                .uri("/v1/models")
++                .body(Body::empty())
++                .unwrap(),
++        )
++        .await
++        .unwrap();
++    assert_eq!(models.status(), StatusCode::OK);
++    let speech = app.oneshot(Request::builder()
++        .method("POST").uri("/v1/audio/speech")
++        .header(header::CONTENT_TYPE, "application/json")
++        .body(Body::from(json!({
++            "model": MODEL_ID, "input": "Hello", "voice": "alloy", "response_format": "wav"
++        }).to_string())).unwrap()).await.unwrap();
++    assert_eq!(speech.status(), StatusCode::OK);
++    assert_eq!(runtime.requests().len(), 1);
++}
++
+ fn app_with_runtime() -> (axum::Router, RecordingRuntime) {
+     let runtime = RecordingRuntime::new();
+     let config = ServerConfig {

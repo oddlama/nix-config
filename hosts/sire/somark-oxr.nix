@@ -27,9 +27,12 @@ in
     maxModelLen = 16384;
     maxNumSeqs = 4;
 
-    # OXR does not authenticate API keys. Keep the API and artifacts local until
-    # an authenticated reverse proxy is configured; do not open firewall ports.
+    # OXR does not authenticate API keys. Only Antirion exposes its API/artifacts;
+    # all three listeners remain local and have no firewall openings.
     listenAddress = "127.0.0.1";
+    layoutPort = 11436;
+    recognitionPort = 11437;
+    port = 11438;
   };
 
   # Gate the first backend, not just the enclosing target: its dependencies

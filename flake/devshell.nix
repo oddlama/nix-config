@@ -25,10 +25,6 @@
       };
 
       devshells.default = {
-        packages = [
-          pkgs.nix # Always use the nix version from this flake's nixpkgs version, so that nix-plugins (below) doesn't fail because of different nix versions.
-        ];
-
         commands = [
           {
             package = config.treefmt.build.wrapper;
@@ -76,12 +72,10 @@
 
         env = [
           {
-            # Additionally configure nix-plugins with our extra builtins file.
-            # We need this for our repo secrets.
+            # Enable builtins.exec for repo secrets only inside the devshell.
             name = "NIX_CONFIG";
             value = ''
-              plugin-files = ${pkgs.nix-plugins}/lib/nix/plugins
-              extra-builtins-file = ${./..}/flake/extra-builtins.nix
+              allow-unsafe-native-code-during-evaluation = true
             '';
           }
         ];

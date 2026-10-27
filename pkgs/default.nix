@@ -30,8 +30,6 @@ inputs: [
           );
       segoe-ui-ttf = prev.callPackage ./segoe-ui-ttf.nix { };
       zsh-histdb-skim = prev.callPackage ./zsh-skim-histdb.nix { };
-      nix = prev.nixVersions.nix_2_31;
-      nix-plugins = prev.callPackage ./nix-plugins.nix { };
       part-db = prev.callPackage ./part-db.nix { };
       neovim-clean = prev.neovim-unwrapped.overrideAttrs (old: {
         nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ prev.makeWrapper ];

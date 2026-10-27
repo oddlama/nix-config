@@ -1,19 +1,6 @@
-# This file is intended to be used together with pkgs.nix-plugins,
-# to provide rage decryption as an additional safe builtin.
-#
-# Make sure that nix-plugins is installed by adding the following
-# statement to your configuration.nix:
-#
-# ```nix
-# {
-#   nix.extraOptions = ''
-#     plugin-files = ${pkgs.nix-plugins}/lib/nix/plugins
-#     # Please adjust path accordingly, or leave this out and alternativaly
-#     # pass `--option extra-builtins-file ./extra-builtins.nix` to each invocation
-#     extra-builtins-file = ${./extra-builtins.nix}
-#   '';
-# }
-# ```
+# Provides rage decryption via builtins.exec when imported with builtins.
+# Requires allow-unsafe-native-code-during-evaluation = true, enabled only
+# in the devshell via NIX_CONFIG.
 { exec, ... }:
 let
   assertMsg = pred: msg: pred || builtins.throw msg;
@@ -27,7 +14,7 @@ let
 in
 {
   # Instead of calling rage directly here, we call a wrapper script that will cache the output
-  # in a predictable path in /tmp, which allows us to only require the password for each encrypted
+  # in /var/tmp/nix-import-encrypted, which allows us to only require the password for each encrypted
   # file once.
   rageImportEncrypted =
     identities: nixFile:

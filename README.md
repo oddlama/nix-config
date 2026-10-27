@@ -142,11 +142,16 @@ Afterwards:
 - Generate, edit and rekey secrets with `agenix <generate|edit|rekey>`
 
 To be able to decrypt the repository-wide secrets (files that contain my PII and are thus hidden from public view),
-you will need to <sub>(be me and)</sub> add nix-plugins and point it to `./nix/extra-builtins.nix`.
-The devshell will do this for you automatically. If this doesn't work for any reason, this can also be done manually:
+you will need to <sub>(be me and)</sub> enable `builtins.exec` for the helper in `flake/extra-builtins.nix`.
+The devshell does this automatically via `NIX_CONFIG`, without changing the system-wide Nix configuration.
+For a single command outside the devshell, pass `--option allow-unsafe-native-code-during-evaluation true`, for example:
 
-1. Get nix-plugins: `NIX_PLUGINS=$(nix build --print-out-paths --no-link nixpkgs#nix-plugins)`
-2. Run all commands with `--option plugin-files "$NIX_PLUGINS"/lib/nix/plugins --option extra-builtins-file ./nix/extra-builtins.nix`
+```bash
+nix build --option allow-unsafe-native-code-during-evaluation true \
+  '.#nixosConfigurations.<host>.config.system.build.toplevel'
+```
+
+This allows arbitrary native code execution during evaluation, even in pure mode, so only evaluate trusted Nix code in this environment.
 
 ## Misc
 

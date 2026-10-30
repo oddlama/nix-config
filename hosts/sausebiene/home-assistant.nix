@@ -166,13 +166,13 @@ in
       python3Packages: with python3Packages; [
         adguardhome
         aioelectricitymaps
+        aioipp
         dwdwfsapi
         fritzconnection
         getmac
         gtts
         psycopg2
         pyatv
-        pyipp
         pymiele
         pymodbus
         zlib-ng

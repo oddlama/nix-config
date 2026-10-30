@@ -23,6 +23,7 @@
     ./music-assistant.nix
     ./influxdb.nix
     ./mosquitto.nix
+    ./thread.nix
     ./wyoming.nix
   ];
 

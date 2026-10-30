@@ -80,6 +80,9 @@ in
         gateway = lib.optionals (vlanName == "services") [ vlanCfg.hosts.ward.ipv4 ];
         matchConfig.Name = "vlan-${vlanName}";
         networkConfig.IPv6PrivacyExtensions = "yes";
+        # The thread border router enables forwarding globally, which makes networkd
+        # ignore RAs by default. We still want our routes from ward.
+        networkConfig.IPv6AcceptRA = true;
         linkConfig.RequiredForOnline = "routable";
       };
     }

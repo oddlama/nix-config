@@ -60,5 +60,6 @@
       somark-oxr-recognition = uidGid 951;
       somark-oxr-api = uidGid 950;
       somark-oxr-watchdog = uidGid 949;
+      otbr = uidGid 948;
     };
 }

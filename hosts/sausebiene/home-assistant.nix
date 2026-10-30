@@ -60,7 +60,9 @@ in
       "mqtt"
       "music_assistant"
       "ollama"
+      "otbr"
       "shelly"
+      "thread"
       "wake_word"
       "webostv" # LG WebOS TV
       "whisper"

@@ -24,6 +24,11 @@ in
       group = "hass";
       mode = "0700";
     }
+    # Holds the Matter fabric and all commissioned nodes. Losing this means re-pairing every device.
+    {
+      directory = "/var/lib/private/matterjs-server";
+      mode = "0700";
+    }
   ];
 
   globals.services.home-assistant.domain = homeassistantDomain;
@@ -33,9 +38,14 @@ in
   #   network = "internet";
   # };
 
-  services.matter-server = {
+  services.matterjs-server = {
     enable = true;
-    logLevel = "debug";
+    extraArgs = [
+      # Matter devices live in the iot vlan, use it to scope link-local addresses
+      "--primary-interface=vlan-iot"
+      # Home Assistant's vendor id, so the fabric isn't shown as a test vendor
+      "--vendorid=4939"
+    ];
   };
 
   topology.self.services.home-assistant.info = "https://${homeassistantDomain}";

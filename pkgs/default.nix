@@ -39,6 +39,20 @@ inputs: [
           wrapProgram $out/bin/nvim --add-flags "--clean"
         '';
       });
+      # Backport of https://github.com/NixOS/nixpkgs/pull/580626 (moonraker 1.13.4 is marked broken).
+      # Drop this and ./home-assistant-moonraker once the PR has reached our nixpkgs input.
+      pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+        (pythonFinal: _pythonPrev: {
+          moonraker-api = pythonFinal.callPackage ./home-assistant-moonraker/moonraker-api.nix { };
+        })
+      ];
+      home-assistant-custom-components = prev.home-assistant-custom-components.extend (
+        _: _: {
+          moonraker =
+            final.home-assistant.python3Packages.callPackage ./home-assistant-moonraker/moonraker.nix
+              { };
+        }
+      );
       # pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
       #   (pythonFinal: pythonPrev: {
       #     xy = pythonPrev.xy.overrideAttrs { };

@@ -148,6 +148,14 @@
         ipv6Prefixes = [
           { Prefix = vlanCfg.cidrv6; }
         ];
+        # The Thread network lives behind sausebiene's border router in the iot vlan.
+        # We can't learn this from its RAs, as we send RAs on this interface ourselves.
+        routes = lib.optionals (vlanName == "iot") [
+          {
+            Destination = globals.net.home-thread.cidrv6;
+            Gateway = vlanCfg.hosts.sausebiene.ipv6;
+          }
+        ];
         # Delegate prefix
         # dhcpPrefixDelegationConfig = {
         #   SubnetId = vlanCfg.id;

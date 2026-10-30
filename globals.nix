@@ -176,6 +176,11 @@ in
           };
         };
       };
+
+      # OMR prefix of the Thread network formed by sausebiene's border router. OTBR generated
+      # it randomly and keeps it in /var/lib/thread, so it only changes if that state is lost
+      # (check with `echo "br omrprefix" | ot-ctl`).
+      home-thread.cidrv6 = "fdfd:4f47:3a85:1::/64";
     };
 
     monitoring = {

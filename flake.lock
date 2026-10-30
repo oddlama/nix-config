@@ -2711,11 +2711,11 @@
         "uv2nix": "uv2nix"
       },
       "locked": {
-        "lastModified": 1792964718,
-        "narHash": "sha256-rqLRF4SMf7Vh3AZaHaL6rMIJrBzRAUPROUGI1yHuogI=",
+        "lastModified": 1793130248,
+        "narHash": "sha256-7sZBiBm3smHliB5L3olSHFCK6u2tjgDW653/1yTeMSY=",
         "ref": "main",
-        "rev": "83fd07b5d90580a77cbcc10bcab926c65c87bec1",
-        "revCount": 23,
+        "rev": "4ebaf38e3172744b6f60da5775edc0fea3408361",
+        "revCount": 24,
         "type": "git",
         "url": "ssh://git@github.com/oddlama/nix-somark-oxr"
       },

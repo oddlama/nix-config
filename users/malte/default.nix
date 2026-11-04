@@ -71,8 +71,10 @@ lib.optionalAttrs (!minimal) {
     };
   };
 
-  # Autologin
+  # Autologin, but only on tty1 and only once per boot (the disk is already unlocked
+  # with a passphrase). Other ttys and later logins on tty1 ask for the password.
   services.getty.autologinUser = "malte";
+  services.getty.autologinOnce = true;
 
   # Allow screen recorder to access the framebuffer as root
   programs.gpu-screen-recorder.enable = true;

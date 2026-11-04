@@ -189,7 +189,7 @@ in
   ];
 
   home.persistence."/persist".directories = [
-    ".mozilla"
+    ".config/mozilla"
   ];
 
   xdg.mimeApps.defaultApplications = {

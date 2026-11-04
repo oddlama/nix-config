@@ -24,6 +24,9 @@ in
   ];
 
   services.gnome-keyring.enable = true;
+  home.persistence."/persist".directories = [
+    ".local/share/keyrings" # Secret service storage (saved app credentials)
+  ];
   xdg.portal = {
     enable = true;
     xdgOpenUsePortal = true;

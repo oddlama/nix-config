@@ -114,7 +114,8 @@ in
           "Mod+b".action = spawn "firefox";
           "Menu".action = spawn "fuzzel";
           "Mod+asciicircum".action = spawn "fuzzel";
-          "Mod+Alt+l".action = spawn "systemctl suspend";
+          "Mod+l".action = spawn "noctalia" "msg" "session" "lock";
+          "Mod+Alt+l".action = spawn "noctalia" "msg" "session" "lock-and-suspend";
 
           "Mod+q".action = close-window;
           "Mod+f".action = toggle-window-floating;

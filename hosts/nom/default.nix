@@ -1,6 +1,7 @@
 {
   inputs,
   pkgs,
+  lib,
   ...
 }:
 {
@@ -28,6 +29,7 @@
     ./net.nix
   ];
 
+  system.stateVersion = lib.mkForce "26.11";
   nixpkgs.hostPlatform = "x86_64-linux";
   boot.mode = "efi";
   boot.initrd.availableKernelModules = [

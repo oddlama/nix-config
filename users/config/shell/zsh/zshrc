@@ -231,6 +231,42 @@ zstyle ':completion:*' special-dirs ..
 # directories takes multiple seconds e.g. /nix/store/whatever/bin/<TAB>)
 #zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 
+# Faster replacement for the startable-unit helper in systemd's _systemctl completion
+# (`systemctl start <TAB>`), which only defines it if no such function exists yet.
+# The stock version runs `systemctl show` over every candidate unit twice to read
+# CanStart and ActiveState. That loads each unit over D-Bus and takes seconds on hosts
+# with many units. Here the active state comes from a single `list-units --all`
+# instead. Units with RefuseManualStart=yes are no longer filtered out.
+function _systemctl_startable_units() {
+	local pattern unit
+	if zstyle -T ":completion:$curcontext" use-pattern; then
+		pattern="$PREFIX*$SUFFIX"
+	fi
+
+	# Loaded units: unit -> "<load> <active>"
+	local -A loaded
+	local -a fields
+	for unit in ${(f)"$(__systemctl list-units --all $pattern)"}; do
+		fields=(${=unit})
+		loaded[$fields[1]]="$fields[2] $fields[3]"
+	done
+
+	local -a candidates
+	candidates=(
+		${${(f)"$(__systemctl list-unit-files --state enabled,enabled-runtime,linked,linked-runtime,static,indirect,disabled,generated,transient $pattern)"}%%[[:space:]]*}
+		${(k)loaded}
+	)
+
+	_sys_startable_units=()
+	for unit in ${(u)candidates:#*@.*}; do
+		# Devices and scopes can never be started manually
+		[[ $unit == *.(device|scope) ]] && continue
+		# Unloaded unit files are inactive. Loaded units must be loadable and inactive or failed.
+		[[ -z ${loaded[$unit]} || ${loaded[$unit]} == loaded\ (inactive|failed) ]] || continue
+		_sys_startable_units+=($unit)
+	done
+}
+
 
 # --------------------------------------------------------------------------------
 # ZSH Options

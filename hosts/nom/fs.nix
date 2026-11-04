@@ -15,18 +15,8 @@ in
         content = {
           type = "gpt";
           partitions = {
+            efi = lib.disko.gpt.partEfi "1G";
             rpool = lib.disko.gpt.partLuksZfs disks.m2-ssd "rpool" "100%";
-          };
-        };
-      };
-      boot-ssd = {
-        type = "disk";
-        device = "/dev/disk/by-id/${disks.boot-ssd}";
-        content = {
-          type = "gpt";
-          partitions = {
-            efi = lib.disko.gpt.partEfi "8G";
-            swap = lib.disko.gpt.partSwap "100%";
           };
         };
       };

@@ -32,12 +32,14 @@ in
         IdentityFile = [ "~/.ssh/yubikey.pub" ];
       };
       # Secondary GitHub account: clone with git@github3:<owner>/<repo>.git
-      # IdentityFile accumulates with the one from "*", but this key is listed first,
-      # so GitHub authenticates with it before the yubikey is ever offered.
+      # IdentityFile accumulates with the yubikey from "*", and ssh always offers
+      # agent-held keys first, so GitHub would accept the yubikey (main account).
+      # Disabling the agent here leaves the yubikey unusable and this key wins.
       "github3" = {
         HostName = "github.com";
         User = "git";
         IdentityFile = [ "~/.ssh/id_ed25519" ];
+        IdentityAgent = "none";
       };
     }
     // lib.mapAttrs (_: toDirectives) config.userSecrets.ssh.matchBlocks;

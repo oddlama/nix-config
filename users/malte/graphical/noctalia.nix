@@ -1,22 +1,24 @@
 {
-  inputs,
-  pkgs,
-  ...
-}:
-{
-  imports = [
-    inputs.noctalia.homeModules.default
-  ];
-
   home.persistence."/state".directories = [
     ".cache/noctalia"
+    # Settings changed in the UI are stored in settings.toml here, on top of the declarative config.toml
+    ".local/state/noctalia"
   ];
 
   programs.niri.settings = {
     layer-rules = [
       {
-        matches = [ { namespace = "^noctalia-wallpaper*"; } ];
+        matches = [ { namespace = "^noctalia-wallpaper"; } ];
         place-within-backdrop = true;
+      }
+    ];
+
+    window-rules = [
+      {
+        matches = [ { app-id = "^dev\\.noctalia\\.Noctalia$"; } ];
+        open-floating = true;
+        default-column-width.fixed = 1080;
+        default-window-height.fixed = 920;
       }
     ];
 
@@ -28,176 +30,11 @@
     debug.honor-xdg-activation-with-invalid-serial = [ ];
   };
 
-  programs.noctalia-shell = {
-    # FIXME: remove once noctalia-qs builds against Qt >= 6.12 (or when migrating to the noctalia rewrite)
-    package = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
-      quickshell =
-        inputs.noctalia.inputs.noctalia-qs.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs
-          (old: {
-            patches = (old.patches or [ ]) ++ [ ../../../pkgs/quickshell-qt-6.12.patch ];
-          });
-    };
+  programs.noctalia = {
     enable = true;
     systemd.enable = true;
-
-    settings = {
-      audio = {
-        cavaFrameRate = 60;
-        volumeOverdrive = true;
-      };
-      bar = {
-        density = "compact";
-        marginHorizontal = 0.2;
-        marginVertical = 0.1;
-        position = "bottom";
-        showCapsule = false;
-        showOutline = false;
-        transparent = false;
-        outerCorners = false;
-        widgets = {
-          center = [
-            {
-              id = "Tray";
-              blacklist = [ ];
-              colorizeIcons = false;
-              drawerEnabled = false;
-              hidePassive = false;
-              pinned = [ ];
-            }
-            {
-              id = "Workspace";
-              characterCount = 10;
-              colorizeIcons = false;
-              enableScrollWheel = false;
-              followFocusedScreen = false;
-              hideUnoccupied = false;
-              labelMode = "name";
-              showApplications = false;
-              showLabelsOnlyWhenOccupied = false;
-            }
-          ];
-          left = [
-            {
-              id = "ControlCenter";
-              colorizeDistroLogo = false;
-              colorizeSystemIcon = "none";
-              customIconPath = "";
-              enableColorization = false;
-              icon = "noctalia";
-              useDistroLogo = true;
-            }
-            { id = "WallpaperSelector"; }
-            {
-              id = "Spacer";
-              width = 20;
-            }
-            {
-              compactMode = false;
-              id = "SystemMonitor";
-              diskPath = "/persist";
-              showCpuTemp = true;
-              showCpuUsage = true;
-              showDiskUsage = true;
-              showGpuTemp = true;
-              showMemoryAsPercent = true;
-              showMemoryUsage = true;
-              showNetworkStats = true;
-              usePrimaryColor = false;
-            }
-            {
-              id = "AudioVisualizer";
-              colorName = "primary";
-              hideWhenIdle = false;
-              width = 200;
-            }
-          ];
-          right = [
-            {
-              id = "MediaMini";
-              hideMode = "hidden";
-              hideWhenIdle = false;
-              maxWidth = 145;
-              scrollingMode = "hover";
-              showAlbumArt = false;
-              showArtistFirst = true;
-              showProgressRing = true;
-              showVisualizer = false;
-              useFixedWidth = false;
-              visualizerType = "linear";
-            }
-            {
-              id = "Spacer";
-              width = 20;
-            }
-            {
-              id = "Microphone";
-              displayMode = "alwaysShow";
-            }
-            {
-              id = "Volume";
-              displayMode = "alwaysShow";
-            }
-            {
-              id = "Brightness";
-              displayMode = "alwaysShow";
-            }
-            {
-              id = "Spacer";
-              width = 20;
-            }
-            {
-              id = "Battery";
-              displayMode = "alwaysShow";
-              showNoctaliaPerformance = false;
-              showPowerProfiles = false;
-              warningThreshold = 20;
-            }
-            {
-              id = "NotificationHistory";
-              hideWhenZero = true;
-              showUnreadBadge = true;
-            }
-            {
-              id = "Clock";
-              customFont = "";
-              formatHorizontal = "ddd dd.MM. HH:mm:ss";
-              formatVertical = "HH mm - dd MM";
-              useCustomFont = false;
-              usePrimaryColor = false;
-            }
-          ];
-        };
-      };
-      colorSchemes = {
-        predefinedScheme = "Ayu";
-      };
-      general = {
-        animationSpeed = 1.5;
-        radiusRatio = 0.4;
-        shadowDirection = "center";
-        shadowOffsetX = 0;
-        shadowOffsetY = 0;
-        showSessionButtonsOnLockScreen = false;
-      };
-      location = {
-        firstDayOfWeek = 0;
-        name = "Munich, Germany";
-      };
-      systemMonitor = {
-        enableNvidiaGpu = true;
-      };
-      ui = {
-        fontDefault = "Segoe UI";
-        fontFixed = "JetBrains Mono";
-        panelBackgroundOpacity = 1;
-      };
-      notifications.enabled = true;
-      dock.enabled = false;
-      wallpaper = {
-        enabled = true;
-        directory = "/home/malte/.local/share/wallpapers";
-        wallpaperChangeMode = "random";
-      };
-    };
+    # Intentionally empty for now: configure via the settings UI, then move the
+    # result from ~/.local/state/noctalia/settings.toml into `settings` here.
+    settings = { };
   };
 }

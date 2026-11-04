@@ -86,11 +86,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    noctalia = {
-      url = "github:noctalia-dev/noctalia-shell";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     omnivoice-rs = {
       url = "github:oddlama/omnivoice-rs";
       inputs.nixpkgs.follows = "nixpkgs";

@@ -8,11 +8,10 @@
 }:
 {
   imports = [
-    inputs.nixos-hardware.nixosModules.common-cpu-intel
+    inputs.nixos-hardware.nixosModules.common-cpu-amd
     inputs.nixos-hardware.nixosModules.common-pc-ssd
 
     ../../config
-    ../../config/hardware/intel.nix
     ../../config/hardware/physical.nix
     ../../config/optional/zfs.nix
 
@@ -22,6 +21,10 @@
   ];
 
   topology.self.hardware.info = "AMD Ryzen Threadripper 1950X, 96GB RAM";
+
+  # Zen 1 has no amd-pstate support, so this uses acpi-cpufreq, where "powersave"
+  # would pin every core to its minimum clock. schedutil scales with load instead.
+  powerManagement.cpuFreqGovernor = "schedutil";
 
   nixpkgs.hostPlatform = "x86_64-linux";
   boot.mode = "efi";

@@ -1,5 +1,6 @@
 {
   inputs,
+  pkgs,
   ...
 }:
 {
@@ -28,6 +29,14 @@
   };
 
   programs.noctalia-shell = {
+    # FIXME: remove once noctalia-qs builds against Qt >= 6.12 (or when migrating to the noctalia rewrite)
+    package = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
+      quickshell =
+        inputs.noctalia.inputs.noctalia-qs.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs
+          (old: {
+            patches = (old.patches or [ ]) ++ [ ../../../pkgs/quickshell-qt-6.12.patch ];
+          });
+    };
     enable = true;
     systemd.enable = true;
 

@@ -37,7 +37,7 @@ in
     # Needed for gtk
     programs.dconf.enable = true;
     # Required for gnome3 pinentry
-    services.dbus.packages = [ pkgs.gcr ];
+    services.dbus.packages = [ pkgs.gcr_3 ];
     services.printing.enable = true;
     services.printing.drivers = [ pkgs.epson-escpr ];
 

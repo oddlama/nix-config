@@ -23,6 +23,8 @@
 
   programs.nixvim = {
     enable = true;
+    # Use home-manager's (= our global) pkgs instead of letting nixvim construct its own instance
+    nixpkgs.useGlobalPackages = true;
 
     # TODO for wayland:
     # clipboard.providers.wl-copy.enable = true;

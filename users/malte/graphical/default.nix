@@ -83,6 +83,7 @@
       ".config/gh"
       ".config/gh-dash"
       ".config/gpu-screen-recorder"
+      ".config/herdr"
       ".config/obsidian"
       ".config/spotify"
       ".config/nrfconnect"

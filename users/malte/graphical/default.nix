@@ -12,6 +12,7 @@
     ./signal.nix
     ./theme.nix
     ./thunderbird.nix
+    ./unifi-endpoint.nix
 
     # X11
     ./i3.nix

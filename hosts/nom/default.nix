@@ -56,6 +56,9 @@
     nvidiaBusId = "PCI:1:0:0";
   };
 
+  # UniFi Identity VPN. Its WiFi/802.1X features need NetworkManager, but nom uses iwd.
+  programs.unifi-endpoint.enable = true;
+
   services.mullvad-vpn.enable = true;
   environment.persistence."/persist".directories = [
     {

@@ -2,7 +2,7 @@
 
 `modules/antirion.nix` is imported by `modules/default.nix`; the overlay provides
 `pkgs.antirion`. The module does not enable itself; `hosts/sire/antirion.nix`
-now enables it on `sire`. See [the host runbook](../hosts/sire/antirion.md).
+enables it on `sire`, and `hosts/sire/antirion-proxy.nix` holds the nginx config shared by both proxy frontends.
 
 The module is intentionally tailored to a single gateway:
 

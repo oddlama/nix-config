@@ -26,11 +26,13 @@ Make sure to utilize the github search if you know what you need!
   Some of these simplify the option interface of existing options, others add new funtionality
   to existing modules.
 
-- `nix/` library functions and flake plumbing
-  - `generate-installer-package.nix` Helper package that that will be available in our iso images. This provides the `install-system` command that will do a full install including partitioning.
-  - `hosts.nix` Loads all host declarations from host.toml and defines the actual hosts in nixosConfigurations.
-  - `installer-configuration.nix` Our modified ISO installer image config (sets up ssh, contains the installer package, ...)
-  - `rage-decrypt-and-cache.sh` Auxiliary script for repository-wide secrets that decrypts a file and caches the output in /tmp
+- `flake/` flake-parts modules and flake plumbing
+  - `hosts.nix` Turns every directory in `hosts/` into a `nixosConfigurations` (and `nixosConfigurationsMinimal`) entry, and collects all hosts and their guests into `nodes`.
+  - `pkgs.nix` Instantiates nixpkgs with the overlays from `pkgs/` (plus a CUDA-enabled `pkgsCuda`).
+  - `devshell.nix` Devshell with formatting, pre-commit hooks and the `build`/`deploy` helpers.
+  - `agenix-rekey.nix` Master identities and agenix-rekey setup.
+  - `iso.nix` and `installer-configuration.nix` Our modified installer image (sets up ssh, ...). The `install-system` command itself is defined in `config/installer.nix`.
+  - `extra-builtins.nix` and `rage-decrypt-and-cache.sh` Decrypt repository-wide secrets at evaluation time via `builtins.exec`, caching the output in `/var/tmp/nix-import-encrypted`.
 
 - `pkgs/` Custom packages and scripts
 

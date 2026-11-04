@@ -14,7 +14,7 @@ including my homelab, external servers and my development machines.
 💻 | Laptop | nom | Gigabyte AERO 15-W8 (i7-8750H) | My laptop and my main portable development machine <sub>Framework when?</sub>
 🖥️ | Desktop | kroma | PC (AMD Ryzen 9 5900X) | Main workstation and development machine, also for some occasional gaming
 🖥️ | Server | ward | ODROID H3 | Energy efficient SBC for my home firewall and some lightweight services using containers and microvms.
-🖥️ | Server | sire | Threadripper 1950X | Home media server and data storage. Runs all services as microvms.
+🖥️ | Server | sire | Threadripper 1950X | Home media server and data storage. Runs most services as microvms, GPU workloads (LLMs, TTS, OCR) on the host.
 🖥️ | Server | sausebiene | Intel N100 | Home automation and IoT network isolation
 🥔 | Server | zackbiene | ODROID N2+ | Decomissioned. Old home assistant board
 ☁️  | VPS | sentinel | Hetzner Cloud server | Proxies and protects my local services
@@ -36,7 +36,7 @@ I've included the major components in the lists below.
 🔋 Bar | noctalia | [Link](./users/malte/graphical/noctalia.nix) | Statusbar, wallpaper and notifications
 🌐 Browser | Firefox | [Link](./users/malte/graphical/firefox.nix) | Firefox with many privacy settings and betterfox
 🖊️ Editor | Neovim | [Link](./users/malte/neovim) | Extensive neovim configuration, made with nixvim
-📜 Manpager | Neovim | [Link](./users/config/manpager.nix) | Isolated neovim as manpager via nixvim
+📜 Manpager | Neovim | [Link](./users/malte/dev/manpager.nix) | Isolated neovim as manpager via nixvim
 📷 Screenshots | Custom based on grimblast | [Link](./pkgs/scripts) | Custom scripts utilizing grimblast for [QR code detection](./pkgs/scripts/screenshot-area-scan-qr.nix) and [OCR / satty editing](./pkgs/scripts/screenshot-area.nix)
 🎮 Gaming | Steam & Bottles | [Link](./users/malte/graphical/games) | Setup for gaming
 📫 Mail | Thunderbird | [Link](./users/malte/graphical/thunderbird.nix) | Your regular thunderbird setup
@@ -55,10 +55,10 @@ I've included the major components in the lists below.
 🗓️ CalDAV/CardDAV | Radicale | [Link](./hosts/ward/guests/radicale.nix) | Contacts, Calender and Tasks synchronization
 📁 NAS | Samba | [Link](./hosts/sire/guests/samba.nix) | Network attached storage. Cross-integration with paperless
 🥗 Recipes | Mealie | [Link](./hosts/ward/guests/mealie.nix) | Recipe manager and meal planner
-🏠 Home Automation | Home Assistant | [Link](./hosts/zackbiene/home-assistant.nix) | Automation with Home Assistant and many related services
+🏠 Home Automation | Home Assistant | [Link](./hosts/sausebiene/home-assistant.nix) | Automation with Home Assistant and many related services
 📧 Mailserver | Stalwart | [Link](./hosts/envoy/stalwart-mail.nix) | Modern mail server setup with custom self-service alias management including Bitwarden integration
 🧱 Minecraft | PaperMC | [Link](./hosts/sire/guests/minecraft.nix) | Minecraft game server. Autostart on connect, systemd service with background console, automatic backups
-🐒 Local LLM | llama-cpp & open-webui | [Link](./hosts/sire/guests/ai.nix) | Local LLM and AI Chat
+🐒 Local LLM | llama-cpp & open-webui | [Link](./hosts/sire/ai.nix) | Local LLM on the host GPUs, [open-webui](./hosts/sire/guests/ai.nix) for AI Chat
 📊 Dashboard | Grafana | [Link](./hosts/sire/guests/grafana.nix) | Logs and metrics dashboard and alerting
 📔 Logs DB | Loki | [Link](./hosts/sire/guests/loki.nix) | Central log aggregation service
 📔 Logs Agent | Promtail | [Link](./modules/promtail.nix) | Log shipping agent
@@ -102,7 +102,7 @@ but here's a quick breakdown of the what you will find where.
 `config/optional/` | optional configuration included by hosts
 `hosts/<hostname>` | top-level configuration for `<hostname>`
 `modules/` | classical reusable configuration modules
-`nix/` | library functions and flake plumbing
+`flake/` | flake-parts modules (hosts, packages, devshell, secrets plumbing)
 `pkgs/` | Custom packages and scripts
 `secrets/` | Global secrets and age identities
 `users/` | User configuration and dotfiles
@@ -113,24 +113,23 @@ but here's a quick breakdown of the what you will find where.
 
 ... incomplete.
 
-- Add <name> to `hosts` in `flake.nix`
-- Create hosts/<name>
+- Create hosts/<name> (every directory in `hosts/` automatically becomes a host)
 - Fill net.nix
 - Fill fs.nix (you need to know the device /dev/by-id paths in advance for partitioning to work!)
 - Run `agenix generate` and `agenix rekey` (create's dummy secrets for initial deploy)
 
 #### Initial deploy
 
-- Create a bootable iso disk image with `nix build --print-out-paths --no-link .#images.<target-system>.live-iso`, dd it to a stick and boot
+- Create a bootable iso disk image with `nix build --print-out-paths --no-link .#packages.<target-system>.live-iso`, dd it to a stick and boot
 - (Alternative) Use an official NixOS live-iso and setup ssh manually
-- Copy the installer from a local machine to the live system with `nix copy --to <target> .#nixosConfigurationsMinimal.config.system.build.installFromLive`
+- Copy the installer from a local machine to the live system with `nix copy --to <target> .#nixosConfigurationsMinimal.<host>.config.system.build.installFromLive`
 
 Afterwards:
 
 - Run `install-system` in the live environment, export your zfs pools and reboot
 - Retrieve the new host identity by using `ssh-keyscan <host/ip> | grep -o 'ssh-ed25519.*' > hosts/<host>/secrets/host.pub`
 - (If the host has guests, also retrieve their identities!)
-- Rekey the secrets for the new identity `nix run .#rekey`
+- Rekey the secrets for the new identity with `agenix rekey`
 - Deploy again
 
 #### New secret

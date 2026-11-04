@@ -16,6 +16,20 @@
     )
   );
 
+  accounts.calendar = {
+    # Required by home-manager, but unused since Thunderbird keeps its own calendar cache
+    basePath = ".local/share/calendars";
+    accounts = lib.flip lib.mapAttrs (config.userSecrets.accounts.calendar or { }) (
+      _n: v:
+      lib.recursiveUpdate v {
+        thunderbird = {
+          enable = true;
+          profiles = [ "personal" ];
+        };
+      }
+    );
+  };
+
   programs.thunderbird = {
     enable = true;
 

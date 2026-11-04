@@ -13,29 +13,28 @@ in
   ];
 
   home.sessionVariables.CUDA_CACHE_PATH = "\${HOME}/.cache/nv";
-  home.persistence."/state".directories =
-    [
-      ".cache/fontconfig"
-      ".cache/nix" # nix eval cache
-      ".config/dconf" # some apps store their configuration using dconf
-    ]
-    ++ optionals nixosConfig.hardware.nvidia.modesetting.enable [
-      ".cache/nvidia" # GLCache
-      ".cache/nv"
-    ]
-    ++ optionals nixosConfig.services.pipewire.enable [
-      ".local/state/wireplumber"
-    ]
-    ++ optionals nixosConfig.programs.steam.enable [
-      ".local/share/Steam"
-    ];
+  home.persistence."/state".directories = [
+    ".cache/fontconfig"
+    ".cache/nix" # nix eval cache
+    ".config/dconf" # some apps store their configuration using dconf
+    ".local/state/nix/profiles" # imperative user profiles (nix profile), ~/.nix-profile links here
+  ]
+  ++ optionals nixosConfig.hardware.nvidia.modesetting.enable [
+    ".cache/nvidia" # GLCache
+    ".cache/nv"
+  ]
+  ++ optionals nixosConfig.services.pipewire.enable [
+    ".local/state/wireplumber"
+  ]
+  ++ optionals nixosConfig.programs.steam.enable [
+    ".local/share/Steam"
+  ];
 
-  home.persistence."/persist".directories =
-    [
-      ".local/share/nix" # Repl history
-    ]
-    ++ optionals nixosConfig.programs.steam.enable [
-      ".local/share/Steam/userdata"
-      ".steam"
-    ];
+  home.persistence."/persist".directories = [
+    ".local/share/nix" # Repl history
+  ]
+  ++ optionals nixosConfig.programs.steam.enable [
+    ".local/share/Steam/userdata"
+    ".steam"
+  ];
 }

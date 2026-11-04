@@ -160,6 +160,7 @@
   };
 
   home.pointerCursor = {
+    enable = true;
     name = "Bibata-Modern-Ice";
     size = 20;
     package = pkgs.bibata-cursors;

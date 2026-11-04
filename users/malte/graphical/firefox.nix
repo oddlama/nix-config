@@ -190,6 +190,7 @@ in
 
   home.persistence."/persist".directories = [
     ".config/mozilla"
+    (lib.warn "firefox: still persisting legacy ~/.mozilla, drop it once every host has moved its profile to ~/.config/mozilla" ".mozilla")
   ];
 
   xdg.mimeApps.defaultApplications = {

@@ -61,5 +61,8 @@
       somark-oxr-api = uidGid 950;
       somark-oxr-watchdog = uidGid 949;
       otbr = uidGid 948;
+      wpa_supplicant = uidGid 947;
+      nm-iodine.uid = 946;
+      unifi-endpoint.gid = 945;
     };
 }

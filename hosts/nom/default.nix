@@ -69,5 +69,17 @@
     }
   ];
 
+  # Key for the secondary GitHub account (github3 in users/malte/ssh.nix)
+  environment.persistence."/persist".users.malte.files = [
+    {
+      file = ".ssh/id_ed25519";
+      parentDirectory.mode = "0700";
+    }
+    {
+      file = ".ssh/id_ed25519.pub";
+      parentDirectory.mode = "0700";
+    }
+  ];
+
   topology.self.icon = "devices.laptop";
 }

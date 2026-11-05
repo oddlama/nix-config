@@ -23,10 +23,6 @@ in
     pkgs.wl-clipboard-rs
   ];
 
-  services.gnome-keyring.enable = true;
-  home.persistence."/persist".directories = [
-    ".local/share/keyrings" # Secret service storage (saved app credentials)
-  ];
   xdg.portal = {
     enable = true;
     xdgOpenUsePortal = true;
@@ -37,13 +33,11 @@ in
       ];
       "org.freedesktop.impl.portal.Access" = [ "gtk" ];
       "org.freedesktop.impl.portal.Notification" = [ "gtk" ];
-      "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
       "org.freedesktop.impl.portal.FileChooser" = [ "gtk" ];
       "org.freedesktop.impl.portal.ScreenCast" = [ "xdg-desktop-portal-gnome" ];
       "org.freedesktop.impl.portal.Screenshot" = [ "xdg-desktop-portal-gnome" ];
     };
     extraPortals = [
-      pkgs.gnome-keyring
       pkgs.xdg-desktop-portal-gtk
       pkgs.xdg-desktop-portal-gnome
     ];

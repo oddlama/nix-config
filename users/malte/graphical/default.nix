@@ -9,6 +9,7 @@
     ./discord.nix
     ./firefox.nix
     ./kitty.nix
+    ./secret-service.nix
     ./signal.nix
     ./theme.nix
     ./thunderbird.nix

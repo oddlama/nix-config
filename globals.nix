@@ -51,6 +51,7 @@ in
         cidrv6 = "fd00:43::/120";
         hosts = {
           envoy.id = 135;
+          obenix.id = 60;
           sentinel.id = 29;
           sire-affine.id = 93;
           sire-linkwarden.id = 43;

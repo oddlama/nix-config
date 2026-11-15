@@ -16,6 +16,7 @@ including my homelab, external servers and my development machines.
 🖥️ | Server | ward | ODROID H3 | Energy efficient SBC for my home firewall and some lightweight services using containers and microvms.
 🖥️ | Server | sire | Threadripper 1950X | Home media server and data storage. Runs most services as microvms, GPU workloads (LLMs, TTS, OCR) on the host.
 🖥️ | Server | sausebiene | Intel N100 | Home automation and IoT network isolation
+🖥️ | Server | obenix | ODROID H5 | Home automation for the apartment
 🥔 | Server | zackbiene | ODROID N2+ | Decomissioned. Old home assistant board
 ☁️  | VPS | sentinel | Hetzner Cloud server | Proxies and protects my local services
 ☁️  | VPS | envoy | Hetzner Cloud server | Mailserver

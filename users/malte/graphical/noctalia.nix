@@ -45,13 +45,13 @@
         padding = 10;
         margin_ends = 0;
         panel_overlap = 2;
+        radius = 0;
         start = [
           "control-center"
           "session"
           "wallpaper"
           "audio_visualizer"
           "media"
-          "spacer_4"
           "cpu"
           "ram"
           "temp"
@@ -63,10 +63,10 @@
           "spacer_5"
           "workspaces"
           "spacer_7"
-          "network_rx"
-          "network_tx"
         ];
         end = [
+          "network_rx"
+          "network_tx"
           "network"
           "bluetooth"
           "brightness"
@@ -104,12 +104,21 @@
         };
       };
 
-      wallpaper.automation = {
-        enabled = true;
-        interval_seconds = 600;
+      wallpaper = {
+        directory = "~/.local/share/wallpapers";
+        automation = {
+          enabled = true;
+          interval_seconds = 600;
+        };
       };
 
       widget = {
+        audio_visualizer = {
+          bands = 64;
+          mirrored = false;
+          show_when_idle = true;
+          width = 110;
+        };
         control-center = {
           color = "tertiary";
           glyph = "snowflake";
@@ -151,10 +160,6 @@
 
         spacer_2.type = "spacer";
         spacer_3.type = "spacer";
-        spacer_4 = {
-          type = "spacer";
-          length = 32;
-        };
         spacer_5.type = "spacer";
         spacer_6.type = "spacer";
         spacer_7.type = "spacer";

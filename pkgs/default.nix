@@ -39,6 +39,22 @@ inputs: [
           wrapProgram $out/bin/nvim --add-flags "--clean"
         '';
       });
+      # Backport of https://github.com/NixOS/nixpkgs/pull/589961 (NixOS/nixpkgs@203fe58): nginx 1.30.7
+      # fixes several CVEs (HTTP/2 + HTTP/3 UAFs, try_files/alias overflow, ...), see
+      # https://nginx.org/en/CHANGES-1.30. Turns into a warning once our nixpkgs input has caught
+      # up, drop it then.
+      nginxStable =
+        if prev.lib.versionOlder prev.nginxStable.version "1.30.7" then
+          prev.nginxStable.overrideAttrs (_: rec {
+            version = "1.30.7";
+            nginxVersion = version;
+            src = final.fetchurl {
+              url = "https://nginx.org/download/nginx-${version}.tar.gz";
+              hash = "sha256-JWW1yDcFDpWPcPsPc8SOK8pFQq00n9NW9G+wxyYQvG4=";
+            };
+          })
+        else
+          prev.lib.warn "nixpkgs ships nginx >= 1.30.7 now; drop the nginxStable backport from pkgs/default.nix" prev.nginxStable;
       # Backport of https://github.com/NixOS/nixpkgs/pull/580626 (moonraker 1.13.4 is marked broken).
       # Drop this and ./home-assistant-moonraker once the PR has reached our nixpkgs input.
       pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [

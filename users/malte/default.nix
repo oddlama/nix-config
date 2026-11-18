@@ -60,6 +60,7 @@ lib.optionalAttrs (!minimal) {
 
       ./git.nix
       ./gpg.nix
+      ./skagent.nix
       ./ssh.nix
     ];
 

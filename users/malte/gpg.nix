@@ -72,6 +72,7 @@
   };
   services.gpg-agent = {
     enable = true;
+    # Fallback only: SSH_AUTH_SOCK points at skagent (skagent.nix)
     enableSshSupport = true;
     pinentry.package = pkgs.pinentry-gnome3;
   };

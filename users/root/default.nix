@@ -9,6 +9,7 @@
     inherit (globals.root) hashedPassword;
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA5Uq+CDy5Pmt3If5M6d8K/Q7HArU6sZ7sgoj3T521Wm"
+      "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAICB1r4qkbAwGGo/LEiEXlzFeAVr3NDUyFFLLHF9X5uhaAAAADHNzaDpwZXJzb25hbA== yubikey:12764721"
     ];
     shell = pkgs.zsh;
   };

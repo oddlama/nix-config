@@ -146,6 +146,7 @@ in
           "Mod+Alt+Left".action = consume-or-expel-window-left;
           "Mod+Alt+Right".action = consume-or-expel-window-right;
           "Mod+y".action = toggle-column-tabbed-display;
+          "Mod+Tab".action = toggle-overview;
 
           "Mod+Shift+s".action.screenshot = [ ]; # XXX : https://github.com/sodiboo/niri-flake/issues/1380
 

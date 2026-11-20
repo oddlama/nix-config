@@ -9,12 +9,9 @@ in
 {
   imports = [ inputs.skagent.homeModules.default ];
 
-  services.skagent = {
-    enable = true;
-    # skagent's own pinentry (skagent-pinentry): PIN, touch and result in one
-    # layer-shell window on niri, instead of pinentry + touch notification
-    popup.enable = true;
-  };
+  # popup.enable defaults to true: skagent-pinentry shows PIN, touch and
+  # result in one layer-shell window on niri.
+  services.skagent.enable = true;
 
   # gpg-agent's SSH support (gpg.nix) also defines sshAuthSock, which conflicts
   # with skagent. Force skagent's values so SSH_AUTH_SOCK points at it by default.

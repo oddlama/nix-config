@@ -2862,11 +2862,11 @@
         "treefmt-nix": "treefmt-nix_5"
       },
       "locked": {
-        "lastModified": 1794951426,
-        "narHash": "sha256-RCZpzXd7jgt4ThjkvrkQCcMc33Q4ji35xP6baU8Zy/U=",
+        "lastModified": 1795135200,
+        "narHash": "sha256-h/si7KmqXMDilI7BFERmG6z13QDUmF2lL2DbXUiqBJQ=",
         "owner": "oddlama",
         "repo": "skagent",
-        "rev": "a6efc3c2e2bd6a468d5d77ec0ace7c1926164704",
+        "rev": "d88e86f7b40e689052905d8c39821a299a18fcb1",
         "type": "github"
       },
       "original": {

@@ -3,6 +3,7 @@
   pkgs,
   inputs,
   config,
+  options,
   nixosConfig,
   ...
 }:
@@ -146,6 +147,7 @@ in
           "Mod+Alt+Left".action = consume-or-expel-window-left;
           "Mod+Alt+Right".action = consume-or-expel-window-right;
           "Mod+y".action = toggle-column-tabbed-display;
+          # Mod+Tab and Mod+Shift+Tab are removed from the window switcher below.
           "Mod+Tab".action = toggle-overview;
 
           "Mod+Shift+s".action.screenshot = [ ]; # XXX : https://github.com/sodiboo/niri-flake/issues/1380
@@ -401,5 +403,29 @@ in
           );
       })
     ];
+
+    # niri-flake has no option for the recent-windows switcher, so append its
+    # KDL to the generated config. A custom binds block replaces all default
+    # switcher binds, which frees Mod+Tab and Mod+Shift+Tab.
+    config =
+      let
+        inherit (inputs.niri.lib.kdl) plain leaf;
+        switcher =
+          key: action: properties:
+          plain key [ (leaf action properties) ];
+      in
+      options.programs.niri.config.default
+      ++ [
+        (plain "recent-windows" [
+          (plain "binds" [
+            (switcher "Alt+Tab" "next-window" { })
+            (switcher "Alt+Shift+Tab" "previous-window" { })
+            (switcher "Alt+grave" "next-window" { filter = "app-id"; })
+            (switcher "Alt+Shift+grave" "previous-window" { filter = "app-id"; })
+            (switcher "Mod+grave" "next-window" { filter = "app-id"; })
+            (switcher "Mod+Shift+grave" "previous-window" { filter = "app-id"; })
+          ])
+        ])
+      ];
   };
 }

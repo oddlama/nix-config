@@ -3,7 +3,6 @@
   pkgs,
   inputs,
   config,
-  options,
   nixosConfig,
   ...
 }:
@@ -104,7 +103,12 @@ in
           workspace-auto-back-and-forth = false;
         };
 
-        gestures.hot-corners.enable = false;
+        gestures.hot-corners = {
+          top-left = false;
+          top-right = false;
+          bottom-left = false;
+          bottom-right = false;
+        };
 
         binds = with config.lib.niri.actions; {
           "Mod+t".action = spawn "kitty";
@@ -147,7 +151,6 @@ in
           "Mod+Alt+Left".action = consume-or-expel-window-left;
           "Mod+Alt+Right".action = consume-or-expel-window-right;
           "Mod+y".action = toggle-column-tabbed-display;
-          # Mod+Tab and Mod+Shift+Tab are removed from the window switcher below.
           "Mod+Tab".action = toggle-overview;
 
           "Mod+Shift+s".action.screenshot = [ ]; # XXX : https://github.com/sodiboo/niri-flake/issues/1380
@@ -183,6 +186,17 @@ in
             action = spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle";
             allow-when-locked = true;
           };
+        };
+
+        # Setting any recent-windows binds replaces all of niri's defaults. This is
+        # the default set without Mod+Tab and Mod+Shift+Tab.
+        recent-windows.binds = with config.lib.niri.actions.recent-windows; {
+          "Alt+Tab".action = next-window;
+          "Alt+Shift+Tab".action = previous-window;
+          "Alt+grave".action = next-window { filter = "app-id"; };
+          "Alt+Shift+grave".action = previous-window { filter = "app-id"; };
+          "Mod+grave".action = next-window { filter = "app-id"; };
+          "Mod+Shift+grave".action = previous-window { filter = "app-id"; };
         };
 
         window-rules = [
@@ -403,29 +417,5 @@ in
           );
       })
     ];
-
-    # niri-flake has no option for the recent-windows switcher, so append its
-    # KDL to the generated config. A custom binds block replaces all default
-    # switcher binds, which frees Mod+Tab and Mod+Shift+Tab.
-    config =
-      let
-        inherit (inputs.niri.lib.kdl) plain leaf;
-        switcher =
-          key: action: properties:
-          plain key [ (leaf action properties) ];
-      in
-      options.programs.niri.config.default
-      ++ [
-        (plain "recent-windows" [
-          (plain "binds" [
-            (switcher "Alt+Tab" "next-window" { })
-            (switcher "Alt+Shift+Tab" "previous-window" { })
-            (switcher "Alt+grave" "next-window" { filter = "app-id"; })
-            (switcher "Alt+Shift+grave" "previous-window" { filter = "app-id"; })
-            (switcher "Mod+grave" "next-window" { filter = "app-id"; })
-            (switcher "Mod+Shift+grave" "previous-window" { filter = "app-id"; })
-          ])
-        ])
-      ];
   };
 }

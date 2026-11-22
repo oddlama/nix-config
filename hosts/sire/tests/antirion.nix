@@ -1,4 +1,5 @@
-# Uses sire's evaluated settings and the same nginx routes as both frontends.
+# Uses sire's evaluated settings and the shared nginx routes, including the
+# admin plane as routed on ward-web-proxy.
 {
   pkgs,
   agenix,
@@ -47,6 +48,8 @@ pkgs.testers.runNixOSTest {
           enable = true;
           package = pkgs.antirion;
           settings = lib.recursiveUpdate gatewaySettings {
+            # sire binds its proxy-home WireGuard address, which this VM lacks.
+            admin.listen = "0.0.0.0:8081";
             security.client_ip.trusted_proxies = [ "${nodes.proxy.networking.primaryIPAddress}/32" ];
             keys = {
               chatonly = {
@@ -92,34 +95,52 @@ pkgs.testers.runNixOSTest {
             RuntimeDirectory = "mock-ai";
           };
         };
-        networking.firewall.allowedTCPPorts = [ 8080 ];
+        networking.firewall.allowedTCPPorts = [
+          8080
+          8081
+        ];
         environment.systemPackages = [
           pkgs.curl
           pkgs.sqlite
         ];
         virtualisation.memorySize = 2048;
       };
-    proxy = { nodes, ... }: {
-      services.nginx = {
-        enable = true;
-        recommendedProxySettings = true;
-      }
-      // (import ../antirion-proxy.nix {
-        domain = "ai.example.test";
-        upstream = "${nodes.gateway.networking.primaryIPAddress}:8080";
-      });
-      networking.firewall.allowedTCPPorts = [ 80 ];
-      environment.systemPackages = [ pkgs.curl ];
-      virtualisation.memorySize = 512;
-    };
+    proxy =
+      { config, nodes, ... }:
+      {
+        services.nginx = {
+          enable = true;
+          recommendedProxySettings = true;
+        }
+        // (import ../antirion-proxy.nix {
+          domain = "ai.example.test";
+          upstream = "${nodes.gateway.networking.primaryIPAddress}:8080";
+          admin = {
+            upstream = "${nodes.gateway.networking.primaryIPAddress}:8081";
+            # Stands in for the home VLAN: requests to the proxy's own address
+            # originate from it, requests to loopback do not. The test network
+            # itself uses 2001:db8::/32, so the IPv6 entry is unused ULA space.
+            allow = [
+              "${config.networking.primaryIPAddress}/32"
+              "fd00:a5::/64"
+            ];
+          };
+        });
+        networking.firewall.allowedTCPPorts = [ 80 ];
+        environment.systemPackages = [ pkgs.curl ];
+        virtualisation.memorySize = 512;
+      };
   };
   testScript = ''
     import json
+    import re
     import shlex
 
-    def request(path, key=None, payload=None, args=None):
+    def request(path, key=None, payload=None, args=None, home=False):
+        # Requests to the proxy's own address stand in for a home VLAN client.
+        target = home_address if home else "127.0.0.1"
         command = ["curl", "-sS", "--max-time", "20", "-w", "\\n%{http_code}",
-                   "-H", "Host: ai.example.test", "http://127.0.0.1" + path]
+                   "-D", "/tmp/headers", "-H", "Host: ai.example.test", f"http://{target}{path}"]
         if key:
             command += ["-H", "Authorization: Bearer " + key]
         if payload is not None:
@@ -127,6 +148,13 @@ pkgs.testers.runNixOSTest {
         command += args or []
         body, code = proxy.succeed(shlex.join(command)).rsplit("\n", 1)
         return int(code), body
+
+    def header(name):
+        for line in proxy.succeed("cat /tmp/headers").splitlines():
+            key, _, value = line.partition(":")
+            if key.strip().lower() == name:
+                return value.strip()
+        return None
 
     def query(sql):
         return json.loads(gateway.succeed(shlex.join([
@@ -138,6 +166,9 @@ pkgs.testers.runNixOSTest {
     gateway.wait_for_unit("antirion.service")
     gateway.wait_until_succeeds("curl -fsS http://127.0.0.1:8080/-/readyz")
     proxy.wait_for_unit("nginx.service")
+    # Not the hostname, which resolves to 127.0.0.2 on the machine itself.
+    home_address = proxy.wait_until_succeeds(
+        "ip -4 -o addr show dev eth1 | grep -m1 inet").split()[3].split("/")[0]
     keys = {name: gateway.succeed("cat /run/agenix/antirion-" + name).strip()
             for name in ["operator", "chatonly", "limited"]}
     key = keys["operator"]
@@ -146,18 +177,51 @@ pkgs.testers.runNixOSTest {
         for path in ["/v1/models", "/oxr/v1/artifacts/job/image.png", "/v1/artifacts/job/image.png"]:
             assert request(path)[0] == 401, path
         assert request("/v1/models", "invalid-key")[0] == 401
+        # The console is same-origin now; the former SSH-tunnel origin is refused.
         assert request("/v1/audio/speech", args=[
             "-X", "OPTIONS", "-H", "Origin: http://localhost:8081",
             "-H", "Access-Control-Request-Method: POST",
             "-H", "Access-Control-Request-Headers: authorization,content-type"
-        ])[0] == 204
-        for path in ["/", "/ui/", "/admin/v1/keys", "/health"]:
+        ])[0] == 403
+        for path in ["/", "/health"]:
             assert request(path, key)[0] == 404, path
-        for port in [8081, 11434, 11435, 11436, 11437, 11438]:
+        for port in [11434, 11435, 11436, 11437, 11438]:
             proxy.fail(f"curl -fsS --connect-timeout 2 --max-time 2 http://gateway:{port}/")
         code, body = request("/v1/models", key)
         assert code == 200, body
         assert {m["id"] for m in json.loads(body)["data"]} == {"orcarouter-qwen38-27b", "omnivoice-tts"}
+
+    with subtest("admin console and API only from the allowed network"):
+        bootstrap = {"token": "${bootstrap}"}
+        for path in ["/ui/", "/ui/_next/x.js", "/admin/v1/auth/me"]:
+            assert request(path)[0] == 403, path
+        assert request("/admin/v1/auth/session", payload=bootstrap)[0] == 403
+        assert request("/ui", home=True)[0] == 301 and (header("location") or "").endswith("/ui/")
+        code, body = request("/ui/", home=True)
+        assert code == 200 and "<html" in body.lower(), (code, body)
+        assets = re.findall(r'/ui/_next/[^"]+[.]js', body)
+        assert assets and request(assets[0], home=True)[0] == 200, assets
+        # Only the console and the Admin API: probes, metrics, MCP and SCIM stay unrouted.
+        for path in ["/-/readyz", "/metrics", "/admin/mcp", "/scim/v2", "/uix"]:
+            assert request(path, home=True)[0] == 404, path
+
+        code, body = request("/admin/v1/auth/session", payload=bootstrap, home=True)
+        assert code == 200, (code, body)
+        session = re.match(r"antirion_session=([^;]+);", header("set-cookie") or "")
+        assert session, header("set-cookie")
+        cookie = ["-H", "Cookie: antirion_session=" + session.group(1)]
+        assert request("/admin/v1/auth/me", args=cookie, home=True)[0] == 200
+        assert request("/admin/v1/auth/me", args=cookie)[0] == 403
+        assert request("/admin/v1/keys", "${bootstrap}", home=True)[0] == 200
+        # Cookie writes are refused from any origin but the configured one.
+        logout = cookie + ["-X", "POST"]
+        code, body = request("/admin/v1/auth/logout", home=True,
+                             args=logout + ["-H", "Origin: http://localhost:8081"])
+        assert code == 403 and "admin plane's origin" in body, (code, body)
+        code, body = request("/admin/v1/auth/logout", home=True,
+                             args=logout + ["-H", "Origin: ${gatewaySettings.auth.admin.public_origin}"])
+        assert code == 204, (code, body)
+        assert request("/admin/v1/auth/me", args=cookie, home=True)[0] == 401
 
     with subtest("Qwen non-streaming and SSE"):
         payload = {"model": "orcarouter-qwen38-27b",

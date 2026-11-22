@@ -21,6 +21,7 @@ let
     globals.services.part-db.domain
     globals.services.home-assistant.domain
     globals.services.music-assistant.domain
+    globals.services.antirion.domain
     "fritzbox.${globals.domains.personal}"
   ];
 in

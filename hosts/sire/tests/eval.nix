@@ -7,16 +7,30 @@ let
   c = flake.nodes.sire.config;
   settings = c.services.antirion.settings;
   domain = "ai.${flake.globals.domains.me}";
+  homeVlan = flake.globals.net.home-lan.vlans.home;
+  wardProxyIp = flake.globals.net.home-lan.vlans.services.hosts.ward-web-proxy.ipv4;
+  adminListen = "${flake.globals.wireguard.proxy-home.hosts.sire.ipv4}:8081";
   oldDomains = map (prefix: "${prefix}.${flake.globals.domains.me}") [
     "llm"
     "tts"
   ];
+  adminRoutes = [
+    "/ui/"
+    "/admin/v1/"
+  ];
   proxyCheck =
-    name: network:
+    name: network: admin:
     let
       proxy = flake.nodes.${name}.config;
       nginx = proxy.services.nginx;
       routes = nginx.virtualHosts.${domain}.locations;
+      homeOnly =
+        route:
+        lib.hasSuffix ''
+          allow ${homeVlan.cidrv4};
+          allow ${homeVlan.cidrv6};
+          deny all;
+        '' route.extraConfig;
     in
     lib.all (a: a.assertion) proxy.assertions
     && nginx.virtualHosts.${domain}.forceSSL
@@ -32,14 +46,35 @@ let
     && routes."/oxr/".proxyPass == "http://antirion"
     && routes."/v1/artifacts/".proxyPass == "http://antirion/oxr/v1/artifacts/"
     && routes."/".return == "404"
+    && (
+      if admin then
+        builtins.attrNames nginx.upstreams.antirion-admin.servers == [ adminListen ]
+        && nginx.upstreams.antirion-admin.monitoring.enable
+        && lib.all (
+          route: routes.${route}.proxyPass == "http://antirion-admin" && homeOnly routes.${route}
+        ) adminRoutes
+      else
+        !(nginx.upstreams ? antirion-admin)
+        && lib.all (route: !(routes ? ${route})) adminRoutes
+        && lib.all (route: route.proxyPass != "http://antirion-admin") (builtins.attrValues routes)
+    )
     &&
       c.networking.nftables.firewall.rules."wg-${network}-node-${name}-to-local".allowedTCPPorts
-      == [ 8080 ];
+      == [ 8080 ] ++ lib.optional admin 8081;
   checks = {
     hostAssertions = lib.all (a: a.assertion) c.assertions;
     enabled = c.services.antirion.enable;
     disabledOnMinimal = !flake.nixosConfigurationsMinimal.sire.config.services.antirion.enable;
-    listeners = settings.server.listen == "0.0.0.0:8080" && settings.admin.listen == "127.0.0.1:8081";
+    listeners = settings.server.listen == "0.0.0.0:8080" && settings.admin.listen == adminListen;
+    sharedOrigin =
+      settings.auth.admin.public_origin == "https://${domain}"
+      && settings.admin.ui.data_plane_url == "https://${domain}"
+      && !(settings.security ? cors);
+    homeDns =
+      lib.elem domain flake.nodes.ward.config.networking.hosts.${wardProxyIp}
+      && lib.any (
+        rewrite: rewrite.domain == domain && rewrite.answer == wardProxyIp && rewrite.enabled
+      ) flake.nodes.ward-adguardhome.config.services.adguardhome.settings.filtering.rewrites;
     backendPorts =
       c.services.llama-cpp.settings.port == 11434
       && c.services.omnivoice.port == 11435
@@ -72,8 +107,8 @@ let
     persistence = lib.any (
       d: d.directory == "/var/lib/private/antirion" && d.mode == "0700"
     ) c.environment.persistence."/persist".directories;
-    wardProxy = proxyCheck "ward-web-proxy" "proxy-home";
-    sentinelProxy = proxyCheck "sentinel" "proxy-sentinel";
+    wardProxy = proxyCheck "ward-web-proxy" "proxy-home" true;
+    sentinelProxy = proxyCheck "sentinel" "proxy-sentinel" false;
     oldServiceNamesRemoved =
       !(flake.globals.services ? llama-cpp) && !(flake.globals.services ? omnivoice);
     operatorKey =

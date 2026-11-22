@@ -8,11 +8,17 @@
 let
   domain = "ai.${globals.domains.me}";
   port = 8080;
+  adminPort = 8081;
   proxies = {
     ward-web-proxy = "proxy-home";
     sentinel = "proxy-sentinel";
   };
+  # The only frontend that routes the admin console, restricted to the home VLAN.
+  adminProxy = "ward-web-proxy";
   proxyAddress = name: network: globals.wireguard.${network}.hosts.${name}.ipv4;
+  ownAddress = network: globals.wireguard.${network}.hosts.${config.node.name}.ipv4;
+  # Not on loopback or the LAN: only the admin frontend can reach this.
+  adminListen = "${ownAddress proxies.${adminProxy}}:${toString adminPort}";
   localProvider = backendPort: prefix: {
     type = "openai_compatible";
     base_url = "http://127.0.0.1:${toString backendPort}${prefix}";
@@ -29,8 +35,10 @@ in
       enable = true;
       settings = {
         server.listen = "0.0.0.0:${toString port}";
-        admin.listen = "127.0.0.1:8081";
-        auth.admin.public_origin = "http://localhost:8081";
+        admin.listen = adminListen;
+        # The console shares the data plane's origin; cookie-authenticated
+        # writes are only accepted from exactly this origin.
+        auth.admin.public_origin = "https://${domain}";
         admin.ui.data_plane_url = "https://${domain}";
 
         providers = {
@@ -69,8 +77,7 @@ in
 
         security = {
           limits.max_body = "128MiB";
-          # Allow the private admin console, reached through an SSH tunnel.
-          cors.data.allowed_origins = [ "http://localhost:8081" ];
+          # Also resolves admin-plane client addresses for sessions and audit.
           client_ip.trusted_proxies = lib.mapAttrsToList (
             name: network: "${proxyAddress name network}/32"
           ) proxies;
@@ -132,21 +139,43 @@ in
     globals.wireguard = lib.mapAttrs' (
       name: network:
       lib.nameValuePair network {
-        hosts.${config.node.name}.firewallRuleForNode.${name}.allowedTCPPorts = [ port ];
+        hosts.${config.node.name}.firewallRuleForNode.${name}.allowedTCPPorts = [
+          port
+        ]
+        ++ lib.optional (name == adminProxy) adminPort;
       }
     ) proxies;
 
-    nodes = lib.mapAttrs (_: network: {
+    nodes = lib.mapAttrs (name: network: {
       services.nginx =
         lib.recursiveUpdate
           (import ./antirion-proxy.nix {
             inherit domain;
-            upstream = "${globals.wireguard.${network}.hosts.${config.node.name}.ipv4}:${toString port}";
+            upstream = "${ownAddress network}:${toString port}";
+            admin =
+              if name == adminProxy then
+                {
+                  upstream = adminListen;
+                  allow = [
+                    globals.net.home-lan.vlans.home.cidrv4
+                    globals.net.home-lan.vlans.home.cidrv6
+                  ];
+                }
+              else
+                null;
           })
           {
-            upstreams.antirion.monitoring = {
-              enable = true;
-              path = "/-/readyz";
+            upstreams = {
+              antirion.monitoring = {
+                enable = true;
+                path = "/-/readyz";
+              };
+            }
+            // lib.optionalAttrs (name == adminProxy) {
+              antirion-admin.monitoring = {
+                enable = true;
+                path = "/-/readyz";
+              };
             };
             virtualHosts.${domain} = {
               forceSSL = true;

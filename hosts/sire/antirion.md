@@ -4,12 +4,13 @@
 
 Both nginx frontends (`ward-web-proxy` and `sentinel`) expose only
 `https://ai.<globals.domains.me>`. The old `llm.` and `tts.` virtual hosts and
-service registrations are removed, not redirected.
+service registrations are removed, not redirected. Only `ward-web-proxy` also
+routes the admin console, and only for the home VLAN (see below).
 
 | Service | Listener | Remote access |
 | --- | --- | --- |
 | Antirion data plane | `0.0.0.0:8080` | Only the two nginx peers over WireGuard |
-| Antirion admin/UI | `127.0.0.1:8081` | SSH tunnel only |
+| Antirion admin/UI | sire's `proxy-home` IPv4, port `8081` | Only `ward-web-proxy` (`/ui/`, `/admin/v1/`, home VLAN) |
 | Qwen/llama.cpp | `127.0.0.1:11434` | Through Antirion |
 | OmniVoice HTTP | `127.0.0.1:11435` | Through Antirion |
 | OXR layout | `127.0.0.1:11436` | Local OXR component only |
@@ -105,7 +106,8 @@ Send `Authorization: Bearer <Antirion key>`:
 
 Uploads are capped at 128 MiB at nginx/Antirion, with the backend's own limits
 still applying (OmniVoice: 50 MiB). Proxy buffering is off; gateway/proxy request
-allowances accommodate long inference. `/`, `/ui/`, and `/admin/` are not public.
+allowances accommodate long inference. `/` and everything not listed here is
+unrouted; `/ui/` and `/admin/v1/` only exist for the home VLAN (below).
 Readiness monitoring checks Antirion, not individual GPU readiness.
 
 OXR passthrough authenticates access to the shared service, **not ownership of
@@ -116,14 +118,22 @@ before offering access; friends-only/free use is not automatically exempt.
 
 ## Administration and state
 
-```sh
-ssh -N -L 8081:127.0.0.1:8081 sire
-```
+From the home VLAN, open `https://ai.<domain>/ui/` and sign in with the
+administrative bootstrap credential from `/run/agenix/antirion-bootstrap-token`
+on sire. Never distribute that credential as an API key.
 
-Visit `http://localhost:8081/ui/`, using the administrative bootstrap credential
-from `/run/agenix/antirion-bootstrap-token` on sire. The public data API permits
-CORS from this private console origin only. Never distribute that credential as
-an API key.
+`ward-web-proxy` routes `/ui/` (console) and `/admin/v1/` (the Admin API it
+calls) to the admin listener and allows only `home-lan.vlans.home` (IPv4 and
+IPv6); everyone else gets 403 there. Sentinel never routes them, so this only
+works while the client resolves the domain through adguardhome's rewrite to
+`ward-web-proxy` (it is in ward's `homeDomains` and adguardhome's list). Browser
+DNS-over-HTTPS or a cached public answer leads to sentinel and a 404. The admin
+listener binds only to sire's `proxy-home` address, and nftables admits port
+`8081` only from `ward-web-proxy`, so there is no loopback/SSH-tunnel console.
+
+The console shares its origin with the data plane, so it needs no CORS.
+`auth.admin.public_origin` is that origin, and Antirion refuses
+cookie-authenticated writes from any other origin.
 
 The DynamicUser backing directory `/var/lib/private/antirion` is persisted on
 `/persist` with mode `0700`. Back up its SQLite state/log databases, WALs and spool
@@ -160,5 +170,8 @@ The two-node gateway VM uses the actual sire settings and shared nginx routes,
 with disposable credentials and loopback mock backends. It checks authentication,
 provider permissions, request limits, chat/SSE usage attribution, binary speech,
 OXR multipart/polling/artifacts, private ports, and absence of upstream tokens.
+It also signs in to the console through nginx from an allowed address and
+checks that other addresses, other admin-plane paths and foreign origins are
+refused.
 The CPU-only OmniVoice checks exercise the patched real server with a fake speech
 runtime, including its unchanged Wyoming protocol.

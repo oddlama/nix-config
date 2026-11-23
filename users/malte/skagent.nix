@@ -13,6 +13,14 @@ in
   # result in one layer-shell window on niri.
   services.skagent.enable = true;
 
+  # What skagent learned: the keys it offers (keys.toml), which YubiKey holds
+  # them (bindings.toml) and its age identities (age.toml). Nothing secret.
+  # Without it the agent starts empty after every boot, and with
+  # IdentitiesOnly ssh has no key to offer until `skagent load`.
+  home.persistence."/persist".directories = [
+    ".local/state/skagent"
+  ];
+
   # gpg-agent's SSH support (gpg.nix) also defines sshAuthSock, which conflicts
   # with skagent. Force skagent's values so SSH_AUTH_SOCK points at it by default.
   # gpg-agent's ssh socket keeps running as a fallback for hosts that only know
